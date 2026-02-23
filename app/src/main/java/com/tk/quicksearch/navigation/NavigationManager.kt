@@ -72,6 +72,7 @@ fun MainContent(
     val initialSettingsDetailType = navigationRequest?.settingsDetailType
     var destination by rememberSaveable { mutableStateOf(initialDestination) }
     var settingsDetailType by rememberSaveable { mutableStateOf(initialSettingsDetailType) }
+    val uiState by searchViewModel.uiState.collectAsState()
 
     LaunchedEffect(navigationRequest) {
         navigationRequest?.let { request ->
@@ -172,7 +173,11 @@ fun MainContent(
                             android.Manifest.permission.READ_EXTERNAL_STORAGE,
                         ) == android.content.pm.PackageManager.PERMISSION_GRANTED
                     }
-                val skipFinalSetup = !hasContactsPermission && !hasFilesPermission
+                val hasAnyThirdPartyMessagingApp =
+                    uiState.isWhatsAppInstalled || uiState.isTelegramInstalled || uiState.isSignalInstalled
+                val shouldShowFinalSetup =
+                    hasFilesPermission || (hasContactsPermission && hasAnyThirdPartyMessagingApp)
+                val skipFinalSetup = !shouldShowFinalSetup
                 val searchEngineTotalSteps = if (skipFinalSetup) 2 else 3
                 SearchEngineSetupScreen(
                     currentStep = 2,

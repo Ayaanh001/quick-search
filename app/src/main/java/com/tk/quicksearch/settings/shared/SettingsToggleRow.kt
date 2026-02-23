@@ -1,11 +1,13 @@
 package com.tk.quicksearch.settings.shared
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -14,8 +16,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -31,6 +35,7 @@ fun SettingsToggleRow(
     title: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    onRowClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     leadingIcon: ImageVector? = null,
@@ -45,12 +50,27 @@ fun SettingsToggleRow(
     val view = LocalView.current
     val topPadding = DesignTokens.cardItemTopPadding(isFirstItem) + extraVerticalPadding
     val bottomPadding = DesignTokens.cardItemBottomPadding(isLastItem) + extraVerticalPadding
+    val onToggle: (Boolean) -> Unit = { newValue ->
+        hapticToggle(view)()
+        onCheckedChange(newValue)
+    }
 
     Column {
         Row(
             modifier =
                 modifier
                     .fillMaxWidth()
+                    .then(
+                        if (onRowClick != null) {
+                            Modifier.clickable(onClick = onRowClick)
+                        } else {
+                            Modifier.toggleable(
+                                value = checked,
+                                role = Role.Switch,
+                                onValueChange = onToggle,
+                            )
+                        },
+                    )
                     .padding(
                         start = horizontalPadding,
                         top = topPadding,
@@ -90,10 +110,8 @@ fun SettingsToggleRow(
 
             Switch(
                 checked = checked,
-                onCheckedChange = { newValue ->
-                    hapticToggle(view)()
-                    onCheckedChange(newValue)
-                },
+                onCheckedChange = onToggle,
+                modifier = Modifier.scale(0.85f),
             )
         }
 

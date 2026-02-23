@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -245,6 +246,7 @@ private fun ShortcutRow(
                 hapticToggle(view)()
                 onToggle(enabled)
             },
+            modifier = Modifier.scale(0.85f),
         )
     }
 }

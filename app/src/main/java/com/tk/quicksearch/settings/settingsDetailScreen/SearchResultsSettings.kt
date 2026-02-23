@@ -114,6 +114,7 @@ fun SearchOptionsCard(
     onRecentQueriesToggle: (Boolean) -> Unit,
     calculatorEnabled: Boolean,
     onToggleCalculator: (Boolean) -> Unit,
+    hasExcludedItems: Boolean,
     excludedItemsTitle: String,
     excludedItemsDescription: String,
     onNavigateToExcludedItems: () -> Unit,
@@ -148,20 +149,22 @@ fun SearchOptionsCard(
                 onCheckedChange = onToggleCalculator,
                 leadingIcon = Icons.Rounded.Calculate,
                 isFirstItem = false,
-                isLastItem = false,
+                isLastItem = !hasExcludedItems,
                 extraVerticalPadding = 4.dp,
             )
 
-            SettingsNavigationRow(
-                item =
-                    SettingsCardItem(
-                        title = excludedItemsTitle,
-                        description = excludedItemsDescription,
-                        icon = Icons.Rounded.VisibilityOff,
-                        actionOnPress = onNavigateToExcludedItems,
-                    ),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
-            )
+            if (hasExcludedItems) {
+                SettingsNavigationRow(
+                    item =
+                        SettingsCardItem(
+                            title = excludedItemsTitle,
+                            description = excludedItemsDescription,
+                            icon = Icons.Rounded.VisibilityOff,
+                            actionOnPress = onNavigateToExcludedItems,
+                        ),
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                )
+            }
         }
     }
 }
@@ -171,6 +174,8 @@ fun RefreshDataCard(
     onRefreshApps: (Boolean) -> Unit,
     onRefreshContacts: (Boolean) -> Unit,
     onRefreshFiles: (Boolean) -> Unit,
+    hasContactPermission: Boolean,
+    hasFilePermission: Boolean,
     modifier: Modifier = Modifier,
 ) {
     ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
@@ -213,49 +218,53 @@ fun RefreshDataCard(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(itemShape)
-                        .clickable(onClick = { onRefreshContacts(true) })
-                        .border(1.dp, borderColor, itemShape)
-                        .padding(12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Contacts,
-                        contentDescription = stringResource(R.string.settings_refresh_contacts_title),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(24.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.settings_refresh_contacts_title),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
+                if (hasContactPermission) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(itemShape)
+                            .clickable(onClick = { onRefreshContacts(true) })
+                            .border(1.dp, borderColor, itemShape)
+                            .padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Contacts,
+                            contentDescription = stringResource(R.string.settings_refresh_contacts_title),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(24.dp),
+                        )
+                        Text(
+                            text = stringResource(R.string.settings_refresh_contacts_title),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 }
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(itemShape)
-                        .clickable(onClick = { onRefreshFiles(true) })
-                        .border(1.dp, borderColor, itemShape)
-                        .padding(12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.InsertDriveFile,
-                        contentDescription = stringResource(R.string.settings_refresh_files_title),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(24.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.settings_refresh_files_title),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
+                if (hasFilePermission) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(itemShape)
+                            .clickable(onClick = { onRefreshFiles(true) })
+                            .border(1.dp, borderColor, itemShape)
+                            .padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.InsertDriveFile,
+                            contentDescription = stringResource(R.string.settings_refresh_files_title),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(24.dp),
+                        )
+                        Text(
+                            text = stringResource(R.string.settings_refresh_files_title),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 }
             }
         }
@@ -267,25 +276,36 @@ fun RefreshDataCard(
 fun SearchResultsSettingsSection(
     state: SettingsScreenState,
     callbacks: SettingsScreenCallbacks,
+    hasContactPermission: Boolean,
+    hasFilePermission: Boolean,
     onNavigateToExcludedItems: () -> Unit,
     onNavigateToAppManagement: () -> Unit,
     onNavigateToAppShortcuts: () -> Unit,
     onNavigateToDeviceSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val hasExcludedItems =
+        state.suggestionExcludedApps.isNotEmpty() ||
+            state.resultExcludedApps.isNotEmpty() ||
+            state.excludedContacts.isNotEmpty() ||
+            state.excludedFiles.isNotEmpty() ||
+            state.excludedSettings.isNotEmpty() ||
+            state.excludedAppShortcuts.isNotEmpty() ||
+            state.excludedFileExtensions.isNotEmpty()
+
     Column(modifier = modifier) {
         // Search Sections Section
         SectionSettingsSection(
             sectionOrder = ItemPriorityConfig.getSearchResultsPriority(),
             disabledSections = state.disabledSections,
             onToggleSection = callbacks.onToggleSection,
-            appsSubtitle = stringResource(R.string.settings_manage_apps),
+            appsSubtitle = stringResource(R.string.settings_manage_apps_desc),
             onAppsClick = onNavigateToAppManagement,
             onAppsClickNoRipple = true,
-            appShortcutsSubtitle = stringResource(R.string.settings_manage_shortcuts),
+            appShortcutsSubtitle = stringResource(R.string.settings_manage_shortcuts_desc),
             onAppShortcutsClick = onNavigateToAppShortcuts,
             onAppShortcutsClickNoRipple = true,
-            deviceSettingsSubtitle = stringResource(R.string.settings_view_all),
+            deviceSettingsSubtitle = stringResource(R.string.settings_view_all_desc),
             onDeviceSettingsClick = onNavigateToDeviceSettings,
             onDeviceSettingsClickNoRipple = true,
             showTitle = false,
@@ -306,6 +326,7 @@ fun SearchResultsSettingsSection(
             onRecentQueriesToggle = callbacks.onToggleRecentQueries,
             calculatorEnabled = state.calculatorEnabled,
             onToggleCalculator = callbacks.onToggleCalculator,
+            hasExcludedItems = hasExcludedItems,
             excludedItemsTitle = stringResource(R.string.settings_excluded_items_title),
             excludedItemsDescription = stringResource(R.string.settings_excluded_items_desc),
             onNavigateToExcludedItems = onNavigateToExcludedItems,
@@ -316,6 +337,8 @@ fun SearchResultsSettingsSection(
             onRefreshApps = callbacks.onRefreshApps,
             onRefreshContacts = callbacks.onRefreshContacts,
             onRefreshFiles = callbacks.onRefreshFiles,
+            hasContactPermission = hasContactPermission,
+            hasFilePermission = hasFilePermission,
             modifier = Modifier.padding(top = DesignTokens.SpacingLarge),
         )
     }

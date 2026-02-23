@@ -444,10 +444,10 @@
     <string name="settings_sections_title">Search Results</string>
     <string name="section_apps">Apps</string>
     <string name="section_app_shortcuts">App Shortcuts</string>
-    <string name="settings_manage_shortcuts">Manage</string>
-    <string name="settings_manage_apps">Manage</string>
     <string name="settings_manage_apps_title">Manage Apps</string>
-    <string name="settings_view_all">View All</string>
+    <string name="settings_manage_apps_desc">Manage your apps</string>
+    <string name="settings_manage_shortcuts_desc">Manage your app shortcuts</string>
+    <string name="settings_view_all_desc">View all settings</string>
     <string name="settings_app_shortcuts_empty">No app shortcuts found.</string>
     <string name="settings_app_shortcuts_available_count">Available shortcuts: %1$d</string>
     <string name="settings_app_shortcuts_add_button">Add Shortcut</string>
@@ -590,7 +590,7 @@
          Permissions Screen
          ============================================================================ -->
     <string name="permissions_screen_title">Permissions</string>
-    <string name="permissions_screen_subtitle">These permissions unlock additional features. Your data stays on your device.</string>
+    <string name="permissions_screen_subtitle">These permissions unlock additional features. They are optional. Your data stays on your device.</string>
     <string name="permissions_usage_title">Usage Access</string>
     <string name="permissions_usage_desc">Required to show your recently used apps in suggestions.</string>
     <string name="permissions_contacts_title">Contacts</string>
@@ -598,7 +598,7 @@
     <string name="permissions_files_title">Files Access</string>
     <string name="permissions_files_desc">Required to search through your documents and other files.</string>
     <string name="permissions_calling_title">Calling</string>
-    <string name="permissions_calling_desc">Required to call your contacts.</string>
+    <string name="permissions_calling_desc">Required to call your contacts directly without opening the dialer.</string>
     <string name="permissions_privacy_notice"></string>
     <string name="permissions_granted">Granted</string>
     <string name="permissions_reminder_dialog_title">Permissions Not Granted</string>
