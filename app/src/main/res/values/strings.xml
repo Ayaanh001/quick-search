@@ -294,10 +294,6 @@
     <string name="settings_icon_pack_option_system">System icons</string>
     <string name="settings_show_app_labels_title">App Labels</string>
     <string name="settings_show_app_labels_desc">Show app names in suggestions and results</string>
-    <string name="settings_app_icon_size_title">App Icon Size</string>
-    <string name="settings_app_icon_size_small">Small</string>
-    <string name="settings_app_icon_size_medium">Medium</string>
-    <string name="settings_app_icon_size_big">Big</string>
     <string name="settings_refresh_icon_packs">Refresh icon packs</string>
     <string name="settings_refreshing_icon_packs">Refreshing icon packs list</string>
     <string name="settings_icon_pack_picker_title">Choose Icon Pack</string>
@@ -512,7 +508,7 @@
     <string name="settings_default_assistant_desc">Set this app as your default digital assistant app.</string>
     <string name="settings_default_assistant_desc_change">Change your default digital assistant app.</string>
     <string name="settings_assistant_voice_mode_title">Assistant Voice Mode</string>
-    <string name="settings_assistant_voice_mode_desc">Enable voice typing when launched as digital assistant</string>
+    <string name="settings_assistant_voice_mode_desc">Launch voice typing when launched as digital assistant</string>
     <string name="settings_home_screen_widget_title">Home Screen Widget</string>
     <string name="settings_home_screen_widget_desc">Add Quick Search widget to your home screen.</string>
     <string name="settings_home_screen_widget_confirm_message">You are about to add Quick Search widget to your home screen. Long press on the widget to access widget settings page that has many customization options.</string>
@@ -624,7 +620,7 @@
          ============================================================================ -->
     <string name="release_notes_title">Quick Search v%1$s Release Notes</string>
     <string name="release_notes_title_no_version">Quick Search Release Notes</string>
-    <string name="release_notes_points">URL detection in search bar\nLong press any result to add it to your home screen\nSet a default calling app\nAdditional widget color options\nHide app labels or adjust their size\nEnable voice mode when launched using digital assistant trigger\nEnhancements and bug fixes</string>
+    <string name="release_notes_points">URL detection in search bar\nLong press any result to add it to your home screen\nSet a default calling app\nAdditional widget color options\nOption to hide app labels\nEnable voice mode when launched using digital assistant trigger\nEnhancements and bug fixes</string>
     <string name="release_notes_action_got_it">Got it</string>
     <string name="release_notes_view_all_features">View all features</string>
     <string name="settings_all_quick_search_features">Features List</string>

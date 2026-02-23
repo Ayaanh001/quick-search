@@ -143,7 +143,6 @@ private fun renderAppsSection(
             rowCount = params.appsParams.rowCount,
             iconPackPackage = params.appsParams.iconPackPackage,
             showAppLabels = params.appsParams.showAppLabels,
-            appIconSizeOption = params.appsParams.appIconSizeOption,
             oneHandedMode = params.appsParams.oneHandedMode,
             isInitializing = params.appsParams.isInitializing,
             isOverlayPresentation = params.appsParams.isOverlayPresentation,

@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.common.AddToHomeHandler
-import com.tk.quicksearch.search.core.AppIconSizeOption
 import com.tk.quicksearch.search.data.AppShortcutRepository
 import com.tk.quicksearch.search.data.StaticShortcut
 import com.tk.quicksearch.search.data.launchStaticShortcut
@@ -55,6 +54,10 @@ import com.tk.quicksearch.util.getAppGridColumns
 import com.tk.quicksearch.util.hapticConfirm
 
 private const val ROW_COUNT = 2
+private enum class AppIconDisplayMode {
+    OVERLAY,
+    REGULAR,
+}
 
 /** Data class containing all app actions to reduce parameter count in composables. */
 private data class AppActions(
@@ -96,7 +99,6 @@ fun AppGridView(
         rowCount: Int = ROW_COUNT,
         iconPackPackage: String? = null,
         showAppLabels: Boolean = true,
-        appIconSizeOption: AppIconSizeOption = AppIconSizeOption.MEDIUM,
         oneHandedMode: Boolean = false,
         isInitializing: Boolean = false,
         isOverlayPresentation: Boolean = false,
@@ -174,7 +176,6 @@ fun AppGridView(
                     rowCount = rowCount,
                     iconPackPackage = iconPackPackage,
                     showAppLabels = showAppLabels,
-                    appIconSizeOption = appIconSizeOption,
                     oneHandedMode = oneHandedMode,
                     isOverlayPresentation = isOverlayPresentation,
                     predictedTarget = predictedTarget,
@@ -218,7 +219,6 @@ private fun AppGrid(
         rowCount: Int = ROW_COUNT,
         iconPackPackage: String?,
         showAppLabels: Boolean,
-        appIconSizeOption: AppIconSizeOption,
         oneHandedMode: Boolean,
         isOverlayPresentation: Boolean,
         predictedTarget: PredictedSubmitTarget?,
@@ -282,7 +282,6 @@ private fun AppGrid(
                     pinnedPackageNames = pinnedPackageNames,
                     shortcutsByPackage = shortcutsByPackage,
                     iconPackPackage = iconPackPackage,
-                    appIconSizeOption = appIconSizeOption,
                     createAppActions = createAppActions,
                     createAppState = createAppState,
                     predictedTarget = predictedTarget,
@@ -298,7 +297,6 @@ private fun AppGridRow(
         pinnedPackageNames: Set<String>,
         shortcutsByPackage: Map<String, List<StaticShortcut>>,
         iconPackPackage: String?,
-        appIconSizeOption: AppIconSizeOption,
         createAppActions: (AppInfo) -> AppActions,
         createAppState: (AppInfo) -> AppState,
         predictedTarget: PredictedSubmitTarget?,
@@ -319,7 +317,6 @@ private fun AppGridRow(
                         appActions = createAppActions(app),
                         appState = createAppState(app),
                         iconPackPackage = iconPackPackage,
-                        appIconSizeOption = appIconSizeOption,
                         isPredicted =
                                 (predictedTarget as? PredictedSubmitTarget.App)?.let {
                                     it.packageName == app.packageName &&
@@ -342,7 +339,6 @@ private fun AppGridItem(
         appActions: AppActions,
         appState: AppState,
         iconPackPackage: String?,
-        appIconSizeOption: AppIconSizeOption,
         isPredicted: Boolean = false,
 ) {
     val context = LocalContext.current
@@ -358,11 +354,16 @@ private fun AppGridItem(
                 appInfo.appName.firstOrNull()?.uppercaseChar()?.toString().orEmpty()
             }
     val appIconSize =
-            remember(appIconSizeOption) {
-                when (appIconSizeOption) {
-                    AppIconSizeOption.SMALL -> 44.dp
-                    AppIconSizeOption.MEDIUM -> DesignTokens.IconSizeXLarge
-                    AppIconSizeOption.BIG -> 60.dp
+            remember(appState.isOverlayPresentation) {
+                when (
+                    if (appState.isOverlayPresentation) {
+                        AppIconDisplayMode.OVERLAY
+                    } else {
+                        AppIconDisplayMode.REGULAR
+                    }
+                ) {
+                    AppIconDisplayMode.OVERLAY -> 44.dp
+                    AppIconDisplayMode.REGULAR -> DesignTokens.IconSizeXLarge - 4.dp
                 }
             }
 
@@ -514,7 +515,7 @@ private fun AppLabelText(
                             if (isOverlayPresentation) {
                                 4.dp
                             } else {
-                                DesignTokens.SpacingSmall
+                                DesignTokens.SpacingXSmall
                             },
                     ),
     )

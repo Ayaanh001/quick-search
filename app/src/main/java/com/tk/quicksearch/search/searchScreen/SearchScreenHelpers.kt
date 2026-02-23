@@ -209,7 +209,6 @@ data class AppsSectionParams(
     val rowCount: Int,
     val iconPackPackage: String?,
     val showAppLabels: Boolean,
-    val appIconSizeOption: AppIconSizeOption,
     val oneHandedMode: Boolean,
     val isInitializing: Boolean,
     val isOverlayPresentation: Boolean,
@@ -566,12 +565,6 @@ internal fun buildSectionParams(
             rowCount = derivedState.visibleRowCount,
             iconPackPackage = state.selectedIconPackPackage,
             showAppLabels = state.showAppLabels,
-            appIconSizeOption =
-                if (state.overlayModeEnabled) {
-                    AppIconSizeOption.SMALL
-                } else {
-                    AppIconSizeOption.MEDIUM
-                },
             oneHandedMode = state.oneHandedMode,
             isInitializing = state.isInitializing,
             isOverlayPresentation = isOverlayPresentation,

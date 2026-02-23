@@ -107,12 +107,6 @@ enum class BackgroundSource {
     CUSTOM_IMAGE,
 }
 
-enum class AppIconSizeOption {
-    SMALL,
-    MEDIUM,
-    BIG,
-}
-
 enum class DirectSearchStatus {
     Idle,
     Loading,
@@ -332,7 +326,6 @@ data class SearchUiState(
         val selectedIconPackPackage: String? = null,
         val availableIconPacks: List<IconPackInfo> = emptyList(),
         val showAppLabels: Boolean = true,
-        val appIconSizeOption: AppIconSizeOption = AppIconSizeOption.MEDIUM,
         val disabledSections: Set<SearchSection> = emptySet(),
         val isSearchEngineCompactMode: Boolean = false,
         val amazonDomain: String? = null,
