@@ -187,8 +187,6 @@ internal fun SettingsDetailLevel1Screen(
                             availableIconPacks = state.availableIconPacks,
                             showAppLabels = state.showAppLabels,
                             onToggleAppLabels = callbacks.onToggleAppLabels,
-                            appIconSizeOption = state.appIconSizeOption,
-                            onSetAppIconSizeOption = callbacks.onSetAppIconSizeOption,
                             onSelectIconPack = callbacks.onSelectIconPack,
                             onRefreshIconPacks = {
                                 callbacks.onRefreshIconPacks()

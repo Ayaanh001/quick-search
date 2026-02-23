@@ -414,6 +414,12 @@ private fun AppIconSurface(
         isPredicted: Boolean = false,
 ) {
     val view = LocalView.current
+    val predictedHighlightHeight =
+            if (isPredicted) {
+                (DesignTokens.AppIconSize - 4.dp).coerceAtLeast(48.dp)
+            } else {
+                DesignTokens.AppIconSize
+            }
     val predictedIconHorizontalInset =
             if (isPredicted && appIconSize >= 60.dp) {
                 DesignTokens.SpacingXSmall
@@ -421,12 +427,7 @@ private fun AppIconSurface(
                 0.dp
             }
     Surface(
-            modifier =
-                    Modifier.size(DesignTokens.AppIconSize)
-                            .predictedSubmitHighlight(
-                                    isPredicted = isPredicted,
-                                    shape = DesignTokens.ShapeLarge,
-                            ),
+            modifier = Modifier.size(DesignTokens.AppIconSize),
             color = Color.Transparent,
             tonalElevation = 0.dp,
             shape = DesignTokens.ShapeLarge,
@@ -434,7 +435,6 @@ private fun AppIconSurface(
         Box(
                 modifier =
                         Modifier.fillMaxSize()
-                                .padding(horizontal = predictedIconHorizontalInset)
                                 .combinedClickable(
                                         onClick = {
                                             hapticConfirm(view)()
@@ -444,30 +444,50 @@ private fun AppIconSurface(
                                 ),
                 contentAlignment = Alignment.Center,
         ) {
-            if (iconBitmap != null) {
-                Image(
-                        bitmap = iconBitmap,
-                        contentDescription =
-                                stringResource(
-                                        R.string.desc_launch_app,
-                                        appName,
-                                ),
-                        modifier =
-                                Modifier.size(appIconSize)
-                                        .then(
-                                                if (iconIsLegacy) {
-                                                    Modifier.clip(DesignTokens.ShapeLarge)
-                                                } else {
-                                                    Modifier
-                                                },
-                                        ),
-                )
-            } else {
-                Text(
-                        text = placeholderLabel,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            Box(
+                    modifier =
+                            Modifier.align(Alignment.Center)
+                                    .size(
+                                            width = DesignTokens.AppIconSize,
+                                            height = predictedHighlightHeight,
+                                    )
+                                    .predictedSubmitHighlight(
+                                            isPredicted = isPredicted,
+                                            shape = DesignTokens.ShapeLarge,
+                                    ),
+            )
+            Box(
+                    modifier =
+                            Modifier.fillMaxSize()
+                                .padding(horizontal = predictedIconHorizontalInset)
+                                .align(Alignment.Center),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (iconBitmap != null) {
+                    Image(
+                            bitmap = iconBitmap,
+                            contentDescription =
+                                    stringResource(
+                                            R.string.desc_launch_app,
+                                            appName,
+                                    ),
+                            modifier =
+                                    Modifier.size(appIconSize)
+                                            .then(
+                                                    if (iconIsLegacy) {
+                                                        Modifier.clip(DesignTokens.ShapeLarge)
+                                                    } else {
+                                                        Modifier
+                                                    },
+                                            ),
+                    )
+                } else {
+                    Text(
+                            text = placeholderLabel,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }

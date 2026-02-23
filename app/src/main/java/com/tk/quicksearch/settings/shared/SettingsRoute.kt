@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -401,11 +402,13 @@ private fun SectionRowWithoutDrag(
         if (onRowClick != null) {
             Row(
                 modifier =
-                    Modifier.clickable(
-                        interactionSource = rowInteractionSource,
-                        indication = if (noRippleOnRowClick) null else rowIndication,
-                        onClick = onRowClick,
-                    ),
+                    Modifier
+                        .offset(x = 8.dp)
+                        .clickable(
+                            interactionSource = rowInteractionSource,
+                            indication = if (noRippleOnRowClick) null else rowIndication,
+                            onClick = onRowClick,
+                        ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(

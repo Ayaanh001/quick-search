@@ -564,7 +564,12 @@ internal fun buildSectionParams(
             rowCount = derivedState.visibleRowCount,
             iconPackPackage = state.selectedIconPackPackage,
             showAppLabels = state.showAppLabels,
-            appIconSizeOption = state.appIconSizeOption,
+            appIconSizeOption =
+                if (state.overlayModeEnabled) {
+                    AppIconSizeOption.SMALL
+                } else {
+                    AppIconSizeOption.MEDIUM
+                },
             oneHandedMode = state.oneHandedMode,
             isInitializing = state.isInitializing,
         )
