@@ -345,7 +345,7 @@ private fun CustomWidgetButtonDialog(
 
     val results =
         remember(searchState, query.text) {
-            if (query.text.trim().length < 2) {
+            if (query.text.trim().isEmpty()) {
                 emptyList()
             } else {
                 buildCustomWidgetSearchResults(searchState)
@@ -415,7 +415,7 @@ private fun CustomWidgetButtonDialog(
                             ),
                 ) {
                     when {
-                        query.text.trim().length < 2 -> {
+                        query.text.trim().isEmpty() -> {
                             // Empty state - no prompt text needed
                         }
 

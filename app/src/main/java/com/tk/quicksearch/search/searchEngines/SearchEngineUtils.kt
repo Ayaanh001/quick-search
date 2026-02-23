@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.SearchEngine
+import com.tk.quicksearch.util.PackageConstants
 
 private data class SearchEngineMetadata(
     @DrawableRes val drawableResId: Int,
@@ -65,6 +66,13 @@ private val SEARCH_ENGINE_METADATA: Map<SearchEngine, SearchEngineMetadata> =
                 contentDescription = "Google Maps",
                 urlTemplate = "https://maps.google.com/?q=%s",
                 defaultShortcutCode = "mps",
+            ),
+        SearchEngine.WAZE to
+            SearchEngineMetadata(
+                drawableResId = R.drawable.waze,
+                contentDescription = "Waze",
+                urlTemplate = "https://www.waze.com/ul?q=%s",
+                defaultShortcutCode = "wze",
             ),
         SearchEngine.GOOGLE_DRIVE to
             SearchEngineMetadata(
@@ -196,6 +204,31 @@ fun SearchEngine.getContentDescription(): String =
     SEARCH_ENGINE_METADATA[this]?.contentDescription
         ?: throw IllegalArgumentException("Unknown SearchEngine: $this")
 
+fun SearchEngine.getAppPackageCandidates(): List<String> =
+    when (this) {
+        SearchEngine.CHATGPT -> listOf(PackageConstants.CHATGPT_PACKAGE)
+        SearchEngine.PERPLEXITY -> listOf(PackageConstants.PERPLEXITY_PACKAGE, PackageConstants.PERPLEXITY_PACKAGE_ALT)
+        SearchEngine.GROK -> listOf(PackageConstants.GROK_PACKAGE, PackageConstants.GROK_PACKAGE_ALT)
+        SearchEngine.GOOGLE -> listOf(PackageConstants.GOOGLE_APP_PACKAGE)
+        SearchEngine.GEMINI -> listOf(PackageConstants.GEMINI_PACKAGE_NAME)
+        SearchEngine.GOOGLE_MAPS -> listOf(PackageConstants.GOOGLE_MAPS_PACKAGE)
+        SearchEngine.WAZE -> listOf(PackageConstants.WAZE_PACKAGE)
+        SearchEngine.GOOGLE_DRIVE -> listOf(PackageConstants.GOOGLE_DRIVE_PACKAGE)
+        SearchEngine.GOOGLE_PHOTOS -> listOf(PackageConstants.GOOGLE_PHOTOS_PACKAGE_NAME)
+        SearchEngine.GOOGLE_PLAY -> listOf(PackageConstants.GOOGLE_PLAY_PACKAGE)
+        SearchEngine.REDDIT -> listOf(PackageConstants.REDDIT_PACKAGE)
+        SearchEngine.YOUTUBE -> listOf(PackageConstants.YOUTUBE_PACKAGE)
+        SearchEngine.YOUTUBE_MUSIC -> listOf(PackageConstants.YOUTUBE_MUSIC_PACKAGE)
+        SearchEngine.SPOTIFY -> listOf(PackageConstants.SPOTIFY_PACKAGE)
+        SearchEngine.CLAUDE -> listOf(PackageConstants.CLAUDE_PACKAGE)
+        SearchEngine.FACEBOOK_MARKETPLACE -> listOf(PackageConstants.FACEBOOK_PACKAGE)
+        SearchEngine.AMAZON -> listOf(PackageConstants.AMAZON_PACKAGE)
+        SearchEngine.YOU_COM -> listOf(PackageConstants.YOU_COM_PACKAGE_NAME)
+        SearchEngine.X -> listOf(PackageConstants.X_PACKAGE)
+        SearchEngine.STARTPAGE -> listOf(PackageConstants.STARTPAGE_PACKAGE_NAME)
+        else -> emptyList()
+    }
+
 /**
  * Builds a search URL for the given query and search engine.
  *
@@ -271,6 +304,10 @@ fun buildSearchUrl(
                     "https://claude.ai"
                 }
 
+                SearchEngine.WAZE -> {
+                    "https://www.waze.com"
+                }
+
                 else -> {
                     null
                 }
@@ -329,6 +366,7 @@ fun SearchEngine.getDisplayNameResId(): Int =
         SearchEngine.GROK -> R.string.search_engine_grok
         SearchEngine.GEMINI -> R.string.search_engine_gemini
         SearchEngine.GOOGLE_MAPS -> R.string.search_engine_google_maps
+        SearchEngine.WAZE -> R.string.search_engine_waze
         SearchEngine.GOOGLE_DRIVE -> R.string.search_engine_google_drive
         SearchEngine.GOOGLE_PHOTOS -> R.string.search_engine_google_photos
         SearchEngine.GOOGLE_PLAY -> R.string.search_engine_google_play

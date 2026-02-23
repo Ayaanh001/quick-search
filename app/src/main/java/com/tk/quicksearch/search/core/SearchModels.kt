@@ -26,6 +26,7 @@ enum class SearchEngine {
     GOOGLE_PLAY,
     YOUTUBE,
     GOOGLE_MAPS,
+    WAZE,
     GROK,
     REDDIT,
     AMAZON,

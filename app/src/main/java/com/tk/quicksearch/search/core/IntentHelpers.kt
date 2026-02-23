@@ -27,6 +27,8 @@ import com.tk.quicksearch.util.PackageConstants
 object IntentHelpers {
     private const val EXTERNAL_STORAGE_DOCUMENTS_AUTHORITY = "com.android.externalstorage.documents"
     private const val TAG = "IntentHelpers"
+    private const val GMS_SEARCH_ACTION = "com.google.android.gms.actions.SEARCH_ACTION"
+    private const val GMS_SEARCH_EXTRA_QUERY = "query"
 
     private fun canResolveIntent(
         context: Application,
@@ -209,6 +211,11 @@ object IntentHelpers {
 
             SearchEngine.SPOTIFY -> {
                 openSpotify(context, query)
+                return
+            }
+
+            SearchEngine.WAZE -> {
+                openWaze(context, query)
                 return
             }
 
@@ -638,6 +645,62 @@ object IntentHelpers {
 
         // Fallback to web URL
         openWebUrl(context, buildSearchUrl(query, SearchEngine.SPOTIFY))
+    }
+
+    /** Opens Waze app with query (when possible), otherwise opens web URL. */
+    private fun openWaze(
+        context: Application,
+        query: String,
+    ) {
+        val launchIntent = context.packageManager.getLaunchIntentForPackage(PackageConstants.WAZE_PACKAGE)
+
+        if (query.isBlank()) {
+            if (launchIntent != null) {
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                try {
+                    context.startActivity(launchIntent)
+                    return
+                } catch (_: ActivityNotFoundException) {
+                } catch (_: SecurityException) {
+                }
+            }
+            openWebUrl(context, buildSearchUrl(query, SearchEngine.WAZE))
+            return
+        }
+
+        val encodedQuery = Uri.encode(query)
+        val deepLinkIntents =
+            listOf(
+                Intent(Intent.ACTION_VIEW, Uri.parse("waze://?q=$encodedQuery")),
+                Intent(Intent.ACTION_VIEW, Uri.parse("https://www.waze.com/ul?q=$encodedQuery")),
+            ).map { intent ->
+                intent.apply {
+                    setPackage(PackageConstants.WAZE_PACKAGE)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            }
+
+        for (intent in deepLinkIntents) {
+            if (!canResolveIntent(context, intent)) continue
+            try {
+                context.startActivity(intent)
+                return
+            } catch (_: ActivityNotFoundException) {
+            } catch (_: SecurityException) {
+            }
+        }
+
+        if (launchIntent != null) {
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            try {
+                context.startActivity(launchIntent)
+                return
+            } catch (_: ActivityNotFoundException) {
+            } catch (_: SecurityException) {
+            }
+        }
+
+        openWebUrl(context, buildSearchUrl(query, SearchEngine.WAZE))
     }
 
     /** Opens Claude app if installed with query via share intent; otherwise opens web URL. */

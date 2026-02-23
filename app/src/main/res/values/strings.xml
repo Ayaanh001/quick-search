@@ -639,6 +639,7 @@
     <string name="search_engine_grok">Grok</string>
     <string name="search_engine_gemini">Gemini</string>
     <string name="search_engine_google_maps">Google Maps</string>
+    <string name="search_engine_waze">Waze</string>
     <string name="search_engine_google_drive">Google Drive</string>
     <string name="search_engine_google_photos">Google Photos</string>
     <string name="search_engine_google_play">Google Play</string>

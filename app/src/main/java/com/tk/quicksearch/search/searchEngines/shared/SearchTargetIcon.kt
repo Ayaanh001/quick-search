@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.Dp
 import com.tk.quicksearch.search.apps.rememberAppIcon
 import com.tk.quicksearch.search.core.SearchEngine
 import com.tk.quicksearch.search.core.SearchTarget
+import com.tk.quicksearch.search.searchEngines.getAppPackageCandidates
 import com.tk.quicksearch.search.searchEngines.getContentDescription
 import com.tk.quicksearch.search.searchEngines.getDrawableResId
 
@@ -54,100 +55,114 @@ fun SearchTargetIcon(
     when (target) {
         is SearchTarget.Engine -> {
             val targetEngine = target.engine
-
-            when (style) {
-                IconRenderStyle.SIMPLE -> {
-                    Icon(
-                        painter = painterResource(id = targetEngine.getDrawableResId()),
-                        contentDescription = targetEngine.getContentDescription(),
-                        modifier = modifier.size(iconSize),
-                        tint = androidx.compose.ui.graphics.Color.Unspecified,
-                    )
+            val iconCandidates =
+                targetEngine.getAppPackageCandidates().map { packageName ->
+                    packageName to rememberAppIcon(packageName = packageName)
                 }
+            val appIconBitmap = iconCandidates.firstOrNull { it.second.bitmap != null }?.second?.bitmap
 
-                IconRenderStyle.ADVANCED -> {
-                    val needsColorChange =
-                        targetEngine in
-                            setOf(
-                                SearchEngine.CHATGPT,
-                                SearchEngine.GROK,
-                                SearchEngine.AMAZON,
-                            )
+            if (appIconBitmap != null) {
+                Image(
+                    bitmap = appIconBitmap,
+                    contentDescription = targetEngine.getContentDescription(),
+                    modifier = modifier.size(iconSize),
+                    contentScale = ContentScale.Fit,
+                )
+            } else {
+                when (style) {
+                    IconRenderStyle.SIMPLE -> {
+                        Icon(
+                            painter = painterResource(id = targetEngine.getDrawableResId()),
+                            contentDescription = targetEngine.getContentDescription(),
+                            modifier = modifier.size(iconSize),
+                            tint = androidx.compose.ui.graphics.Color.Unspecified,
+                        )
+                    }
 
-                    val backgroundColor = MaterialTheme.colorScheme.background
-                    val isLightMode =
-                        backgroundColor.red > 0.9f &&
-                            backgroundColor.green > 0.9f &&
-                            backgroundColor.blue > 0.9f
-
-                    val colorFilter =
-                        if (needsColorChange && isLightMode) {
-                            if (targetEngine == SearchEngine.AMAZON) {
-                                ColorFilter.colorMatrix(
-                                    ColorMatrix(
-                                        floatArrayOf(
-                                            0.3f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            0.3f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            0.3f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            1f,
-                                            0f,
-                                        ),
-                                    ),
+                    IconRenderStyle.ADVANCED -> {
+                        val needsColorChange =
+                            targetEngine in
+                                setOf(
+                                    SearchEngine.CHATGPT,
+                                    SearchEngine.GROK,
+                                    SearchEngine.AMAZON,
                                 )
+
+                        val backgroundColor = MaterialTheme.colorScheme.background
+                        val isLightMode =
+                            backgroundColor.red > 0.9f &&
+                                backgroundColor.green > 0.9f &&
+                                backgroundColor.blue > 0.9f
+
+                        val colorFilter =
+                            if (needsColorChange && isLightMode) {
+                                if (targetEngine == SearchEngine.AMAZON) {
+                                    ColorFilter.colorMatrix(
+                                        ColorMatrix(
+                                            floatArrayOf(
+                                                0.3f,
+                                                0f,
+                                                0f,
+                                                0f,
+                                                0f,
+                                                0f,
+                                                0.3f,
+                                                0f,
+                                                0f,
+                                                0f,
+                                                0f,
+                                                0f,
+                                                0.3f,
+                                                0f,
+                                                0f,
+                                                0f,
+                                                0f,
+                                                0f,
+                                                1f,
+                                                0f,
+                                            ),
+                                        ),
+                                    )
+                                } else {
+                                    ColorFilter.colorMatrix(
+                                        ColorMatrix(
+                                            floatArrayOf(
+                                                -1f,
+                                                0f,
+                                                0f,
+                                                0f,
+                                                255f,
+                                                0f,
+                                                -1f,
+                                                0f,
+                                                0f,
+                                                255f,
+                                                0f,
+                                                0f,
+                                                -1f,
+                                                0f,
+                                                255f,
+                                                0f,
+                                                0f,
+                                                0f,
+                                                1f,
+                                                0f,
+                                            ),
+                                        ),
+                                    )
+                                }
                             } else {
-                                ColorFilter.colorMatrix(
-                                    ColorMatrix(
-                                        floatArrayOf(
-                                            -1f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            255f,
-                                            0f,
-                                            -1f,
-                                            0f,
-                                            0f,
-                                            255f,
-                                            0f,
-                                            0f,
-                                            -1f,
-                                            0f,
-                                            255f,
-                                            0f,
-                                            0f,
-                                            0f,
-                                            1f,
-                                            0f,
-                                        ),
-                                    ),
-                                )
+                                null
                             }
-                        } else {
-                            null
-                        }
 
-                    Image(
-                        painter = painterResource(id = targetEngine.getDrawableResId()),
-                        contentDescription = targetEngine.getContentDescription(),
-                        modifier = modifier.size(iconSize),
-                        contentScale = ContentScale.Fit,
-                        colorFilter = colorFilter,
-                    )
+                        Image(
+                            painter = painterResource(id = targetEngine.getDrawableResId()),
+                            contentDescription = targetEngine.getContentDescription(),
+                            modifier = modifier.size(iconSize),
+                            contentScale = ContentScale.Fit,
+                            colorFilter = colorFilter,
+                        )
+                    }
                 }
             }
         }
