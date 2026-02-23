@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.Alignment
@@ -53,6 +54,7 @@ private const val OVERLAY_WIDTH_PERCENT = 0.9f
 private const val OVERLAY_HEIGHT_PERCENT = 0.85f
 private const val OVERLAY_EXPANDED_HEIGHT_PERCENT = 0.93f
 private const val OVERLAY_FALLBACK_GRADIENT_ALPHA = 0.98f
+private const val OVERLAY_RESIZE_ANIMATION_MS = 140
 private val OVERLAY_TOP_OFFSET = 16.dp
 
 @Composable
@@ -148,14 +150,14 @@ fun OverlayRoot(
                                 }
                         val overlayHeight by animateDpAsState(
                                 targetValue = overlayHeightTarget,
-                                animationSpec = tween(durationMillis = 250),
+                                animationSpec =
+                                        tween(
+                                                durationMillis = OVERLAY_RESIZE_ANIMATION_MS,
+                                                easing = LinearOutSlowInEasing,
+                                        ),
                                 label = "overlayHeight",
                         )
-                        val overlayWidth by animateDpAsState(
-                                targetValue = targetOverlayWidth,
-                                animationSpec = tween(durationMillis = 300),
-                                label = "overlayWidth",
-                        )
+                        val overlayWidth = targetOverlayWidth
 
                         LaunchedEffect(imeBottomPadding) {
                                 val isImeVisible = imeBottomPadding > 0.dp
