@@ -8,6 +8,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,6 +72,8 @@ internal fun SearchScreenContent(
         onDisableSearchHistory: () -> Unit = {},
         onGeminiModelInfoClick: () -> Unit = {},
         onKeyboardSwitchToggle: () -> Unit,
+        onOverlayExpandRequest: () -> Unit = {},
+        isOverlayExpanded: Boolean = false,
         onWelcomeAnimationCompleted: (() -> Unit)? = null,
         expandedSection: ExpandedSection,
         manuallySwitchedToNumberKeyboard: Boolean,
@@ -331,7 +335,11 @@ internal fun SearchScreenContent(
                 isOverlayPresentation = isOverlayPresentation,
         )
 
-        // Keyboard switch pill - appears above search engines
+        // Fixed search engines section at the bottom (above keyboard, not scrollable)
+        // Hide when files or contacts are expanded, when search engine section is disabled,
+        // or when a shortcut is detected
+        // Fixed search engines section at the bottom (above keyboard, not scrollable)
+        // Hide when files or contacts are expanded
         if (expandedSection == ExpandedSection.NONE) {
             val pillText =
                     if (!isImeVisible && canShowOpenKeyboardPill) {
@@ -346,38 +354,57 @@ internal fun SearchScreenContent(
                     } else {
                         null
                     }
-
+            val shouldShowOverlayExpandControl =
+                    isOverlayPresentation &&
+                            !isOverlayExpanded &&
+                            !state.isSearchEngineCompactMode &&
+                            scrollState.maxValue > 0
+            val shouldShowCompactChevronExpand =
+                    isOverlayPresentation &&
+                            state.isSearchEngineCompactMode &&
+                            (scrollState.maxValue > 0 || isOverlayExpanded)
             AnimatedVisibility(
-                    visible = pillText != null,
+                    visible = pillText != null || shouldShowOverlayExpandControl,
                     enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
                     exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
             ) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    KeyboardSwitchPill(
-                            text = pillText.orEmpty(),
-                            onClick = {
-                                if (!isImeVisible) {
-                                    keyboardController?.show()
-                                } else {
-                                    onKeyboardSwitchToggle()
-                                }
-                            },
-                            modifier =
-                                    Modifier.padding(
-                                            top = DesignTokens.SpacingMedium,
-                                            bottom = DesignTokens.SpacingMedium,
-                                    ),
-                    )
+                Row(
+                        modifier =
+                                Modifier.fillMaxWidth()
+                                        .padding(
+                                                top = DesignTokens.SpacingSmall,
+                                                bottom = DesignTokens.SpacingSmall,
+                                        ),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (pillText != null) {
+                        KeyboardSwitchPill(
+                                text = pillText,
+                                onClick = {
+                                    if (!isImeVisible) {
+                                        keyboardController?.show()
+                                    } else {
+                                        onKeyboardSwitchToggle()
+                                    }
+                                },
+                        )
+                    }
+                    if (pillText != null && shouldShowOverlayExpandControl) {
+                        Spacer(modifier = Modifier.width(DesignTokens.SpacingSmall))
+                    }
+                    if (shouldShowOverlayExpandControl) {
+                        OverlayExpandPill(
+                                text = stringResource(R.string.action_expand),
+                                onClick = {
+                                    keyboardController?.hide()
+                                    onOverlayExpandRequest()
+                                },
+                        )
+                    }
                 }
             }
-        }
 
-        // Fixed search engines section at the bottom (above keyboard, not scrollable)
-        // Hide when files or contacts are expanded, when search engine section is disabled,
-        // or when a shortcut is detected
-        // Fixed search engines section at the bottom (above keyboard, not scrollable)
-        // Hide when files or contacts are expanded
-        if (expandedSection == ExpandedSection.NONE) {
             SearchEnginesVisibility(
                     enginesState = state.searchEnginesState,
                     modifier = searchEnginesModifier,
@@ -393,6 +420,16 @@ internal fun SearchScreenContent(
                                 onClearDetectedShortcut = onClearDetectedShortcut,
                                 showWallpaperBackground = state.showWallpaperBackground,
                                 isOverlayPresentation = isOverlayPresentation,
+                                showOverlayExpandChevron = shouldShowCompactChevronExpand,
+                                onOverlayExpandClick = {
+                                    if (isOverlayExpanded) {
+                                        keyboardController?.show()
+                                    } else {
+                                        keyboardController?.hide()
+                                        onOverlayExpandRequest()
+                                    }
+                                },
+                                isOverlayExpanded = isOverlayExpanded,
                                 predictedTarget = predictedTarget,
                         )
                     },

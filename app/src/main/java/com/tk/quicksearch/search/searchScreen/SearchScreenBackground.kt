@@ -6,12 +6,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.search.core.OverlayGradientTheme
 import com.tk.quicksearch.search.data.preferences.UiPreferences
@@ -31,10 +33,13 @@ internal fun SearchScreenBackground(
     wallpaperBitmap: ImageBitmap?,
     wallpaperBackgroundAlpha: Float,
     wallpaperBlurRadius: Float,
+    backgroundTransitionDurationMillis: Int = DesignTokens.WallpaperFadeInDuration + 120,
+    animateBlurRadius: Boolean = true,
     fallbackBackgroundAlpha: Float = 1f,
     useGradientFallback: Boolean = false,
     overlayGradientTheme: OverlayGradientTheme = OverlayGradientTheme.MONOCHROME,
     overlayThemeIntensity: Float = UiPreferences.DEFAULT_OVERLAY_THEME_INTENSITY,
+    wallpaperFixedHeight: Dp? = null,
     modifier: Modifier = Modifier,
 ) {
     // Check if we're in dark mode by checking the background color luminance
@@ -50,41 +55,106 @@ internal fun SearchScreenBackground(
             luminance < DesignTokens.DarkModeLuminanceThreshold
         }
 
-    // Track if the animation has already played (only animate first time)
-    var hasAnimated by remember { mutableStateOf(false) }
-    val shouldAnimate = showWallpaperBackground && wallpaperBitmap != null && !hasAnimated
+    val hasWallpaperLayer = showWallpaperBackground && wallpaperBitmap != null
     val overlayAlpha = wallpaperBackgroundAlpha.coerceIn(0f, 1f)
     val blurRadius = wallpaperBlurRadius.coerceIn(0f, UiPreferences.MAX_WALLPAPER_BLUR_RADIUS)
     val fallbackAlpha = fallbackBackgroundAlpha.coerceIn(0f, 1f)
+    val backgroundTransitionDuration = backgroundTransitionDurationMillis.coerceAtLeast(0)
 
-    // Animate fade-in only the first time wallpaper background becomes visible
-    val wallpaperAlpha =
+    val wallpaperLayerAlpha by
         animateFloatAsState(
-            targetValue =
-                if (shouldAnimate) {
-                    1f
-                } else if (showWallpaperBackground && wallpaperBitmap != null) {
-                    1f
-                } else {
-                    0f
-                },
-            animationSpec = tween(durationMillis = DesignTokens.WallpaperFadeInDuration),
-            label = "wallpaperFadeIn",
-        ) { hasAnimated = true }
+            targetValue = if (hasWallpaperLayer) 1f else 0f,
+            animationSpec = tween(durationMillis = backgroundTransitionDuration),
+            label = "wallpaperLayerAlpha",
+        )
+    val fallbackLayerAlpha by
+        animateFloatAsState(
+            targetValue = if (hasWallpaperLayer) 0f else 1f,
+            animationSpec = tween(durationMillis = backgroundTransitionDuration),
+            label = "fallbackLayerAlpha",
+        )
+    val wallpaperOverlayAlpha by
+        animateFloatAsState(
+            targetValue = if (hasWallpaperLayer) overlayAlpha else 0f,
+            animationSpec = tween(durationMillis = backgroundTransitionDuration),
+            label = "wallpaperOverlayAlpha",
+        )
+    val animatedBlurRadius by
+        animateFloatAsState(
+            targetValue = if (hasWallpaperLayer) blurRadius else 0f,
+            animationSpec = tween(durationMillis = backgroundTransitionDuration),
+            label = "wallpaperBlurRadius",
+        )
+    val effectiveBlurRadius =
+        if (animateBlurRadius) {
+            animatedBlurRadius
+        } else {
+            if (hasWallpaperLayer) blurRadius else 0f
+        }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // Blurred wallpaper background (only if enabled)
-        if (showWallpaperBackground) {
-            wallpaperBitmap?.let { bitmap ->
+        val fallbackModifier =
+            if (useGradientFallback) {
+                val fallbackGradientBrush =
+                    Brush.linearGradient(
+                        colors =
+                            overlayGradientColors(
+                                theme = overlayGradientTheme,
+                                isDarkMode = isDarkMode,
+                                alpha = fallbackAlpha,
+                                intensity = overlayThemeIntensity,
+                            ),
+                        start = Offset.Zero,
+                        end = Offset(1800f, 2200f),
+                    )
+                Modifier
+                    .fillMaxSize()
+                    .background(fallbackGradientBrush)
+                    .background(
+                        Brush.verticalGradient(
+                            colors =
+                                if (isDarkMode) {
+                                    listOf(
+                                        Color.Black.copy(alpha = 0.22f),
+                                        Color.Black.copy(alpha = 0.12f),
+                                        Color.Black.copy(alpha = 0.3f),
+                                    )
+                                } else {
+                                    listOf(
+                                        Color.White.copy(alpha = 0.12f),
+                                        Color.Transparent,
+                                        Color.Black.copy(alpha = 0.06f),
+                                    )
+                                },
+                        )
+                    )
+            } else {
+                Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = fallbackAlpha))
+            }
+
+        Box(
+            modifier = fallbackModifier.graphicsLayer(alpha = fallbackLayerAlpha),
+        )
+
+        wallpaperBitmap?.let { bitmap ->
+            if (wallpaperLayerAlpha > 0f) {
+                val wallpaperModifier =
+                    if (wallpaperFixedHeight != null) {
+                        Modifier.fillMaxWidth().height(wallpaperFixedHeight)
+                    } else {
+                        Modifier.fillMaxSize()
+                    }
                 Image(
                     bitmap = bitmap,
                     contentDescription = null,
                     modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .blur(radius = blurRadius.dp)
-                            .graphicsLayer(alpha = wallpaperAlpha.value),
+                        wallpaperModifier
+                            .blur(radius = effectiveBlurRadius.dp)
+                            .graphicsLayer(alpha = wallpaperLayerAlpha),
                     contentScale = ContentScale.Crop,
+                    alignment = Alignment.TopCenter,
                 )
 
                 // Dark overlay in dark mode
@@ -93,8 +163,8 @@ internal fun SearchScreenBackground(
                         modifier =
                             Modifier
                                 .fillMaxSize()
-                                .background(Color.Black.copy(alpha = overlayAlpha))
-                                .graphicsLayer(alpha = wallpaperAlpha.value),
+                                .background(Color.Black.copy(alpha = wallpaperOverlayAlpha))
+                                .graphicsLayer(alpha = wallpaperLayerAlpha),
                     )
                 } else {
                     // Light overlay in light mode
@@ -102,59 +172,11 @@ internal fun SearchScreenBackground(
                         modifier =
                             Modifier
                                 .fillMaxSize()
-                                .background(Color.White.copy(alpha = overlayAlpha))
-                                .graphicsLayer(alpha = wallpaperAlpha.value),
+                                .background(Color.White.copy(alpha = wallpaperOverlayAlpha))
+                                .graphicsLayer(alpha = wallpaperLayerAlpha),
                     )
                 }
             }
-        }
-
-    // Fallback background if wallpaper is disabled or not available
-        if (!showWallpaperBackground || wallpaperBitmap == null) {
-            val fallbackModifier =
-                if (useGradientFallback) {
-                    val fallbackGradientBrush =
-                        Brush.linearGradient(
-                            colors =
-                                overlayGradientColors(
-                                    theme = overlayGradientTheme,
-                                    isDarkMode = isDarkMode,
-                                    alpha = fallbackAlpha,
-                                    intensity = overlayThemeIntensity,
-                                ),
-                            start = Offset.Zero,
-                            end = Offset(1800f, 2200f),
-                        )
-                    Modifier
-                        .fillMaxSize()
-                        .background(fallbackGradientBrush)
-                        .background(
-                            Brush.verticalGradient(
-                                colors =
-                                    if (isDarkMode) {
-                                        listOf(
-                                            Color.Black.copy(alpha = 0.22f),
-                                            Color.Black.copy(alpha = 0.12f),
-                                            Color.Black.copy(alpha = 0.3f),
-                                        )
-                                    } else {
-                                        listOf(
-                                            Color.White.copy(alpha = 0.12f),
-                                            Color.Transparent,
-                                            Color.Black.copy(alpha = 0.06f),
-                                        )
-                                    },
-                            ),
-                        )
-                } else {
-                    Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background.copy(alpha = fallbackAlpha))
-                }
-
-            Box(
-                modifier = fallbackModifier,
-            )
         }
     }
 }

@@ -147,6 +147,8 @@ fun SearchRoute(
     onWallpaperLoaded: (() -> Unit)? = null,
     isOverlayPresentation: Boolean = false,
     overlaySnackbarHostState: SnackbarHostState? = null,
+    onOverlayExpandRequest: (() -> Unit)? = null,
+    isOverlayExpanded: Boolean = false,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -426,6 +428,8 @@ fun SearchRoute(
             onSaveSecondaryContactCardAction = viewModel::setSecondaryContactCardAction,
             onWallpaperLoaded = onWallpaperLoaded,
             isOverlayPresentation = isOverlayPresentation,
+            onOverlayExpandRequest = onOverlayExpandRequest,
+            isOverlayExpanded = isOverlayExpanded,
         )
 
         if (overlaySnackbarHostState == null) {
@@ -537,6 +541,8 @@ fun SearchScreen(
     getSecondaryContactCardAction: (Long) -> ContactCardAction?,
     onSavePrimaryContactCardAction: (Long, ContactCardAction) -> Unit,
     onSaveSecondaryContactCardAction: (Long, ContactCardAction) -> Unit,
+    onOverlayExpandRequest: (() -> Unit)? = null,
+    isOverlayExpanded: Boolean = false,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
@@ -922,6 +928,8 @@ fun SearchScreen(
             onKeyboardSwitchToggle = {
                 manuallySwitchedToNumberKeyboard = !manuallySwitchedToNumberKeyboard
             },
+            onOverlayExpandRequest = { onOverlayExpandRequest?.invoke() },
+            isOverlayExpanded = isOverlayExpanded,
             expandedSection = expandedSection,
             manuallySwitchedToNumberKeyboard = manuallySwitchedToNumberKeyboard,
             scrollState = scrollState,

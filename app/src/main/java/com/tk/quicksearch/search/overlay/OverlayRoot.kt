@@ -51,6 +51,7 @@ import kotlinx.coroutines.delay
 
 private const val OVERLAY_WIDTH_PERCENT = 0.9f
 private const val OVERLAY_HEIGHT_PERCENT = 0.85f
+private const val OVERLAY_EXPANDED_HEIGHT_PERCENT = 0.93f
 private const val OVERLAY_FALLBACK_GRADIENT_ALPHA = 0.98f
 private val OVERLAY_TOP_OFFSET = 16.dp
 
@@ -97,6 +98,8 @@ fun OverlayRoot(
                                 remember { viewModel.getLastOverlayKeyboardOpenHeightDp() }
                         var learnedKeyboardOpenHeightDp by
                                 remember { mutableStateOf<Float?>(persistedKeyboardOpenHeightDp) }
+                        var isOverlayManuallyExpanded by remember { mutableStateOf(false) }
+                        var wasImeVisible by remember { mutableStateOf(false) }
                         val hasPersistedHeightAtLaunch = persistedKeyboardOpenHeightDp != null
                         val layoutDirection = LocalLayoutDirection.current
                         val systemBarsPadding = WindowInsets.systemBars.asPaddingValues()
@@ -125,7 +128,7 @@ fun OverlayRoot(
                         val targetOverlayWidth =
                                 (availableWidth * OVERLAY_WIDTH_PERCENT).coerceAtLeast(0.dp)
 
-                        val overlayHeight =
+                        val baseOverlayHeight =
                                 if (hasPersistedHeightAtLaunch) {
                                         minOf(
                                                 persistedKeyboardOpenHeightDp!!.dp,
@@ -134,11 +137,33 @@ fun OverlayRoot(
                                 } else {
                                         targetOverlayHeight
                                 }
+                        val targetOverlayExpandedHeight =
+                                (availableHeight * OVERLAY_EXPANDED_HEIGHT_PERCENT)
+                                        .coerceAtLeast(0.dp)
+                        val overlayHeightTarget =
+                                if (isOverlayManuallyExpanded) {
+                                        targetOverlayExpandedHeight
+                                } else {
+                                        baseOverlayHeight
+                                }
+                        val overlayHeight by animateDpAsState(
+                                targetValue = overlayHeightTarget,
+                                animationSpec = tween(durationMillis = 250),
+                                label = "overlayHeight",
+                        )
                         val overlayWidth by animateDpAsState(
                                 targetValue = targetOverlayWidth,
                                 animationSpec = tween(durationMillis = 300),
                                 label = "overlayWidth",
                         )
+
+                        LaunchedEffect(imeBottomPadding) {
+                                val isImeVisible = imeBottomPadding > 0.dp
+                                if (isImeVisible && !wasImeVisible && isOverlayManuallyExpanded) {
+                                        isOverlayManuallyExpanded = false
+                                }
+                                wasImeVisible = isImeVisible
+                        }
 
                         LaunchedEffect(imeBottomPadding, targetOverlayHeight) {
                                 if (hasPersistedHeightAtLaunch) return@LaunchedEffect
@@ -259,6 +284,10 @@ fun OverlayRoot(
                                                                 uiState.wallpaperBackgroundAlpha,
                                                         wallpaperBlurRadius =
                                                                 uiState.wallpaperBlurRadius,
+                                                        backgroundTransitionDurationMillis =
+                                                                DesignTokens
+                                                                        .WallpaperFadeInDuration + 220,
+                                                        animateBlurRadius = false,
                                                         fallbackBackgroundAlpha =
                                                                 OVERLAY_FALLBACK_GRADIENT_ALPHA,
                                                         useGradientFallback =
@@ -282,6 +311,11 @@ fun OverlayRoot(
                                                                 viewModel
                                                                         .onSearchBarWelcomeAnimationCompleted()
                                                         },
+                                                        onOverlayExpandRequest = {
+                                                                isOverlayManuallyExpanded = true
+                                                        },
+                                                        isOverlayExpanded =
+                                                                isOverlayManuallyExpanded,
                                                         onOverlayDismissRequest = { handleClose() },
                                                         onSettingsClick = {
                                                                 OverlayModeController

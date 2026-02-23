@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -14,6 +15,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,7 +26,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.searchEngines.getId
 import com.tk.quicksearch.search.searchEngines.compact.SearchEngineCard
@@ -69,6 +74,9 @@ fun SearchEngineIconsSection(
     onClearDetectedShortcut: () -> Unit = {},
     showWallpaperBackground: Boolean = false,
     isOverlayPresentation: Boolean = false,
+    showOverlayExpandChevron: Boolean = false,
+    onOverlayExpandClick: (() -> Unit)? = null,
+    isOverlayExpanded: Boolean = false,
     predictedTarget: PredictedSubmitTarget? = null,
 ) {
     if (enabledEngines.isEmpty() && detectedShortcutTarget == null) return
@@ -131,6 +139,9 @@ fun SearchEngineIconsSection(
                 scrollState = scrollState,
                 onSearchEngineClick = onSearchEngineClick,
                 onSearchEngineLongPress = onSearchEngineLongPress,
+                showOverlayExpandChevron = showOverlayExpandChevron,
+                onOverlayExpandClick = onOverlayExpandClick,
+                isOverlayExpanded = isOverlayExpanded,
                 predictedTarget = predictedTarget,
             )
         }
@@ -145,6 +156,9 @@ private fun SearchEngineContent(
     scrollState: androidx.compose.foundation.lazy.LazyListState,
     onSearchEngineClick: (String, SearchTarget) -> Unit,
     onSearchEngineLongPress: () -> Unit,
+    showOverlayExpandChevron: Boolean,
+    onOverlayExpandClick: (() -> Unit)?,
+    isOverlayExpanded: Boolean,
     predictedTarget: PredictedSubmitTarget?,
 ) {
     Row(
@@ -158,7 +172,11 @@ private fun SearchEngineContent(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        SearchIcon()
+        SearchIcon(
+            showOverlayExpandChevron = showOverlayExpandChevron,
+            onOverlayExpandClick = onOverlayExpandClick,
+            isOverlayExpanded = isOverlayExpanded,
+        )
 
         Spacer(modifier = Modifier.width(SearchEngineSectionConstants.SEARCH_ICON_SPACING))
 
@@ -175,11 +193,43 @@ private fun SearchEngineContent(
 
 /** Fixed search icon displayed at the start of the section. */
 @Composable
-private fun SearchIcon() {
+private fun SearchIcon(
+    showOverlayExpandChevron: Boolean,
+    onOverlayExpandClick: (() -> Unit)?,
+    isOverlayExpanded: Boolean,
+) {
+    val imageVector =
+        if (showOverlayExpandChevron && isOverlayExpanded) {
+            Icons.Rounded.ExpandLess
+        } else if (showOverlayExpandChevron) {
+            Icons.Rounded.ExpandMore
+        } else {
+            Icons.Rounded.Search
+        }
+    val contentDescription =
+        if (showOverlayExpandChevron && isOverlayExpanded) {
+            stringResource(R.string.desc_collapse)
+        } else if (showOverlayExpandChevron) {
+            stringResource(R.string.desc_expand)
+        } else {
+            stringResource(R.string.desc_search_icon)
+        }
     Icon(
-        imageVector = Icons.Rounded.Search,
-        contentDescription = "Search",
-        modifier = Modifier.size(SearchEngineSectionConstants.SEARCH_ICON_SIZE),
+        imageVector = imageVector,
+        contentDescription = contentDescription,
+        modifier =
+            Modifier
+                .size(SearchEngineSectionConstants.SEARCH_ICON_SIZE)
+                .then(
+                    if (
+                        showOverlayExpandChevron &&
+                            onOverlayExpandClick != null
+                    ) {
+                        Modifier.clickable(onClick = onOverlayExpandClick)
+                    } else {
+                        Modifier
+                    },
+                ),
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }

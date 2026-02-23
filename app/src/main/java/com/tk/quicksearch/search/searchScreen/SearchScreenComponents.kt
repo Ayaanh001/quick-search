@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
@@ -737,7 +739,7 @@ internal fun KeyboardSwitchPill(
 ) {
     Surface(
         modifier = modifier.clickable(onClick = onClick),
-        shape = DesignTokens.ShapeMedium,
+        shape = RoundedCornerShape(999.dp),
         color = Color.Black.copy(alpha = 0.4f),
         tonalElevation = 0.dp,
     ) {
@@ -746,7 +748,7 @@ internal fun KeyboardSwitchPill(
                 Modifier
                     .padding(
                         horizontal = DesignTokens.SpacingMedium,
-                        vertical = 6.dp,
+                        vertical = 4.dp,
                     ).height(DesignTokens.IconSize),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
@@ -756,6 +758,45 @@ internal fun KeyboardSwitchPill(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Medium,
+            )
+        }
+    }
+}
+
+@Composable
+internal fun OverlayExpandPill(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(999.dp),
+        color = Color.Black.copy(alpha = 0.4f),
+        tonalElevation = 0.dp,
+    ) {
+        Row(
+            modifier =
+                Modifier
+                    .padding(
+                        horizontal = DesignTokens.SpacingMedium,
+                        vertical = 4.dp,
+                    ).height(DesignTokens.IconSize),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Medium,
+            )
+            Spacer(modifier = Modifier.size(4.dp))
+            Icon(
+                imageVector = Icons.Rounded.ExpandMore,
+                contentDescription = stringResource(R.string.desc_expand),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(14.dp),
             )
         }
     }
