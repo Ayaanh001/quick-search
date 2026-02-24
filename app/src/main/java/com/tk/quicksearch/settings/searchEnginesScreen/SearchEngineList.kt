@@ -407,7 +407,7 @@ fun SearchEngineListCard(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(top = 24.dp, bottom = 24.dp),
+                        .padding(top = 34.dp, bottom = 24.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Button(onClick = { showAddSearchEngineDialog = true }) {

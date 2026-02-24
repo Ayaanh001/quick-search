@@ -695,7 +695,7 @@
          Calculator
          ============================================================================ -->
     <string name="calculator_toggle_title">Calculator</string>
-    <string name="calculator_toggle_desc">Show calculator results for basic math expressions</string>
+    <string name="calculator_toggle_desc">Results for basic math expressions</string>
 
     <!-- ============================================================================
          No Results

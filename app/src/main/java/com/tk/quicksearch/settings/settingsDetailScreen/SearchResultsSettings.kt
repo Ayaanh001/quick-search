@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
-import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.Contacts
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.InsertDriveFile
@@ -112,8 +111,6 @@ fun SearchOptionsCard(
     onAppSuggestionsToggle: (Boolean) -> Unit,
     recentQueriesEnabled: Boolean,
     onRecentQueriesToggle: (Boolean) -> Unit,
-    calculatorEnabled: Boolean,
-    onToggleCalculator: (Boolean) -> Unit,
     hasExcludedItems: Boolean,
     excludedItemsTitle: String,
     excludedItemsDescription: String,
@@ -139,18 +136,7 @@ fun SearchOptionsCard(
                 onCheckedChange = onRecentQueriesToggle,
                 leadingIcon = Icons.Rounded.History,
                 isFirstItem = false,
-                isLastItem = false,
-            )
-
-            SettingsToggleRow(
-                title = stringResource(R.string.calculator_toggle_title),
-                subtitle = stringResource(R.string.calculator_toggle_desc),
-                checked = calculatorEnabled,
-                onCheckedChange = onToggleCalculator,
-                leadingIcon = Icons.Rounded.Calculate,
-                isFirstItem = false,
                 isLastItem = !hasExcludedItems,
-                extraVerticalPadding = 4.dp,
             )
 
             if (hasExcludedItems) {
@@ -210,7 +196,7 @@ fun RefreshDataCard(
                         imageVector = Icons.Rounded.Apps,
                         contentDescription = stringResource(R.string.settings_refresh_apps_title),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(22.dp),
                     )
                     Text(
                         text = stringResource(R.string.settings_refresh_apps_title),
@@ -233,7 +219,7 @@ fun RefreshDataCard(
                             imageVector = Icons.Rounded.Contacts,
                             contentDescription = stringResource(R.string.settings_refresh_contacts_title),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(22.dp),
                         )
                         Text(
                             text = stringResource(R.string.settings_refresh_contacts_title),
@@ -257,7 +243,7 @@ fun RefreshDataCard(
                             imageVector = Icons.Rounded.InsertDriveFile,
                             contentDescription = stringResource(R.string.settings_refresh_files_title),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(22.dp),
                         )
                         Text(
                             text = stringResource(R.string.settings_refresh_files_title),
@@ -308,15 +294,10 @@ fun SearchResultsSettingsSection(
             deviceSettingsSubtitle = stringResource(R.string.settings_view_all_desc),
             onDeviceSettingsClick = onNavigateToDeviceSettings,
             onDeviceSettingsClickNoRipple = true,
+            calculatorEnabled = state.calculatorEnabled,
+            onCalculatorToggle = callbacks.onToggleCalculator,
+            calculatorSubtitle = stringResource(R.string.calculator_toggle_desc),
             showTitle = false,
-        )
-
-        WebSearchSuggestionsCard(
-            webSuggestionsEnabled = state.webSuggestionsEnabled,
-            onWebSuggestionsToggle = callbacks.onToggleWebSuggestions,
-            webSuggestionsCount = state.webSuggestionsCount,
-            onWebSuggestionsCountChange = callbacks.onWebSuggestionsCountChange,
-            modifier = Modifier.padding(top = DesignTokens.SpacingLarge),
         )
 
         SearchOptionsCard(
@@ -324,12 +305,18 @@ fun SearchResultsSettingsSection(
             onAppSuggestionsToggle = callbacks.onToggleAppSuggestions,
             recentQueriesEnabled = state.recentQueriesEnabled,
             onRecentQueriesToggle = callbacks.onToggleRecentQueries,
-            calculatorEnabled = state.calculatorEnabled,
-            onToggleCalculator = callbacks.onToggleCalculator,
             hasExcludedItems = hasExcludedItems,
             excludedItemsTitle = stringResource(R.string.settings_excluded_items_title),
             excludedItemsDescription = stringResource(R.string.settings_excluded_items_desc),
             onNavigateToExcludedItems = onNavigateToExcludedItems,
+            modifier = Modifier.padding(top = DesignTokens.SpacingLarge),
+        )
+
+        WebSearchSuggestionsCard(
+            webSuggestionsEnabled = state.webSuggestionsEnabled,
+            onWebSuggestionsToggle = callbacks.onToggleWebSuggestions,
+            webSuggestionsCount = state.webSuggestionsCount,
+            onWebSuggestionsCountChange = callbacks.onWebSuggestionsCountChange,
             modifier = Modifier.padding(top = DesignTokens.SpacingLarge),
         )
 

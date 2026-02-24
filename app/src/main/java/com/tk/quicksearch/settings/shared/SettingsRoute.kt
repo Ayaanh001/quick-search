@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
+import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Contacts
 import androidx.compose.material.icons.rounded.DragHandle
@@ -273,6 +274,9 @@ fun SectionSettingsSection(
     deviceSettingsSubtitle: String? = null,
     onDeviceSettingsClick: (() -> Unit)? = null,
     onDeviceSettingsClickNoRipple: Boolean = false,
+    calculatorEnabled: Boolean? = null,
+    onCalculatorToggle: ((Boolean) -> Unit)? = null,
+    calculatorSubtitle: String? = null,
     modifier: Modifier = Modifier,
     showTitle: Boolean = true,
 ) {
@@ -322,7 +326,82 @@ fun SectionSettingsSection(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 }
             }
+
+            if (calculatorEnabled != null && onCalculatorToggle != null) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                ExtraToggleRow(
+                    title = stringResource(R.string.calculator_toggle_title),
+                    subtitle = calculatorSubtitle,
+                    icon = Icons.Rounded.Calculate,
+                    checked = calculatorEnabled,
+                    onToggle = onCalculatorToggle,
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun ExtraToggleRow(
+    title: String,
+    subtitle: String? = null,
+    icon: ImageVector,
+    checked: Boolean,
+    onToggle: (Boolean) -> Unit,
+    bottomPadding: Dp = DragConstants.rowVerticalPadding,
+) {
+    val view = LocalView.current
+
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = DragConstants.rowHorizontalPadding,
+                    end = DragConstants.rowHorizontalPadding,
+                    top = DragConstants.rowVerticalPadding,
+                    bottom = bottomPadding,
+                ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(DragConstants.rowSpacing),
+    ) {
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(DragConstants.rowSpacing),
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(DragConstants.iconSize),
+            )
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                if (!subtitle.isNullOrBlank()) {
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
+            }
+        }
+
+        Switch(
+            checked = checked,
+            onCheckedChange = { enabled ->
+                hapticToggle(view)()
+                onToggle(enabled)
+            },
+            modifier = Modifier.scale(0.85f),
+        )
     }
 }
 
@@ -345,6 +424,17 @@ private fun SectionRowWithoutDrag(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .let { rowModifier ->
+                    if (onRowClick != null) {
+                        rowModifier.clickable(
+                            interactionSource = rowInteractionSource,
+                            indication = if (noRippleOnRowClick) null else rowIndication,
+                            onClick = onRowClick,
+                        )
+                    } else {
+                        rowModifier
+                    }
+                }
                 .padding(
                     start = DragConstants.rowHorizontalPadding,
                     end = DragConstants.rowHorizontalPadding,
@@ -355,20 +445,7 @@ private fun SectionRowWithoutDrag(
         horizontalArrangement = Arrangement.spacedBy(DragConstants.rowSpacing),
     ) {
         Row(
-            modifier =
-                Modifier
-                    .weight(1f)
-                    .let { rowModifier ->
-                        if (onRowClick != null) {
-                            rowModifier.clickable(
-                                interactionSource = rowInteractionSource,
-                                indication = if (noRippleOnRowClick) null else rowIndication,
-                                onClick = onRowClick,
-                            )
-                        } else {
-                            rowModifier
-                        }
-                    },
+            modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(DragConstants.rowSpacing),
         ) {
@@ -399,14 +476,7 @@ private fun SectionRowWithoutDrag(
 
         if (onRowClick != null) {
             Row(
-                modifier =
-                    Modifier
-                        .offset(x = 8.dp)
-                        .clickable(
-                            interactionSource = rowInteractionSource,
-                            indication = if (noRippleOnRowClick) null else rowIndication,
-                            onClick = onRowClick,
-                        ),
+                modifier = Modifier.offset(x = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(

@@ -211,8 +211,6 @@ internal fun SettingsDetailLevel1Screen(
                             directDialEnabled = state.directDialEnabled,
                             onToggleDirectDial = callbacks.onToggleDirectDial,
                             hasCallPermission = PermissionRequestHandler.checkCallPermission(context),
-                            hasContactPermission = PermissionUtils.hasContactsPermission(context),
-                            onNavigateToPermissions = { onNavigateToDetail(SettingsDetailType.PERMISSIONS) },
                             contactsSectionEnabled = true,
                             isWhatsAppInstalled = state.isWhatsAppInstalled,
                             isTelegramInstalled = state.isTelegramInstalled,

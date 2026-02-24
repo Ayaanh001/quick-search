@@ -188,56 +188,72 @@ fun SettingsScreen(
 
             // Search Results and Search Engines Card
             val navigationItems =
-                listOf(
-                    SettingsCardItem(
-                        title = stringResource(R.string.settings_appearance_title),
-                        description = stringResource(R.string.settings_appearance_desc),
-                        icon = Icons.Rounded.Palette,
-                        actionOnPress = {
-                            onNavigateToDetail(SettingsDetailType.APPEARANCE)
-                        },
-                    ),
-                    SettingsCardItem(
-                        title = stringResource(R.string.settings_search_results_title),
-                        description = stringResource(R.string.settings_search_results_desc),
-                        icon = Icons.Rounded.Search,
-                        actionOnPress = {
-                            onNavigateToDetail(SettingsDetailType.SEARCH_RESULTS)
-                        },
-                    ),
-                    SettingsCardItem(
-                        title = stringResource(R.string.settings_search_engines_title),
-                        description = stringResource(R.string.settings_search_engines_desc),
-                        icon = Icons.AutoMirrored.Rounded.ManageSearch,
-                        actionOnPress = {
-                            onNavigateToDetail(SettingsDetailType.SEARCH_ENGINES)
-                        },
-                    ),
-                    SettingsCardItem(
-                        title = stringResource(R.string.settings_calls_texts_title),
-                        description = stringResource(R.string.settings_calls_texts_desc),
-                        icon = Icons.Rounded.Phone,
-                        actionOnPress = {
-                            onNavigateToDetail(SettingsDetailType.CALLS_TEXTS)
-                        },
-                    ),
-                    SettingsCardItem(
-                        title = stringResource(R.string.settings_file_types_title),
-                        description = stringResource(R.string.settings_files_desc),
-                        icon = Icons.Rounded.Folder,
-                        actionOnPress = {
-                            onNavigateToDetail(SettingsDetailType.FILES)
-                        },
-                    ),
-                    SettingsCardItem(
-                        title = stringResource(R.string.settings_launch_options_title),
-                        description = stringResource(R.string.settings_launch_options_desc),
-                        icon = Icons.Rounded.RocketLaunch,
-                        actionOnPress = {
-                            onNavigateToDetail(SettingsDetailType.LAUNCH_OPTIONS)
-                        },
-                    ),
-                )
+                buildList {
+                    add(
+                        SettingsCardItem(
+                            title = stringResource(R.string.settings_appearance_title),
+                            description = stringResource(R.string.settings_appearance_desc),
+                            icon = Icons.Rounded.Palette,
+                            actionOnPress = {
+                                onNavigateToDetail(SettingsDetailType.APPEARANCE)
+                            },
+                        ),
+                    )
+                    add(
+                        SettingsCardItem(
+                            title = stringResource(R.string.settings_search_results_title),
+                            description = stringResource(R.string.settings_search_results_desc),
+                            icon = Icons.Rounded.Search,
+                            actionOnPress = {
+                                onNavigateToDetail(SettingsDetailType.SEARCH_RESULTS)
+                            },
+                        ),
+                    )
+                    add(
+                        SettingsCardItem(
+                            title = stringResource(R.string.settings_search_engines_title),
+                            description = stringResource(R.string.settings_search_engines_desc),
+                            icon = Icons.AutoMirrored.Rounded.ManageSearch,
+                            actionOnPress = {
+                                onNavigateToDetail(SettingsDetailType.SEARCH_ENGINES)
+                            },
+                        ),
+                    )
+                    if (hasContactPermission) {
+                        add(
+                            SettingsCardItem(
+                                title = stringResource(R.string.settings_calls_texts_title),
+                                description = stringResource(R.string.settings_calls_texts_desc),
+                                icon = Icons.Rounded.Phone,
+                                actionOnPress = {
+                                    onNavigateToDetail(SettingsDetailType.CALLS_TEXTS)
+                                },
+                            ),
+                        )
+                    }
+                    if (hasFilePermission) {
+                        add(
+                            SettingsCardItem(
+                                title = stringResource(R.string.settings_file_types_title),
+                                description = stringResource(R.string.settings_files_desc),
+                                icon = Icons.Rounded.Folder,
+                                actionOnPress = {
+                                    onNavigateToDetail(SettingsDetailType.FILES)
+                                },
+                            ),
+                        )
+                    }
+                    add(
+                        SettingsCardItem(
+                            title = stringResource(R.string.settings_launch_options_title),
+                            description = stringResource(R.string.settings_launch_options_desc),
+                            icon = Icons.Rounded.RocketLaunch,
+                            actionOnPress = {
+                                onNavigateToDetail(SettingsDetailType.LAUNCH_OPTIONS)
+                            },
+                        ),
+                    )
+                }
 
             ElevatedCard(
                 modifier =
