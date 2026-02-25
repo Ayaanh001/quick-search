@@ -3,6 +3,7 @@ package com.tk.quicksearch.widget.customButtons
 import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
+import com.tk.quicksearch.search.contacts.models.ContactCardAction
 import com.tk.quicksearch.search.data.StaticShortcut
 import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.models.AppInfo
@@ -89,6 +90,7 @@ sealed class CustomWidgetButtonAction : Parcelable {
         val lookupKey: String,
         val displayName: String,
         val photoUri: String?,
+        val serializedAction: String? = null,
     ) : CustomWidgetButtonAction() {
         override val type: CustomWidgetButtonType = CustomWidgetButtonType.CONTACT
 
@@ -110,7 +112,11 @@ sealed class CustomWidgetButtonAction : Parcelable {
                 .put(KEY_LOOKUP_KEY, lookupKey)
                 .put(KEY_DISPLAY_NAME, displayName)
                 .put(KEY_PHOTO_URI, photoUri)
+                .put(KEY_CONTACT_ACTION, serializedAction)
                 .toString()
+
+        fun toContactCardAction(): ContactCardAction? =
+            serializedAction?.let { ContactCardAction.fromSerializedString(it) }
     }
 
     @Parcelize
@@ -274,6 +280,8 @@ sealed class CustomWidgetButtonAction : Parcelable {
                                     .nullIfBlankOrLiteralNull()
                                     ?: lookupKey,
                             photoUri = json.optString(KEY_PHOTO_URI).nullIfBlankOrLiteralNull(),
+                            serializedAction =
+                                json.optString(KEY_CONTACT_ACTION).nullIfBlankOrLiteralNull(),
                         )
                     }
 
@@ -359,6 +367,7 @@ private const val KEY_CONTACT_ID = "contactId"
 private const val KEY_LOOKUP_KEY = "lookupKey"
 private const val KEY_DISPLAY_NAME = "displayName"
 private const val KEY_PHOTO_URI = "photoUri"
+private const val KEY_CONTACT_ACTION = "contactAction"
 private const val KEY_URI = "uri"
 private const val KEY_MIME_TYPE = "mimeType"
 private const val KEY_LAST_MODIFIED = "lastModified"

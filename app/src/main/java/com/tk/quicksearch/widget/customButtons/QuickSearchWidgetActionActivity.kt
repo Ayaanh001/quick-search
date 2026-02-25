@@ -14,12 +14,15 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.contacts.dialogs.ContactMethodsDialog
+import com.tk.quicksearch.search.contacts.models.ContactCardAction
 import com.tk.quicksearch.search.contacts.utils.ContactIntentHelpers
+import com.tk.quicksearch.search.contacts.utils.TelegramContactUtils
 import com.tk.quicksearch.search.core.IntentHelpers
 import com.tk.quicksearch.search.data.ContactRepository
 import com.tk.quicksearch.search.data.launchStaticShortcut
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
+import com.tk.quicksearch.search.utils.PhoneNumberUtils
 import com.tk.quicksearch.ui.theme.QuickSearchTheme
 import kotlinx.coroutines.launch
 
@@ -32,7 +35,10 @@ class QuickSearchWidgetActionActivity : ComponentActivity() {
             )
         if (action != null) {
             if (action is CustomWidgetButtonAction.Contact) {
-                loadFullContactInfo(action)
+                loadFullContactInfo(
+                    contactAction = action,
+                    specificAction = action.toContactCardAction(),
+                )
             } else {
                 handleAction(action)
                 finish()
@@ -42,17 +48,100 @@ class QuickSearchWidgetActionActivity : ComponentActivity() {
         }
     }
 
-    private fun loadFullContactInfo(contactAction: CustomWidgetButtonAction.Contact) {
+    private fun loadFullContactInfo(
+        contactAction: CustomWidgetButtonAction.Contact,
+        specificAction: ContactCardAction? = null,
+    ) {
         lifecycleScope.launch {
             val contactRepository = ContactRepository(application.applicationContext)
             val contacts = contactRepository.getContactsByIds(setOf(contactAction.contactId))
             val fullContactInfo = contacts.firstOrNull()
-            if (fullContactInfo != null) {
-                showContactMethodsDialog(fullContactInfo)
+            val resolvedContact = fullContactInfo ?: contactAction.toContactInfo()
+            if (specificAction != null) {
+                handleSpecificContactAction(resolvedContact, specificAction)
+                finish()
             } else {
-                // Fallback to basic contact info if loading fails
-                showContactMethodsDialog(contactAction.toContactInfo())
+                showContactMethodsDialog(resolvedContact)
             }
+        }
+    }
+
+    private fun handleSpecificContactAction(
+        contactInfo: ContactInfo,
+        action: ContactCardAction,
+    ) {
+        val methods = contactInfo.contactMethods
+
+        fun matchesPhoneNumber(method: ContactMethod): Boolean {
+            if (method.data.isBlank()) return false
+            return PhoneNumberUtils.isSameNumber(method.data, action.phoneNumber)
+        }
+
+        fun matchesTelegramNumber(method: ContactMethod): Boolean =
+            TelegramContactUtils.isTelegramMethodForPhoneNumber(
+                context = application.applicationContext,
+                phoneNumber = action.phoneNumber,
+                telegramMethod = method,
+            ) || matchesPhoneNumber(method)
+
+        fun matchesSignalNumber(method: ContactMethod): Boolean =
+            method.data.isBlank() || matchesPhoneNumber(method)
+
+        val matchedMethod: ContactMethod? =
+            methods.find { method ->
+                when (action) {
+                    is ContactCardAction.Phone -> {
+                        method is ContactMethod.Phone && matchesPhoneNumber(method)
+                    }
+                    is ContactCardAction.Sms -> {
+                        method is ContactMethod.Sms && matchesPhoneNumber(method)
+                    }
+                    is ContactCardAction.WhatsAppCall -> {
+                        method is ContactMethod.WhatsAppCall && matchesPhoneNumber(method)
+                    }
+                    is ContactCardAction.WhatsAppMessage -> {
+                        method is ContactMethod.WhatsAppMessage && matchesPhoneNumber(method)
+                    }
+                    is ContactCardAction.WhatsAppVideoCall -> {
+                        method is ContactMethod.WhatsAppVideoCall && matchesPhoneNumber(method)
+                    }
+                    is ContactCardAction.TelegramMessage -> {
+                        method is ContactMethod.TelegramMessage && matchesTelegramNumber(method)
+                    }
+                    is ContactCardAction.TelegramCall -> {
+                        method is ContactMethod.TelegramCall && matchesTelegramNumber(method)
+                    }
+                    is ContactCardAction.TelegramVideoCall -> {
+                        method is ContactMethod.TelegramVideoCall && matchesTelegramNumber(method)
+                    }
+                    is ContactCardAction.SignalMessage -> {
+                        method is ContactMethod.SignalMessage && matchesSignalNumber(method)
+                    }
+                    is ContactCardAction.SignalCall -> {
+                        method is ContactMethod.SignalCall && matchesSignalNumber(method)
+                    }
+                    is ContactCardAction.SignalVideoCall -> {
+                        method is ContactMethod.SignalVideoCall && matchesSignalNumber(method)
+                    }
+                    is ContactCardAction.GoogleMeet -> {
+                        method is ContactMethod.GoogleMeet && matchesPhoneNumber(method)
+                    }
+                }
+            }
+
+        if (matchedMethod != null) {
+            handleContactMethod(matchedMethod)
+            return
+        }
+
+        when (action) {
+            is ContactCardAction.Phone -> {
+                handleContactMethod(ContactMethod.Phone("Call", action.phoneNumber))
+            }
+            is ContactCardAction.Sms -> {
+                handleContactMethod(ContactMethod.Sms("Message", action.phoneNumber))
+            }
+            else -> showToast(R.string.error_action_not_available)
         }
     }
 

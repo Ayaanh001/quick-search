@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.tk.quicksearch.R
+import com.tk.quicksearch.search.contacts.models.ContactCardAction
 import com.tk.quicksearch.search.data.StaticShortcut
 import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.models.AppInfo
@@ -120,6 +121,50 @@ class AddToHomeHandler(private val context: Context) {
                             .setLongLabel(contact.displayName)
                             .setIntent(intent)
                             .setIcon(loadContactIcon(contact))
+
+            shortcutManager?.requestPinShortcut(builder.build(), null)
+        }
+    }
+
+    fun addContactActionToHome(
+        contact: ContactInfo,
+        contactAction: ContactCardAction,
+        actionDisplayName: String,
+    ) {
+        if (!isSupported()) {
+            showUnsupportedMessage()
+            return
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val shortcutLabel = "${contact.displayName} - $actionDisplayName"
+            val serializedAction = contactAction.toSerializedString()
+            val contactShortcutAction =
+                CustomWidgetButtonAction.Contact(
+                    contactId = contact.contactId,
+                    lookupKey = contact.lookupKey,
+                    displayName = contact.displayName,
+                    photoUri = contact.photoUri,
+                    serializedAction = serializedAction,
+                )
+
+            val intent =
+                Intent(context, QuickSearchWidgetActionActivity::class.java).apply {
+                    action = Intent.ACTION_VIEW
+                    putExtra(
+                        QuickSearchWidgetActionActivity.EXTRA_CUSTOM_BUTTON_ACTION,
+                        contactShortcutAction.toJson(),
+                    )
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+
+            val shortcutId = "contact_${contact.contactId}_${serializedAction.hashCode()}"
+            val builder =
+                ShortcutInfo.Builder(context, shortcutId)
+                    .setShortLabel(shortcutLabel)
+                    .setLongLabel(shortcutLabel)
+                    .setIntent(intent)
+                    .setIcon(loadContactIcon(contact))
 
             shortcutManager?.requestPinShortcut(builder.build(), null)
         }

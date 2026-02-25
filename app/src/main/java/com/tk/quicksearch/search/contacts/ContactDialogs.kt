@@ -52,8 +52,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
+import com.tk.quicksearch.search.common.AddToHomeHandler
 import com.tk.quicksearch.search.contacts.components.ContactActionButton
 import com.tk.quicksearch.search.contacts.components.ContactAvatar
+import com.tk.quicksearch.search.contacts.models.ContactCardAction
 import com.tk.quicksearch.search.contacts.utils.TelegramContactUtils
 import com.tk.quicksearch.search.core.DirectDialOption
 import com.tk.quicksearch.search.models.ContactInfo
@@ -268,6 +270,8 @@ fun ContactMethodsDialog(
 ) {
     val hasMultipleNumbers = contactInfo.phoneNumbers.size > 1
     val maxCardHeight = LocalConfiguration.current.screenHeightDp.dp * 0.72f
+    val context = LocalContext.current
+    val addToHomeHandler = remember(context) { AddToHomeHandler(context) }
 
     // Reorder phone numbers to show last shown number first (only for multiple numbers)
     val reorderedPhoneNumbers =
@@ -453,7 +457,6 @@ fun ContactMethodsDialog(
                             val firstRowMethods = mutableListOf<ContactMethod>()
 
                             // Filter methods by selected phone number (using phone number normalization)
-                            val context = LocalContext.current
                             val methodsForSelectedNumber =
                                 filterMethodsByPhoneNumber(
                                     contactInfo.contactMethods,
@@ -483,6 +486,17 @@ fun ContactMethodsDialog(
                                                 onContactMethodClick(contactInfo, method)
                                                 onDismiss()
                                             },
+                                            onLongClick = {
+                                                val action = contactMethodToCardAction(method, selectedPhoneNumber)
+                                                val actionDisplayName = methodShortcutLabel(context, method)
+                                                if (action != null && actionDisplayName != null) {
+                                                    addToHomeHandler.addContactActionToHome(
+                                                        contact = contactInfo,
+                                                        contactAction = action,
+                                                        actionDisplayName = actionDisplayName,
+                                                    )
+                                                }
+                                            },
                                         )
                                     }
                                 }
@@ -490,40 +504,76 @@ fun ContactMethodsDialog(
 
                             // Render method rows for different app types
                             renderMethodRow(
-                                methodsForSelectedNumber,
-                                listOf(
+                                methods = methodsForSelectedNumber,
+                                methodTypes = listOf(
                                     ContactMethod.WhatsAppCall::class,
                                     ContactMethod.WhatsAppMessage::class,
                                     ContactMethod.WhatsAppVideoCall::class,
                                 ),
-                            ) { method ->
-                                onContactMethodClick(contactInfo, method)
-                                onDismiss()
-                            }
+                                onMethodClick = { method ->
+                                    onContactMethodClick(contactInfo, method)
+                                    onDismiss()
+                                },
+                                onMethodLongClick = { method ->
+                                    val action = contactMethodToCardAction(method, selectedPhoneNumber)
+                                    val actionDisplayName = methodShortcutLabel(context, method)
+                                    if (action != null && actionDisplayName != null) {
+                                        addToHomeHandler.addContactActionToHome(
+                                            contact = contactInfo,
+                                            contactAction = action,
+                                            actionDisplayName = actionDisplayName,
+                                        )
+                                    }
+                                },
+                            )
 
                             renderMethodRow(
-                                methodsForSelectedNumber,
-                                listOf(
+                                methods = methodsForSelectedNumber,
+                                methodTypes = listOf(
                                     ContactMethod.TelegramMessage::class,
                                     ContactMethod.TelegramCall::class,
                                     ContactMethod.TelegramVideoCall::class,
                                 ),
-                            ) { method ->
-                                onContactMethodClick(contactInfo, method)
-                                onDismiss()
-                            }
+                                onMethodClick = { method ->
+                                    onContactMethodClick(contactInfo, method)
+                                    onDismiss()
+                                },
+                                onMethodLongClick = { method ->
+                                    val action = contactMethodToCardAction(method, selectedPhoneNumber)
+                                    val actionDisplayName = methodShortcutLabel(context, method)
+                                    if (action != null && actionDisplayName != null) {
+                                        addToHomeHandler.addContactActionToHome(
+                                            contact = contactInfo,
+                                            contactAction = action,
+                                            actionDisplayName = actionDisplayName,
+                                        )
+                                    }
+                                },
+                            )
 
                             renderMethodRow(
-                                methodsForSelectedNumber,
-                                listOf(
+                                methods = methodsForSelectedNumber,
+                                methodTypes = listOf(
                                     ContactMethod.SignalMessage::class,
                                     ContactMethod.SignalCall::class,
                                     ContactMethod.SignalVideoCall::class,
                                 ),
-                            ) { method ->
-                                onContactMethodClick(contactInfo, method)
-                                onDismiss()
-                            }
+                                onMethodClick = { method ->
+                                    onContactMethodClick(contactInfo, method)
+                                    onDismiss()
+                                },
+                                onMethodLongClick = { method ->
+                                    val action = contactMethodToCardAction(method, selectedPhoneNumber)
+                                    val actionDisplayName = methodShortcutLabel(context, method)
+                                    if (action != null && actionDisplayName != null) {
+                                        addToHomeHandler.addContactActionToHome(
+                                            contact = contactInfo,
+                                            contactAction = action,
+                                            actionDisplayName = actionDisplayName,
+                                        )
+                                    }
+                                },
+                            )
 
                             // Show message if no methods available
                             if (contactInfo.contactMethods.filterNot { it is ContactMethod.Email }.isEmpty()) {
@@ -636,6 +686,7 @@ private inline fun renderMethodRow(
     methods: List<ContactMethod>,
     methodTypes: List<KClass<out ContactMethod>>,
     crossinline onMethodClick: (ContactMethod) -> Unit,
+    crossinline onMethodLongClick: (ContactMethod) -> Unit,
 ) {
     val filteredMethods =
         methods.filter { method ->
@@ -652,8 +703,54 @@ private inline fun renderMethodRow(
                 ContactActionButton(
                     method = method,
                     onClick = { onMethodClick(method) },
+                    onLongClick = { onMethodLongClick(method) },
                 )
             }
         }
     }
 }
+
+private fun contactMethodToCardAction(
+    method: ContactMethod,
+    selectedPhoneNumber: String?,
+): ContactCardAction? {
+    val phoneNumber = selectedPhoneNumber ?: method.data.takeIf { it.isNotBlank() } ?: return null
+    return when (method) {
+        is ContactMethod.Phone -> ContactCardAction.Phone(phoneNumber)
+        is ContactMethod.Sms -> ContactCardAction.Sms(phoneNumber)
+        is ContactMethod.WhatsAppCall -> ContactCardAction.WhatsAppCall(phoneNumber)
+        is ContactMethod.WhatsAppMessage -> ContactCardAction.WhatsAppMessage(phoneNumber)
+        is ContactMethod.WhatsAppVideoCall -> ContactCardAction.WhatsAppVideoCall(phoneNumber)
+        is ContactMethod.TelegramMessage -> ContactCardAction.TelegramMessage(phoneNumber)
+        is ContactMethod.TelegramCall -> ContactCardAction.TelegramCall(phoneNumber)
+        is ContactMethod.TelegramVideoCall -> ContactCardAction.TelegramVideoCall(phoneNumber)
+        is ContactMethod.SignalMessage -> ContactCardAction.SignalMessage(phoneNumber)
+        is ContactMethod.SignalCall -> ContactCardAction.SignalCall(phoneNumber)
+        is ContactMethod.SignalVideoCall -> ContactCardAction.SignalVideoCall(phoneNumber)
+        is ContactMethod.GoogleMeet -> ContactCardAction.GoogleMeet(phoneNumber)
+        else -> null
+    }
+}
+
+private fun methodShortcutLabel(
+    context: android.content.Context,
+    method: ContactMethod,
+): String? =
+    when (method) {
+        is ContactMethod.Phone -> context.getString(R.string.contacts_action_button_call)
+        is ContactMethod.Sms -> context.getString(R.string.contacts_action_button_message)
+        is ContactMethod.WhatsAppCall,
+        is ContactMethod.TelegramCall,
+        is ContactMethod.SignalCall,
+        -> context.getString(R.string.contacts_action_button_voice_call)
+        is ContactMethod.WhatsAppMessage,
+        is ContactMethod.TelegramMessage,
+        is ContactMethod.SignalMessage,
+        -> context.getString(R.string.contacts_action_button_chat)
+        is ContactMethod.WhatsAppVideoCall,
+        is ContactMethod.TelegramVideoCall,
+        is ContactMethod.SignalVideoCall,
+        -> context.getString(R.string.contacts_action_button_video_call)
+        is ContactMethod.GoogleMeet -> context.getString(R.string.contacts_action_button_meet)
+        else -> null
+    }
