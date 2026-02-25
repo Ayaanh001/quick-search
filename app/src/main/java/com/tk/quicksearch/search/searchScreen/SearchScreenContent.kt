@@ -74,6 +74,7 @@ internal fun SearchScreenContent(
         onDismissSearchHistoryTip: () -> Unit = {},
         onGeminiModelInfoClick: () -> Unit = {},
         onKeyboardSwitchToggle: () -> Unit,
+        onOverlayNumberKeyboardUiChanged: ((Boolean, Boolean) -> Unit)? = null,
         onOverlayExpandRequest: () -> Unit = {},
         isOverlayExpanded: Boolean = false,
         onWelcomeAnimationCompleted: (() -> Unit)? = null,
@@ -108,6 +109,9 @@ internal fun SearchScreenContent(
                 state.searchTargetsOrder.filter { it.getId() !in state.disabledSearchTargetIds }
             }
     val isImeVisible = WindowInsets.ime.getBottom(density) > 0
+    val shouldShowNumberKeyboardOperators = isImeVisible && manuallySwitchedToNumberKeyboard
+    val shouldRenderInlineNumberKeyboardOperators =
+            shouldShowNumberKeyboardOperators && !isOverlayPresentation
     val shouldShowPredictedHighlight = isImeVisible
     val predictedTarget =
             remember(
@@ -201,11 +205,20 @@ internal fun SearchScreenContent(
             }
 
     val searchEnginesModifier =
-            if (isOverlayPresentation) {
+            if (isOverlayPresentation || shouldRenderInlineNumberKeyboardOperators) {
                 Modifier
             } else {
                 Modifier.imePadding()
             }
+
+    LaunchedEffect(isOverlayPresentation, manuallySwitchedToNumberKeyboard, isImeVisible) {
+        if (isOverlayPresentation) {
+            onOverlayNumberKeyboardUiChanged?.invoke(
+                    manuallySwitchedToNumberKeyboard,
+                    isImeVisible,
+            )
+        }
+    }
 
     Column(modifier = contentModifier, verticalArrangement = Arrangement.Top) {
         // Fixed search bar at the top
@@ -368,7 +381,9 @@ internal fun SearchScreenContent(
                             state.isSearchEngineCompactMode &&
                             (scrollState.maxValue > 0 || isOverlayExpanded)
             AnimatedVisibility(
-                    visible = pillText != null || shouldShowOverlayExpandControl,
+                    visible =
+                            pillText != null ||
+                                    shouldShowOverlayExpandControl,
                     enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
                     exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
             ) {
@@ -476,6 +491,19 @@ internal fun SearchScreenContent(
                         Spacer(modifier = searchEnginesModifier)
                     },
             )
+
+            AnimatedVisibility(
+                    visible = shouldRenderInlineNumberKeyboardOperators,
+                    enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
+                    exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
+            ) {
+                NumberKeyboardOperatorPills(
+                        modifier = Modifier.imePadding(),
+                        onOperatorClick = { operator ->
+                            onQueryChanged(state.query + operator)
+                        },
+                )
+            }
         }
     }
 }

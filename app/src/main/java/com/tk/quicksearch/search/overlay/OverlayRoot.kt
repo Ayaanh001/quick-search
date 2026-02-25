@@ -15,6 +15,11 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +46,7 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.SearchViewModel
 import com.tk.quicksearch.search.searchScreen.ExcludeUndoSnackbarHost
+import com.tk.quicksearch.search.searchScreen.NumberKeyboardOperatorPills
 import com.tk.quicksearch.search.searchScreen.SearchRoute
 import com.tk.quicksearch.search.searchScreen.SearchScreenBackground
 import com.tk.quicksearch.settings.settingsDetailScreen.SettingsDetailType
@@ -100,6 +106,8 @@ fun OverlayRoot(
                                 remember { viewModel.getLastOverlayKeyboardOpenHeightDp() }
                         var learnedKeyboardOpenHeightDp by
                                 remember { mutableStateOf<Float?>(persistedKeyboardOpenHeightDp) }
+                        var overlayNumberKeyboardSelected by remember { mutableStateOf(false) }
+                        var overlayImeVisible by remember { mutableStateOf(false) }
                         var isOverlayManuallyExpanded by remember { mutableStateOf(false) }
                         var wasImeVisible by remember { mutableStateOf(false) }
                         val hasPersistedHeightAtLaunch = persistedKeyboardOpenHeightDp != null
@@ -318,6 +326,14 @@ fun OverlayRoot(
                                                         },
                                                         isOverlayExpanded =
                                                                 isOverlayManuallyExpanded,
+                                                        onOverlayNumberKeyboardUiChanged =
+                                                                { isNumberKeyboardSelected,
+                                                                    isImeOpen ->
+                                                                        overlayNumberKeyboardSelected =
+                                                                                isNumberKeyboardSelected
+                                                                        overlayImeVisible =
+                                                                                isImeOpen
+                                                                },
                                                         onOverlayDismissRequest = { handleClose() },
                                                         onSettingsClick = {
                                                                 OverlayModeController
@@ -374,6 +390,24 @@ fun OverlayRoot(
                                                 )
                                         }
                                 }
+                        }
+
+                        AnimatedVisibility(
+                                visible = overlayNumberKeyboardSelected && overlayImeVisible,
+                                enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
+                                exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
+                                modifier =
+                                        Modifier.align(Alignment.BottomCenter)
+                                                .width(maxWidth)
+                                                .imePadding(),
+                        ) {
+                                NumberKeyboardOperatorPills(
+                                        isOverlayPresentation = true,
+                                        extendToScreenEdges = false,
+                                        onOperatorClick = { operator ->
+                                                viewModel.onQueryChange(uiState.query + operator)
+                                        },
+                                )
                         }
 
                         var tipDelayElapsed by remember { mutableStateOf(false) }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -75,6 +76,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.SearchEngine
 import com.tk.quicksearch.search.core.SearchTarget
+import com.tk.quicksearch.search.searchEngines.extendToScreenEdges
 import com.tk.quicksearch.search.searchEngines.shared.IconRenderStyle
 import com.tk.quicksearch.search.searchEngines.shared.SearchTargetIcon
 import com.tk.quicksearch.ui.components.TipBanner
@@ -798,6 +800,79 @@ internal fun OverlayExpandPill(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(14.dp),
             )
+        }
+    }
+}
+
+@Composable
+internal fun NumberKeyboardOperatorPills(
+    onOperatorClick: (String) -> Unit,
+    isOverlayPresentation: Boolean = false,
+    extendToScreenEdges: Boolean = true,
+    modifier: Modifier = Modifier,
+) {
+    val operators = remember { listOf("+", "-", "*", "/", "(", ")") }
+    val containerBackgroundColor =
+        if (isOverlayPresentation) {
+            MaterialTheme.colorScheme.surface
+        } else if (
+            MaterialTheme.colorScheme.surface == MaterialTheme.colorScheme.background &&
+                MaterialTheme.colorScheme.background.red < 0.1f &&
+                MaterialTheme.colorScheme.background.green < 0.1f &&
+                MaterialTheme.colorScheme.background.blue < 0.1f
+        ) {
+            Color.Black.copy(alpha = 0.5f)
+        } else {
+            MaterialTheme.colorScheme.surface
+        }
+    val operatorChipColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+    val operatorChipTextColor = MaterialTheme.colorScheme.primary
+
+    Surface(
+        modifier = if (extendToScreenEdges) modifier.extendToScreenEdges() else modifier,
+        color = containerBackgroundColor,
+        shape = RoundedCornerShape(ZeroCornerSize),
+        tonalElevation = 0.dp,
+    ) {
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(
+                        start = DesignTokens.SpacingLarge,
+                        end = DesignTokens.SpacingLarge,
+                        top = 9.dp,
+                        bottom = 7.dp,
+                    ),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            operators.forEach { operator ->
+                Surface(
+                    modifier =
+                        Modifier.weight(1f).clickable { onOperatorClick(operator) },
+                    shape = RoundedCornerShape(999.dp),
+                    color = operatorChipColor,
+                    tonalElevation = 0.dp,
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(32.dp)
+                                .padding(
+                                    vertical = 2.dp,
+                                ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = operator,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = operatorChipTextColor,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
+            }
         }
     }
 }

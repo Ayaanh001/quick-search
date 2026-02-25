@@ -150,6 +150,7 @@ fun SearchRoute(
     overlaySnackbarHostState: SnackbarHostState? = null,
     onOverlayExpandRequest: (() -> Unit)? = null,
     isOverlayExpanded: Boolean = false,
+    onOverlayNumberKeyboardUiChanged: ((Boolean, Boolean) -> Unit)? = null,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -433,6 +434,7 @@ fun SearchRoute(
             isOverlayPresentation = isOverlayPresentation,
             onOverlayExpandRequest = onOverlayExpandRequest,
             isOverlayExpanded = isOverlayExpanded,
+            onOverlayNumberKeyboardUiChanged = onOverlayNumberKeyboardUiChanged,
         )
 
         if (overlaySnackbarHostState == null) {
@@ -548,6 +550,7 @@ fun SearchScreen(
     onSaveSecondaryContactCardAction: (Long, ContactCardAction) -> Unit,
     onOverlayExpandRequest: (() -> Unit)? = null,
     isOverlayExpanded: Boolean = false,
+    onOverlayNumberKeyboardUiChanged: ((Boolean, Boolean) -> Unit)? = null,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
@@ -935,6 +938,7 @@ fun SearchScreen(
             onKeyboardSwitchToggle = {
                 manuallySwitchedToNumberKeyboard = !manuallySwitchedToNumberKeyboard
             },
+            onOverlayNumberKeyboardUiChanged = onOverlayNumberKeyboardUiChanged,
             onOverlayExpandRequest = { onOverlayExpandRequest?.invoke() },
             isOverlayExpanded = isOverlayExpanded,
             expandedSection = expandedSection,
