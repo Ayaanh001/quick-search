@@ -39,7 +39,8 @@ import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.searchEngines.SearchTargetQueryShortcutActivity
 import com.tk.quicksearch.search.searchEngines.getDisplayNameResId
 import com.tk.quicksearch.search.searchEngines.getDrawableResId
-import com.tk.quicksearch.search.searchEngines.getSearchTargetShortcutPackageName
+import com.tk.quicksearch.search.searchEngines.getAppPackageCandidates
+import com.tk.quicksearch.search.searchEngines.resolveSearchTargetShortcutPackageName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -473,7 +474,20 @@ class AppShortcutRepository(
             val query = shortcutQuery.trim()
             if (name.isBlank() || query.isBlank()) return@withContext null
 
-            val targetPackageName = getSearchTargetShortcutPackageName(target)
+            val targetPackageName =
+                resolveSearchTargetShortcutPackageName(
+                    target = target,
+                    existingPackages =
+                        when (target) {
+                            is SearchTarget.Engine ->
+                                target.engine
+                                    .getAppPackageCandidates()
+                                    .filter { packageName ->
+                                        packageManager.getLaunchIntentForPackage(packageName) != null
+                                    }.toSet()
+                            else -> emptySet()
+                        },
+                )
             val launchIntent = createSearchTargetShortcutIntent(target, query) ?: return@withContext null
             val iconBase64 = resolveSearchTargetIconBase64(target)
             val shortcutId =

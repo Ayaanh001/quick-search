@@ -464,9 +464,9 @@
     <string name="settings_app_shortcuts_expand_all">Expand all</string>
     <string name="settings_app_shortcuts_collapse_all">Collapse all</string>
     <string name="settings_app_shortcuts_add_dialog_title">Choose Shortcut Source</string>
-    <string name="settings_app_shortcuts_add_query_shortcut">Add Query Shortcut</string>
-    <string name="settings_app_shortcuts_add_url_shortcut">Add URL Shortcut</string>
-    <string name="settings_app_shortcuts_add_query_dialog_title">Add Query Shortcut to %1$s</string>
+    <string name="settings_app_shortcuts_add_query_shortcut">Custom Search Query</string>
+    <string name="settings_app_shortcuts_add_url_shortcut">Custom URL</string>
+    <string name="settings_app_shortcuts_add_query_dialog_title">Add Custom Search Query Shortcut to %1$s</string>
     <string name="settings_app_shortcuts_add_url_dialog_title">Add URL Shortcut to %1$s</string>
     <string name="settings_app_shortcuts_shortcut_name_label">Shortcut Name</string>
     <string name="settings_app_shortcuts_query_label">Query</string>

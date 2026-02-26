@@ -68,7 +68,8 @@ import com.tk.quicksearch.search.data.shortcutKey
 import com.tk.quicksearch.settings.shared.AppShortcutSource
 import com.tk.quicksearch.settings.shared.filterAppShortcutSources
 import com.tk.quicksearch.search.searchEngines.getContentDescription
-import com.tk.quicksearch.search.searchEngines.getSearchTargetShortcutPackageName
+import com.tk.quicksearch.search.searchEngines.isSearchTargetShortcutPackageName
+import com.tk.quicksearch.search.searchEngines.resolveSearchTargetShortcutPackageName
 import com.tk.quicksearch.search.searchEngines.shared.IconRenderStyle
 import com.tk.quicksearch.search.searchEngines.shared.SearchTargetIcon
 import com.tk.quicksearch.ui.theme.AppColors
@@ -197,13 +198,22 @@ fun AppShortcutsSettingsSection(
             )
         }
     val searchTargetShortcutSources =
-        remember(searchTargets) {
+        remember(searchTargets, displayShortcuts, filteredShortcutSources) {
+            val existingPackageNames =
+                (
+                    displayShortcuts.map { it.packageName } +
+                        filteredShortcutSources.map { it.packageName }
+                ).toSet()
             searchTargets
                 .flatMap { target ->
                     val baseSource =
                         SearchTargetShortcutSource(
                             target = target,
-                            packageName = getSearchTargetShortcutPackageName(target),
+                            packageName =
+                                resolveSearchTargetShortcutPackageName(
+                                    target = target,
+                                    existingPackages = existingPackageNames,
+                                ),
                             label = target.getContentDescription(),
                             kind = SearchTargetShortcutKind.QUERY,
                         )
@@ -500,7 +510,12 @@ fun AppShortcutsSettingsSection(
                     packageName = group.packageName,
                     appLabel = group.appLabel,
                     shortcutCount = group.shortcuts.size,
-                    searchTarget = group.searchTargetSources.firstOrNull()?.target,
+                    searchTarget =
+                        if (isSearchTargetShortcutPackageName(group.packageName)) {
+                            group.searchTargetSources.firstOrNull()?.target
+                        } else {
+                            null
+                        },
                     isExpanded = isExpanded,
                     onToggleExpanded = {
                         expandedCards[group.packageName] = !isExpanded

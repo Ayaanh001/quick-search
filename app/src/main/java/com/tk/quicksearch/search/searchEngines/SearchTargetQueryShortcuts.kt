@@ -18,3 +18,20 @@ fun getSearchTargetShortcutPackageName(targetId: String): String {
             .ifBlank { "target" }
     return "$SEARCH_TARGET_SHORTCUT_PACKAGE_PREFIX.$sanitizedId"
 }
+
+fun isSearchTargetShortcutPackageName(packageName: String): Boolean =
+    packageName.startsWith("$SEARCH_TARGET_SHORTCUT_PACKAGE_PREFIX.")
+
+fun resolveSearchTargetShortcutPackageName(
+    target: SearchTarget,
+    existingPackages: Set<String> = emptySet(),
+): String =
+    when (target) {
+        is SearchTarget.Browser -> target.app.packageName
+        is SearchTarget.Custom -> getSearchTargetShortcutPackageName(target)
+        is SearchTarget.Engine -> {
+            val candidates = target.engine.getAppPackageCandidates()
+            candidates.firstOrNull { it in existingPackages }
+                ?: getSearchTargetShortcutPackageName(target)
+        }
+    }
