@@ -83,14 +83,20 @@ private data class AppShortcutGroup(
     val appLabel: String,
     val shortcuts: List<StaticShortcut>,
     val sources: List<AppShortcutSource>,
-    val querySource: SearchTargetQuerySource? = null,
+    val searchTargetSources: List<SearchTargetShortcutSource> = emptyList(),
 )
 
-private data class SearchTargetQuerySource(
+private data class SearchTargetShortcutSource(
     val target: SearchTarget,
     val packageName: String,
     val label: String,
+    val kind: SearchTargetShortcutKind,
 )
+
+private enum class SearchTargetShortcutKind {
+    QUERY,
+    URL,
+}
 
 private enum class ShortcutSearchMatchPriority {
     EXACT,
@@ -103,6 +109,7 @@ private enum class ShortcutFilterOption(val labelResId: Int) {
     ALL(R.string.settings_app_shortcuts_filter_all_apps_with_shortcuts),
     CUSTOM_SHORTCUTS(R.string.settings_app_shortcuts_filter_apps_with_custom_shortcuts),
     SEARCH_ENGINES(R.string.settings_app_shortcuts_filter_search_engines),
+    BROWSERS(R.string.settings_app_shortcuts_filter_browsers),
 }
 
 private fun shortcutMatchPriority(name: String, query: String, locale: Locale): ShortcutSearchMatchPriority? {
@@ -129,7 +136,7 @@ private fun bestShortcutMatchPriority(
             add(group.appLabel)
             addAll(group.shortcuts.map(::shortcutDisplayName))
             addAll(group.sources.map { it.label })
-            group.querySource?.let { add(it.label) }
+            addAll(group.searchTargetSources.map { it.label })
         }
     return allCandidates.mapNotNull { shortcutMatchPriority(it, query, locale) }.minOrNull()
 }
@@ -189,34 +196,53 @@ fun AppShortcutsSettingsSection(
                 currentPackageName = context.packageName,
             )
         }
-    val queryShortcutSources =
+    val searchTargetShortcutSources =
         remember(searchTargets) {
             searchTargets
-                .filterNot { target -> target is SearchTarget.Browser }
-                .map { target ->
-                    SearchTargetQuerySource(
-                        target = target,
-                        packageName = getSearchTargetShortcutPackageName(target),
-                        label = target.getContentDescription(),
-                    )
+                .flatMap { target ->
+                    val baseSource =
+                        SearchTargetShortcutSource(
+                            target = target,
+                            packageName = getSearchTargetShortcutPackageName(target),
+                            label = target.getContentDescription(),
+                            kind = SearchTargetShortcutKind.QUERY,
+                        )
+                    if (target is SearchTarget.Browser) {
+                        listOf(
+                            baseSource,
+                            baseSource.copy(kind = SearchTargetShortcutKind.URL),
+                        )
+                    } else {
+                        listOf(baseSource)
+                    }
                 }
         }
     val allShortcutGroups =
-        remember(displayShortcuts, filteredShortcutSources, queryShortcutSources, context, locale) {
+        remember(
+            displayShortcuts,
+            filteredShortcutSources,
+            searchTargetShortcutSources,
+            context,
+            locale,
+        ) {
             val shortcutsByPackage = displayShortcuts.groupBy { it.packageName }
             val sourcesByPackage = filteredShortcutSources.groupBy { it.packageName }
-            val querySourcesByPackage = queryShortcutSources.associateBy { it.packageName }
-            (shortcutsByPackage.keys + sourcesByPackage.keys + querySourcesByPackage.keys)
+            val searchTargetSourcesByPackage = searchTargetShortcutSources.groupBy { it.packageName }
+            (shortcutsByPackage.keys + sourcesByPackage.keys + searchTargetSourcesByPackage.keys)
                 .mapNotNull { packageName ->
                     val appShortcuts = shortcutsByPackage[packageName].orEmpty()
                     val appSources = sourcesByPackage[packageName].orEmpty()
-                    val querySource = querySourcesByPackage[packageName]
-                    if (appShortcuts.isEmpty() && appSources.isEmpty() && querySource == null) {
+                    val appSearchTargetSources =
+                        searchTargetSourcesByPackage[packageName].orEmpty()
+                    if (appShortcuts.isEmpty() &&
+                        appSources.isEmpty() &&
+                        appSearchTargetSources.isEmpty()
+                    ) {
                         null
                     } else {
                         val appLabel =
                             appShortcuts.firstOrNull()?.appLabel?.takeIf { it.isNotBlank() }
-                                ?: querySource?.label?.takeIf { it.isNotBlank() }
+                                ?: appSearchTargetSources.firstOrNull()?.label?.takeIf { it.isNotBlank() }
                                 ?: resolveAppLabel(context, packageName, locale)
                         AppShortcutGroup(
                             packageName = packageName,
@@ -229,7 +255,7 @@ fun AppShortcutsSettingsSection(
                                     ),
                                 ),
                             sources = appSources,
-                            querySource = querySource,
+                            searchTargetSources = appSearchTargetSources,
                         )
                     }
                 }.sortedBy { it.appLabel.lowercase(locale) }
@@ -255,18 +281,20 @@ fun AppShortcutsSettingsSection(
                             group.sources.filter { source ->
                                 shortcutMatchPriority(source.label, normalizedSearchQuery, locale) != null
                             }
-                        val matchesQuerySource =
-                            group.querySource?.let {
-                                shortcutMatchPriority(it.label, normalizedSearchQuery, locale) != null
-                            } == true
+                        val matchingSearchTargetSources =
+                            group.searchTargetSources.filter { source ->
+                                shortcutMatchPriority(source.label, normalizedSearchQuery, locale) != null
+                            }
                         val filteredGroup =
                             when {
                                 appMatchPriority != null -> group
-                                matchingShortcuts.isNotEmpty() || matchingSources.isNotEmpty() || matchesQuerySource ->
+                                matchingShortcuts.isNotEmpty() ||
+                                    matchingSources.isNotEmpty() ||
+                                    matchingSearchTargetSources.isNotEmpty() ->
                                     group.copy(
                                         shortcuts = matchingShortcuts,
                                         sources = matchingSources,
-                                        querySource = if (matchesQuerySource) group.querySource else null,
+                                        searchTargetSources = matchingSearchTargetSources,
                                     )
                                 else -> null
                             } ?: return@mapNotNull null
@@ -287,13 +315,19 @@ fun AppShortcutsSettingsSection(
             when (selectedFilterOption) {
                 ShortcutFilterOption.ALL -> shortcutGroups
                 ShortcutFilterOption.CUSTOM_SHORTCUTS ->
-                    shortcutGroups.filter { it.sources.isNotEmpty() || it.querySource != null }
+                    shortcutGroups.filter {
+                        it.sources.isNotEmpty() || it.searchTargetSources.isNotEmpty()
+                    }
                 ShortcutFilterOption.SEARCH_ENGINES ->
-                    shortcutGroups.filter { it.querySource != null }
+                    shortcutGroups.filter { it.searchTargetSources.isNotEmpty() }
+                ShortcutFilterOption.BROWSERS ->
+                    shortcutGroups.filter { group ->
+                        group.searchTargetSources.any { it.target is SearchTarget.Browser }
+                    }
             }
         }
     val expandedCards = remember { mutableStateMapOf<String, Boolean>() }
-    var queryShortcutDialogSource by remember { mutableStateOf<SearchTargetQuerySource?>(null) }
+    var shortcutDialogSource by remember { mutableStateOf<SearchTargetShortcutSource?>(null) }
 
     LaunchedEffect(visibleShortcutGroups) {
         val currentPackages = visibleShortcutGroups.map { it.packageName }.toSet()
@@ -334,13 +368,14 @@ fun AppShortcutsSettingsSection(
         return
     }
 
-    queryShortcutDialogSource?.let { source ->
-        AddSearchTargetQueryShortcutDialog(
+    shortcutDialogSource?.let { source ->
+        AddSearchTargetShortcutDialog(
             targetLabel = source.label,
-            onDismiss = { queryShortcutDialogSource = null },
-            onSave = { shortcutName, shortcutQuery ->
-                onAddQueryShortcut(source.target, shortcutName, shortcutQuery)
-                queryShortcutDialogSource = null
+            shortcutKind = source.kind,
+            onDismiss = { shortcutDialogSource = null },
+            onSave = { shortcutName, shortcutValue ->
+                onAddQueryShortcut(source.target, shortcutName, shortcutValue)
+                shortcutDialogSource = null
             },
         )
     }
@@ -465,7 +500,7 @@ fun AppShortcutsSettingsSection(
                     packageName = group.packageName,
                     appLabel = group.appLabel,
                     shortcutCount = group.shortcuts.size,
-                    searchTarget = group.querySource?.target,
+                    searchTarget = group.searchTargetSources.firstOrNull()?.target,
                     isExpanded = isExpanded,
                     onToggleExpanded = {
                         expandedCards[group.packageName] = !isExpanded
@@ -523,13 +558,18 @@ fun AppShortcutsSettingsSection(
                             }
                         }
 
-                        val querySource = group.querySource
-                        if (querySource != null) {
+                        val searchTargetSources = group.searchTargetSources
+                        if (searchTargetSources.isNotEmpty()) {
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                            SearchTargetQuerySourceRow(
-                                source = querySource,
-                                onClick = { queryShortcutDialogSource = querySource },
-                            )
+                            searchTargetSources.forEachIndexed { index, source ->
+                                SearchTargetShortcutSourceRow(
+                                    source = source,
+                                    onClick = { shortcutDialogSource = source },
+                                )
+                                if (index < searchTargetSources.lastIndex) {
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                                }
+                            }
                         }
                     }
                 }
@@ -595,10 +635,15 @@ private fun ShortcutSourceRow(
 }
 
 @Composable
-private fun SearchTargetQuerySourceRow(
-    source: SearchTargetQuerySource,
+private fun SearchTargetShortcutSourceRow(
+    source: SearchTargetShortcutSource,
     onClick: () -> Unit,
 ) {
+    val actionLabelResId =
+        when (source.kind) {
+            SearchTargetShortcutKind.QUERY -> R.string.settings_app_shortcuts_add_query_shortcut
+            SearchTargetShortcutKind.URL -> R.string.settings_app_shortcuts_add_url_shortcut
+        }
     Row(
         modifier =
             Modifier
@@ -618,7 +663,7 @@ private fun SearchTargetQuerySourceRow(
         )
 
         Text(
-            text = stringResource(R.string.settings_app_shortcuts_add_query_shortcut),
+            text = stringResource(actionLabelResId),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
@@ -629,7 +674,7 @@ private fun SearchTargetQuerySourceRow(
         IconButton(onClick = onClick) {
             Icon(
                 imageVector = Icons.Rounded.Add,
-                contentDescription = stringResource(R.string.settings_app_shortcuts_add_query_shortcut),
+                contentDescription = stringResource(actionLabelResId),
                 tint = MaterialTheme.colorScheme.primary,
             )
         }
@@ -637,12 +682,13 @@ private fun SearchTargetQuerySourceRow(
 }
 
 @Composable
-private fun AddSearchTargetQueryShortcutDialog(
+private fun AddSearchTargetShortcutDialog(
     targetLabel: String,
+    shortcutKind: SearchTargetShortcutKind,
     onDismiss: () -> Unit,
     onSave: (String, String) -> Unit,
 ) {
-    var shortcutName by remember(targetLabel) {
+    var shortcutName by remember(targetLabel, shortcutKind) {
         mutableStateOf(
             TextFieldValue(
                 text = "",
@@ -650,7 +696,7 @@ private fun AddSearchTargetQueryShortcutDialog(
             ),
         )
     }
-    var shortcutQuery by remember {
+    var shortcutValue by remember(targetLabel, shortcutKind) {
         mutableStateOf(
             TextFieldValue(
                 text = "",
@@ -660,12 +706,22 @@ private fun AddSearchTargetQueryShortcutDialog(
     }
 
     val trimmedName = shortcutName.text.trim()
-    val trimmedQuery = shortcutQuery.text.trim()
-    val canSave = trimmedName.isNotBlank() && trimmedQuery.isNotBlank()
+    val trimmedValue = shortcutValue.text.trim()
+    val canSave = trimmedName.isNotBlank() && trimmedValue.isNotBlank()
+    val titleResId =
+        when (shortcutKind) {
+            SearchTargetShortcutKind.QUERY -> R.string.settings_app_shortcuts_add_query_dialog_title
+            SearchTargetShortcutKind.URL -> R.string.settings_app_shortcuts_add_url_dialog_title
+        }
+    val valueLabelResId =
+        when (shortcutKind) {
+            SearchTargetShortcutKind.QUERY -> R.string.settings_app_shortcuts_query_label
+            SearchTargetShortcutKind.URL -> R.string.settings_app_shortcuts_url_label
+        }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.settings_app_shortcuts_add_query_dialog_title, targetLabel)) },
+        title = { Text(text = stringResource(titleResId, targetLabel)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
@@ -676,17 +732,17 @@ private fun AddSearchTargetQueryShortcutDialog(
                     label = { Text(stringResource(R.string.settings_app_shortcuts_shortcut_name_label)) },
                 )
                 OutlinedTextField(
-                    value = shortcutQuery,
-                    onValueChange = { shortcutQuery = it },
+                    value = shortcutValue,
+                    onValueChange = { shortcutValue = it },
                     singleLine = false,
                     maxLines = 3,
-                    label = { Text(stringResource(R.string.settings_app_shortcuts_query_label)) },
+                    label = { Text(stringResource(valueLabelResId)) },
                 )
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { onSave(trimmedName, trimmedQuery) },
+                onClick = { onSave(trimmedName, trimmedValue) },
                 enabled = canSave,
             ) {
                 Text(text = stringResource(R.string.dialog_save))

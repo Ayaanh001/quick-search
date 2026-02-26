@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import com.tk.quicksearch.app.MainActivity
 import com.tk.quicksearch.search.core.IntentHelpers
 import com.tk.quicksearch.search.core.SearchEngine
+import com.tk.quicksearch.search.core.isLikelyWebUrl
 import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.search.recentSearches.RecentSearchEntry
 import com.tk.quicksearch.search.overlay.OverlayModeController
@@ -67,7 +68,11 @@ class SearchTargetQueryShortcutActivity : ComponentActivity() {
                 val browserPackage = intent.getStringExtra(EXTRA_BROWSER_PACKAGE).orEmpty()
                 if (browserPackage.isBlank()) return
                 userPreferences.addRecentItem(RecentSearchEntry.Query(query))
-                IntentHelpers.openBrowserSearch(app, query, browserPackage, ::showToastMessage)
+                if (isLikelyWebUrl(query)) {
+                    IntentHelpers.openBrowserUrl(app, query, browserPackage, ::showToastMessage)
+                } else {
+                    IntentHelpers.openBrowserSearch(app, query, browserPackage, ::showToastMessage)
+                }
             }
 
             TARGET_TYPE_CUSTOM -> {

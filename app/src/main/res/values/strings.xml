@@ -457,6 +457,7 @@
     <string name="settings_app_shortcuts_filter_all_apps_with_shortcuts">Apps with Shortcuts</string>
     <string name="settings_app_shortcuts_filter_apps_with_custom_shortcuts">Apps with Custom Shortcuts</string>
     <string name="settings_app_shortcuts_filter_search_engines">Search Engines</string>
+    <string name="settings_app_shortcuts_filter_browsers">Browsers</string>
     <string name="settings_app_shortcuts_add_button">Add Shortcut</string>
     <string name="settings_app_shortcuts_search_button">Search</string>
     <string name="settings_app_shortcuts_search_hint">Search App Shortcuts</string>
@@ -464,9 +465,12 @@
     <string name="settings_app_shortcuts_collapse_all">Collapse all</string>
     <string name="settings_app_shortcuts_add_dialog_title">Choose Shortcut Source</string>
     <string name="settings_app_shortcuts_add_query_shortcut">Add Query Shortcut</string>
+    <string name="settings_app_shortcuts_add_url_shortcut">Add URL Shortcut</string>
     <string name="settings_app_shortcuts_add_query_dialog_title">Add Query Shortcut to %1$s</string>
+    <string name="settings_app_shortcuts_add_url_dialog_title">Add URL Shortcut to %1$s</string>
     <string name="settings_app_shortcuts_shortcut_name_label">Shortcut Name</string>
     <string name="settings_app_shortcuts_query_label">Query</string>
+    <string name="settings_app_shortcuts_url_label">URL</string>
     <string name="settings_app_shortcuts_delete_action">Delete shortcut</string>
     <string name="settings_app_shortcuts_create_not_supported">No app supports shortcut creation on this device.</string>
     <string name="settings_app_shortcuts_add_success">Shortcut added.</string>
