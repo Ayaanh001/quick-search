@@ -56,9 +56,10 @@ private data class HardcodedShortcutDefinition(
     val packageName: String,
     val shortLabel: String,
     val longLabel: String = shortLabel,
-    val targetClassName: String,
-    val shortcutSourceClassName: String = targetClassName,
+    val targetClassName: String? = null,
+    val shortcutSourceClassName: String? = targetClassName,
     val intentAction: String? = null,
+    val intentDataUri: String? = null,
 ) {
     fun toStaticShortcut(
         appLabel: String,
@@ -67,7 +68,12 @@ private data class HardcodedShortcutDefinition(
         val intent =
             Intent().apply {
                 intentAction?.let { action = it }
-                component = ComponentName(packageName, targetClassName)
+                intentDataUri?.let { data = Uri.parse(it) }
+                if (!targetClassName.isNullOrBlank()) {
+                    component = ComponentName(packageName, targetClassName)
+                } else {
+                    `package` = packageName
+                }
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
 
@@ -93,7 +99,19 @@ private val HARDCODED_SHORTCUT_DEFINITIONS =
             shortLabel = "Song Search",
             targetClassName = "com.google.android.apps.search.soundsearch.shortcut.AliasAddShortcutActivity",
         ),
+        HardcodedShortcutDefinition(
+            id = "watch_later",
+            packageName = "com.google.android.youtube",
+            shortLabel = "Watch Later",
+            intentAction = Intent.ACTION_VIEW,
+            intentDataUri = "https://www.youtube.com/playlist?list=WL",
+        ),
     )
+private val HARDCODED_SHORTCUT_KEYS =
+    HARDCODED_SHORTCUT_DEFINITIONS
+        .asSequence()
+        .map { "${it.packageName}:${it.id}" }
+        .toSet()
 
 data class StaticShortcut(
     val packageName: String,
@@ -669,22 +687,29 @@ class AppShortcutRepository(
             .map { definition ->
                 definition.copy(
                     targetClassName =
-                        resolveClassName(
-                            definition.packageName,
-                            definition.targetClassName,
-                        ),
+                        definition.targetClassName?.let { targetClass ->
+                            resolveClassName(
+                                definition.packageName,
+                                targetClass,
+                            )
+                        },
                     shortcutSourceClassName =
-                        resolveClassName(
-                            definition.packageName,
-                            definition.shortcutSourceClassName,
-                        ),
+                        definition.shortcutSourceClassName?.let { sourceClass ->
+                            resolveClassName(
+                                definition.packageName,
+                                sourceClass,
+                            )
+                        },
                 )
             }.filter { definition ->
-                runCatching { packageManager.getApplicationInfo(definition.packageName, 0) }.isSuccess
+                isAppInstalled(definition.packageName)
             }.map { definition ->
-                val sourceComponentKey = "${definition.packageName}/${definition.shortcutSourceClassName}"
+                val sourceComponentKey =
+                    definition.shortcutSourceClassName?.let { sourceClassName ->
+                        "${definition.packageName}/$sourceClassName"
+                    }
                 val iconBase64 =
-                    sourceIconByComponent[sourceComponentKey]
+                    sourceComponentKey?.let { sourceIconByComponent[it] }
                         ?: loadAppIconBase64(definition.packageName)
                 definition.toStaticShortcut(
                     appLabel = resolveAppLabel(definition.packageName),
@@ -695,6 +720,9 @@ class AppShortcutRepository(
                     existingByPackageAndLabel
             }.toList()
     }
+
+    private fun isAppInstalled(packageName: String): Boolean =
+        runCatching { packageManager.getApplicationInfo(packageName, 0) }.isSuccess
 
     private fun loadShortcutSourceIconBase64ByComponent(): Map<String, String> {
         val resolveInfos =
@@ -1199,9 +1227,13 @@ class AppShortcutRepository(
 
     private fun filterShortcuts(shortcuts: List<StaticShortcut>): List<StaticShortcut> =
         shortcuts.filter { shortcut ->
+            val shortcutKey = "${shortcut.packageName}:${shortcut.id}"
+            val isBlockedBrowserShortcut =
+                (shortcut.packageName == "com.android.chrome" ||
+                    shortcut.packageName == "com.brave.browser") &&
+                    shortcutKey !in HARDCODED_SHORTCUT_KEYS
             shortcut.enabled &&
-                shortcut.packageName != "com.android.chrome" &&
-                shortcut.packageName != "com.brave.browser" &&
+                !isBlockedBrowserShortcut &&
                 shortcut.intents.isNotEmpty() &&
                 canLaunchShortcut(shortcut)
         }
