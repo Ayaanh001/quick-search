@@ -1877,6 +1877,41 @@ class SearchViewModel(
         }
     }
 
+    fun addCustomAppActivityShortcut(
+        packageName: String,
+        activityClassName: String,
+        activityLabel: String,
+        showDefaultToast: Boolean = true,
+        onShortcutAdded: ((StaticShortcut) -> Unit)? = null,
+        onAddFailed: (() -> Unit)? = null,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val addedShortcut =
+                appShortcutRepository.addCustomShortcutForAppActivity(
+                    packageName = packageName,
+                    activityClassName = activityClassName,
+                    activityLabel = activityLabel,
+                )
+            if (addedShortcut != null) {
+                appShortcutSearchHandler.loadCachedShortcutsOnly()
+                withContext(Dispatchers.Main) {
+                    refreshAppShortcutsState()
+                    onShortcutAdded?.invoke(addedShortcut)
+                    if (showDefaultToast) {
+                        showToast(R.string.settings_app_shortcuts_add_success)
+                    }
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    if (showDefaultToast) {
+                        showToast(R.string.settings_app_shortcuts_add_failed)
+                    }
+                    onAddFailed?.invoke()
+                }
+            }
+        }
+    }
+
     fun deleteCustomAppShortcut(shortcut: StaticShortcut) {
         if (!isUserCreatedShortcut(shortcut)) return
         viewModelScope.launch(Dispatchers.IO) {
@@ -1892,6 +1927,34 @@ class SearchViewModel(
                 refreshAppShortcutsState()
                 refreshRecentItems()
                 showToast(R.string.settings_app_shortcuts_delete_success)
+            }
+        }
+    }
+
+    fun updateCustomAppShortcut(
+        shortcut: StaticShortcut,
+        shortcutName: String,
+        iconBase64: String?,
+    ) {
+        if (!isUserCreatedShortcut(shortcut)) return
+        viewModelScope.launch(Dispatchers.IO) {
+            val updated =
+                appShortcutRepository.updateCustomShortcut(
+                    shortcut = shortcut,
+                    shortcutName = shortcutName,
+                    iconBase64 = iconBase64,
+                )
+            if (updated) {
+                appShortcutSearchHandler.loadCachedShortcutsOnly()
+            }
+            withContext(Dispatchers.Main) {
+                if (!updated) {
+                    showToast(R.string.settings_app_shortcuts_update_failed)
+                    return@withContext
+                }
+                refreshAppShortcutsState()
+                refreshRecentItems()
+                showToast(R.string.settings_app_shortcuts_update_success)
             }
         }
     }

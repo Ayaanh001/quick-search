@@ -482,6 +482,41 @@ class AppShortcutRepository(
             true
         }
 
+    suspend fun updateCustomShortcut(
+        shortcut: StaticShortcut,
+        shortcutName: String,
+        iconBase64: String?,
+    ): Boolean =
+        withContext(Dispatchers.IO) {
+            if (!isUserCreatedShortcut(shortcut)) return@withContext false
+            val normalizedName = shortcutName.trim()
+            if (normalizedName.isBlank()) return@withContext false
+            val keyToUpdate = shortcutKey(shortcut)
+            val existing = shortcutCache.loadCustomShortcuts().orEmpty()
+            var updatedAny = false
+            val updated =
+                existing.map { existingShortcut ->
+                    if (shortcutKey(existingShortcut) != keyToUpdate) {
+                        existingShortcut
+                    } else {
+                        updatedAny = true
+                        existingShortcut.copy(
+                            shortLabel = normalizedName,
+                            longLabel = normalizedName,
+                            iconBase64 = iconBase64?.takeIf { it.isNotBlank() },
+                        )
+                    }
+                }
+            if (!updatedAny) return@withContext false
+            if (!shortcutCache.saveCustomShortcuts(updated)) return@withContext false
+            inMemoryShortcuts =
+                mergeAndSortShortcuts(
+                    staticShortcuts = inMemoryShortcuts.orEmpty().filterNot(::isUserCreatedShortcut),
+                    customShortcuts = updated,
+                )
+            true
+        }
+
     suspend fun addSearchTargetQueryShortcut(
         target: SearchTarget,
         shortcutName: String,
@@ -536,6 +571,58 @@ class AppShortcutRepository(
                     customShortcuts = customShortcuts,
                 )
             shortcut
+        }
+
+    suspend fun addCustomShortcutForAppActivity(
+        packageName: String,
+        activityClassName: String,
+        activityLabel: String,
+    ): StaticShortcut? =
+        withContext(Dispatchers.IO) {
+            val normalizedPackageName = packageName.trim()
+            val normalizedClassName = activityClassName.trim()
+            val normalizedLabel = activityLabel.trim()
+            if (normalizedPackageName.isBlank() ||
+                normalizedClassName.isBlank() ||
+                normalizedLabel.isBlank()
+            ) {
+                return@withContext null
+            }
+
+            val resolvedClassName = resolveClassName(normalizedPackageName, normalizedClassName)
+            val launchIntent =
+                Intent(Intent.ACTION_MAIN).apply {
+                    component = ComponentName(normalizedPackageName, resolvedClassName)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+
+            val shortcut =
+                StaticShortcut(
+                    packageName = normalizedPackageName,
+                    appLabel = resolveAppLabel(normalizedPackageName),
+                    id =
+                        "${CUSTOM_SHORTCUT_ID_PREFIX}activity_${System.currentTimeMillis()}_${(Math.random() * 100000).toInt()}",
+                    shortLabel = normalizedLabel,
+                    longLabel = normalizedLabel,
+                    iconResId = null,
+                    iconBase64 = loadAppIconBase64(normalizedPackageName),
+                    enabled = true,
+                    intents = listOf(launchIntent),
+                )
+            val validShortcut = filterShortcuts(listOf(shortcut)).firstOrNull() ?: return@withContext null
+
+            val customShortcuts = shortcutCache.loadCustomShortcuts().orEmpty().toMutableList()
+            customShortcuts.add(validShortcut)
+            if (!shortcutCache.saveCustomShortcuts(customShortcuts)) {
+                return@withContext null
+            }
+
+            inMemoryShortcuts =
+                mergeAndSortShortcuts(
+                    staticShortcuts = inMemoryShortcuts.orEmpty().filterNot(::isUserCreatedShortcut),
+                    customShortcuts = customShortcuts,
+                )
+            validShortcut
         }
 
     private fun createSearchTargetShortcutIntent(

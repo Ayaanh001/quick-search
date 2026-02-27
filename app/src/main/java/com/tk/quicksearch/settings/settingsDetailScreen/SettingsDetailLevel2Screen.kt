@@ -160,6 +160,7 @@ internal fun SettingsDetailLevel2Screen(
                     onAddShortcutFromSource = callbacks.onAddAppShortcutFromSource,
                     searchTargets = searchTargets,
                     onAddQueryShortcut = callbacks.onAddSearchTargetQueryShortcut,
+                    onUpdateCustomShortcut = callbacks.onUpdateCustomAppShortcut,
                     onDeleteCustomShortcut = callbacks.onDeleteCustomAppShortcut,
                     focusShortcut = appShortcutFocusShortcut,
                     focusPackageName = appShortcutFocusPackageName,

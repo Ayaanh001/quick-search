@@ -454,8 +454,8 @@
     <string name="settings_app_shortcuts_description">Tap any app to view its shortcuts. Enable, disable, or add custom shortcuts.</string>
     <string name="settings_app_shortcuts_description_with_count">Tap any app to view its shortcuts. Enable, disable, or add custom shortcuts.\n\nAvailable Shortcuts: %1$s</string>
     <string name="settings_app_shortcuts_available_count">Available shortcuts: %1$d</string>
-    <string name="settings_app_shortcuts_filter_all_apps_with_shortcuts">Apps with Shortcuts</string>
-    <string name="settings_app_shortcuts_filter_apps_with_custom_shortcuts">Apps with Custom Shortcuts</string>
+    <string name="settings_app_shortcuts_filter_all_apps">All Apps</string>
+    <string name="settings_app_shortcuts_filter_apps_with_shortcuts">Apps with Shortcuts</string>
     <string name="settings_app_shortcuts_filter_search_engines">Search Engines</string>
     <string name="settings_app_shortcuts_filter_browsers">Browsers</string>
     <string name="settings_app_shortcuts_add_button">Add Shortcut</string>
@@ -468,7 +468,11 @@
     <string name="settings_app_shortcuts_add_url_shortcut">Custom URL</string>
     <string name="settings_app_shortcuts_add_query_dialog_title">Add Custom Search Query Shortcut to %1$s</string>
     <string name="settings_app_shortcuts_add_url_dialog_title">Add URL Shortcut to %1$s</string>
+    <string name="settings_app_shortcuts_activity_dialog_title">Choose App Activity</string>
+    <string name="settings_app_shortcuts_activity_empty">No app activities available.</string>
+    <string name="settings_app_shortcuts_activity_warning">Some activities may not work as expected</string>
     <string name="settings_app_shortcuts_shortcut_name_label">Shortcut Name</string>
+    <string name="settings_app_shortcuts_edit_dialog_title">Edit Shortcut</string>
     <string name="settings_app_shortcuts_query_label">Query</string>
     <string name="settings_app_shortcuts_url_label">URL</string>
     <string name="settings_app_shortcuts_delete_action">Delete shortcut</string>
@@ -476,6 +480,8 @@
     <string name="settings_app_shortcuts_add_success">Shortcut added.</string>
     <string name="settings_app_shortcuts_add_success_with_app_name">New shortcut is added to %1$s</string>
     <string name="settings_app_shortcuts_add_failed">Unable to add shortcut.</string>
+    <string name="settings_app_shortcuts_update_success">Shortcut updated.</string>
+    <string name="settings_app_shortcuts_update_failed">Unable to update shortcut.</string>
     <string name="settings_app_shortcuts_delete_success">Shortcut deleted.</string>
     <plurals name="settings_app_shortcuts_card_count">
         <item quantity="one">%d shortcut</item>

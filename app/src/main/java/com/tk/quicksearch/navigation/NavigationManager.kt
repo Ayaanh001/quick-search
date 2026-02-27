@@ -36,6 +36,8 @@ enum class RootDestination {
     Settings,
 }
 
+private const val NAVIGATION_ANIMATION_DURATION_MS = 180
+
 data class NavigationRequest(
     val destination: RootDestination,
     val settingsDetailType: SettingsDetailType? = null,
@@ -122,13 +124,13 @@ fun MainContent(
                 slideInHorizontally(
                     animationSpec =
                         androidx.compose.animation.core
-                            .tween(300),
+                            .tween(NAVIGATION_ANIMATION_DURATION_MS),
                     initialOffsetX = { it },
                 ) togetherWith
                     slideOutHorizontally(
                         animationSpec =
                             androidx.compose.animation.core
-                                .tween(300),
+                                .tween(NAVIGATION_ANIMATION_DURATION_MS),
                         targetOffsetX = { -it },
                     )
             } else {
@@ -136,13 +138,13 @@ fun MainContent(
                 slideInHorizontally(
                     animationSpec =
                         androidx.compose.animation.core
-                            .tween(300),
+                            .tween(NAVIGATION_ANIMATION_DURATION_MS),
                     initialOffsetX = { -it },
                 ) togetherWith
                     slideOutHorizontally(
                         animationSpec =
                             androidx.compose.animation.core
-                                .tween(300),
+                                .tween(NAVIGATION_ANIMATION_DURATION_MS),
                         targetOffsetX = { it },
                     )
             }
@@ -292,13 +294,13 @@ private fun NavigationContent(
                 slideInHorizontally(
                     animationSpec =
                         androidx.compose.animation.core
-                            .tween(300),
+                            .tween(NAVIGATION_ANIMATION_DURATION_MS),
                     initialOffsetX = { it },
                 ) togetherWith
                     slideOutHorizontally(
                         animationSpec =
                             androidx.compose.animation.core
-                                .tween(300),
+                                .tween(NAVIGATION_ANIMATION_DURATION_MS),
                         targetOffsetX = { -it },
                     )
             } else {
@@ -306,13 +308,13 @@ private fun NavigationContent(
                 slideInHorizontally(
                     animationSpec =
                         androidx.compose.animation.core
-                            .tween(300),
+                            .tween(NAVIGATION_ANIMATION_DURATION_MS),
                     initialOffsetX = { -it },
                 ) togetherWith
                     slideOutHorizontally(
                         animationSpec =
                             androidx.compose.animation.core
-                                .tween(300),
+                                .tween(NAVIGATION_ANIMATION_DURATION_MS),
                         targetOffsetX = { it },
                     )
             }
@@ -333,13 +335,13 @@ private fun NavigationContent(
                             slideInHorizontally(
                                 animationSpec =
                                     androidx.compose.animation.core
-                                        .tween(300),
+                                        .tween(NAVIGATION_ANIMATION_DURATION_MS),
                                 initialOffsetX = { it },
                             ) togetherWith
                                 slideOutHorizontally(
                                     animationSpec =
                                         androidx.compose.animation.core.tween(
-                                            300,
+                                            NAVIGATION_ANIMATION_DURATION_MS,
                                         ),
                                     targetOffsetX = { -it },
                                 )
@@ -348,13 +350,13 @@ private fun NavigationContent(
                             slideInHorizontally(
                                 animationSpec =
                                     androidx.compose.animation.core
-                                        .tween(300),
+                                        .tween(NAVIGATION_ANIMATION_DURATION_MS),
                                 initialOffsetX = { -it },
                             ) togetherWith
                                 slideOutHorizontally(
                                     animationSpec =
                                         androidx.compose.animation.core.tween(
-                                            300,
+                                            NAVIGATION_ANIMATION_DURATION_MS,
                                         ),
                                     targetOffsetX = { it },
                                 )
@@ -393,28 +395,28 @@ private fun NavigationContent(
                 SearchRoute(
                     viewModel = viewModel,
                     onSettingsClick = {
-                        keyboardController?.hide()
                         onDestinationChange(RootDestination.Settings)
+                        keyboardController?.hide()
                     },
                     onOpenSearchHistorySettings = {
-                        keyboardController?.hide()
                         onDestinationChange(RootDestination.Settings)
                         onSettingsDetailTypeChange(SettingsDetailType.SEARCH_RESULTS)
+                        keyboardController?.hide()
                     },
                     onSearchEngineLongPress = {
-                        keyboardController?.hide()
                         onDestinationChange(RootDestination.Settings)
                         onSettingsDetailTypeChange(SettingsDetailType.SEARCH_ENGINES)
+                        keyboardController?.hide()
                     },
                     onCustomizeSearchEnginesClick = {
-                        keyboardController?.hide()
                         onDestinationChange(RootDestination.Settings)
                         onSettingsDetailTypeChange(SettingsDetailType.SEARCH_ENGINES)
+                        keyboardController?.hide()
                     },
                     onOpenDirectSearchConfigure = {
-                        keyboardController?.hide()
                         onDestinationChange(RootDestination.Settings)
                         onSettingsDetailTypeChange(SettingsDetailType.DIRECT_SEARCH_CONFIGURE)
+                        keyboardController?.hide()
                     },
                     onWelcomeAnimationCompleted = {
                         viewModel.onSearchBarWelcomeAnimationCompleted()

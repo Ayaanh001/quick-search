@@ -1,9 +1,14 @@
 package com.tk.quicksearch.settings.settingsDetailScreen
 
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,6 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,8 +25,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.UnfoldLess
 import androidx.compose.material.icons.rounded.UnfoldMore
 import androidx.compose.material3.ButtonDefaults
@@ -41,11 +49,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -68,16 +79,21 @@ import com.tk.quicksearch.search.data.rememberShortcutIcon
 import com.tk.quicksearch.search.data.shortcutDisplayName
 import com.tk.quicksearch.search.data.shortcutKey
 import com.tk.quicksearch.settings.shared.AppShortcutSource
+import com.tk.quicksearch.settings.shared.AppShortcutSourceType
 import com.tk.quicksearch.settings.shared.filterAppShortcutSources
 import com.tk.quicksearch.search.searchEngines.getContentDescription
 import com.tk.quicksearch.search.searchEngines.isSearchTargetShortcutPackageName
+import com.tk.quicksearch.search.searchEngines.loadCustomIconAsBase64
 import com.tk.quicksearch.search.searchEngines.resolveSearchTargetShortcutPackageName
 import com.tk.quicksearch.search.searchEngines.shared.IconRenderStyle
 import com.tk.quicksearch.search.searchEngines.shared.SearchTargetIcon
 import com.tk.quicksearch.ui.theme.AppColors
 import com.tk.quicksearch.ui.theme.DesignTokens
 import com.tk.quicksearch.util.hapticToggle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.Locale
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.font.FontWeight
 
@@ -109,8 +125,8 @@ private enum class ShortcutSearchMatchPriority {
 }
 
 private enum class ShortcutFilterOption(val labelResId: Int) {
-    ALL(R.string.settings_app_shortcuts_filter_all_apps_with_shortcuts),
-    CUSTOM_SHORTCUTS(R.string.settings_app_shortcuts_filter_apps_with_custom_shortcuts),
+    ALL(R.string.settings_app_shortcuts_filter_all_apps),
+    APPS_WITH_SHORTCUTS(R.string.settings_app_shortcuts_filter_apps_with_shortcuts),
     SEARCH_ENGINES(R.string.settings_app_shortcuts_filter_search_engines),
     BROWSERS(R.string.settings_app_shortcuts_filter_browsers),
 }
@@ -162,6 +178,11 @@ private fun resolveAppLabel(
     }
 }
 
+private fun fallbackAppLabel(
+    packageName: String,
+    locale: Locale,
+): String = packageName.substringAfterLast(".").replaceFirstChar { it.titlecase(locale) }
+
 @Composable
 fun AppShortcutsSettingsSection(
     shortcuts: List<StaticShortcut>,
@@ -175,6 +196,7 @@ fun AppShortcutsSettingsSection(
     onAddShortcutFromSource: (AppShortcutSource) -> Unit,
     searchTargets: List<SearchTarget>,
     onAddQueryShortcut: (SearchTarget, String, String) -> Unit,
+    onUpdateCustomShortcut: (StaticShortcut, String, String?) -> Unit,
     onDeleteCustomShortcut: (StaticShortcut) -> Unit,
     focusShortcut: StaticShortcut? = null,
     focusPackageName: String? = null,
@@ -229,107 +251,140 @@ fun AppShortcutsSettingsSection(
                     }
                 }
         }
-    val allShortcutGroups =
-        remember(
+    val allPackageNames =
+        remember(displayShortcuts, filteredShortcutSources, searchTargetShortcutSources) {
+            (
+                displayShortcuts.map { it.packageName } +
+                    filteredShortcutSources.map { it.packageName } +
+                    searchTargetShortcutSources.map { it.packageName }
+            ).toSet()
+        }
+    val appLabelCache = remember { mutableStateMapOf<String, String>() }
+    LaunchedEffect(allPackageNames, locale) {
+        val unresolvedPackages = allPackageNames.filter { it !in appLabelCache }
+        if (unresolvedPackages.isEmpty()) return@LaunchedEffect
+
+        val resolvedLabels =
+            withContext(Dispatchers.Default) {
+                unresolvedPackages.associateWith { packageName ->
+                    resolveAppLabel(context, packageName, locale)
+                }
+            }
+        appLabelCache.putAll(resolvedLabels)
+    }
+    val allShortcutGroups by
+        produceState(
+            initialValue = emptyList<AppShortcutGroup>(),
             displayShortcuts,
             filteredShortcutSources,
             searchTargetShortcutSources,
-            context,
+            locale,
+            appLabelCache.toMap(),
+        ) {
+            val labelCacheSnapshot = appLabelCache.toMap()
+            value =
+                withContext(Dispatchers.Default) {
+                    val shortcutsByPackage = displayShortcuts.groupBy { it.packageName }
+                    val sourcesByPackage = filteredShortcutSources.groupBy { it.packageName }
+                    val searchTargetSourcesByPackage = searchTargetShortcutSources.groupBy { it.packageName }
+                    (shortcutsByPackage.keys + sourcesByPackage.keys + searchTargetSourcesByPackage.keys)
+                        .mapNotNull { packageName ->
+                            val appShortcuts = shortcutsByPackage[packageName].orEmpty()
+                            val appSources = sourcesByPackage[packageName].orEmpty()
+                            val appSearchTargetSources =
+                                searchTargetSourcesByPackage[packageName].orEmpty()
+                            if (appShortcuts.isEmpty() &&
+                                appSources.isEmpty() &&
+                                appSearchTargetSources.isEmpty()
+                            ) {
+                                null
+                            } else {
+                                val appLabel =
+                                    appShortcuts.firstOrNull()?.appLabel?.takeIf { it.isNotBlank() }
+                                        ?: appSearchTargetSources.firstOrNull()?.label?.takeIf { it.isNotBlank() }
+                                        ?: labelCacheSnapshot[packageName]
+                                        ?: fallbackAppLabel(packageName, locale)
+                                AppShortcutGroup(
+                                    packageName = packageName,
+                                    appLabel = appLabel,
+                                    shortcuts =
+                                        appShortcuts.sortedWith(
+                                            compareBy(
+                                                { isUserCreatedShortcut(it) },
+                                                { shortcutDisplayName(it).lowercase(locale) },
+                                            ),
+                                        ),
+                                    sources = appSources,
+                                    searchTargetSources = appSearchTargetSources,
+                                )
+                            }
+                        }.sortedBy { it.appLabel.lowercase(locale) }
+                }
+        }
+    val shortcutGroups by
+        produceState(
+            initialValue = emptyList<AppShortcutGroup>(),
+            allShortcutGroups,
+            normalizedSearchQuery,
             locale,
         ) {
-            val shortcutsByPackage = displayShortcuts.groupBy { it.packageName }
-            val sourcesByPackage = filteredShortcutSources.groupBy { it.packageName }
-            val searchTargetSourcesByPackage = searchTargetShortcutSources.groupBy { it.packageName }
-            (shortcutsByPackage.keys + sourcesByPackage.keys + searchTargetSourcesByPackage.keys)
-                .mapNotNull { packageName ->
-                    val appShortcuts = shortcutsByPackage[packageName].orEmpty()
-                    val appSources = sourcesByPackage[packageName].orEmpty()
-                    val appSearchTargetSources =
-                        searchTargetSourcesByPackage[packageName].orEmpty()
-                    if (appShortcuts.isEmpty() &&
-                        appSources.isEmpty() &&
-                        appSearchTargetSources.isEmpty()
-                    ) {
-                        null
+            value =
+                withContext(Dispatchers.Default) {
+                    if (normalizedSearchQuery.isBlank()) {
+                        allShortcutGroups
                     } else {
-                        val appLabel =
-                            appShortcuts.firstOrNull()?.appLabel?.takeIf { it.isNotBlank() }
-                                ?: appSearchTargetSources.firstOrNull()?.label?.takeIf { it.isNotBlank() }
-                                ?: resolveAppLabel(context, packageName, locale)
-                        AppShortcutGroup(
-                            packageName = packageName,
-                            appLabel = appLabel,
-                            shortcuts =
-                                appShortcuts.sortedWith(
-                                    compareBy(
-                                        { isUserCreatedShortcut(it) },
-                                        { shortcutDisplayName(it).lowercase(locale) },
-                                    ),
-                                ),
-                            sources = appSources,
-                            searchTargetSources = appSearchTargetSources,
-                        )
-                    }
-                }.sortedBy { it.appLabel.lowercase(locale) }
-        }
-    val shortcutGroups =
-        remember(allShortcutGroups, normalizedSearchQuery, locale) {
-            if (normalizedSearchQuery.isBlank()) {
-                allShortcutGroups
-            } else {
-                allShortcutGroups
-                    .mapNotNull { group ->
-                        val appMatchPriority =
-                            shortcutMatchPriority(group.appLabel, normalizedSearchQuery, locale)
-                        val matchingShortcuts =
-                            group.shortcuts.filter { shortcut ->
-                                shortcutMatchPriority(
-                                    shortcutDisplayName(shortcut),
-                                    normalizedSearchQuery,
-                                    locale,
-                                ) != null
-                            }
-                        val matchingSources =
-                            group.sources.filter { source ->
-                                shortcutMatchPriority(source.label, normalizedSearchQuery, locale) != null
-                            }
-                        val matchingSearchTargetSources =
-                            group.searchTargetSources.filter { source ->
-                                shortcutMatchPriority(source.label, normalizedSearchQuery, locale) != null
-                            }
-                        val filteredGroup =
-                            when {
-                                appMatchPriority != null -> group
-                                matchingShortcuts.isNotEmpty() ||
-                                    matchingSources.isNotEmpty() ||
-                                    matchingSearchTargetSources.isNotEmpty() ->
-                                    group.copy(
-                                        shortcuts = matchingShortcuts,
-                                        sources = matchingSources,
-                                        searchTargetSources = matchingSearchTargetSources,
-                                    )
-                                else -> null
-                            } ?: return@mapNotNull null
+                        allShortcutGroups
+                            .mapNotNull { group ->
+                                val appMatchPriority =
+                                    shortcutMatchPriority(group.appLabel, normalizedSearchQuery, locale)
+                                val matchingShortcuts =
+                                    group.shortcuts.filter { shortcut ->
+                                        shortcutMatchPriority(
+                                            shortcutDisplayName(shortcut),
+                                            normalizedSearchQuery,
+                                            locale,
+                                        ) != null
+                                    }
+                                val matchingSources =
+                                    group.sources.filter { source ->
+                                        shortcutMatchPriority(source.label, normalizedSearchQuery, locale) != null
+                                    }
+                                val matchingSearchTargetSources =
+                                    group.searchTargetSources.filter { source ->
+                                        shortcutMatchPriority(source.label, normalizedSearchQuery, locale) != null
+                                    }
+                                val filteredGroup =
+                                    when {
+                                        appMatchPriority != null -> group
+                                        matchingShortcuts.isNotEmpty() ||
+                                            matchingSources.isNotEmpty() ||
+                                            matchingSearchTargetSources.isNotEmpty() ->
+                                            group.copy(
+                                                shortcuts = matchingShortcuts,
+                                                sources = matchingSources,
+                                                searchTargetSources = matchingSearchTargetSources,
+                                            )
+                                        else -> null
+                                    } ?: return@mapNotNull null
 
-                        val bestPriority =
-                            bestShortcutMatchPriority(filteredGroup, normalizedSearchQuery, locale)
-                                ?: return@mapNotNull null
-                        filteredGroup to bestPriority
-                    }.sortedWith(compareBy<Pair<AppShortcutGroup, ShortcutSearchMatchPriority>> { it.second.ordinal }
-                        .thenBy { it.first.appLabel.lowercase(locale) })
-                    .map { it.first }
+                                val bestPriority =
+                                    bestShortcutMatchPriority(filteredGroup, normalizedSearchQuery, locale)
+                                        ?: return@mapNotNull null
+                                filteredGroup to bestPriority
+                            }.sortedWith(compareBy<Pair<AppShortcutGroup, ShortcutSearchMatchPriority>> { it.second.ordinal }
+                                .thenBy { it.first.appLabel.lowercase(locale) })
+                            .map { it.first }
+                    }
                 }
         }
     var selectedFilterOption by remember { mutableStateOf(ShortcutFilterOption.ALL) }
     var isFilterMenuExpanded by remember { mutableStateOf(false) }
+    var shortcutToEdit by remember { mutableStateOf<StaticShortcut?>(null) }
     val visibleShortcutGroups =
         remember(shortcutGroups, selectedFilterOption) {
             when (selectedFilterOption) {
                 ShortcutFilterOption.ALL -> shortcutGroups
-                ShortcutFilterOption.CUSTOM_SHORTCUTS ->
-                    shortcutGroups.filter {
-                        it.sources.isNotEmpty() || it.searchTargetSources.isNotEmpty()
-                    }
+                ShortcutFilterOption.APPS_WITH_SHORTCUTS -> shortcutGroups.filter { it.shortcuts.isNotEmpty() }
                 ShortcutFilterOption.SEARCH_ENGINES ->
                     shortcutGroups.filter { it.searchTargetSources.isNotEmpty() }
                 ShortcutFilterOption.BROWSERS ->
@@ -388,6 +443,21 @@ fun AppShortcutsSettingsSection(
             onSave = { shortcutName, shortcutValue ->
                 onAddQueryShortcut(source.target, shortcutName, shortcutValue)
                 shortcutDialogSource = null
+            },
+        )
+    }
+    shortcutToEdit?.let { shortcut ->
+        EditCustomShortcutDialog(
+            shortcut = shortcut,
+            iconPackPackage = iconPackPackage,
+            onDismiss = { shortcutToEdit = null },
+            onSave = { updatedName, updatedIconBase64 ->
+                onUpdateCustomShortcut(shortcut, updatedName, updatedIconBase64)
+                shortcutToEdit = null
+            },
+            onDelete = {
+                onDeleteCustomShortcut(shortcut)
+                shortcutToEdit = null
             },
         )
     }
@@ -535,9 +605,12 @@ fun AppShortcutsSettingsSection(
                     exit = shrinkVertically(animationSpec = tween(220)),
                 ) {
                     Column {
+                        var hasRenderedSection = false
                         val appShortcuts = group.shortcuts
                         if (appShortcuts.isNotEmpty()) {
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            if (hasRenderedSection) {
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            }
                             appShortcuts.forEachIndexed { index, shortcut ->
                                 val shortcutId = shortcutKey(shortcut)
                                 val isCustomShortcut = isUserCreatedShortcut(shortcut)
@@ -549,9 +622,9 @@ fun AppShortcutsSettingsSection(
                                         onShortcutEnabledChange(shortcut, enabled)
                                     },
                                     onShortcutNameClick = { onShortcutNameClick(shortcut) },
-                                    onDeleteClick =
+                                    onEditClick =
                                         if (isCustomShortcut) {
-                                            { onDeleteCustomShortcut(shortcut) }
+                                            { shortcutToEdit = shortcut }
                                         } else {
                                             null
                                         },
@@ -562,32 +635,57 @@ fun AppShortcutsSettingsSection(
                                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                                 }
                             }
+                            hasRenderedSection = true
                         }
 
-                        val appSources = group.sources
-                        if (appSources.isNotEmpty()) {
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        val regularAppSources =
+                            group.sources.filter { it.sourceType != AppShortcutSourceType.APP_ACTIVITY }
+                        if (regularAppSources.isNotEmpty()) {
+                            if (hasRenderedSection) {
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            }
 
-                            appSources.forEachIndexed { index, source ->
+                            regularAppSources.forEachIndexed { index, source ->
                                 ShortcutSourceRow(
                                     source = source,
                                     onClick = { onAddShortcutFromSource(source) },
                                 )
-                                if (index < appSources.lastIndex) {
+                                if (index < regularAppSources.lastIndex) {
                                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                                 }
                             }
+                            hasRenderedSection = true
                         }
 
                         val searchTargetSources = group.searchTargetSources
                         if (searchTargetSources.isNotEmpty()) {
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            if (hasRenderedSection) {
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            }
                             searchTargetSources.forEachIndexed { index, source ->
                                 SearchTargetShortcutSourceRow(
                                     source = source,
                                     onClick = { shortcutDialogSource = source },
                                 )
                                 if (index < searchTargetSources.lastIndex) {
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                                }
+                            }
+                            hasRenderedSection = true
+                        }
+
+                        val appActivitySources =
+                            group.sources.filter { it.sourceType == AppShortcutSourceType.APP_ACTIVITY }
+                        if (appActivitySources.isNotEmpty()) {
+                            if (hasRenderedSection) {
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            }
+                            appActivitySources.forEachIndexed { index, source ->
+                                ShortcutSourceRow(
+                                    source = source,
+                                    onClick = { onAddShortcutFromSource(source) },
+                                )
+                                if (index < appActivitySources.lastIndex) {
                                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                                 }
                             }
@@ -784,6 +882,155 @@ private fun AddSearchTargetShortcutDialog(
 }
 
 @Composable
+private fun EditCustomShortcutDialog(
+    shortcut: StaticShortcut,
+    iconPackPackage: String?,
+    onDismiss: () -> Unit,
+    onSave: (String, String?) -> Unit,
+    onDelete: () -> Unit,
+) {
+    val context = LocalContext.current
+    var shortcutName by remember(shortcut) {
+        mutableStateOf(
+            TextFieldValue(
+                text = shortcutDisplayName(shortcut),
+                selection = TextRange(shortcutDisplayName(shortcut).length),
+            ),
+        )
+    }
+    var iconBase64 by remember(shortcut) { mutableStateOf(shortcut.iconBase64) }
+    val trimmedName = shortcutName.text.trim()
+    val canSave = trimmedName.isNotBlank()
+
+    val pickIconLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            val encoded = loadCustomIconAsBase64(context, uri) ?: return@rememberLauncherForActivityResult
+            iconBase64 = encoded
+        }
+
+    val iconBitmap =
+        remember(iconBase64) {
+            val encoded = iconBase64 ?: return@remember null
+            val bytes = runCatching { Base64.decode(encoded, Base64.DEFAULT) }.getOrNull()
+                ?: return@remember null
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
+        }
+    val appIconResult = rememberAppIcon(packageName = shortcut.packageName, iconPackPackage = iconPackPackage)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(text = stringResource(R.string.settings_app_shortcuts_edit_dialog_title))
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Rounded.Delete,
+                        contentDescription = stringResource(R.string.settings_app_shortcuts_delete_action),
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(50.dp)
+                                .clip(MaterialTheme.shapes.medium)
+                                .clickable { pickIconLauncher.launch(arrayOf("image/*")) },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        when {
+                            iconBitmap != null -> {
+                                Image(
+                                    bitmap = iconBitmap,
+                                    contentDescription = trimmedName,
+                                    modifier =
+                                        Modifier
+                                            .size(34.dp)
+                                            .offset(y = 2.dp),
+                                    contentScale = ContentScale.Fit,
+                                )
+                            }
+                            appIconResult.bitmap != null -> {
+                                Image(
+                                    bitmap = appIconResult.bitmap,
+                                    contentDescription = trimmedName,
+                                    modifier =
+                                        Modifier
+                                            .size(34.dp)
+                                            .offset(y = 2.dp),
+                                    contentScale = ContentScale.Fit,
+                                )
+                            }
+                            else -> {
+                                Icon(
+                                    imageVector = Icons.Rounded.Public,
+                                    contentDescription = trimmedName,
+                                    modifier =
+                                        Modifier
+                                            .size(28.dp)
+                                            .offset(y = 2.dp),
+                                )
+                            }
+                        }
+                        Box(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .offset(x = (-4).dp, y = (-6).dp)
+                                    .size(16.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surface),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Edit,
+                                contentDescription = stringResource(R.string.settings_edit_label),
+                                modifier = Modifier.size(10.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+                    OutlinedTextField(
+                        value = shortcutName,
+                        onValueChange = { shortcutName = it },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        maxLines = 1,
+                        isError = !canSave,
+                        label = { Text(stringResource(R.string.settings_app_shortcuts_shortcut_name_label)) },
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onSave(trimmedName, iconBase64) },
+                enabled = canSave,
+            ) {
+                Text(text = stringResource(R.string.dialog_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.dialog_cancel))
+            }
+        },
+    )
+}
+
+@Composable
 private fun AppShortcutCardHeader(
     packageName: String,
     appLabel: String,
@@ -869,7 +1116,7 @@ private fun ShortcutToggleRow(
     showToggle: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     onShortcutNameClick: () -> Unit,
-    onDeleteClick: (() -> Unit)?,
+    onEditClick: (() -> Unit)?,
     iconPackPackage: String?,
 ) {
     val view = LocalView.current
@@ -932,12 +1179,12 @@ private fun ShortcutToggleRow(
                     ),
         )
 
-        if (onDeleteClick != null) {
-            IconButton(onClick = onDeleteClick) {
+        if (onEditClick != null) {
+            IconButton(onClick = onEditClick) {
                 Icon(
-                    imageVector = Icons.Rounded.Delete,
-                    contentDescription = stringResource(R.string.settings_app_shortcuts_delete_action),
-                    tint = MaterialTheme.colorScheme.error,
+                    imageVector = Icons.Rounded.Edit,
+                    contentDescription = stringResource(R.string.settings_edit_label),
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         }
