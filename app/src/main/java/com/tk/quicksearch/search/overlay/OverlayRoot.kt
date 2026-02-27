@@ -20,6 +20,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,13 +31,16 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.ImageBitmap
@@ -61,6 +65,7 @@ private const val OVERLAY_HEIGHT_PERCENT = 0.88f
 private const val OVERLAY_EXPANDED_HEIGHT_PERCENT = 0.93f
 private const val OVERLAY_FALLBACK_GRADIENT_ALPHA = 0.98f
 private const val OVERLAY_RESIZE_ANIMATION_MS = 140
+private const val OVERLAY_ENTER_EXIT_ANIMATION_MS = 280
 private val OVERLAY_TOP_OFFSET = 16.dp
 
 @Composable
@@ -71,18 +76,20 @@ fun OverlayRoot(
 ) {
         // Keep initial frame visible to avoid cold-start transparent flash.
         var isVisible by remember { mutableStateOf(true) }
+        var hasEntered by remember { mutableStateOf(false) }
 
         // Handle closing with animation
         val handleClose = { isVisible = false }
 
         // Call onCloseRequested immediately when isVisible becomes false
-        val animationDuration = 250
+        val animationDuration = OVERLAY_ENTER_EXIT_ANIMATION_MS
         LaunchedEffect(isVisible) {
                 if (!isVisible) {
                         delay(animationDuration.toLong())
                         onCloseRequested()
                 }
         }
+        LaunchedEffect(Unit) { hasEntered = true }
 
         BackHandler(enabled = isVisible) { handleClose() }
 
@@ -245,150 +252,142 @@ fun OverlayRoot(
                                 uiState.backgroundSource != BackgroundSource.THEME &&
                                         overlayImageBitmap != null
 
-                        androidx.compose.animation.AnimatedVisibility(
-                                visible = isVisible,
-                                enter =
-                                        androidx.compose.animation.fadeIn(
-                                                androidx.compose.animation.core.tween(
-                                                        animationDuration
-                                                )
+                        val density = LocalDensity.current
+                        val overlayEntryProgress by animateFloatAsState(
+                                targetValue = if (hasEntered && isVisible) 1f else 0f,
+                                animationSpec =
+                                        tween(
+                                                durationMillis = animationDuration,
+                                                easing = FastOutSlowInEasing,
                                         ),
-                                exit =
-                                        androidx.compose.animation.fadeOut(
-                                                androidx.compose.animation.core.tween(
-                                                        animationDuration
+                                label = "overlayEntryProgress",
+                        )
+
+                        Box(
+                                modifier =
+                                        Modifier.align(Alignment.TopCenter)
+                                                .padding(
+                                                        start = leftSafePadding,
+                                                        end = rightSafePadding,
+                                                        top = overlayTopPadding,
                                                 )
-                                        )
+                                                .fillMaxSize(),
+                                contentAlignment = Alignment.TopCenter,
                         ) {
+                                val slideOffsetPx = with(density) { 22.dp.toPx() }
                                 Box(
                                         modifier =
-                                                Modifier.align(Alignment.TopCenter)
-                                                        .padding(
-                                                                start = leftSafePadding,
-                                                                end = rightSafePadding,
-                                                                top = overlayTopPadding,
-                                                        )
-                                                        .fillMaxSize(),
-                                        contentAlignment = Alignment.TopCenter,
+                                                Modifier.width(overlayWidth)
+                                                        .height(overlayHeight)
+                                                        .graphicsLayer {
+                                                                alpha = overlayEntryProgress
+                                                                val scale =
+                                                                        0.96f +
+                                                                                (0.04f *
+                                                                                        overlayEntryProgress)
+                                                                scaleX = scale
+                                                                scaleY = scale
+                                                                translationY =
+                                                                        slideOffsetPx *
+                                                                                (1f -
+                                                                                        overlayEntryProgress)
+                                                        }
+                                                        .clip(DesignTokens.ExtraLargeCardShape)
+                                                        .clickable(
+                                                                interactionSource =
+                                                                        remember {
+                                                                                MutableInteractionSource()
+                                                                        },
+                                                                indication = null,
+                                                        ) {},
                                 ) {
-                                        Box(
-                                                modifier =
-                                                        Modifier.width(overlayWidth)
-                                                                .height(overlayHeight)
-                                                                .clip(
-                                                                        DesignTokens
-                                                                                .ExtraLargeCardShape
-                                                                )
-                                                                .clickable(
-                                                                        interactionSource =
-                                                                                remember {
-                                                                                        MutableInteractionSource()
-                                                                                },
-                                                                        indication = null,
-                                                                ) {},
-                                        ) {
-                                                SearchScreenBackground(
-                                                        showWallpaperBackground = useImageBackground,
-                                                        wallpaperBitmap = overlayImageBitmap,
-                                                        wallpaperBackgroundAlpha =
-                                                                uiState.wallpaperBackgroundAlpha,
-                                                        wallpaperBlurRadius =
-                                                                uiState.wallpaperBlurRadius,
-                                                        backgroundTransitionDurationMillis =
-                                                                DesignTokens
-                                                                        .WallpaperFadeInDuration + 220,
-                                                        animateBlurRadius = false,
-                                                        fallbackBackgroundAlpha =
-                                                                OVERLAY_FALLBACK_GRADIENT_ALPHA,
-                                                        useGradientFallback =
-                                                                uiState.backgroundSource ==
-                                                                        BackgroundSource
-                                                                                .THEME,
-                                                        overlayGradientTheme =
-                                                                uiState.overlayGradientTheme,
-                                                        overlayThemeIntensity =
-                                                                uiState.overlayThemeIntensity,
-                                                        modifier = Modifier.fillMaxSize(),
-                                                )
+                                        SearchScreenBackground(
+                                                showWallpaperBackground = useImageBackground,
+                                                wallpaperBitmap = overlayImageBitmap,
+                                                wallpaperBackgroundAlpha =
+                                                        uiState.wallpaperBackgroundAlpha,
+                                                wallpaperBlurRadius = uiState.wallpaperBlurRadius,
+                                                backgroundTransitionDurationMillis =
+                                                        DesignTokens.WallpaperFadeInDuration + 220,
+                                                animateBlurRadius = false,
+                                                fallbackBackgroundAlpha =
+                                                        OVERLAY_FALLBACK_GRADIENT_ALPHA,
+                                                useGradientFallback =
+                                                        uiState.backgroundSource ==
+                                                                BackgroundSource.THEME,
+                                                overlayGradientTheme = uiState.overlayGradientTheme,
+                                                overlayThemeIntensity =
+                                                        uiState.overlayThemeIntensity,
+                                                modifier = Modifier.fillMaxSize(),
+                                        )
 
-                                                SearchRoute(
-                                                        modifier = Modifier.fillMaxSize(),
-                                                        viewModel = viewModel,
-                                                        isOverlayPresentation = true,
-                                                        overlaySnackbarHostState =
-                                                                overlaySnackbarHostState,
-                                                        onWelcomeAnimationCompleted = {
-                                                                viewModel
-                                                                        .onSearchBarWelcomeAnimationCompleted()
+                                        SearchRoute(
+                                                modifier = Modifier.fillMaxSize(),
+                                                viewModel = viewModel,
+                                                isOverlayPresentation = true,
+                                                overlaySnackbarHostState = overlaySnackbarHostState,
+                                                onWelcomeAnimationCompleted = {
+                                                        viewModel.onSearchBarWelcomeAnimationCompleted()
+                                                },
+                                                onOverlayExpandRequest = {
+                                                        isOverlayManuallyExpanded = true
+                                                },
+                                                isOverlayExpanded = isOverlayManuallyExpanded,
+                                                onOverlayNumberKeyboardUiChanged =
+                                                        { isNumberKeyboardSelected, isImeOpen ->
+                                                                overlayNumberKeyboardSelected =
+                                                                        isNumberKeyboardSelected
+                                                                overlayImeVisible = isImeOpen
                                                         },
-                                                        onOverlayExpandRequest = {
-                                                                isOverlayManuallyExpanded = true
-                                                        },
-                                                        isOverlayExpanded =
-                                                                isOverlayManuallyExpanded,
-                                                        onOverlayNumberKeyboardUiChanged =
-                                                                { isNumberKeyboardSelected,
-                                                                    isImeOpen ->
-                                                                        overlayNumberKeyboardSelected =
-                                                                                isNumberKeyboardSelected
-                                                                        overlayImeVisible =
-                                                                                isImeOpen
-                                                                },
-                                                        onOverlayDismissRequest = { handleClose() },
-                                                        onSettingsClick = {
-                                                                OverlayModeController
-                                                                        .openMainActivity(
-                                                                                context,
-                                                                                openSettings = true,
-                                                                        )
-                                                                handleClose()
-                                                        },
-                                                        onOpenSearchHistorySettings = {
-                                                                OverlayModeController
-                                                                        .openMainActivity(
-                                                                                context,
-                                                                                openSettings = true,
-                                                                                settingsDetailType =
-                                                                                        SettingsDetailType
-                                                                                                .SEARCH_RESULTS,
-                                                                        )
-                                                                handleClose()
-                                                        },
-                                                        onSearchEngineLongPress = {
-                                                                OverlayModeController
-                                                                        .openMainActivity(
-                                                                                context,
-                                                                                openSettings = true,
-                                                                                settingsDetailType =
-                                                                                        SettingsDetailType
-                                                                                                .SEARCH_ENGINES,
-                                                                        )
-                                                                handleClose()
-                                                        },
-                                                        onCustomizeSearchEnginesClick = {
-                                                                OverlayModeController
-                                                                        .openMainActivity(
-                                                                                context,
-                                                                                openSettings = true,
-                                                                                settingsDetailType =
-                                                                                        SettingsDetailType
-                                                                                                .SEARCH_ENGINES,
-                                                                        )
-                                                                handleClose()
-                                                        },
-                                                        onOpenDirectSearchConfigure = {
-                                                                OverlayModeController
-                                                                        .openMainActivity(
-                                                                                context,
-                                                                                openSettings = true,
-                                                                                settingsDetailType =
-                                                                                        SettingsDetailType
-                                                                                                .DIRECT_SEARCH_CONFIGURE,
-                                                                        )
-                                                                handleClose()
-                                                        },
-                                                )
-                                        }
+                                                onOverlayDismissRequest = { handleClose() },
+                                                onSettingsClick = {
+                                                        OverlayModeController.openMainActivity(
+                                                                context,
+                                                                openSettings = true,
+                                                        )
+                                                        handleClose()
+                                                },
+                                                onOpenSearchHistorySettings = {
+                                                        OverlayModeController.openMainActivity(
+                                                                context,
+                                                                openSettings = true,
+                                                                settingsDetailType =
+                                                                        SettingsDetailType
+                                                                                .SEARCH_RESULTS,
+                                                        )
+                                                        handleClose()
+                                                },
+                                                onSearchEngineLongPress = {
+                                                        OverlayModeController.openMainActivity(
+                                                                context,
+                                                                openSettings = true,
+                                                                settingsDetailType =
+                                                                        SettingsDetailType
+                                                                                .SEARCH_ENGINES,
+                                                        )
+                                                        handleClose()
+                                                },
+                                                onCustomizeSearchEnginesClick = {
+                                                        OverlayModeController.openMainActivity(
+                                                                context,
+                                                                openSettings = true,
+                                                                settingsDetailType =
+                                                                        SettingsDetailType
+                                                                                .SEARCH_ENGINES,
+                                                        )
+                                                        handleClose()
+                                                },
+                                                onOpenDirectSearchConfigure = {
+                                                        OverlayModeController.openMainActivity(
+                                                                context,
+                                                                openSettings = true,
+                                                                settingsDetailType =
+                                                                        SettingsDetailType
+                                                                                .DIRECT_SEARCH_CONFIGURE,
+                                                        )
+                                                        handleClose()
+                                                },
+                                        )
                                 }
                         }
 

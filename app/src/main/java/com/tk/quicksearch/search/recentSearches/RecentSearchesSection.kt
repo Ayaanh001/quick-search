@@ -491,7 +491,7 @@ private fun InlineSearchHistoryTip(
     val linkTag = "search_history_settings"
     val tipMessage = stringResource(R.string.search_history_tip_message)
     val linkText = stringResource(R.string.search_history_tip_link)
-    val fullText = "$tipMessage\n$linkText"
+    val fullText = "$tipMessage $linkText"
     val annotatedText =
         buildAnnotatedString {
             append(fullText)
