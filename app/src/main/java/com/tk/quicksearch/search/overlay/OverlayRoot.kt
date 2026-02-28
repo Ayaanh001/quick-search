@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
@@ -47,10 +48,16 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.SearchViewModel
+import com.tk.quicksearch.search.core.SearchTarget
+import com.tk.quicksearch.search.core.isLikelyWebUrl
 import com.tk.quicksearch.search.searchScreen.ExcludeUndoSnackbarHost
 import com.tk.quicksearch.search.searchScreen.NumberKeyboardOperatorPills
+import com.tk.quicksearch.search.searchScreen.PersistentSearchField
 import com.tk.quicksearch.search.searchScreen.SearchRoute
 import com.tk.quicksearch.search.searchScreen.SearchScreenBackground
+import com.tk.quicksearch.search.searchEngines.defaultBrowserTarget
+import com.tk.quicksearch.search.searchEngines.getId
+import com.tk.quicksearch.search.searchEngines.resolveDefaultBrowserPackage
 import com.tk.quicksearch.settings.settingsDetailScreen.SettingsDetailType
 import com.tk.quicksearch.ui.theme.DesignTokens
 import com.tk.quicksearch.ui.theme.QuickSearchTheme
@@ -68,6 +75,9 @@ private const val OVERLAY_ENTER_START_DELAY_MS = 32
 private const val OVERLAY_ENTER_START_SCALE = 0.9f
 private val OVERLAY_TOP_OFFSET = 16.dp
 private val OVERLAY_ENTER_START_OFFSET = 56.dp
+private val OVERLAY_EXTERNAL_SEARCH_BAR_RESERVED_HEIGHT = 62.dp
+private val OVERLAY_EXTERNAL_SEARCH_BAR_BOTTOM_PADDING = DesignTokens.SpacingMedium
+private val OVERLAY_OPERATOR_PILLS_RESERVED_HEIGHT = 48.dp
 
 @Composable
 fun OverlayRoot(
@@ -118,6 +128,9 @@ fun OverlayRoot(
                         var overlayImeVisible by remember { mutableStateOf(false) }
                         var isOverlayManuallyExpanded by remember { mutableStateOf(false) }
                         var wasImeVisible by remember { mutableStateOf(false) }
+                        val showOverlayOperatorPills =
+                                overlayNumberKeyboardSelected && overlayImeVisible
+                        val uiState by viewModel.uiState.collectAsState()
                         val layoutDirection = LocalLayoutDirection.current
                         val systemBarsPadding = WindowInsets.systemBars.asPaddingValues()
                         val imeBottomPadding =
@@ -131,9 +144,25 @@ fun OverlayRoot(
                                         systemBarsPadding.calculateBottomPadding(),
                                         imeBottomPadding,
                                 )
+                        val showExternalBottomSearchBar = uiState.bottomSearchBarEnabled
+                        val externalBottomBarReservedHeight =
+                                if (showExternalBottomSearchBar) {
+                                        OVERLAY_EXTERNAL_SEARCH_BAR_RESERVED_HEIGHT +
+                                                if (showOverlayOperatorPills) {
+                                                        OVERLAY_OPERATOR_PILLS_RESERVED_HEIGHT
+                                                } else {
+                                                        0.dp
+                                                }
+                                } else {
+                                        0.dp
+                                }
                         val overlayTopPadding = topSafePadding + OVERLAY_TOP_OFFSET
                         val availableHeight =
-                                (maxHeight - overlayTopPadding - bottomSafePadding).coerceAtLeast(
+                                (maxHeight -
+                                                overlayTopPadding -
+                                                bottomSafePadding -
+                                                externalBottomBarReservedHeight)
+                                        .coerceAtLeast(
                                         0.dp
                                 )
                         val availableWidth =
@@ -174,7 +203,6 @@ fun OverlayRoot(
                                 wasImeVisible = isImeVisible
                         }
 
-                        val uiState by viewModel.uiState.collectAsState()
                         val overlayWallpaperBitmap by
                                 produceState<ImageBitmap?>(
                                         initialValue = null,
@@ -370,18 +398,161 @@ fun OverlayRoot(
                                 }
                         }
 
+                        if (showExternalBottomSearchBar) {
+                                val enabledTargets: List<SearchTarget> =
+                                        remember(uiState.searchTargetsOrder, uiState.disabledSearchTargetIds) {
+                                                uiState.searchTargetsOrder.filter {
+                                                        it.getId() !in uiState.disabledSearchTargetIds
+                                                }
+                                        }
+                                PersistentSearchField(
+                                        query = uiState.query,
+                                        onQueryChange = viewModel::onQueryChange,
+                                        onClearQuery = viewModel::clearQuery,
+                                        onSettingsClick = {
+                                                OverlayModeController.openMainActivity(
+                                                        context,
+                                                        openSettings = true,
+                                                )
+                                                handleClose()
+                                        },
+                                        dismissKeyboardBeforeSettingsClick = true,
+                                        enabledTargets = enabledTargets,
+                                        shouldUseNumberKeyboard = overlayNumberKeyboardSelected,
+                                        detectedShortcutTarget = uiState.detectedShortcutTarget,
+                                        showWelcomeAnimation = uiState.showSearchBarWelcomeAnimation,
+                                        opaqueBackground = true,
+                                        onClearDetectedShortcut = viewModel::clearDetectedShortcut,
+                                        onWelcomeAnimationCompleted = {
+                                                viewModel.onSearchBarWelcomeAnimationCompleted()
+                                        },
+                                        modifier =
+                                                Modifier.align(Alignment.BottomCenter)
+                                                        .width(overlayWidth)
+                                                        .imePadding()
+                                                        .navigationBarsPadding()
+                                                        .padding(
+                                                                bottom =
+                                                                        OVERLAY_EXTERNAL_SEARCH_BAR_BOTTOM_PADDING +
+                                                                                if (showOverlayOperatorPills) {
+                                                                                        OVERLAY_OPERATOR_PILLS_RESERVED_HEIGHT
+                                                                                } else {
+                                                                                        0.dp
+                                                                                },
+                                                        )
+                                                        .graphicsLayer { alpha = overlayEntryProgress },
+                                        onSearchAction = {
+                                                val trimmedQuery = uiState.query.trim()
+                                                val isUrlQuery = isLikelyWebUrl(trimmedQuery)
+                                                val defaultBrowserPackage =
+                                                        resolveDefaultBrowserPackage(context)
+                                                if (uiState.query != trimmedQuery) {
+                                                        viewModel.onQueryChange(trimmedQuery)
+                                                }
+
+                                                if (isUrlQuery && trimmedQuery.isNotBlank()) {
+                                                        val browserTarget =
+                                                                defaultBrowserTarget(
+                                                                        uiState.searchTargetsOrder,
+                                                                        defaultBrowserPackage,
+                                                                )
+                                                        if (browserTarget != null) {
+                                                                viewModel.openSearchTarget(
+                                                                        trimmedQuery,
+                                                                        browserTarget,
+                                                                )
+                                                                return@PersistentSearchField
+                                                        }
+                                                }
+
+                                                val firstApp =
+                                                        uiState.searchResults.firstOrNull()
+                                                                ?: uiState.recentApps.firstOrNull()
+                                                                ?: uiState.pinnedApps.firstOrNull()
+                                                if (firstApp != null) {
+                                                        viewModel.launchApp(firstApp)
+                                                        return@PersistentSearchField
+                                                }
+
+                                                val firstAppShortcut = uiState.appShortcutResults.firstOrNull()
+                                                if (firstAppShortcut != null) {
+                                                        viewModel.launchAppShortcut(firstAppShortcut)
+                                                        return@PersistentSearchField
+                                                }
+
+                                                val firstContact = uiState.contactResults.firstOrNull()
+                                                if (firstContact != null) {
+                                                        if (firstContact.hasContactMethods) {
+                                                                viewModel.showContactMethodsBottomSheet(
+                                                                        firstContact
+                                                                )
+                                                        } else {
+                                                                viewModel.openContact(firstContact)
+                                                        }
+                                                        return@PersistentSearchField
+                                                }
+
+                                                val firstFile = uiState.fileResults.firstOrNull()
+                                                if (firstFile != null) {
+                                                        viewModel.openFile(firstFile)
+                                                        return@PersistentSearchField
+                                                }
+
+                                                val firstSetting = uiState.settingResults.firstOrNull()
+                                                if (firstSetting != null) {
+                                                        viewModel.openSetting(firstSetting)
+                                                        return@PersistentSearchField
+                                                }
+
+                                                val detectedTarget = uiState.detectedShortcutTarget
+                                                if (detectedTarget != null) {
+                                                        viewModel.openSearchTarget(trimmedQuery, detectedTarget)
+                                                        return@PersistentSearchField
+                                                }
+
+                                                val primaryTarget = enabledTargets.firstOrNull()
+                                                if (primaryTarget != null && trimmedQuery.isNotBlank()) {
+                                                        viewModel.openSearchTarget(trimmedQuery, primaryTarget)
+                                                }
+                                        },
+                                )
+                        }
+
+                        val overlayBottomFloatingPadding =
+                                if (showExternalBottomSearchBar) {
+                                        OVERLAY_EXTERNAL_SEARCH_BAR_RESERVED_HEIGHT +
+                                                if (showOverlayOperatorPills) {
+                                                        OVERLAY_OPERATOR_PILLS_RESERVED_HEIGHT
+                                                } else {
+                                                        0.dp
+                                                }
+                                } else {
+                                        0.dp
+                                }
+
                         AnimatedVisibility(
-                                visible = overlayNumberKeyboardSelected && overlayImeVisible,
+                                visible = showOverlayOperatorPills,
                                 enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
                                 exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
                                 modifier =
                                         Modifier.align(Alignment.BottomCenter)
-                                                .width(maxWidth)
+                                                .fillMaxWidth()
                                                 .imePadding(),
                         ) {
                                 NumberKeyboardOperatorPills(
                                         isOverlayPresentation = true,
                                         extendToScreenEdges = false,
+                                        modifier =
+                                                Modifier.padding(
+                                                        top =
+                                                                if (showExternalBottomSearchBar) {
+                                                                        OVERLAY_EXTERNAL_SEARCH_BAR_BOTTOM_PADDING
+                                                                } else {
+                                                                        0.dp
+                                                                },
+                                                        bottom =
+                                                                0.dp,
+                                                ),
                                         onOperatorClick = { operator ->
                                                 viewModel.onQueryChange(uiState.query + operator)
                                         },
@@ -397,7 +568,9 @@ fun OverlayRoot(
                                                 .padding(
                                                         start = DesignTokens.SpacingLarge,
                                                         end = DesignTokens.SpacingLarge,
-                                                        bottom = DesignTokens.SpacingHuge,
+                                                        bottom =
+                                                                DesignTokens.SpacingHuge +
+                                                                        overlayBottomFloatingPadding,
                                                 ),
                         )
                 }

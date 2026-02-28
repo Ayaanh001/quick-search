@@ -88,6 +88,7 @@ internal fun SearchScreenContent(
         onClearDetectedShortcut: () -> Unit,
         modifier: Modifier = Modifier,
         isOverlayPresentation: Boolean = false,
+        showSearchField: Boolean = true,
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -224,7 +225,7 @@ internal fun SearchScreenContent(
         }
     }
 
-    val showBottomSearchBar = state.bottomSearchBarEnabled && !isOverlayPresentation
+    val showBottomSearchBar = showSearchField && state.bottomSearchBarEnabled && !isOverlayPresentation
     val searchFieldModifier =
             if (showBottomSearchBar) {
                 Modifier.padding(
@@ -329,13 +330,13 @@ internal fun SearchScreenContent(
     }
 
     Column(modifier = contentModifier, verticalArrangement = Arrangement.Top) {
-        if (!showBottomSearchBar) {
+        if (showSearchField && !showBottomSearchBar) {
             // Fixed search bar at the top
             searchFieldContent()
         }
 
         // Add spacing between search bar and apps list when bottom aligned setting is off
-        if (!showBottomSearchBar && !state.oneHandedMode) {
+        if (showSearchField && !showBottomSearchBar && !state.oneHandedMode) {
             Spacer(modifier = Modifier.padding(top = DesignTokens.SpacingSmall))
         }
 
@@ -500,7 +501,7 @@ internal fun SearchScreenContent(
             }
         }
 
-        if (showBottomSearchBar) {
+        if (showSearchField && showBottomSearchBar) {
             if (state.isSearchEngineCompactMode) {
                 Box(
                         modifier =

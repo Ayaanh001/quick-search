@@ -253,7 +253,7 @@ private fun ScrollableEngineIcons(
             val predictedTargetId = (predictedTarget as? PredictedSubmitTarget.SearchTarget)?.targetId
             val hasPredictedItem = predictedTargetId != null && enabledEngines.any { it.getId() == predictedTargetId }
             val predictionHighlightExtraHeight =
-                if (hasPredictedItem) {
+                if (hasPredictedItem && visibleRowCount == 1) {
                     SearchEngineSectionConstants.PREDICTION_HIGHLIGHT_HEIGHT_EXTRA
                 } else {
                     0.dp

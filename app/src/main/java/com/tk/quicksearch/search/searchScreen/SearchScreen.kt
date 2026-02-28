@@ -946,6 +946,7 @@ fun SearchScreen(
             scrollState = scrollState,
             onClearDetectedShortcut = onClearDetectedShortcut,
             isOverlayPresentation = isOverlayPresentation,
+            showSearchField = !(isOverlayPresentation && state.bottomSearchBarEnabled),
         )
 
         // Search engine onboarding overlay

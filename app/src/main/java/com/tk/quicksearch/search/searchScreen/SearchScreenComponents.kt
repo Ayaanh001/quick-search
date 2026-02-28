@@ -175,6 +175,7 @@ internal fun PersistentSearchField(
     shouldUseNumberKeyboard: Boolean,
     detectedShortcutTarget: SearchTarget? = null,
     showWelcomeAnimation: Boolean = false,
+    opaqueBackground: Boolean = false,
     onClearDetectedShortcut: () -> Unit = {},
     onWelcomeAnimationCompleted: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
@@ -184,8 +185,12 @@ internal fun PersistentSearchField(
     val lifecycleOwner = LocalLifecycleOwner.current
     val view = LocalView.current
 
-    // Set search bar background to black with slight transparency
-    val searchBarBackground = Color.Black.copy(alpha = 0.5f)
+    val searchBarBackground =
+        if (opaqueBackground) {
+            Color.Black
+        } else {
+            Color.Black.copy(alpha = 0.5f)
+        }
     // Light color for icons and text on dark grey background
     val iconAndTextColor = DesignTokens.ColorSearchText
 
