@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -17,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,13 +31,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
@@ -47,9 +43,6 @@ import com.tk.quicksearch.settings.shared.AppShortcutSource
 import com.tk.quicksearch.settings.shared.SettingsScreenCallbacks
 import com.tk.quicksearch.settings.shared.SettingsScreenState
 import com.tk.quicksearch.ui.theme.DesignTokens
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 
 @Composable
 internal fun SettingsDetailLevel2Screen(
@@ -69,14 +62,8 @@ internal fun SettingsDetailLevel2Screen(
     BackHandler(onBack = callbacks.onBack)
     val scrollState = rememberScrollState()
     var showClearAllConfirmation by remember { mutableStateOf(false) }
-    var isScrollingDown by remember { mutableStateOf(false) }
-    var appShortcutsSearchActive by remember { mutableStateOf(false) }
     var appShortcutsSearchQuery by remember { mutableStateOf("") }
     var appShortcutsCollapseAllTrigger by remember { mutableIntStateOf(0) }
-    var lastScrollOffset by remember { mutableIntStateOf(0) }
-    val scrollDeltaThreshold = 6
-    val appShortcutsSearchFocusRequester = remember { FocusRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
 
     val hasExcludedItems =
         state.suggestionExcludedApps.isNotEmpty() ||
@@ -90,30 +77,6 @@ internal fun SettingsDetailLevel2Screen(
     LaunchedEffect(detailType, hasExcludedItems) {
         if (detailType == SettingsDetailType.EXCLUDED_ITEMS && !hasExcludedItems) {
             callbacks.onBack()
-        }
-    }
-
-    LaunchedEffect(detailType, scrollState) {
-        if (detailType != SettingsDetailType.APP_SHORTCUTS) return@LaunchedEffect
-        snapshotFlow { scrollState.value }
-            .map { offset ->
-                val delta = offset - lastScrollOffset
-                val direction = when {
-                    delta > scrollDeltaThreshold -> true
-                    delta < -scrollDeltaThreshold -> false
-                    else -> isScrollingDown
-                }
-                lastScrollOffset = offset
-                direction
-            }.distinctUntilChanged()
-            .collectLatest { down ->
-                isScrollingDown = down
-            }
-    }
-    LaunchedEffect(appShortcutsSearchActive, detailType) {
-        if (detailType == SettingsDetailType.APP_SHORTCUTS && appShortcutsSearchActive) {
-            appShortcutsSearchFocusRequester.requestFocus()
-            keyboardController?.show()
         }
     }
 
@@ -260,74 +223,56 @@ internal fun SettingsDetailLevel2Screen(
         }
 
         if (detailType == SettingsDetailType.APP_SHORTCUTS) {
-            if (appShortcutsSearchActive) {
-                TextField(
-                    value = appShortcutsSearchQuery,
-                    onValueChange = { appShortcutsSearchQuery = it },
-                    modifier =
-                        Modifier
-                            .align(androidx.compose.ui.Alignment.BottomEnd)
-                            .imePadding()
-                            .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-                            .fillMaxWidth()
-                            .focusRequester(appShortcutsSearchFocusRequester),
-                    shape = RoundedCornerShape(28.dp),
-                    singleLine = true,
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Search,
-                            contentDescription = stringResource(R.string.desc_search_icon),
-                        )
-                    },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = {
-                                appShortcutsCollapseAllTrigger++
-                                if (appShortcutsSearchQuery.isBlank()) {
-                                    appShortcutsSearchActive = false
-                                } else {
+            TextField(
+                value = appShortcutsSearchQuery,
+                onValueChange = { appShortcutsSearchQuery = it },
+                modifier =
+                    Modifier
+                        .align(androidx.compose.ui.Alignment.BottomEnd)
+                        .imePadding()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+                        .fillMaxWidth(),
+                shape = RoundedCornerShape(28.dp),
+                singleLine = true,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Search,
+                        contentDescription = stringResource(R.string.desc_search_icon),
+                        modifier = Modifier.offset(x = 2.dp),
+                    )
+                },
+                trailingIcon =
+                    if (appShortcutsSearchQuery.isNotBlank()) {
+                        {
+                            IconButton(
+                                onClick = {
+                                    appShortcutsCollapseAllTrigger++
                                     appShortcutsSearchQuery = ""
-                                }
-                            },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Close,
-                                contentDescription = stringResource(R.string.desc_close),
-                            )
+                                },
+                                modifier = Modifier.offset(x = (-2).dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Close,
+                                    contentDescription = stringResource(R.string.desc_close),
+                                )
+                            }
                         }
+                    } else {
+                        null
                     },
-                    placeholder = {
-                        Text(text = stringResource(R.string.settings_app_shortcuts_search_hint))
-                    },
-                    colors =
-                        TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                        ),
-                )
-            } else {
-                ExtendedFloatingActionButton(
-                    onClick = { appShortcutsSearchActive = true },
-                    modifier =
-                        Modifier
-                            .align(androidx.compose.ui.Alignment.BottomEnd)
-                            .padding(16.dp),
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    expanded = !isScrollingDown,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Search,
-                            contentDescription = null,
-                        )
-                    },
-                    text = { Text(text = stringResource(R.string.settings_app_shortcuts_search_button)) },
-                )
-            }
+                placeholder = {
+                    Text(text = stringResource(R.string.settings_app_shortcuts_search_hint))
+                },
+                colors =
+                    TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                    ),
+            )
         }
 
         if (showClearAllConfirmation && detailType == SettingsDetailType.EXCLUDED_ITEMS) {

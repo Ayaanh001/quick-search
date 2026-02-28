@@ -3,6 +3,7 @@ package com.tk.quicksearch.search.searchEngines.inline
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.clickable
@@ -11,10 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.items as gridItems
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items as rowItems
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -258,36 +255,65 @@ private fun ScrollableEngineIcons(
 ) {
     val resolvedRowCount = compactRowCount.coerceIn(1, 2)
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val itemWidthDp = calculateItemWidth(maxWidth, resolvedRowCount)
+        val itemsPerRow = calculateItemsPerRow()
+        val itemWidthDp = calculateItemWidth(maxWidth, itemsPerRow)
 
         if (resolvedRowCount == 2) {
-            val gridState = rememberLazyGridState()
-            LazyHorizontalGrid(
-                rows = GridCells.Fixed(2),
-                state = gridState,
+            val columns = buildTwoRowColumns(enabledEngines, itemsPerRow)
+            val hasSecondRowItems = columns.any { it.bottom != null }
+            val visibleRowCount = if (hasSecondRowItems) 2 else 1
+            val predictedTargetId = (predictedTarget as? PredictedSubmitTarget.SearchTarget)?.targetId
+            val hasPredictedItem = predictedTargetId != null && enabledEngines.any { it.getId() == predictedTargetId }
+            val predictionHighlightExtraHeight =
+                if (hasPredictedItem) {
+                    SearchEngineSectionConstants.PREDICTION_HIGHLIGHT_HEIGHT_EXTRA
+                } else {
+                    0.dp
+                }
+            LazyRow(
+                state = scrollState,
                 horizontalArrangement = Arrangement.spacedBy(SearchEngineSectionConstants.SPACING),
-                verticalArrangement = Arrangement.spacedBy(SearchEngineSectionConstants.ROW_SPACING),
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .height(
-                            (SearchEngineSectionConstants.ICON_SIZE * 2) +
-                                SearchEngineSectionConstants.ROW_SPACING +
-                                SearchEngineSectionConstants.PREDICTION_HIGHLIGHT_HEIGHT_EXTRA,
+                            (SearchEngineSectionConstants.ICON_SIZE * visibleRowCount) +
+                                (if (visibleRowCount == 2) SearchEngineSectionConstants.ROW_SPACING else 0.dp) +
+                                predictionHighlightExtraHeight,
                         ),
             ) {
-                gridItems(enabledEngines) { engine ->
-                    SearchEngineIconItem(
-                        engine = engine,
-                        query = query,
-                        iconSize = SearchEngineSectionConstants.ICON_SIZE,
-                        itemWidth = itemWidthDp,
-                        onSearchEngineClick = onSearchEngineClick,
-                        onSearchEngineLongPress = onSearchEngineLongPress,
-                        isPredicted =
-                            (predictedTarget as? PredictedSubmitTarget.SearchTarget)?.targetId ==
-                                engine.getId(),
-                    )
+                rowItems(columns) { column ->
+                    Column(
+                        verticalArrangement =
+                            Arrangement.spacedBy(SearchEngineSectionConstants.ROW_SPACING),
+                    ) {
+                        column.top?.let { topEngine ->
+                            SearchEngineIconItem(
+                                engine = topEngine,
+                                query = query,
+                                iconSize = SearchEngineSectionConstants.ICON_SIZE,
+                                itemWidth = itemWidthDp,
+                                onSearchEngineClick = onSearchEngineClick,
+                                onSearchEngineLongPress = onSearchEngineLongPress,
+                                isPredicted =
+                                    (predictedTarget as? PredictedSubmitTarget.SearchTarget)
+                                        ?.targetId == topEngine.getId(),
+                            )
+                        }
+                        column.bottom?.let { bottomEngine ->
+                            SearchEngineIconItem(
+                                engine = bottomEngine,
+                                query = query,
+                                iconSize = SearchEngineSectionConstants.ICON_SIZE,
+                                itemWidth = itemWidthDp,
+                                onSearchEngineClick = onSearchEngineClick,
+                                onSearchEngineLongPress = onSearchEngineLongPress,
+                                isPredicted =
+                                    (predictedTarget as? PredictedSubmitTarget.SearchTarget)
+                                        ?.targetId == bottomEngine.getId(),
+                            )
+                        }
+                    }
                 }
             }
         } else {
@@ -319,16 +345,44 @@ private fun ScrollableEngineIcons(
  * / number of items
  */
 @Composable
-private fun calculateItemWidth(
-    maxWidth: androidx.compose.ui.unit.Dp,
-    _compactRowCount: Int,
-): androidx.compose.ui.unit.Dp {
-    val itemsPerRow =
-        when {
-            isTablet() && isLandscape() -> 10
-            isTablet() -> 8
-            else -> 6
-        }
+private fun calculateItemWidth(maxWidth: androidx.compose.ui.unit.Dp, itemsPerRow: Int): androidx.compose.ui.unit.Dp {
     val totalSpacing = SearchEngineSectionConstants.SPACING * (itemsPerRow - 1)
     return (maxWidth - totalSpacing) / itemsPerRow
+}
+
+@Composable
+private fun calculateItemsPerRow(): Int =
+    when {
+        isTablet() && isLandscape() -> 10
+        isTablet() -> 8
+        else -> 6
+    }
+
+private data class TwoRowColumn(
+    val top: SearchTarget?,
+    val bottom: SearchTarget?,
+)
+
+private fun buildTwoRowColumns(
+    engines: List<SearchTarget>,
+    itemsPerRow: Int,
+): List<TwoRowColumn> {
+    if (engines.isEmpty()) return emptyList()
+
+    val pageSize = itemsPerRow * 2
+    return buildList {
+        engines.chunked(pageSize).forEach { page ->
+            val topRow = page.take(itemsPerRow)
+            val bottomRow = page.drop(itemsPerRow)
+            val columnCount = maxOf(topRow.size, bottomRow.size)
+            repeat(columnCount) { index ->
+                add(
+                    TwoRowColumn(
+                        top = topRow.getOrNull(index),
+                        bottom = bottomRow.getOrNull(index),
+                    ),
+                )
+            }
+        }
+    }
 }

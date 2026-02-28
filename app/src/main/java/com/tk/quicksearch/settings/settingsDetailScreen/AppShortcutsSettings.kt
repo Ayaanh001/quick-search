@@ -467,7 +467,9 @@ fun AppShortcutsSettingsSection(
             visibleShortcutGroups.all { expandedCards[it.packageName] == true }
 
     LazyColumn(
-        modifier = modifier,
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(16.dp)),
         verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingLarge),
     ) {
         if (normalizedSearchQuery.isBlank()) {

@@ -1318,6 +1318,7 @@ class AppShortcutRepository(
             val isBlockedBrowserShortcut =
                 (shortcut.packageName == "com.android.chrome" ||
                     shortcut.packageName == "com.brave.browser") &&
+                    !isUserCreatedShortcut(shortcut) &&
                     shortcutKey !in HARDCODED_SHORTCUT_KEYS
             shortcut.enabled &&
                 !isBlockedBrowserShortcut &&
