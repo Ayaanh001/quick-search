@@ -1,6 +1,5 @@
 package com.tk.quicksearch.widget
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -24,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.data.UserAppPreferences
@@ -32,16 +30,20 @@ import com.tk.quicksearch.widget.customButtons.CustomWidgetButtonIcon
 import com.tk.quicksearch.widget.voiceSearch.MicAction
 
 @Composable
-fun WidgetPreviewCard(state: QuickSearchWidgetPreferences) {
+fun WidgetPreviewCard(
+    state: QuickSearchWidgetPreferences,
+    widgetVariant: QuickSearchWidgetVariant = QuickSearchWidgetVariant.STANDARD,
+) {
+    val previewState = state.enforceVariantConstraints(widgetVariant)
     val context = LocalContext.current
-    val colors = calculatePreviewColors(state)
-    val borderShape = RoundedCornerShape(state.borderRadiusDp.dp)
-    val shouldShowBorder = state.borderWidthDp >= WidgetConfigConstants.BORDER_VISIBILITY_THRESHOLD
+    val colors = calculatePreviewColors(previewState)
+    val borderShape = RoundedCornerShape(previewState.borderRadiusDp.dp)
+    val shouldShowBorder = previewState.borderWidthDp >= WidgetConfigConstants.BORDER_VISIBILITY_THRESHOLD
     val iconPackPackage =
         remember(context) {
             UserAppPreferences(context).uiPreferences.getSelectedIconPackPackage()
         }
-    val customButtons = state.customButtons.filterNotNull()
+    val customButtons = previewState.customButtons.filterNotNull()
 
     Box(
         modifier =
@@ -61,7 +63,7 @@ fun WidgetPreviewCard(state: QuickSearchWidgetPreferences) {
                     .then(
                         if (shouldShowBorder) {
                             Modifier.border(
-                                width = state.borderWidthDp.dp,
+                                width = previewState.borderWidthDp.dp,
                                 color = colors.border,
                                 shape = borderShape,
                             )
@@ -70,7 +72,7 @@ fun WidgetPreviewCard(state: QuickSearchWidgetPreferences) {
                         },
                     ),
         ) {
-            if (state.iconAlignLeft) {
+            if (widgetVariant == QuickSearchWidgetVariant.STANDARD && previewState.iconAlignLeft) {
                 Box(
                     modifier =
                         Modifier
@@ -78,7 +80,7 @@ fun WidgetPreviewCard(state: QuickSearchWidgetPreferences) {
                             .padding(horizontal = WidgetConfigConstants.PREVIEW_INNER_PADDING),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (state.showLabel) {
+                    if (previewState.showLabel) {
                         Text(
                             text = stringResource(R.string.widget_label_text),
                             color = colors.textIcon,
@@ -86,7 +88,7 @@ fun WidgetPreviewCard(state: QuickSearchWidgetPreferences) {
                         )
                     }
 
-                    if (state.showSearchIcon) {
+                    if (previewState.showSearchIcon) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.CenterStart,
@@ -109,7 +111,7 @@ fun WidgetPreviewCard(state: QuickSearchWidgetPreferences) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ) {
-                    if (state.showSearchIcon) {
+                    if (widgetVariant == QuickSearchWidgetVariant.STANDARD && previewState.showSearchIcon) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_widget_search),
                             contentDescription = stringResource(R.string.desc_search_icon),
@@ -117,12 +119,17 @@ fun WidgetPreviewCard(state: QuickSearchWidgetPreferences) {
                             modifier = Modifier.size(WidgetConfigConstants.PREVIEW_ICON_SIZE),
                         )
                     }
-                    if (state.showLabel) {
+                    if (widgetVariant == QuickSearchWidgetVariant.STANDARD && previewState.showLabel) {
                         Text(
                             text = stringResource(R.string.widget_label_text),
                             modifier =
                                 Modifier.padding(
-                                    start = if (state.showSearchIcon) WidgetConfigConstants.PREVIEW_ICON_TEXT_SPACING else 0.dp,
+                                    start =
+                                        if (previewState.showSearchIcon) {
+                                            WidgetConfigConstants.PREVIEW_ICON_TEXT_SPACING
+                                        } else {
+                                            0.dp
+                                        },
                                 ),
                             color = colors.textIcon,
                             style = MaterialTheme.typography.titleMedium,
@@ -131,42 +138,101 @@ fun WidgetPreviewCard(state: QuickSearchWidgetPreferences) {
                 }
             }
 
-            if (customButtons.isNotEmpty() || state.micAction != MicAction.OFF) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(end = WidgetConfigConstants.PREVIEW_INNER_PADDING),
-                    contentAlignment = Alignment.CenterEnd,
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(WidgetConfigConstants.CUSTOM_BUTTON_SPACING),
-                    ) {
-                        customButtons.forEach { action ->
-                            Box(
-                                modifier = Modifier.size(36.dp), // Match micTouchSpace from actual widget
-                                contentAlignment = Alignment.Center,
+            when (widgetVariant) {
+                QuickSearchWidgetVariant.STANDARD -> {
+                    if (customButtons.isNotEmpty() || previewState.micAction != MicAction.OFF) {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(end = WidgetConfigConstants.PREVIEW_INNER_PADDING),
+                            contentAlignment = Alignment.CenterEnd,
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(WidgetConfigConstants.CUSTOM_BUTTON_SPACING),
                             ) {
-                                CustomWidgetButtonIcon(
-                                    action = action,
-                                    iconSize = WidgetConfigConstants.PREVIEW_ICON_SIZE,
-                                    iconPackPackage = iconPackPackage,
-                                    tintColor = colors.textIcon,
-                                )
+                                customButtons.forEach { action ->
+                                    Box(
+                                        modifier = Modifier.size(36.dp), // Match micTouchSpace from actual widget
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        CustomWidgetButtonIcon(
+                                            action = action,
+                                            iconSize = WidgetConfigConstants.PREVIEW_ICON_SIZE,
+                                            iconPackPackage = iconPackPackage,
+                                            tintColor = colors.textIcon,
+                                        )
+                                    }
+                                }
+                                if (previewState.micAction != MicAction.OFF) {
+                                    Box(
+                                        modifier = Modifier.size(36.dp), // Match micTouchSpace from actual widget
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_widget_mic),
+                                            contentDescription = stringResource(R.string.desc_voice_search_icon),
+                                            tint = colors.textIcon,
+                                            modifier = Modifier.size(WidgetConfigConstants.PREVIEW_ICON_SIZE),
+                                        )
+                                    }
+                                }
                             }
                         }
-                        if (state.micAction != MicAction.OFF) {
-                            Box(
-                                modifier = Modifier.size(36.dp), // Match micTouchSpace from actual widget
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_widget_mic),
-                                    contentDescription = stringResource(R.string.desc_voice_search_icon),
-                                    tint = colors.textIcon,
-                                    modifier = Modifier.size(WidgetConfigConstants.PREVIEW_ICON_SIZE),
-                                )
+                    }
+                }
+                QuickSearchWidgetVariant.CUSTOM_BUTTONS_ONLY -> {
+                    val placeholderIcons =
+                        listOf(
+                            R.drawable.ic_widget_contact,
+                            R.drawable.ic_widget_apps,
+                            R.drawable.ic_widget_folder,
+                            R.drawable.ic_widget_file,
+                            R.drawable.ic_widget_shortcut,
+                            R.drawable.ic_widget_settings,
+                        )
+                    val touchSpace = if (customButtons.size >= 5 || customButtons.isEmpty()) 28.dp else 36.dp
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = WidgetConfigConstants.PREVIEW_INNER_PADDING),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            if (customButtons.isNotEmpty()) {
+                                customButtons.forEach { action ->
+                                    Box(
+                                        modifier = Modifier.size(touchSpace),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        CustomWidgetButtonIcon(
+                                            action = action,
+                                            iconSize = WidgetConfigConstants.PREVIEW_ICON_SIZE,
+                                            iconPackPackage = iconPackPackage,
+                                            tintColor = colors.textIcon,
+                                        )
+                                    }
+                                }
+                            } else {
+                                placeholderIcons.forEach { iconRes ->
+                                    Box(
+                                        modifier = Modifier.size(touchSpace),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = iconRes),
+                                            contentDescription = null,
+                                            tint = colors.textIcon,
+                                            modifier = Modifier.size(WidgetConfigConstants.PREVIEW_ICON_SIZE),
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

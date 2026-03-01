@@ -571,7 +571,9 @@
          Widget
          ============================================================================ -->
     <string name="widget_label_text">Quick Search</string>
-    <string name="widget_settings_title">Quick Search Widget</string>
+    <string name="widget_settings_title">Search Widget</string>
+    <string name="widget_custom_buttons_widget_title">Custom Buttons Widget</string>
+    <string name="widget_custom_buttons_widget_settings_title">Custom Buttons Widget</string>
     <string name="widget_loading_state">Loading widget settings…</string>
     <string name="widget_slider_radius">Corner Radius</string>
     <string name="widget_slider_border">Border Thickness</string>

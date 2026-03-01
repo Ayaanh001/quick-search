@@ -42,6 +42,17 @@ enum class SearchIconDisplay(
     OFF("off"),
 }
 
+enum class QuickSearchWidgetVariant {
+    STANDARD,
+    CUSTOM_BUTTONS_ONLY,
+}
+
+internal object WidgetButtonSlotConfig {
+    const val STANDARD_COUNT = 2
+    const val CUSTOM_ONLY_COUNT = 6
+    const val MAX_COUNT = CUSTOM_ONLY_COUNT
+}
+
 internal object WidgetDefaults {
     val BORDER_COLOR = Color.Black
     val BORDER_COLOR_ARGB = BORDER_COLOR.toArgb()
@@ -62,7 +73,8 @@ internal object WidgetDefaults {
 
     // Default to theme-based colors (null means follow theme)
     val TEXT_ICON_COLOR_OVERRIDE: Boolean? = null
-    val CUSTOM_BUTTONS: List<CustomWidgetButtonAction?> = listOf(null, null)
+    val CUSTOM_BUTTONS: List<CustomWidgetButtonAction?> =
+        List(WidgetButtonSlotConfig.STANDARD_COUNT) { null }
 }
 
 private object WidgetRanges {
@@ -90,6 +102,10 @@ private object WidgetKeys {
         stringPreferencesKey("quick_search_widget_text_icon_color_override")
     val CUSTOM_BUTTON_0 = stringPreferencesKey("quick_search_widget_custom_button_0")
     val CUSTOM_BUTTON_1 = stringPreferencesKey("quick_search_widget_custom_button_1")
+    val CUSTOM_BUTTON_2 = stringPreferencesKey("quick_search_widget_custom_button_2")
+    val CUSTOM_BUTTON_3 = stringPreferencesKey("quick_search_widget_custom_button_3")
+    val CUSTOM_BUTTON_4 = stringPreferencesKey("quick_search_widget_custom_button_4")
+    val CUSTOM_BUTTON_5 = stringPreferencesKey("quick_search_widget_custom_button_5")
 
     // Legacy keys for migration
     val SHOW_SEARCH_ICON = booleanPreferencesKey("quick_search_widget_show_search_icon")
@@ -133,7 +149,7 @@ data class QuickSearchWidgetPreferences(
         get() = customButtons.any { it != null }
 
     fun coerceToValidRanges(): QuickSearchWidgetPreferences {
-        val normalizedButtons = normalizeCustomButtons(customButtons)
+        val normalizedButtons = normalizeCustomButtons(customButtons, WidgetButtonSlotConfig.MAX_COUNT)
         val shouldHideLabel = normalizedButtons.any { it != null }
         return copy(
             borderRadiusDp =
@@ -168,9 +184,12 @@ data class QuickSearchWidgetPreferences(
     }
 }
 
-private fun normalizeCustomButtons(buttons: List<CustomWidgetButtonAction?>): List<CustomWidgetButtonAction?> {
-    val normalized = buttons.take(2).toMutableList()
-    while (normalized.size < 2) {
+private fun normalizeCustomButtons(
+    buttons: List<CustomWidgetButtonAction?>,
+    maxSlots: Int,
+): List<CustomWidgetButtonAction?> {
+    val normalized = buttons.take(maxSlots).toMutableList()
+    while (normalized.size < maxSlots) {
         normalized.add(null)
     }
     return normalized
@@ -201,6 +220,10 @@ fun Preferences.toWidgetPreferences(): QuickSearchWidgetPreferences {
         listOf(
             CustomWidgetButtonAction.fromJson(this[WidgetKeys.CUSTOM_BUTTON_0]),
             CustomWidgetButtonAction.fromJson(this[WidgetKeys.CUSTOM_BUTTON_1]),
+            CustomWidgetButtonAction.fromJson(this[WidgetKeys.CUSTOM_BUTTON_2]),
+            CustomWidgetButtonAction.fromJson(this[WidgetKeys.CUSTOM_BUTTON_3]),
+            CustomWidgetButtonAction.fromJson(this[WidgetKeys.CUSTOM_BUTTON_4]),
+            CustomWidgetButtonAction.fromJson(this[WidgetKeys.CUSTOM_BUTTON_5]),
         )
 
     return QuickSearchWidgetPreferences(
@@ -282,9 +305,43 @@ fun MutablePreferences.applyWidgetPreferences(config: QuickSearchWidgetPreferenc
     this[WidgetKeys.BORDER_ALPHA] = validated.borderAlpha
     this[WidgetKeys.MIC_ACTION] = validated.micAction.value
     this[WidgetKeys.TEXT_ICON_COLOR_OVERRIDE] = validated.textIconColorOverride.value
-    val customButtons = normalizeCustomButtons(validated.customButtons)
+    val customButtons = normalizeCustomButtons(validated.customButtons, WidgetButtonSlotConfig.MAX_COUNT)
     customButtons.getOrNull(0)?.let { action -> this[WidgetKeys.CUSTOM_BUTTON_0] = action.toJson() }
         ?: remove(WidgetKeys.CUSTOM_BUTTON_0)
     customButtons.getOrNull(1)?.let { action -> this[WidgetKeys.CUSTOM_BUTTON_1] = action.toJson() }
         ?: remove(WidgetKeys.CUSTOM_BUTTON_1)
+    customButtons.getOrNull(2)?.let { action -> this[WidgetKeys.CUSTOM_BUTTON_2] = action.toJson() }
+        ?: remove(WidgetKeys.CUSTOM_BUTTON_2)
+    customButtons.getOrNull(3)?.let { action -> this[WidgetKeys.CUSTOM_BUTTON_3] = action.toJson() }
+        ?: remove(WidgetKeys.CUSTOM_BUTTON_3)
+    customButtons.getOrNull(4)?.let { action -> this[WidgetKeys.CUSTOM_BUTTON_4] = action.toJson() }
+        ?: remove(WidgetKeys.CUSTOM_BUTTON_4)
+    customButtons.getOrNull(5)?.let { action -> this[WidgetKeys.CUSTOM_BUTTON_5] = action.toJson() }
+        ?: remove(WidgetKeys.CUSTOM_BUTTON_5)
+}
+
+fun QuickSearchWidgetPreferences.enforceVariantConstraints(variant: QuickSearchWidgetVariant): QuickSearchWidgetPreferences {
+    val normalized = coerceToValidRanges()
+    return when (variant) {
+        QuickSearchWidgetVariant.STANDARD ->
+            normalized.copy(
+                customButtons =
+                    normalizeCustomButtons(
+                        normalized.customButtons,
+                        WidgetButtonSlotConfig.STANDARD_COUNT,
+                    ),
+            )
+        QuickSearchWidgetVariant.CUSTOM_BUTTONS_ONLY ->
+            normalized.copy(
+                showLabel = false,
+                searchIconDisplay = SearchIconDisplay.OFF,
+                showMicIcon = false,
+                micAction = OFF,
+                customButtons =
+                    normalizeCustomButtons(
+                        normalized.customButtons,
+                        WidgetButtonSlotConfig.CUSTOM_ONLY_COUNT,
+                    ),
+            )
+    }
 }

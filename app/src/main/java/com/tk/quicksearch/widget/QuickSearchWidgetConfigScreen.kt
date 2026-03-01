@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -53,6 +52,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -63,7 +63,6 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.OverlayGradientTheme
@@ -81,22 +80,27 @@ import kotlin.math.roundToInt
 fun QuickSearchWidgetConfigScreen(
     state: QuickSearchWidgetPreferences,
     isLoaded: Boolean,
+    isSaveEnabled: Boolean = isLoaded,
     onStateChange: (QuickSearchWidgetPreferences) -> Unit,
     onApply: () -> Unit,
     onCancel: () -> Unit,
     searchViewModel: SearchViewModel,
+    widgetVariant: QuickSearchWidgetVariant = QuickSearchWidgetVariant.STANDARD,
+    titleResId: Int = R.string.widget_settings_title,
     showConfigTip: Boolean = false,
     onDismissConfigTip: (() -> Unit)? = null,
 ) {
+    val constrainedState = state.enforceVariantConstraints(widgetVariant)
+    val onConstrainedStateChange: (QuickSearchWidgetPreferences) -> Unit = { updated ->
+        onStateChange(updated.enforceVariantConstraints(widgetVariant))
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text =
-                            stringResource(
-                                R.string.widget_settings_title,
-                            ),
+                        text = stringResource(titleResId),
                         style = MaterialTheme.typography.titleLarge,
                     )
                 },
@@ -138,7 +142,7 @@ fun QuickSearchWidgetConfigScreen(
                 ) {
                     Button(
                         onClick = onApply,
-                        enabled = isLoaded,
+                        enabled = isSaveEnabled,
                         modifier =
                             Modifier
                                 .fillMaxWidth()
@@ -176,7 +180,12 @@ fun QuickSearchWidgetConfigScreen(
                     Arrangement.spacedBy(
                         WidgetConfigConstants.PREVIEW_SECTION_SPACING,
                     ),
-            ) { WidgetPreviewCard(state = state) }
+            ) {
+                WidgetPreviewCard(
+                    state = constrainedState,
+                    widgetVariant = widgetVariant,
+                )
+            }
 
             // Scrollable preferences section
             Column(
@@ -199,10 +208,19 @@ fun QuickSearchWidgetConfigScreen(
                 verticalArrangement =
                     Arrangement.spacedBy(WidgetConfigConstants.SECTION_SPACING),
             ) {
-                WidgetThemeSection(state = state, onStateChange = onStateChange)
+                if (widgetVariant == QuickSearchWidgetVariant.CUSTOM_BUTTONS_ONLY) {
+                    CustomWidgetButtonsSection(
+                        state = constrainedState,
+                        searchViewModel = searchViewModel,
+                        maxButtons = WidgetButtonSlotConfig.CUSTOM_ONLY_COUNT,
+                        onStateChange = onConstrainedStateChange,
+                    )
+                }
+
+                WidgetThemeSection(state = constrainedState, onStateChange = onConstrainedStateChange)
 
                 // Tip banner (only shown once)
-                if (showConfigTip) {
+                if (showConfigTip && widgetVariant == QuickSearchWidgetVariant.STANDARD) {
                     TipBanner(
                         text =
                             stringResource(
@@ -213,26 +231,29 @@ fun QuickSearchWidgetConfigScreen(
                     )
                 }
 
-                WidgetSlidersSection(state = state, onStateChange = onStateChange)
-                WidgetSearchIconSection(
-                    state = state,
-                    onStateChange = onStateChange,
-                )
-                WidgetMicIconSection(state = state, onStateChange = onStateChange)
-                WidgetToggleSection(
-                    state = state,
-                    hasCustomButtons = state.hasCustomButtons,
-                    onStateChange = onStateChange,
-                )
-                WidgetTextIconColorSection(
-                    state = state,
-                    onStateChange = onStateChange,
-                )
-                CustomWidgetButtonsSection(
-                    state = state,
-                    searchViewModel = searchViewModel,
-                    onStateChange = onStateChange,
-                )
+                WidgetSlidersSection(state = constrainedState, onStateChange = onConstrainedStateChange)
+                if (widgetVariant == QuickSearchWidgetVariant.STANDARD) {
+                    WidgetSearchIconSection(
+                        state = constrainedState,
+                        onStateChange = onConstrainedStateChange,
+                    )
+                    WidgetMicIconSection(state = constrainedState, onStateChange = onConstrainedStateChange)
+                    WidgetToggleSection(
+                        state = constrainedState,
+                        hasCustomButtons = constrainedState.hasCustomButtons,
+                        onStateChange = onConstrainedStateChange,
+                    )
+                    WidgetTextIconColorSection(
+                        state = constrainedState,
+                        onStateChange = onConstrainedStateChange,
+                    )
+                    CustomWidgetButtonsSection(
+                        state = constrainedState,
+                        searchViewModel = searchViewModel,
+                        maxButtons = WidgetButtonSlotConfig.STANDARD_COUNT,
+                        onStateChange = onConstrainedStateChange,
+                    )
+                }
             }
         }
     }
