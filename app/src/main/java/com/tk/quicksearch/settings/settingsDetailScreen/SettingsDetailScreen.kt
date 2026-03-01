@@ -158,6 +158,12 @@ internal fun SettingsDetailLevel1Screen(
                             onNavigateToAppShortcuts = {
                                 onNavigateToDetail(SettingsDetailType.APP_SHORTCUTS)
                             },
+                            onNavigateToCallsTexts = {
+                                onNavigateToDetail(SettingsDetailType.CALLS_TEXTS)
+                            },
+                            onNavigateToFiles = {
+                                onNavigateToDetail(SettingsDetailType.FILES)
+                            },
                             onNavigateToDeviceSettings = {
                                 onNavigateToDetail(SettingsDetailType.DEVICE_SETTINGS)
                             },
@@ -208,46 +214,6 @@ internal fun SettingsDetailLevel1Screen(
                         )
                     }
 
-                    SettingsDetailType.CALLS_TEXTS -> {
-                        CallsTextsSettingsSection(
-                            messagingApp = state.messagingApp,
-                            callingApp = state.callingApp,
-                            onSetMessagingApp = callbacks.onSetMessagingApp,
-                            onSetCallingApp = callbacks.onSetCallingApp,
-                            directDialEnabled = state.directDialEnabled,
-                            onToggleDirectDial = callbacks.onToggleDirectDial,
-                            hasCallPermission = PermissionRequestHandler.checkCallPermission(context),
-                            contactsSectionEnabled = true,
-                            isWhatsAppInstalled = state.isWhatsAppInstalled,
-                            isTelegramInstalled = state.isTelegramInstalled,
-                            isSignalInstalled = state.isSignalInstalled,
-                            isGoogleMeetInstalled = state.isGoogleMeetInstalled,
-                            modifier = Modifier,
-                        )
-                    }
-
-                    SettingsDetailType.FILES -> {
-                        FileTypesSection(
-                            enabledFileTypes = state.enabledFileTypes,
-                            onToggleFileType = callbacks.onToggleFileType,
-                            showFolders = state.showFolders,
-                            onToggleFolders = callbacks.onToggleFolders,
-                            showSystemFiles = state.showSystemFiles,
-                            onToggleSystemFiles = callbacks.onToggleSystemFiles,
-                            showHiddenFiles = state.showHiddenFiles,
-                            onToggleHiddenFiles = callbacks.onToggleHiddenFiles,
-                            folderWhitelistPatterns = state.folderWhitelistPatterns,
-                            onSetFolderWhitelistPatterns = callbacks.onSetFolderWhitelistPatterns,
-                            folderBlacklistPatterns = state.folderBlacklistPatterns,
-                            onSetFolderBlacklistPatterns = callbacks.onSetFolderBlacklistPatterns,
-                            excludedExtensions = state.excludedFileExtensions,
-                            onRemoveExcludedExtension = callbacks.onRemoveExcludedFileExtension,
-                            filesSectionEnabled = SearchSection.FILES !in state.disabledSections,
-                            showTitle = false,
-                            modifier = Modifier,
-                        )
-                    }
-
                     SettingsDetailType.LAUNCH_OPTIONS -> {
                         LaunchOptionsSettings(
                             isDefaultAssistant = isDefaultAssistant,
@@ -283,6 +249,8 @@ internal fun SettingsDetailLevel1Screen(
                     SettingsDetailType.APP_MANAGEMENT,
                     SettingsDetailType.APP_SHORTCUTS,
                     SettingsDetailType.DEVICE_SETTINGS,
+                    SettingsDetailType.CALLS_TEXTS,
+                    SettingsDetailType.FILES,
                     SettingsDetailType.DIRECT_SEARCH_CONFIGURE,
                     -> Unit
                 }
@@ -350,6 +318,8 @@ internal fun SettingsDetailType.isLevel2(): Boolean =
         this == SettingsDetailType.APP_SHORTCUTS ||
         this == SettingsDetailType.EXCLUDED_ITEMS ||
         this == SettingsDetailType.DEVICE_SETTINGS ||
+        this == SettingsDetailType.CALLS_TEXTS ||
+        this == SettingsDetailType.FILES ||
         this == SettingsDetailType.DIRECT_SEARCH_CONFIGURE
 
 internal fun SettingsDetailType.level(): Int = if (isLevel2()) 2 else 1

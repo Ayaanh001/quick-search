@@ -285,6 +285,12 @@ fun SectionSettingsSection(
     appShortcutsSubtitle: String? = null,
     onAppShortcutsClick: (() -> Unit)? = null,
     onAppShortcutsClickNoRipple: Boolean = false,
+    contactsSubtitle: String? = null,
+    onContactsClick: (() -> Unit)? = null,
+    onContactsClickNoRipple: Boolean = false,
+    filesSubtitle: String? = null,
+    onFilesClick: (() -> Unit)? = null,
+    onFilesClickNoRipple: Boolean = false,
     deviceSettingsSubtitle: String? = null,
     onDeviceSettingsClick: (() -> Unit)? = null,
     onDeviceSettingsClickNoRipple: Boolean = false,
@@ -308,6 +314,8 @@ fun SectionSettingsSection(
             sectionOrder.forEachIndexed { index, section ->
                 val isAppsRow = section == SearchSection.APPS
                 val isAppShortcutsRow = section == SearchSection.APP_SHORTCUTS
+                val isContactsRow = section == SearchSection.CONTACTS
+                val isFilesRow = section == SearchSection.FILES
                 val isDeviceSettingsRow = section == SearchSection.SETTINGS
                 SectionRowWithoutDrag(
                     section = section,
@@ -317,6 +325,8 @@ fun SectionSettingsSection(
                         when {
                             isAppsRow -> appsSubtitle
                             isAppShortcutsRow -> appShortcutsSubtitle
+                            isContactsRow -> contactsSubtitle
+                            isFilesRow -> filesSubtitle
                             isDeviceSettingsRow -> deviceSettingsSubtitle
                             else -> null
                         },
@@ -324,6 +334,8 @@ fun SectionSettingsSection(
                         when {
                             isAppsRow -> onAppsClick
                             isAppShortcutsRow -> onAppShortcutsClick
+                            isContactsRow -> onContactsClick
+                            isFilesRow -> onFilesClick
                             isDeviceSettingsRow -> onDeviceSettingsClick
                             else -> null
                         },
@@ -331,6 +343,8 @@ fun SectionSettingsSection(
                         when {
                             isAppsRow -> onAppsClickNoRipple
                             isAppShortcutsRow -> onAppShortcutsClickNoRipple
+                            isContactsRow -> onContactsClickNoRipple
+                            isFilesRow -> onFilesClickNoRipple
                             isDeviceSettingsRow -> onDeviceSettingsClickNoRipple
                             else -> false
                         },

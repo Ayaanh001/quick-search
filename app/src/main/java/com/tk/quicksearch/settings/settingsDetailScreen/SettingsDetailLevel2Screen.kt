@@ -34,9 +34,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
+import com.tk.quicksearch.onboarding.permissionScreen.PermissionRequestHandler
+import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.data.StaticShortcut
 import com.tk.quicksearch.settings.shared.AppShortcutSource
@@ -60,6 +63,7 @@ internal fun SettingsDetailLevel2Screen(
     if (!detailType.isLevel2()) return
 
     BackHandler(onBack = callbacks.onBack)
+    val context = LocalContext.current
     val scrollState = rememberScrollState()
     var showClearAllConfirmation by remember { mutableStateOf(false) }
     var appShortcutsSearchQuery by remember { mutableStateOf("") }
@@ -181,6 +185,46 @@ internal fun SettingsDetailLevel2Screen(
                             DeviceSettingsSettingsSection(
                                 settings = state.allDeviceSettings,
                                 onSettingClick = callbacks.onLaunchDeviceSetting,
+                            )
+                        }
+
+                        SettingsDetailType.CALLS_TEXTS -> {
+                            CallsTextsSettingsSection(
+                                messagingApp = state.messagingApp,
+                                callingApp = state.callingApp,
+                                onSetMessagingApp = callbacks.onSetMessagingApp,
+                                onSetCallingApp = callbacks.onSetCallingApp,
+                                directDialEnabled = state.directDialEnabled,
+                                onToggleDirectDial = callbacks.onToggleDirectDial,
+                                hasCallPermission = PermissionRequestHandler.checkCallPermission(context),
+                                contactsSectionEnabled = true,
+                                isWhatsAppInstalled = state.isWhatsAppInstalled,
+                                isTelegramInstalled = state.isTelegramInstalled,
+                                isSignalInstalled = state.isSignalInstalled,
+                                isGoogleMeetInstalled = state.isGoogleMeetInstalled,
+                                modifier = Modifier,
+                            )
+                        }
+
+                        SettingsDetailType.FILES -> {
+                            FileTypesSection(
+                                enabledFileTypes = state.enabledFileTypes,
+                                onToggleFileType = callbacks.onToggleFileType,
+                                showFolders = state.showFolders,
+                                onToggleFolders = callbacks.onToggleFolders,
+                                showSystemFiles = state.showSystemFiles,
+                                onToggleSystemFiles = callbacks.onToggleSystemFiles,
+                                showHiddenFiles = state.showHiddenFiles,
+                                onToggleHiddenFiles = callbacks.onToggleHiddenFiles,
+                                folderWhitelistPatterns = state.folderWhitelistPatterns,
+                                onSetFolderWhitelistPatterns = callbacks.onSetFolderWhitelistPatterns,
+                                folderBlacklistPatterns = state.folderBlacklistPatterns,
+                                onSetFolderBlacklistPatterns = callbacks.onSetFolderBlacklistPatterns,
+                                excludedExtensions = state.excludedFileExtensions,
+                                onRemoveExcludedExtension = callbacks.onRemoveExcludedFileExtension,
+                                filesSectionEnabled = SearchSection.FILES !in state.disabledSections,
+                                showTitle = false,
+                                modifier = Modifier,
                             )
                         }
 

@@ -36,10 +36,8 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Email
-import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.RocketLaunch
 import androidx.compose.material.icons.rounded.Search
@@ -131,7 +129,39 @@ fun SettingsScreen(
         androidx.compose.foundation.rememberScrollState(),
 ) {
     BackHandler(onBack = callbacks.onBack)
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
+    var showImportWarningDialog by remember { mutableStateOf(false) }
+
+    val exportLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("application/octet-stream"),
+        ) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            coroutineScope.launch(Dispatchers.IO) {
+                val isSuccess =
+                    runCatching { SettingsBackupManager.exportToUri(context, uri) }.isSuccess
+                withContext(Dispatchers.Main) {
+                    val messageResId =
+                        if (isSuccess) {
+                            R.string.settings_backup_export_success
+                        } else {
+                            R.string.settings_backup_export_failed
+                        }
+                    Toast.makeText(context, context.getString(messageResId), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+    val importLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            pendingImportUri = uri
+            showImportWarningDialog = true
+        }
 
     Column(
         modifier =
@@ -234,40 +264,6 @@ fun SettingsScreen(
                             },
                         ),
                     )
-                    if (hasContactPermission) {
-                        add(
-                            SettingsCardItem(
-                                title = stringResource(R.string.settings_calls_texts_title),
-                                description = stringResource(R.string.settings_calls_texts_desc),
-                                icon = Icons.Rounded.Phone,
-                                actionOnPress = {
-                                    onNavigateToDetail(SettingsDetailType.CALLS_TEXTS)
-                                },
-                            ),
-                        )
-                    }
-                    if (hasFilePermission) {
-                        add(
-                            SettingsCardItem(
-                                title = stringResource(R.string.settings_file_types_title),
-                                description = stringResource(R.string.settings_files_desc),
-                                icon = Icons.Rounded.Folder,
-                                actionOnPress = {
-                                    onNavigateToDetail(SettingsDetailType.FILES)
-                                },
-                            ),
-                        )
-                    }
-                    add(
-                        SettingsCardItem(
-                            title = stringResource(R.string.settings_launch_options_title),
-                            description = stringResource(R.string.settings_launch_options_desc),
-                            icon = Icons.Rounded.RocketLaunch,
-                            actionOnPress = {
-                                onNavigateToDetail(SettingsDetailType.LAUNCH_OPTIONS)
-                            },
-                        ),
-                    )
                 }
 
             ElevatedCard(
@@ -293,17 +289,128 @@ fun SettingsScreen(
                 }
             }
 
+            ElevatedCard(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = DesignTokens.SectionTopPadding),
+                shape = MaterialTheme.shapes.extraLarge,
+            ) {
+                Column {
+                    SettingsNavigationRow(
+                        item =
+                            SettingsCardItem(
+                                title = stringResource(R.string.settings_launch_options_title),
+                                description = stringResource(R.string.settings_launch_options_desc),
+                                icon = Icons.Rounded.RocketLaunch,
+                                actionOnPress = {
+                                    onNavigateToDetail(SettingsDetailType.LAUNCH_OPTIONS)
+                                },
+                            ),
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                    )
+
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                    )
+
+                    SettingsNavigationRow(
+                        item =
+                            SettingsCardItem(
+                                title = stringResource(R.string.settings_permissions_title),
+                                description = stringResource(R.string.settings_permissions_desc),
+                                icon = Icons.Rounded.AdminPanelSettings,
+                                actionOnPress = {
+                                    onNavigateToDetail(SettingsDetailType.PERMISSIONS)
+                                },
+                            ),
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                    )
+
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                    )
+
+                    BackupRestoreRow(
+                        onImportClick = {
+                            importLauncher.launch(arrayOf("*/*"))
+                        },
+                        onExportClick = {
+                            val defaultName =
+                                SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
+                            exportLauncher.launch("quick-search-settings-$defaultName.quicksearch")
+                        },
+                    )
+                }
+            }
+
             // More Options Section
-            SettingsMoreOptions(
-                onNavigateToPermissions = {
-                    onNavigateToDetail(SettingsDetailType.PERMISSIONS)
-                },
-                onSettingsImported = onSettingsImported,
-            )
+            SettingsMoreOptions()
 
             // App Version
             SettingsVersionDisplay(modifier = Modifier.padding(top = 40.dp, bottom = 60.dp))
         }
+    }
+
+    if (showImportWarningDialog && pendingImportUri != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showImportWarningDialog = false
+                pendingImportUri = null
+            },
+            title = {
+                Text(text = stringResource(R.string.settings_backup_import_warning_title))
+            },
+            text = {
+                Text(text = stringResource(R.string.settings_backup_import_warning_message))
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val importUri = pendingImportUri
+                        showImportWarningDialog = false
+                        pendingImportUri = null
+                        if (importUri == null) return@TextButton
+
+                        coroutineScope.launch(Dispatchers.IO) {
+                            val isSuccess =
+                                runCatching {
+                                    SettingsBackupManager.importFromUri(context, importUri)
+                                }.isSuccess
+                            withContext(Dispatchers.Main) {
+                                val messageResId =
+                                    if (isSuccess) {
+                                        R.string.settings_backup_import_success
+                                    } else {
+                                        R.string.settings_backup_import_failed
+                                    }
+                                Toast
+                                    .makeText(
+                                        context,
+                                        context.getString(messageResId),
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                if (isSuccess) {
+                                    onSettingsImported()
+                                }
+                            }
+                        }
+                    },
+                ) {
+                    Text(text = stringResource(R.string.dialog_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showImportWarningDialog = false
+                        pendingImportUri = null
+                    },
+                ) {
+                    Text(text = stringResource(R.string.dialog_cancel))
+                }
+            },
+        )
     }
 }
 
@@ -335,47 +442,13 @@ fun NavigationSectionCard(
 }
 
 /**
- * More options section with navigation options for permissions, rating, feedback, GitHub, and features.
+ * More options section with rating, feedback, GitHub, and features.
  */
 @Composable
 fun SettingsMoreOptions(
     modifier: Modifier = Modifier,
-    onNavigateToPermissions: () -> Unit = {},
-    onSettingsImported: () -> Unit = {},
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
-    var showImportWarningDialog by remember { mutableStateOf(false) }
-
-    val exportLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.CreateDocument("application/octet-stream"),
-        ) { uri ->
-            if (uri == null) return@rememberLauncherForActivityResult
-            scope.launch(Dispatchers.IO) {
-                val isSuccess =
-                    runCatching { SettingsBackupManager.exportToUri(context, uri) }.isSuccess
-                withContext(Dispatchers.Main) {
-                    val messageResId =
-                        if (isSuccess) {
-                            R.string.settings_backup_export_success
-                        } else {
-                            R.string.settings_backup_export_failed
-                        }
-                    Toast.makeText(context, context.getString(messageResId), Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-    val importLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.OpenDocument(),
-        ) { uri ->
-            if (uri == null) return@rememberLauncherForActivityResult
-            pendingImportUri = uri
-            showImportWarningDialog = true
-        }
 
     val onSendFeedback = {
         FeedbackUtils.launchFeedbackEmail(context, null)
@@ -430,14 +503,6 @@ fun SettingsMoreOptions(
         }
     }
 
-    val permissionsItem =
-        SettingsCardItem(
-            title = stringResource(R.string.settings_permissions_title),
-            description = stringResource(R.string.settings_permissions_desc),
-            icon = Icons.Rounded.AdminPanelSettings,
-            actionOnPress = onNavigateToPermissions,
-        )
-
     val feedbackItems =
         listOf(
             SettingsCardItem(
@@ -472,28 +537,6 @@ fun SettingsMoreOptions(
         shape = MaterialTheme.shapes.extraLarge,
     ) {
         Column {
-            SettingsNavigationRow(
-                item = permissionsItem,
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
-            )
-
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outlineVariant,
-            )
-
-            BackupRestoreRow(
-                onImportClick = { importLauncher.launch(arrayOf("*/*")) },
-                onExportClick = {
-                    val defaultName =
-                        SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
-                    exportLauncher.launch("quick-search-settings-$defaultName.quicksearch")
-                },
-            )
-
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outlineVariant,
-            )
-
             feedbackItems.forEachIndexed { index, item ->
                 SettingsNavigationRow(
                     item = item,
@@ -527,67 +570,6 @@ fun SettingsMoreOptions(
                 )
             }
         }
-    }
-
-    if (showImportWarningDialog && pendingImportUri != null) {
-        AlertDialog(
-            onDismissRequest = {
-                showImportWarningDialog = false
-                pendingImportUri = null
-            },
-            title = {
-                Text(text = stringResource(R.string.settings_backup_import_warning_title))
-            },
-            text = {
-                Text(text = stringResource(R.string.settings_backup_import_warning_message))
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val importUri = pendingImportUri
-                        showImportWarningDialog = false
-                        pendingImportUri = null
-                        if (importUri == null) return@TextButton
-
-                        scope.launch(Dispatchers.IO) {
-                            val isSuccess =
-                                runCatching {
-                                    SettingsBackupManager.importFromUri(context, importUri)
-                                }.isSuccess
-                            withContext(Dispatchers.Main) {
-                                val messageResId =
-                                    if (isSuccess) {
-                                        R.string.settings_backup_import_success
-                                    } else {
-                                        R.string.settings_backup_import_failed
-                                    }
-                                Toast
-                                    .makeText(
-                                        context,
-                                        context.getString(messageResId),
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
-                                if (isSuccess) {
-                                    onSettingsImported()
-                                }
-                            }
-                        }
-                    },
-                ) {
-                    Text(text = stringResource(R.string.dialog_ok))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showImportWarningDialog = false
-                        pendingImportUri = null
-                    },
-                ) {
-                    Text(text = stringResource(R.string.dialog_cancel))
-                }
-            },
-        )
     }
 }
 

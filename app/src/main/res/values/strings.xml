@@ -464,6 +464,8 @@
     <string name="settings_manage_apps_title">Manage Apps</string>
     <string name="settings_manage_apps_desc">Manage your apps</string>
     <string name="settings_manage_shortcuts_desc">Manage your app shortcuts</string>
+    <string name="settings_manage_calls_texts_contacts_desc">Manage Calls &amp; Texts for contacts</string>
+    <string name="settings_manage_files_desc">Manage which file types appear in results</string>
     <string name="settings_view_all_desc">View all settings</string>
     <string name="settings_app_shortcuts_empty">No app shortcuts found.</string>
     <string name="settings_app_shortcuts_description">Tap any app to view its shortcuts. Enable, disable, or add custom shortcuts.</string>
