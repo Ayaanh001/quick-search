@@ -111,6 +111,11 @@ class SearchViewModel(
                     runCatching { userPreferences.getOverlayThemeIntensity() }
                             .getOrDefault(UiPreferences.DEFAULT_OVERLAY_THEME_INTENSITY)
             )
+    private val initialFontScaleMultiplier: Float =
+            sanitizeFontScaleMultiplier(
+                    runCatching { userPreferences.getFontScaleMultiplier() }
+                            .getOrDefault(UiPreferences.DEFAULT_FONT_SCALE_MULTIPLIER)
+            )
     private val initialBackgroundSource: BackgroundSource =
             runCatching { userPreferences.getBackgroundSource() }
                     .getOrDefault(BackgroundSource.THEME)
@@ -126,6 +131,7 @@ class SearchViewModel(
                             wallpaperBlurRadius = initialWallpaperBlurRadius,
                             overlayGradientTheme = initialOverlayGradientTheme,
                             overlayThemeIntensity = initialOverlayThemeIntensity,
+                            fontScaleMultiplier = initialFontScaleMultiplier,
                             backgroundSource = initialBackgroundSource,
                             customImageUri = initialOverlayCustomImageUri,
                     )
@@ -364,6 +370,7 @@ class SearchViewModel(
     private var wallpaperBlurRadius: Float = initialWallpaperBlurRadius
     private var overlayGradientTheme: OverlayGradientTheme = initialOverlayGradientTheme
     private var overlayThemeIntensity: Float = initialOverlayThemeIntensity
+    private var fontScaleMultiplier: Float = initialFontScaleMultiplier
     private var backgroundSource: BackgroundSource = initialBackgroundSource
     private var customImageUri: String? = initialOverlayCustomImageUri
     private var lockedShortcutTarget: SearchTarget? = null
@@ -582,6 +589,7 @@ class SearchViewModel(
         wallpaperBlurRadius = prefs.wallpaperBlurRadius
         overlayGradientTheme = prefs.overlayGradientTheme
         overlayThemeIntensity = sanitizeOverlayThemeIntensity(prefs.overlayThemeIntensity)
+        fontScaleMultiplier = sanitizeFontScaleMultiplier(prefs.fontScaleMultiplier)
         backgroundSource = prefs.backgroundSource
         customImageUri = prefs.customImageUri
         amazonDomain = prefs.amazonDomain
@@ -607,6 +615,7 @@ class SearchViewModel(
                     wallpaperBlurRadius = wallpaperBlurRadius,
                     overlayGradientTheme = overlayGradientTheme,
                     overlayThemeIntensity = overlayThemeIntensity,
+                    fontScaleMultiplier = fontScaleMultiplier,
                     backgroundSource = backgroundSource,
                     customImageUri = customImageUri,
                     amazonDomain = amazonDomain,
@@ -1992,6 +2001,16 @@ class SearchViewModel(
         }
     }
 
+    fun setFontScaleMultiplier(multiplier: Float) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val sanitizedMultiplier = sanitizeFontScaleMultiplier(multiplier)
+            if (fontScaleMultiplier == sanitizedMultiplier) return@launch
+            userPreferences.setFontScaleMultiplier(sanitizedMultiplier)
+            fontScaleMultiplier = sanitizedMultiplier
+            _uiState.update { it.copy(fontScaleMultiplier = sanitizedMultiplier) }
+        }
+    }
+
     fun setBackgroundSource(source: BackgroundSource) {
         viewModelScope.launch(Dispatchers.IO) {
             if (backgroundSource == source) return@launch
@@ -2020,6 +2039,12 @@ class SearchViewModel(
             intensity.coerceIn(
                     UiPreferences.MIN_OVERLAY_THEME_INTENSITY,
                     UiPreferences.MAX_OVERLAY_THEME_INTENSITY,
+            )
+
+    private fun sanitizeFontScaleMultiplier(multiplier: Float): Float =
+            multiplier.coerceIn(
+                    UiPreferences.MIN_FONT_SCALE_MULTIPLIER,
+                    UiPreferences.MAX_FONT_SCALE_MULTIPLIER,
             )
 
     fun refreshIconPacks() = iconPackHandler.refreshIconPacks()

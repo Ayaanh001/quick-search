@@ -3,6 +3,10 @@ package com.tk.quicksearch.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 
 // ============================================================================
 // Color Schemes
@@ -49,10 +53,23 @@ private val DarkColorScheme =
  * @param content The composable content to be themed.
  */
 @Composable
-fun QuickSearchTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = DarkColorScheme,
-        typography = Typography,
-        content = content,
-    )
+fun QuickSearchTheme(
+    fontScaleMultiplier: Float = 1f,
+    content: @Composable () -> Unit,
+) {
+    val baseDensity = LocalDensity.current
+    val appDensity =
+        remember(baseDensity, fontScaleMultiplier) {
+            Density(
+                density = baseDensity.density,
+                fontScale = baseDensity.fontScale * fontScaleMultiplier,
+            )
+        }
+    CompositionLocalProvider(LocalDensity provides appDensity) {
+        MaterialTheme(
+            colorScheme = DarkColorScheme,
+            typography = Typography,
+            content = content,
+        )
+    }
 }

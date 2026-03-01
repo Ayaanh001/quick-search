@@ -96,6 +96,7 @@ class UserAppPreferences(
             val wallpaperBlurRadius: Float,
             val overlayGradientTheme: OverlayGradientTheme,
             val overlayThemeIntensity: Float,
+            val fontScaleMultiplier: Float,
             val backgroundSource: BackgroundSource,
             val customImageUri: String?,
             val amazonDomain: String?,
@@ -278,6 +279,22 @@ class UserAppPreferences(
                                 Float
                                 ?: com.tk.quicksearch.search.data.preferences.UiPreferences
                                         .DEFAULT_OVERLAY_THEME_INTENSITY,
+                fontScaleMultiplier =
+                        (
+                                allPrefs[
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences
+                                                .KEY_FONT_SCALE_MULTIPLIER,
+                                ] as?
+                                        Float
+                                ?: com.tk.quicksearch.search.data.preferences.UiPreferences
+                                        .DEFAULT_FONT_SCALE_MULTIPLIER
+                        )
+                                .coerceIn(
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences
+                                                .MIN_FONT_SCALE_MULTIPLIER,
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences
+                                                .MAX_FONT_SCALE_MULTIPLIER,
+                                ),
                 backgroundSource =
                         (
                                 allPrefs[
@@ -526,6 +543,22 @@ class UserAppPreferences(
                                         Float
                                         ?: com.tk.quicksearch.search.data.preferences.UiPreferences
                                                 .DEFAULT_OVERLAY_THEME_INTENSITY,
+                        fontScaleMultiplier =
+                                (
+                                        allPrefs[
+                                                com.tk.quicksearch.search.data.preferences.UiPreferences
+                                                        .KEY_FONT_SCALE_MULTIPLIER,
+                                        ] as?
+                                                Float
+                                        ?: com.tk.quicksearch.search.data.preferences.UiPreferences
+                                                .DEFAULT_FONT_SCALE_MULTIPLIER
+                                )
+                                        .coerceIn(
+                                                com.tk.quicksearch.search.data.preferences.UiPreferences
+                                                        .MIN_FONT_SCALE_MULTIPLIER,
+                                                com.tk.quicksearch.search.data.preferences.UiPreferences
+                                                        .MAX_FONT_SCALE_MULTIPLIER,
+                                        ),
                         backgroundSource =
                                 (
                                         allPrefs[
@@ -1046,6 +1079,10 @@ class UserAppPreferences(
     fun getOverlayThemeIntensity(): Float = uiPreferences.getOverlayThemeIntensity()
 
     fun setOverlayThemeIntensity(intensity: Float) = uiPreferences.setOverlayThemeIntensity(intensity)
+
+    fun getFontScaleMultiplier(): Float = uiPreferences.getFontScaleMultiplier()
+
+    fun setFontScaleMultiplier(multiplier: Float) = uiPreferences.setFontScaleMultiplier(multiplier)
 
     fun getBackgroundSource(): BackgroundSource = uiPreferences.getBackgroundSource()
 

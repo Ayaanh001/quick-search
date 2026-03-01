@@ -60,7 +60,6 @@ import com.tk.quicksearch.search.searchEngines.getId
 import com.tk.quicksearch.search.searchEngines.resolveDefaultBrowserPackage
 import com.tk.quicksearch.settings.settingsDetailScreen.SettingsDetailType
 import com.tk.quicksearch.ui.theme.DesignTokens
-import com.tk.quicksearch.ui.theme.QuickSearchTheme
 import com.tk.quicksearch.util.WallpaperUtils
 import kotlinx.coroutines.delay
 
@@ -113,8 +112,7 @@ fun OverlayRoot(
         val context = LocalContext.current
         val overlaySnackbarHostState = remember { SnackbarHostState() }
 
-        QuickSearchTheme {
-                BoxWithConstraints(
+        BoxWithConstraints(
                         modifier =
                                 modifier
                                         .fillMaxSize()
@@ -574,5 +572,4 @@ fun OverlayRoot(
                                                 ),
                         )
                 }
-        }
 }

@@ -89,6 +89,7 @@ fun SettingsDetailRoute(
                     wallpaperBlurRadius = uiState.wallpaperBlurRadius,
                     overlayGradientTheme = uiState.overlayGradientTheme,
                     overlayThemeIntensity = uiState.overlayThemeIntensity,
+                    fontScaleMultiplier = uiState.fontScaleMultiplier,
                     backgroundSource = uiState.backgroundSource,
                     customImageUri = uiState.customImageUri,
                     selectedIconPackPackage = uiState.selectedIconPackPackage,
@@ -411,6 +412,7 @@ fun SettingsDetailRoute(
                     onWallpaperBlurRadiusChange = viewModel::setWallpaperBlurRadius,
                     onSetOverlayGradientTheme = viewModel::setOverlayGradientTheme,
                     onOverlayThemeIntensityChange = viewModel::setOverlayThemeIntensity,
+                    onFontScaleMultiplierChange = viewModel::setFontScaleMultiplier,
                     onSetBackgroundSource = viewModel::setBackgroundSource,
                     onPickCustomImage = {
                         overlayCustomImagePickerLauncher.launch(arrayOf("image/*"))

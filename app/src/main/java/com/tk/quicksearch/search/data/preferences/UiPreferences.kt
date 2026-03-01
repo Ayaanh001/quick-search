@@ -149,6 +149,24 @@ class UiPreferences(
                 .apply()
     }
 
+    fun getFontScaleMultiplier(): Float =
+            prefs.getFloat(
+                    UiPreferences.KEY_FONT_SCALE_MULTIPLIER,
+                    UiPreferences.DEFAULT_FONT_SCALE_MULTIPLIER,
+            ).coerceIn(UiPreferences.MIN_FONT_SCALE_MULTIPLIER, UiPreferences.MAX_FONT_SCALE_MULTIPLIER)
+
+    fun setFontScaleMultiplier(multiplier: Float) {
+        prefs.edit()
+                .putFloat(
+                        UiPreferences.KEY_FONT_SCALE_MULTIPLIER,
+                        multiplier.coerceIn(
+                                UiPreferences.MIN_FONT_SCALE_MULTIPLIER,
+                                UiPreferences.MAX_FONT_SCALE_MULTIPLIER,
+                        ),
+                )
+                .apply()
+    }
+
     fun getBackgroundSource(): BackgroundSource {
         val saved = prefs.getString(KEY_BACKGROUND_SOURCE, null)
         if (saved != null) {
@@ -559,6 +577,7 @@ class UiPreferences(
         const val KEY_WALLPAPER_BLUR_RADIUS = "wallpaper_blur_radius"
         const val KEY_OVERLAY_GRADIENT_THEME = "overlay_gradient_theme"
         const val KEY_OVERLAY_THEME_INTENSITY = "overlay_theme_intensity"
+        const val KEY_FONT_SCALE_MULTIPLIER = "font_scale_multiplier"
         const val KEY_BACKGROUND_SOURCE = "background_source"
         const val KEY_CUSTOM_IMAGE_URI = "custom_image_uri"
         const val KEY_SHOW_WALLPAPER_BACKGROUND = "show_wallpaper_background" // Legacy only.
@@ -611,14 +630,18 @@ class UiPreferences(
         const val DEFAULT_WALLPAPER_BLUR_RADIUS = 20f
         const val DEFAULT_OVERLAY_GRADIENT_THEME = "MONOCHROME"
         const val DEFAULT_OVERLAY_THEME_INTENSITY = 0.5f
+        const val DEFAULT_FONT_SCALE_MULTIPLIER = 1f
         const val OVERLAY_THEME_INTENSITY_STEP = 0.1f
         const val OVERLAY_THEME_INTENSITY_DELTA_STEPS = 2
+        const val FONT_SCALE_MULTIPLIER_STEP = 0.05f
         const val MIN_OVERLAY_THEME_INTENSITY =
                 DEFAULT_OVERLAY_THEME_INTENSITY -
                         (OVERLAY_THEME_INTENSITY_STEP * OVERLAY_THEME_INTENSITY_DELTA_STEPS)
         const val MAX_OVERLAY_THEME_INTENSITY =
                 DEFAULT_OVERLAY_THEME_INTENSITY +
                         (OVERLAY_THEME_INTENSITY_STEP * OVERLAY_THEME_INTENSITY_DELTA_STEPS)
+        const val MIN_FONT_SCALE_MULTIPLIER = 0.90f
+        const val MAX_FONT_SCALE_MULTIPLIER = 1.05f
         const val MAX_WALLPAPER_BLUR_RADIUS = 40f
 
         // Calculator preferences keys

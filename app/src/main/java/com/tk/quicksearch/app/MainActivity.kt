@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tk.quicksearch.navigation.MainContent
 import com.tk.quicksearch.navigation.NavigationRequest
 import com.tk.quicksearch.navigation.RootDestination
@@ -174,7 +175,8 @@ class MainActivity : ComponentActivity() {
 
     private fun setupContent() {
         setContent {
-            QuickSearchTheme {
+            val uiState = searchViewModel.uiState.collectAsStateWithLifecycle()
+            QuickSearchTheme(fontScaleMultiplier = uiState.value.fontScaleMultiplier) {
                 Box(
                     modifier =
                         Modifier

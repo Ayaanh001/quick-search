@@ -31,6 +31,8 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -53,6 +55,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.luminance
@@ -200,8 +203,10 @@ fun AppearanceSettingsSection(
         onWallpaperBlurRadiusChange: (Float) -> Unit,
         overlayGradientTheme: OverlayGradientTheme,
         overlayThemeIntensity: Float,
+        fontScaleMultiplier: Float,
         onSetOverlayGradientTheme: (OverlayGradientTheme) -> Unit,
         onOverlayThemeIntensityChange: (Float) -> Unit,
+        onFontScaleMultiplierChange: (Float) -> Unit,
         backgroundSource: BackgroundSource,
         customImageUri: String?,
         onSetBackgroundSource: (BackgroundSource) -> Unit,
@@ -232,6 +237,13 @@ fun AppearanceSettingsSection(
             }
 
     Column(modifier = modifier) {
+        FontSizeCard(
+                fontScaleMultiplier = fontScaleMultiplier,
+                onFontScaleMultiplierChange = onFontScaleMultiplierChange,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         OverlayThemeCard(
                 selectedTheme = overlayGradientTheme,
                 overlayThemeIntensity = overlayThemeIntensity,
@@ -305,6 +317,110 @@ fun AppearanceSettingsSection(
                 onDismiss = { showIconPackDialog = false },
         )
     }
+}
+
+@Composable
+private fun FontSizeCard(
+        fontScaleMultiplier: Float,
+        onFontScaleMultiplierChange: (Float) -> Unit,
+        modifier: Modifier = Modifier,
+) {
+    val view = LocalView.current
+    val smallSelected = kotlin.math.abs(fontScaleMultiplier - 0.95f) < 0.001f
+    val mediumSelected = kotlin.math.abs(fontScaleMultiplier - 1.0f) < 0.001f
+    val bigSelected = kotlin.math.abs(fontScaleMultiplier - 1.05f) < 0.001f
+
+    ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
+        Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                    text = stringResource(R.string.settings_font_size_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 4.dp),
+            )
+
+            Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    FontSizeChip(
+                            labelRes = R.string.settings_font_size_small,
+                            selected = smallSelected,
+                            onClick = {
+                                hapticToggle(view)()
+                                onFontScaleMultiplierChange(0.95f)
+                            },
+                    )
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    FontSizeChip(
+                            labelRes = R.string.settings_font_size_medium,
+                            selected = mediumSelected,
+                            onClick = {
+                                hapticToggle(view)()
+                                onFontScaleMultiplierChange(1.0f)
+                            },
+                    )
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    FontSizeChip(
+                            labelRes = R.string.settings_font_size_big,
+                            selected = bigSelected,
+                            onClick = {
+                                hapticToggle(view)()
+                                onFontScaleMultiplierChange(1.05f)
+                            },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FontSizeChip(
+        labelRes: Int,
+        selected: Boolean,
+        onClick: () -> Unit,
+) {
+    AssistChip(
+            onClick = {
+                if (!selected) {
+                    onClick()
+                }
+            },
+            label = {
+                Text(
+                        text = stringResource(labelRes),
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                )
+            },
+            shape = RoundedCornerShape(999.dp),
+            colors =
+                    AssistChipDefaults.assistChipColors(
+                            containerColor =
+                                    if (selected) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                                    },
+                            labelColor =
+                                    if (selected) {
+                                        MaterialTheme.colorScheme.onPrimary
+                                    } else {
+                                        MaterialTheme.colorScheme.primary
+                                    },
+                    ),
+            modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable

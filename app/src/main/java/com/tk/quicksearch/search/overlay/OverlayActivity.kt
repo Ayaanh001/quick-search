@@ -10,9 +10,11 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tk.quicksearch.search.core.SearchViewModel
 import com.tk.quicksearch.ui.theme.QuickSearchTheme
 import com.tk.quicksearch.util.WallpaperUtils
@@ -87,7 +89,8 @@ class OverlayActivity : ComponentActivity() {
 
     private fun renderOverlayContent() {
         setContent {
-            QuickSearchTheme {
+            val uiState by searchViewModel.uiState.collectAsStateWithLifecycle()
+            QuickSearchTheme(fontScaleMultiplier = uiState.fontScaleMultiplier) {
                 Box(
                     modifier = Modifier.fillMaxSize().background(Color.Transparent),
                 ) {
