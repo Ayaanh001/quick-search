@@ -23,9 +23,7 @@ object PackageConstants {
     const val WAZE_PACKAGE = "com.waze"
     const val CHATGPT_PACKAGE = "com.openai.chatgpt"
     const val PERPLEXITY_PACKAGE = "ai.perplexity.app.android"
-    const val PERPLEXITY_PACKAGE_ALT = "ai.perplexity.ask"
     const val GROK_PACKAGE = "ai.x.grok"
-    const val GROK_PACKAGE_ALT = "com.xai.grok"
 
     // Social media and content
     const val FACEBOOK_PACKAGE = "com.facebook.katana"

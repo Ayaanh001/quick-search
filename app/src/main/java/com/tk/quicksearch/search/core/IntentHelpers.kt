@@ -20,6 +20,7 @@ import com.tk.quicksearch.search.models.DeviceFile
 import com.tk.quicksearch.search.searchEngines.buildCustomSearchUrl
 import com.tk.quicksearch.search.searchEngines.buildSearchUrl
 import com.tk.quicksearch.search.searchEngines.getDisplayNameResId
+import com.tk.quicksearch.search.searchEngines.getAppPackageCandidates
 import com.tk.quicksearch.search.core.SearchEngine
 import com.tk.quicksearch.util.PackageConstants
 
@@ -227,6 +228,11 @@ object IntentHelpers {
 
             SearchEngine.GOOGLE -> {
                 openGoogle(context, query)
+                return
+            }
+
+            SearchEngine.GROK -> {
+                openGrok(context, query)
                 return
             }
 
@@ -787,6 +793,50 @@ object IntentHelpers {
         }
 
         openWebUrl(context, buildSearchUrl(query, SearchEngine.CLAUDE))
+    }
+
+    /** Opens Grok app if installed; for non-empty query tries app-targeted search first. */
+    private fun openGrok(
+        context: Application,
+        query: String,
+    ) {
+        val trimmedQuery = query.trim()
+        val packageCandidates = SearchEngine.GROK.getAppPackageCandidates()
+        val searchUrl = buildSearchUrl(trimmedQuery, SearchEngine.GROK)
+
+        if (trimmedQuery.isBlank()) {
+            for (packageName in packageCandidates) {
+                val launchIntent = context.packageManager.getLaunchIntentForPackage(packageName)
+                if (launchIntent == null) continue
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                try {
+                    context.startActivity(launchIntent)
+                    return
+                } catch (_: ActivityNotFoundException) {
+                } catch (_: SecurityException) {
+                }
+            }
+            openWebUrl(context, searchUrl)
+            return
+        }
+
+        for (packageName in packageCandidates) {
+            val appSearchIntent =
+                Intent(Intent.ACTION_VIEW, Uri.parse(searchUrl)).apply {
+                    setPackage(packageName)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            if (canResolveIntent(context, appSearchIntent)) {
+                try {
+                    context.startActivity(appSearchIntent)
+                    return
+                } catch (_: ActivityNotFoundException) {
+                } catch (_: SecurityException) {
+                }
+            }
+        }
+
+        openWebUrl(context, searchUrl)
     }
 
     /** Opens a web URL in a browser. */

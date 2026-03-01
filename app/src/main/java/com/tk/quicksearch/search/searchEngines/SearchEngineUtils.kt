@@ -207,8 +207,8 @@ fun SearchEngine.getContentDescription(): String =
 fun SearchEngine.getAppPackageCandidates(): List<String> =
     when (this) {
         SearchEngine.CHATGPT -> listOf(PackageConstants.CHATGPT_PACKAGE)
-        SearchEngine.PERPLEXITY -> listOf(PackageConstants.PERPLEXITY_PACKAGE, PackageConstants.PERPLEXITY_PACKAGE_ALT)
-        SearchEngine.GROK -> listOf(PackageConstants.GROK_PACKAGE, PackageConstants.GROK_PACKAGE_ALT)
+        SearchEngine.PERPLEXITY -> listOf(PackageConstants.PERPLEXITY_PACKAGE)
+        SearchEngine.GROK -> listOf(PackageConstants.GROK_PACKAGE)
         SearchEngine.GOOGLE -> listOf(PackageConstants.GOOGLE_APP_PACKAGE)
         SearchEngine.GEMINI -> listOf(PackageConstants.GEMINI_PACKAGE_NAME)
         SearchEngine.GOOGLE_MAPS -> listOf(PackageConstants.GOOGLE_MAPS_PACKAGE)
