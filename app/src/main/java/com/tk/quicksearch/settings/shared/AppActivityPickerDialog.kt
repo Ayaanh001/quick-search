@@ -26,7 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
 fun AppActivityPickerDialog(

@@ -23,8 +23,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tk.quicksearch.ui.theme.DesignTokens
-import com.tk.quicksearch.util.hapticToggle
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.util.hapticToggle
 
 /**
  * Reusable toggle row component for settings cards.

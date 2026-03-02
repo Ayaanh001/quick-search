@@ -1,4 +1,4 @@
-package com.tk.quicksearch.ui.components
+package com.tk.quicksearch.shared.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 /**
  * Common tip banner component for displaying dismissible tips and hints throughout the app.

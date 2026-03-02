@@ -87,9 +87,9 @@ import com.tk.quicksearch.search.searchEngines.loadCustomIconAsBase64
 import com.tk.quicksearch.search.searchEngines.resolveSearchTargetShortcutPackageName
 import com.tk.quicksearch.search.searchEngines.shared.IconRenderStyle
 import com.tk.quicksearch.search.searchEngines.shared.SearchTargetIcon
-import com.tk.quicksearch.ui.theme.AppColors
-import com.tk.quicksearch.ui.theme.DesignTokens
-import com.tk.quicksearch.util.hapticToggle
+import com.tk.quicksearch.shared.ui.theme.AppColors
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.util.hapticToggle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale

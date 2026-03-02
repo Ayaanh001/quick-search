@@ -25,7 +25,7 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.SearchViewModel
-import com.tk.quicksearch.ui.theme.QuickSearchTheme
+import com.tk.quicksearch.shared.ui.theme.QuickSearchTheme
 import kotlinx.coroutines.launch
 
 /** Activity for configuring widget preferences when a widget is added or reconfigured. */

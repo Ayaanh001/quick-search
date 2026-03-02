@@ -68,8 +68,8 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.OverlayGradientTheme
 import com.tk.quicksearch.search.searchScreen.overlayGradientColors
 import com.tk.quicksearch.search.core.SearchViewModel
-import com.tk.quicksearch.ui.components.TipBanner
-import com.tk.quicksearch.util.hapticToggle
+import com.tk.quicksearch.shared.ui.components.TipBanner
+import com.tk.quicksearch.shared.util.hapticToggle
 import com.tk.quicksearch.widget.customButtons.CustomWidgetButtonsSection
 import com.tk.quicksearch.widget.voiceSearch.MicAction
 import java.util.Locale

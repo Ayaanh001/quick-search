@@ -60,7 +60,7 @@ import com.tk.quicksearch.search.recentSearches.RecentSearchesSection
 import com.tk.quicksearch.search.searchEngines.*
 import com.tk.quicksearch.search.searchEngines.compact.NoResultsSearchEngineCards
 import com.tk.quicksearch.search.webSuggestions.WebSuggestionsSection
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import kotlinx.coroutines.delay
 import kotlin.math.min
 

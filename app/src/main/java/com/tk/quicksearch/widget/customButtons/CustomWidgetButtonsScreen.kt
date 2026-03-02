@@ -71,9 +71,9 @@ import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.DeviceFile
-import com.tk.quicksearch.ui.theme.AppColors
-import com.tk.quicksearch.ui.theme.DesignTokens
-import com.tk.quicksearch.util.hapticToggle
+import com.tk.quicksearch.shared.ui.theme.AppColors
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.util.hapticToggle
 import com.tk.quicksearch.widget.QuickSearchWidgetPreferences
 import com.tk.quicksearch.widget.WidgetConfigConstants
 import com.tk.quicksearch.widget.WidgetButtonSlotConfig

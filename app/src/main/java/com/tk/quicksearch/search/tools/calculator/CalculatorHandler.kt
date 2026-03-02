@@ -1,4 +1,4 @@
-package com.tk.quicksearch.search.calculator
+package com.tk.quicksearch.search.tools.calculator
 
 import com.tk.quicksearch.search.core.CalculatorState
 import com.tk.quicksearch.search.data.UserAppPreferences

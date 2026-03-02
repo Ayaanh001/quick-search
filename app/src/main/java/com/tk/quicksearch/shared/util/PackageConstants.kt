@@ -1,4 +1,4 @@
-package com.tk.quicksearch.util
+package com.tk.quicksearch.shared.util
 
 /**
  * Centralized constants for app package names used throughout the application.

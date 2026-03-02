@@ -63,9 +63,9 @@ import com.tk.quicksearch.search.models.DeviceFile
 import com.tk.quicksearch.search.searchScreen.LocalOverlayActionColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayDividerColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
-import com.tk.quicksearch.ui.components.TipBanner
-import com.tk.quicksearch.ui.theme.AppColors
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.components.TipBanner
+import com.tk.quicksearch.shared.ui.theme.AppColors
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 private val EXPANDED_HISTORY_MAX_HEIGHT = 420.dp
 private val EXPANDED_HISTORY_MAX_HEIGHT_OVERLAY = 300.dp

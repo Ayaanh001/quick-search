@@ -23,7 +23,7 @@ import com.tk.quicksearch.search.data.launchStaticShortcut
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
-import com.tk.quicksearch.ui.theme.QuickSearchTheme
+import com.tk.quicksearch.shared.ui.theme.QuickSearchTheme
 import kotlinx.coroutines.launch
 
 class QuickSearchWidgetActionActivity : ComponentActivity() {

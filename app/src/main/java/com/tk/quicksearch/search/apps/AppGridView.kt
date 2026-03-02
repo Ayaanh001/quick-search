@@ -51,9 +51,9 @@ import com.tk.quicksearch.search.data.shortcutKey
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.search.searchScreen.predictedSubmitHighlight
-import com.tk.quicksearch.ui.theme.DesignTokens
-import com.tk.quicksearch.util.getAppGridColumns
-import com.tk.quicksearch.util.hapticConfirm
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.util.getAppGridColumns
+import com.tk.quicksearch.shared.util.hapticConfirm
 import kotlin.math.ceil
 import kotlin.math.min
 

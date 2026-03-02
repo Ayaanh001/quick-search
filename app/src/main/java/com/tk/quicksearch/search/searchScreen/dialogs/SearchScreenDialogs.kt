@@ -29,7 +29,7 @@ import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.DeviceFile
-import com.tk.quicksearch.util.InAppBrowserUtils
+import com.tk.quicksearch.shared.util.InAppBrowserUtils
 
 @Composable
 internal fun ReleaseNotesDialog(

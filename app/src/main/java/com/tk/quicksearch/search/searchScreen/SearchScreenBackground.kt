@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.search.core.OverlayGradientTheme
 import com.tk.quicksearch.search.data.preferences.UiPreferences
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
 internal fun SearchScreenBackground(

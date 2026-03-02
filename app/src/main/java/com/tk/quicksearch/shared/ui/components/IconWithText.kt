@@ -1,4 +1,4 @@
-package com.tk.quicksearch.ui.components
+package com.tk.quicksearch.shared.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 /**
  * Icon with text in a row pattern - commonly used throughout the app.

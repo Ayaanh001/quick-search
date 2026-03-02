@@ -1,10 +1,10 @@
-package com.tk.quicksearch.ui.components
+package com.tk.quicksearch.shared.ui.components
 
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 /**
  * Standardized horizontal divider with consistent styling.

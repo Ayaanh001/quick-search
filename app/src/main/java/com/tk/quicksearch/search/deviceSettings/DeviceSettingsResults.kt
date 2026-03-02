@@ -45,9 +45,9 @@ import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
 import com.tk.quicksearch.search.searchScreen.predictedSubmitCardBorder
-import com.tk.quicksearch.ui.theme.AppColors
-import com.tk.quicksearch.ui.theme.DesignTokens
-import com.tk.quicksearch.util.hapticConfirm
+import com.tk.quicksearch.shared.ui.theme.AppColors
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.util.hapticConfirm
 
 private const val ROW_MIN_HEIGHT = 52
 private const val ICON_SIZE = 24

@@ -51,10 +51,10 @@ import com.tk.quicksearch.search.searchEngines.getDisplayName
 import com.tk.quicksearch.search.searchEngines.getId
 import com.tk.quicksearch.search.searchEngines.shared.IconRenderStyle
 import com.tk.quicksearch.search.searchEngines.shared.SearchTargetIcon
-import com.tk.quicksearch.ui.theme.AppColors
-import com.tk.quicksearch.ui.theme.DesignTokens
-import com.tk.quicksearch.util.hapticToggle
-import com.tk.quicksearch.util.performHapticFeedbackSafely
+import com.tk.quicksearch.shared.ui.theme.AppColors
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.util.hapticToggle
+import com.tk.quicksearch.shared.util.performHapticFeedbackSafely
 import sh.calvin.reorderable.ReorderableColumn
 
 /**

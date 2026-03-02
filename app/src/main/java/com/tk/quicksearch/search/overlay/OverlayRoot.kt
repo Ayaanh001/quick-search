@@ -61,10 +61,10 @@ import com.tk.quicksearch.search.searchEngines.defaultBrowserTarget
 import com.tk.quicksearch.search.searchEngines.getId
 import com.tk.quicksearch.search.searchEngines.resolveDefaultBrowserPackage
 import com.tk.quicksearch.settings.settingsDetailScreen.SettingsDetailType
-import com.tk.quicksearch.ui.theme.DesignTokens
-import com.tk.quicksearch.util.isLandscape
-import com.tk.quicksearch.util.isTablet
-import com.tk.quicksearch.util.WallpaperUtils
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.util.isLandscape
+import com.tk.quicksearch.shared.util.isTablet
+import com.tk.quicksearch.shared.util.WallpaperUtils
 import kotlinx.coroutines.delay
 
 private const val OVERLAY_WIDTH_PERCENT = 0.9f

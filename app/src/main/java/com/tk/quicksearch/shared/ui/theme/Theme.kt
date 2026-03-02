@@ -1,4 +1,4 @@
-package com.tk.quicksearch.ui.theme
+package com.tk.quicksearch.shared.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme

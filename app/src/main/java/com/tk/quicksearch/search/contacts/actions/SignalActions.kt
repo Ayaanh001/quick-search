@@ -7,7 +7,7 @@ import android.util.Log
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.models.ContactMethodMimeTypes
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
-import com.tk.quicksearch.util.PackageConstants
+import com.tk.quicksearch.shared.util.PackageConstants
 
 /** Signal-specific contact actions. */
 object SignalActions {

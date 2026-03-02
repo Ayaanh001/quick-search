@@ -35,7 +35,7 @@ import com.tk.quicksearch.search.data.ContactRepository
 import com.tk.quicksearch.search.data.FileSearchRepository
 import com.tk.quicksearch.search.utils.PermissionUtils
 import com.tk.quicksearch.settings.shared.*
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 /**
  * Permissions settings screen with permission status and request options.

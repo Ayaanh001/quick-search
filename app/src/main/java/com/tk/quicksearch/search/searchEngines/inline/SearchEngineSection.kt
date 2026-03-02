@@ -38,8 +38,8 @@ import com.tk.quicksearch.search.searchEngines.compact.SearchEngineCard
 import com.tk.quicksearch.search.searchEngines.extendToScreenEdges
 import com.tk.quicksearch.search.searchEngines.shared.SearchTargetConstants
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
-import com.tk.quicksearch.util.isLandscape
-import com.tk.quicksearch.util.isTablet
+import com.tk.quicksearch.shared.util.isLandscape
+import com.tk.quicksearch.shared.util.isTablet
 
 /** Constants for search engine section layout. */
 private object SearchEngineSectionConstants {

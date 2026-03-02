@@ -8,7 +8,7 @@ import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.core.SearchUiState
 import com.tk.quicksearch.search.data.shortcutKey
 import com.tk.quicksearch.search.models.AppInfo
-import com.tk.quicksearch.util.getAppGridColumns
+import com.tk.quicksearch.shared.util.getAppGridColumns
 
 /** Enum representing which section is currently expanded. */
 enum class ExpandedSection {

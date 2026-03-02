@@ -35,7 +35,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.search.calculator.CalculatorUtils
+import com.tk.quicksearch.search.tools.calculator.CalculatorUtils
 import com.tk.quicksearch.search.core.DirectSearchStatus
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.core.SearchUiState
@@ -46,7 +46,7 @@ import com.tk.quicksearch.search.searchEngines.extendToScreenEdges
 import com.tk.quicksearch.search.searchEngines.getId
 import com.tk.quicksearch.search.searchEngines.resolveDefaultBrowserPackage
 import com.tk.quicksearch.search.searchEngines.inline.SearchEngineIconsSection
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import kotlinx.coroutines.delay
 
 @Composable

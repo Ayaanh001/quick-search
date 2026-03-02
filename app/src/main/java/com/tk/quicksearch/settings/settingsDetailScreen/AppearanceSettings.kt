@@ -73,8 +73,8 @@ import com.tk.quicksearch.search.data.preferences.UiPreferences
 import com.tk.quicksearch.search.searchScreen.overlayGradientColors
 import com.tk.quicksearch.settings.searchEnginesScreen.SearchEngineAppearanceCard
 import com.tk.quicksearch.settings.shared.*
-import com.tk.quicksearch.util.WallpaperUtils
-import com.tk.quicksearch.util.hapticToggle
+import com.tk.quicksearch.shared.util.WallpaperUtils
+import com.tk.quicksearch.shared.util.hapticToggle
 import kotlin.math.roundToInt
 
 /** Combined card for keyboard alignment and icon pack settings. */

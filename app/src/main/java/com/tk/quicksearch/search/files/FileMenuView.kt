@@ -37,7 +37,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.models.DeviceFile
 import com.tk.quicksearch.search.utils.FileUtils
-import com.tk.quicksearch.ui.theme.AppColors
+import com.tk.quicksearch.shared.ui.theme.AppColors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

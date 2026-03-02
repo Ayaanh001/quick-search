@@ -33,7 +33,7 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.search.directSearch.GeminiModelCatalog
 import com.tk.quicksearch.search.directSearch.GeminiModelPickerDialog
 import com.tk.quicksearch.search.directSearch.GeminiTextModel
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
 fun DirectSearchConfigureSettingsSection(

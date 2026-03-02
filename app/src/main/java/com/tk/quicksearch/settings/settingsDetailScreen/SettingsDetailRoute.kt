@@ -34,8 +34,8 @@ import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.settings.shared.*
 import com.tk.quicksearch.settings.shared.handlePermissionResult
 import com.tk.quicksearch.tile.requestAddQuickSearchTile
-import com.tk.quicksearch.util.WallpaperUtils
-import com.tk.quicksearch.util.isDefaultDigitalAssistant
+import com.tk.quicksearch.shared.util.WallpaperUtils
+import com.tk.quicksearch.shared.util.isDefaultDigitalAssistant
 import com.tk.quicksearch.widget.requestAddQuickSearchWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -22,7 +22,7 @@ import com.tk.quicksearch.search.searchEngines.buildSearchUrl
 import com.tk.quicksearch.search.searchEngines.getDisplayNameResId
 import com.tk.quicksearch.search.searchEngines.getAppPackageCandidates
 import com.tk.quicksearch.search.core.SearchEngine
-import com.tk.quicksearch.util.PackageConstants
+import com.tk.quicksearch.shared.util.PackageConstants
 
 /** Helper functions for creating and launching intents. */
 object IntentHelpers {

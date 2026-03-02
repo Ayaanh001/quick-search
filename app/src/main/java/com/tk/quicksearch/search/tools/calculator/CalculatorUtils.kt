@@ -1,4 +1,4 @@
-package com.tk.quicksearch.search.calculator
+package com.tk.quicksearch.search.tools.calculator
 
 import java.util.Locale
 

@@ -1,4 +1,4 @@
-package com.tk.quicksearch.ui.theme
+package com.tk.quicksearch.shared.ui.theme
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape

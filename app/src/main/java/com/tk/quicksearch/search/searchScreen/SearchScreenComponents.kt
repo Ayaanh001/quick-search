@@ -79,9 +79,9 @@ import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.searchEngines.extendToScreenEdges
 import com.tk.quicksearch.search.searchEngines.shared.IconRenderStyle
 import com.tk.quicksearch.search.searchEngines.shared.SearchTargetIcon
-import com.tk.quicksearch.ui.components.TipBanner
-import com.tk.quicksearch.ui.theme.DesignTokens
-import com.tk.quicksearch.util.hapticStrong
+import com.tk.quicksearch.shared.ui.components.TipBanner
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.util.hapticStrong
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

@@ -81,8 +81,8 @@ import com.tk.quicksearch.search.recentSearches.RecentSearchEntry
 import com.tk.quicksearch.search.searchScreen.dialogs.NicknameDialogState
 import com.tk.quicksearch.search.searchScreen.dialogs.SearchScreenDialogs
 import com.tk.quicksearch.search.utils.FileUtils
-import com.tk.quicksearch.ui.theme.DesignTokens
-import com.tk.quicksearch.util.WallpaperUtils
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.util.WallpaperUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch

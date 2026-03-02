@@ -48,8 +48,8 @@ import com.tk.quicksearch.search.core.CallingApp
 import com.tk.quicksearch.search.core.MessagingApp
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
-import com.tk.quicksearch.ui.theme.DesignTokens
-import com.tk.quicksearch.util.hapticConfirm
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.util.hapticConfirm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

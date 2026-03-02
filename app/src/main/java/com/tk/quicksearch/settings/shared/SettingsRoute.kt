@@ -66,9 +66,9 @@ import com.tk.quicksearch.search.core.*
 import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.search.directSearch.GeminiTextModel
 import com.tk.quicksearch.tile.requestAddQuickSearchTile
-import com.tk.quicksearch.ui.theme.DesignTokens
-import com.tk.quicksearch.util.WallpaperUtils
-import com.tk.quicksearch.util.hapticToggle
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.util.WallpaperUtils
+import com.tk.quicksearch.shared.util.hapticToggle
 import com.tk.quicksearch.widget.requestAddQuickSearchWidget
 import kotlinx.coroutines.launch
 

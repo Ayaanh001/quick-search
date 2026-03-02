@@ -1,4 +1,4 @@
-package com.tk.quicksearch.util
+package com.tk.quicksearch.shared.util
 
 import android.Manifest
 import android.app.WallpaperManager

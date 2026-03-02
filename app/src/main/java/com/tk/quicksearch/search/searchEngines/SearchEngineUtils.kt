@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.SearchEngine
-import com.tk.quicksearch.util.PackageConstants
+import com.tk.quicksearch.shared.util.PackageConstants
 
 private data class SearchEngineMetadata(
     @DrawableRes val drawableResId: Int,

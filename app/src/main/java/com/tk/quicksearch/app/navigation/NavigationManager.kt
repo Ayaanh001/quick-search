@@ -1,4 +1,4 @@
-package com.tk.quicksearch.navigation
+package com.tk.quicksearch.app.navigation
 
 import android.Manifest
 import android.content.Context

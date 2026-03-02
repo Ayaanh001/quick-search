@@ -36,8 +36,8 @@ import com.tk.quicksearch.search.searchEngines.shared.SearchTargetIcon
 import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.search.searchScreen.predictedSubmitHighlight
-import com.tk.quicksearch.ui.theme.AppColors
-import com.tk.quicksearch.util.hapticConfirm
+import com.tk.quicksearch.shared.ui.theme.AppColors
+import com.tk.quicksearch.shared.util.hapticConfirm
 
 /**
  * Section displaying search engine cards when there are no search results.

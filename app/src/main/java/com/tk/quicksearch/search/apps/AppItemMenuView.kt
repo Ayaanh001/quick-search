@@ -37,8 +37,8 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.search.data.StaticShortcut
 import com.tk.quicksearch.search.data.rememberShortcutIcon
 import com.tk.quicksearch.search.data.shortcutDisplayName
-import com.tk.quicksearch.ui.theme.AppColors
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.AppColors
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 /** Menu item data class for app dropdown menu. */
 private data class AppMenuItem(

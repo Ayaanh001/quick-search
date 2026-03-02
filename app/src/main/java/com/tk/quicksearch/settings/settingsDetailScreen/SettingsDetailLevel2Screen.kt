@@ -47,7 +47,7 @@ import com.tk.quicksearch.settings.shared.AppShortcutSource
 import com.tk.quicksearch.settings.shared.SettingsScreenCallbacks
 import com.tk.quicksearch.settings.shared.SettingsScreenState
 import com.tk.quicksearch.settings.shared.settingsContentWidth
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
 internal fun SettingsDetailLevel2Screen(

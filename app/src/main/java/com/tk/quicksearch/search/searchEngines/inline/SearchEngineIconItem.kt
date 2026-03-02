@@ -19,7 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.searchEngines.shared.IconRenderStyle
 import com.tk.quicksearch.search.searchEngines.shared.SearchTargetIcon
-import com.tk.quicksearch.util.hapticConfirm
+import com.tk.quicksearch.shared.util.hapticConfirm
 
 /**
  * Composable for displaying a single search engine icon item.

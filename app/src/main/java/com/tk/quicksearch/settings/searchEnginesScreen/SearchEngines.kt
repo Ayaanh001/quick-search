@@ -14,8 +14,8 @@ import com.tk.quicksearch.search.core.SearchEngine
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.directSearch.GeminiTextModel
 import com.tk.quicksearch.search.searchEngines.getId
-import com.tk.quicksearch.ui.components.TipBanner
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.components.TipBanner
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 /**
  * Main feature for configuring search engines.

@@ -16,7 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import com.tk.quicksearch.R
-import com.tk.quicksearch.ui.theme.AppColors
+import com.tk.quicksearch.shared.ui.theme.AppColors
 
 /** Menu item data class for settings dropdown menu. */
 private data class DeviceSettingsMenuItem(

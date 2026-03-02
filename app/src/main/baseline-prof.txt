@@ -3,12 +3,12 @@
 # to improve app startup performance and reduce jank.
 
 # Main Activity and Application Startup
-Lcom/tk/quicksearch/MainActivity;
-HSPLcom/tk/quicksearch/MainActivity;-><init>()V
-HSPLcom/tk/quicksearch/MainActivity;->onCreate(Landroid/os/Bundle;)V
-HSPLcom/tk/quicksearch/MainActivity;->initializePreferences()V
-HSPLcom/tk/quicksearch/MainActivity;->setupWindow()V
-HSPLcom/tk/quicksearch/MainActivity;->setupContent()V
+Lcom/tk/quicksearch/app/MainActivity;
+HSPLcom/tk/quicksearch/app/MainActivity;-><init>()V
+HSPLcom/tk/quicksearch/app/MainActivity;->onCreate(Landroid/os/Bundle;)V
+HSPLcom/tk/quicksearch/app/MainActivity;->initializePreferences()V
+HSPLcom/tk/quicksearch/app/MainActivity;->setupWindow()V
+HSPLcom/tk/quicksearch/app/MainActivity;->setupContent()V
 
 # Search ViewModel - Critical Path
 Lcom/tk/quicksearch/search/core/SearchViewModel;
@@ -43,8 +43,8 @@ HSPLcom/tk/quicksearch/search/apps/AppSearchManager;->initCache(Ljava/util/List;
 HSPLcom/tk/quicksearch/search/apps/AppSearchManager;->availableApps()Ljava/util/List;
 HSPLcom/tk/quicksearch/search/apps/AppSearchManager;->setSortAppsByUsageEnabled(Z)V
 
-Lcom/tk/quicksearch/navigation/NavigationHandler;
-HSPLcom/tk/quicksearch/navigation/NavigationHandler;-><init>(Landroid/app/Application;Lcom/tk/quicksearch/search/data/UserAppPreferences;Lcom/tk/quicksearch/search/deviceSettings/DeviceSettingsSearchHandler;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;ZLkotlin/jvm/functions/Function1;)V
+Lcom/tk/quicksearch/app/navigation/NavigationHandler;
+HSPLcom/tk/quicksearch/app/navigation/NavigationHandler;-><init>(Landroid/app/Application;Lcom/tk/quicksearch/search/data/UserAppPreferences;Lcom/tk/quicksearch/search/deviceSettings/DeviceSettingsSearchHandler;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;ZLkotlin/jvm/functions/Function1;)V
 
 Lcom/tk/quicksearch/search/searchEngines/SearchEngineManager;
 HSPLcom/tk/quicksearch/search/searchEngines/SearchEngineManager;-><init>(Landroid/content/Context;Lcom/tk/quicksearch/search/data/UserAppPreferences;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;)V
@@ -97,24 +97,24 @@ Lcom/tk/quicksearch/search/data/preferences/UiPreferences;
 Lcom/tk/quicksearch/search/utils/SearchRankingUtils;
 HSPLcom/tk/quicksearch/search/utils/SearchRankingUtils;->calculateMatchPriorityWithNickname(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
 
-Lcom/tk/quicksearch/util/PhoneNumberUtils;
-Lcom/tk/quicksearch/util/FileUtils;
-Lcom/tk/quicksearch/util/CalculatorUtils;
-Lcom/tk/quicksearch/util/HapticUtils;
-Lcom/tk/quicksearch/util/AssistantUtils;
+Lcom/tk/quicksearch/shared/util/PhoneNumberUtils;
+Lcom/tk/quicksearch/shared/util/FileUtils;
+Lcom/tk/quicksearch/shared/util/CalculatorUtils;
+Lcom/tk/quicksearch/shared/util/HapticUtils;
+Lcom/tk/quicksearch/shared/util/AssistantUtils;
 
 # Wallpaper Utilities - Now called during immediate startup phase
-Lcom/tk/quicksearch/util/WallpaperUtils;
-HSPLcom/tk/quicksearch/util/WallpaperUtils;->preloadWallpaper(Landroid/content/Context;)V
-HSPLcom/tk/quicksearch/util/WallpaperUtils;->getCachedWallpaperBitmap()Landroid/graphics/Bitmap;
-HSPLcom/tk/quicksearch/util/WallpaperUtils;->getWallpaperBitmap(Landroid/content/Context;)Landroid/graphics/Bitmap;
+Lcom/tk/quicksearch/shared/util/WallpaperUtils;
+HSPLcom/tk/quicksearch/shared/util/WallpaperUtils;->preloadWallpaper(Landroid/content/Context;)V
+HSPLcom/tk/quicksearch/shared/util/WallpaperUtils;->getCachedWallpaperBitmap()Landroid/graphics/Bitmap;
+HSPLcom/tk/quicksearch/shared/util/WallpaperUtils;->getWallpaperBitmap(Landroid/content/Context;)Landroid/graphics/Bitmap;
 
 Lcom/tk/quicksearch/search/utils/PermissionUtils;
 HSPLcom/tk/quicksearch/search/utils/PermissionUtils;->hasFileAccessPermission(Landroid/content/Context;)Z
 
 # Calculator Handler
-Lcom/tk/quicksearch/search/calculator/CalculatorHandler;
-HSPLcom/tk/quicksearch/search/calculator/CalculatorHandler;-><init>()V
+Lcom/tk/quicksearch/search/tools/calculator/CalculatorHandler;
+HSPLcom/tk/quicksearch/search/tools/calculator/CalculatorHandler;-><init>()V
 
 # JSON Parsing (for cached apps and data)
 Lorg/json/JSONArray;

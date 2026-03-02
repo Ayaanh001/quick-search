@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.models.FileType
 import com.tk.quicksearch.settings.shared.*
-import com.tk.quicksearch.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 // Constants for consistent spacing
 private object FileTypesSpacing {

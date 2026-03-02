@@ -7,7 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.tk.quicksearch.R
 import com.tk.quicksearch.app.ReleaseNotesHandler
-import com.tk.quicksearch.navigation.NavigationHandler
+import com.tk.quicksearch.app.navigation.NavigationHandler
 import com.tk.quicksearch.onboarding.permissionScreen.PermissionRequestHandler
 import com.tk.quicksearch.search.appShortcuts.AppShortcutManagementHandler
 import com.tk.quicksearch.search.appShortcuts.AppShortcutSearchHandler
@@ -16,7 +16,7 @@ import com.tk.quicksearch.search.apps.AppSearchManager
 import com.tk.quicksearch.search.apps.IconPackService
 import com.tk.quicksearch.search.apps.invalidateAppIconCache
 import com.tk.quicksearch.search.apps.prefetchAppIcons
-import com.tk.quicksearch.search.calculator.CalculatorHandler
+import com.tk.quicksearch.search.tools.calculator.CalculatorHandler
 import com.tk.quicksearch.search.common.PinningHandler
 import com.tk.quicksearch.search.contacts.actions.ContactActionHandler
 import com.tk.quicksearch.search.contacts.utils.ContactCallingAppResolver
@@ -57,8 +57,8 @@ import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
 import com.tk.quicksearch.search.utils.SearchTextNormalizer
 import com.tk.quicksearch.search.webSuggestions.WebSuggestionHandler
-import com.tk.quicksearch.util.PackageConstants
-import com.tk.quicksearch.util.getAppGridColumns
+import com.tk.quicksearch.shared.util.PackageConstants
+import com.tk.quicksearch.shared.util.getAppGridColumns
 import java.util.Calendar
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
