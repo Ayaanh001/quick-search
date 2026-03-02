@@ -9,7 +9,7 @@ import com.tk.quicksearch.search.core.OverlayGradientTheme
 import com.tk.quicksearch.search.core.SearchEngine
 import com.tk.quicksearch.search.data.preferences.*
 import com.tk.quicksearch.search.models.FileType
-import com.tk.quicksearch.search.recentSearches.RecentSearchesPreferences
+import com.tk.quicksearch.search.searchHistory.SearchHistoryPreferences
 
 /**
  * Stores user-driven overrides for the app grid such as hidden or pinned apps. Manages preferences
@@ -38,7 +38,7 @@ class UserAppPreferences(
     private val geminiPreferences by lazy { GeminiPreferences(context) }
     val uiPreferences by lazy { UiPreferences(context) }
     private val amazonPreferences by lazy { AmazonPreferences(context) }
-    private val recentSearchesPreferences by lazy { RecentSearchesPreferences(context) }
+    private val recentSearchesPreferences by lazy { SearchHistoryPreferences(context) }
 
     /**
      * Data class to hold all preferences needed during app startup for performance optimization.
@@ -68,7 +68,7 @@ class UserAppPreferences(
             val pinnedPackages: Set<String>,
             val suggestionHiddenPackages: Set<String>,
             val resultHiddenPackages: Set<String>,
-            val recentSearchesEnabled: Boolean,
+            val searchHistoryEnabled: Boolean,
             val appSuggestionsEnabled: Boolean,
             val showAppLabels: Boolean,
     )
@@ -317,7 +317,7 @@ class UserAppPreferences(
                         ] as?
                                 Set<String>
                                 ?: emptySet(),
-                recentSearchesEnabled =
+                searchHistoryEnabled =
                         allPrefs[
                                 com.tk.quicksearch.search.data.preferences.UiPreferences
                                         .KEY_RECENT_QUERIES_ENABLED,
@@ -583,7 +583,7 @@ class UserAppPreferences(
                                 ] as?
                                         Set<String>
                                         ?: emptySet(),
-                        recentSearchesEnabled =
+                        searchHistoryEnabled =
                                 allPrefs[
                                         com.tk.quicksearch.search.data.preferences.UiPreferences
                                                 .KEY_RECENT_QUERIES_ENABLED,
@@ -1166,15 +1166,15 @@ class UserAppPreferences(
     // Recent Queries Preferences
     // ============================================================================
 
-    fun getRecentItems(): List<com.tk.quicksearch.search.recentSearches.RecentSearchEntry> =
+    fun getRecentItems(): List<com.tk.quicksearch.search.searchHistory.RecentSearchEntry> =
             recentSearchesPreferences.getRecentItems()
 
-    fun addRecentItem(entry: com.tk.quicksearch.search.recentSearches.RecentSearchEntry) =
+    fun addRecentItem(entry: com.tk.quicksearch.search.searchHistory.RecentSearchEntry) =
             recentSearchesPreferences.addRecentItem(entry)
 
     fun clearRecentQueries() = recentSearchesPreferences.clearRecentQueries()
 
-    fun deleteRecentItem(entry: com.tk.quicksearch.search.recentSearches.RecentSearchEntry) =
+    fun deleteRecentItem(entry: com.tk.quicksearch.search.searchHistory.RecentSearchEntry) =
             recentSearchesPreferences.deleteRecentItem(entry)
 
     fun areRecentQueriesEnabled(): Boolean = recentSearchesPreferences.areRecentQueriesEnabled()

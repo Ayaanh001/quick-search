@@ -1,4 +1,4 @@
-package com.tk.quicksearch.search.recentSearches
+package com.tk.quicksearch.search.searchHistory
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -80,7 +80,7 @@ private const val SETTINGS_VERTICAL_PADDING = 4
 private const val SHORTCUT_VERTICAL_PADDING = 4
 
 @Composable
-fun RecentSearchesSection(
+fun SearchHistorySection(
     modifier: Modifier = Modifier,
     items: List<RecentSearchItem>,
     callingApp: CallingApp,

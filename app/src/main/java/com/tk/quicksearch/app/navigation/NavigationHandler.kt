@@ -16,7 +16,7 @@ import com.tk.quicksearch.search.deviceSettings.DeviceSettingsSearchHandler
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.DeviceFile
-import com.tk.quicksearch.search.recentSearches.RecentSearchEntry
+import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
 
 class NavigationHandler(
     private val application: Application,
@@ -89,12 +89,12 @@ class NavigationHandler(
     fun openSearchUrl(
         query: String,
         searchEngine: SearchEngine,
-        addToRecentSearches: Boolean = true,
+        addToSearchHistory: Boolean = true,
     ) {
         val trimmedQuery = query.trim()
 
         // Save the query to recent queries
-        if (addToRecentSearches && trimmedQuery.isNotEmpty()) {
+        if (addToSearchHistory && trimmedQuery.isNotEmpty()) {
             userPreferences.addRecentItem(RecentSearchEntry.Query(trimmedQuery))
         }
 
@@ -125,16 +125,16 @@ class NavigationHandler(
     fun openSearchTarget(
         query: String,
         target: SearchTarget,
-        addToRecentSearches: Boolean = true,
+        addToSearchHistory: Boolean = true,
     ) {
         val trimmedQuery = query.trim()
         when (target) {
             is SearchTarget.Engine -> {
-                openSearchUrl(trimmedQuery, target.engine, addToRecentSearches)
+                openSearchUrl(trimmedQuery, target.engine, addToSearchHistory)
             }
 
             is SearchTarget.Browser -> {
-                if (addToRecentSearches && trimmedQuery.isNotEmpty()) {
+                if (addToSearchHistory && trimmedQuery.isNotEmpty()) {
                     userPreferences.addRecentItem(RecentSearchEntry.Query(trimmedQuery))
                 }
 
@@ -156,7 +156,7 @@ class NavigationHandler(
             }
 
             is SearchTarget.Custom -> {
-                if (addToRecentSearches && trimmedQuery.isNotEmpty()) {
+                if (addToSearchHistory && trimmedQuery.isNotEmpty()) {
                     userPreferences.addRecentItem(RecentSearchEntry.Query(trimmedQuery))
                 }
 
@@ -173,7 +173,7 @@ class NavigationHandler(
 
     fun searchIconPacks() {
         val query = application.getString(R.string.settings_icon_pack_search_query)
-        openSearchUrl(query, SearchEngine.GOOGLE_PLAY, addToRecentSearches = false)
+        openSearchUrl(query, SearchEngine.GOOGLE_PLAY, addToSearchHistory = false)
     }
 
     fun openFile(deviceFile: DeviceFile) {

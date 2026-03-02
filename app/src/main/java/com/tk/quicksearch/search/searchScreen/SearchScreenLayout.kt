@@ -55,8 +55,8 @@ import com.tk.quicksearch.search.directSearch.DirectSearchResult
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.DeviceFile
-import com.tk.quicksearch.search.recentSearches.RecentSearchEntry
-import com.tk.quicksearch.search.recentSearches.RecentSearchesSection
+import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
+import com.tk.quicksearch.search.searchHistory.SearchHistorySection
 import com.tk.quicksearch.search.searchEngines.*
 import com.tk.quicksearch.search.searchEngines.compact.NoResultsSearchEngineCards
 import com.tk.quicksearch.search.webSuggestions.WebSuggestionsSection
@@ -656,13 +656,13 @@ fun ContentLayout(
     val showRecentItems =
         !hasQuery && state.recentQueriesEnabled && state.recentItems.isNotEmpty()
 
-    var recentSearchesExpanded by remember { mutableStateOf(false) }
+    var searchHistoryExpanded by remember { mutableStateOf(false) }
     LaunchedEffect(showRecentItems) {
-        if (!showRecentItems) recentSearchesExpanded = false
+        if (!showRecentItems) searchHistoryExpanded = false
     }
 
     val hidePinnedAndAppsWhenSearchHistoryExpanded =
-        showRecentItems && recentSearchesExpanded
+        showRecentItems && searchHistoryExpanded
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(14.dp)) {
         finalLayoutOrder.forEach { itemType ->
@@ -872,7 +872,7 @@ fun ContentLayout(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
                             ) {
-                                RecentSearchesSection(
+                                SearchHistorySection(
                                     items = orderedRecentItems,
                                     callingApp =
                                         effectiveContactsParams.callingApp
@@ -925,7 +925,7 @@ fun ContentLayout(
                                     showSearchHistoryTip = !state.hasDismissedSearchHistoryTip,
                                     onOpenSearchHistorySettings = onOpenSearchHistorySettings,
                                     onDismissSearchHistoryTip = onDismissSearchHistoryTip,
-                                    onExpandedChange = { recentSearchesExpanded = it },
+                                    onExpandedChange = { searchHistoryExpanded = it },
                                     showWallpaperBackground =
                                         effectiveShowWallpaperBackground,
                                     isOverlayPresentation = isOverlayPresentation,

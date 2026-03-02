@@ -100,7 +100,7 @@ data class SearchUiState(
 - SearchEnginePreferences.kt, ShortcutPreferences.kt - Search engine and shortcuts
 - GeminiPreferences.kt - Direct Search / Gemini API
 - NicknamePreferences.kt, SettingsPreferences.kt, AmazonPreferences.kt
-// RecentSearchesPreferences.kt lives in search/recentSearches/
+// SearchHistoryPreferences.kt lives in search/searchHistory/
 ```
 
 **Caching Strategy**:
@@ -257,10 +257,10 @@ app/src/main/java/com/tk/quicksearch/
 │   │   ├── FuzzySearchConfig.kt
 │   │   └── FuzzySearchConfigurationManager.kt
 │   │
-│   ├── recentSearches/           # Recent items tracking and display
-│   │   ├── RecentSearchesSection.kt
-│   │   ├── RecentSearchModels.kt
-│   │   └── RecentSearchesPreferences.kt
+│   ├── searchHistory/           # Recent items tracking and display
+│   │   ├── SearchHistorySection.kt
+│   │   ├── SearchHistoryModels.kt
+│   │   └── SearchHistoryPreferences.kt
 │   │
 │   └── common/                   # Shared utilities and handlers
 │       ├── PinningHandler.kt
@@ -599,7 +599,7 @@ Direct Search (dsh), Google (ggl), ChatGPT (cgpt), Gemini (gmi), Perplexity (ppx
 - `RecentSearchEntry` (sealed class): Storage format for different item types
 - `RecentSearchItem` (sealed class): UI presentation format with resolved data
 
-**Implementation**: `search/recentSearches/RecentSearchesSection.kt`, `RecentSearchModels.kt`, `RecentSearchesPreferences.kt`
+**Implementation**: `search/searchHistory/SearchHistorySection.kt`, `SearchHistoryModels.kt`, `SearchHistoryPreferences.kt`
 
 ### 6. Overlay Mode
 

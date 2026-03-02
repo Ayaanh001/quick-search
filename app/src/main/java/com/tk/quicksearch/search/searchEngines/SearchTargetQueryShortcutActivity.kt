@@ -11,7 +11,7 @@ import com.tk.quicksearch.search.core.IntentHelpers
 import com.tk.quicksearch.search.core.SearchEngine
 import com.tk.quicksearch.search.core.isLikelyWebUrl
 import com.tk.quicksearch.search.data.UserAppPreferences
-import com.tk.quicksearch.search.recentSearches.RecentSearchEntry
+import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
 import com.tk.quicksearch.search.overlay.OverlayModeController
 
 class SearchTargetQueryShortcutActivity : ComponentActivity() {

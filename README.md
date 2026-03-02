@@ -117,7 +117,7 @@ app/src/main/java/com/tk/quicksearch/
 │   │   └── shared/         # Shared search engine components
 │   ├── calculator/         # Calculator functionality
 │   ├── webSuggestions/     # Web search suggestions
-│   ├── recentSearches/     # Recent items tracking and display
+│   ├── searchHistory/     # Recent items tracking and display
 │   ├── fuzzy/              # Fuzzy search engine
 │   ├── overlay/            # Overlay mode (search over other apps)
 │   ├── searchScreen/       # Main search UI (layout, scroll, sections, dialogs)

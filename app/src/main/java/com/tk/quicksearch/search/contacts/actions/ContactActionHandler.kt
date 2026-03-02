@@ -16,7 +16,7 @@ import com.tk.quicksearch.search.core.SearchUiState
 import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
-import com.tk.quicksearch.search.recentSearches.RecentSearchEntry
+import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
 
 /**
  * Handles contact action coordination logic.

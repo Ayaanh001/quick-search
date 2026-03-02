@@ -1,4 +1,4 @@
-package com.tk.quicksearch.search.recentSearches
+package com.tk.quicksearch.search.searchHistory
 
 import android.content.Context
 import com.tk.quicksearch.search.data.preferences.BasePreferences
@@ -6,7 +6,7 @@ import com.tk.quicksearch.search.data.preferences.BasePreferences
 /**
  * Preferences for recent search queries.
  */
-class RecentSearchesPreferences(
+class SearchHistoryPreferences(
     context: Context,
 ) : BasePreferences(context) {
     companion object {

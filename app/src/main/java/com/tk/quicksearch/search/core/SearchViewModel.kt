@@ -48,8 +48,8 @@ import com.tk.quicksearch.search.models.ContactMethod
 import com.tk.quicksearch.search.models.DeviceFile
 import com.tk.quicksearch.search.models.FileType
 import com.tk.quicksearch.search.overlay.OverlayModeController
-import com.tk.quicksearch.search.recentSearches.RecentSearchEntry
-import com.tk.quicksearch.search.recentSearches.RecentSearchItem
+import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
+import com.tk.quicksearch.search.searchHistory.RecentSearchItem
 import com.tk.quicksearch.search.searchEngines.SearchEngineManager
 import com.tk.quicksearch.search.searchEngines.SecondarySearchOrchestrator
 import com.tk.quicksearch.search.searchEngines.ShortcutHandler
@@ -610,7 +610,7 @@ class SearchViewModel(
                     backgroundSource = backgroundSource,
                     customImageUri = customImageUri,
                     amazonDomain = amazonDomain,
-                    recentQueriesEnabled = prefs.recentSearchesEnabled,
+                    recentQueriesEnabled = prefs.searchHistoryEnabled,
                     webSuggestionsCount = userPreferences.getWebSuggestionsCount(),
                     shouldShowUsagePermissionBanner =
                             userPreferences.shouldShowUsagePermissionBanner(),
@@ -619,7 +619,7 @@ class SearchViewModel(
             )
         }
 
-        if (!prefs.recentSearchesEnabled) {
+        if (!prefs.searchHistoryEnabled) {
             userPreferences.clearRecentQueries()
         }
 
@@ -1628,14 +1628,14 @@ class SearchViewModel(
     fun openSearchUrl(
             query: String,
             searchEngine: SearchEngine,
-            addToRecentSearches: Boolean = true,
-    ) = navigationHandler.openSearchUrl(query, searchEngine, addToRecentSearches)
+            addToSearchHistory: Boolean = true,
+    ) = navigationHandler.openSearchUrl(query, searchEngine, addToSearchHistory)
 
     fun openSearchTarget(
             query: String,
             target: SearchTarget,
-            addToRecentSearches: Boolean = true,
-    ) = navigationHandler.openSearchTarget(query, target, addToRecentSearches)
+            addToSearchHistory: Boolean = true,
+    ) = navigationHandler.openSearchTarget(query, target, addToSearchHistory)
 
     fun searchIconPacks() = navigationHandler.searchIconPacks()
 

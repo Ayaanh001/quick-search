@@ -1,4 +1,4 @@
-package com.tk.quicksearch.search.recentSearches
+package com.tk.quicksearch.search.searchHistory
 
 import com.tk.quicksearch.search.data.StaticShortcut
 import com.tk.quicksearch.search.deviceSettings.DeviceSetting

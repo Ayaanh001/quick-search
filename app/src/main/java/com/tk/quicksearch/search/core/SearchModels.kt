@@ -9,7 +9,7 @@ import com.tk.quicksearch.search.directSearch.GeminiTextModel
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.DeviceFile
-import com.tk.quicksearch.search.recentSearches.RecentSearchItem
+import com.tk.quicksearch.search.searchHistory.RecentSearchItem
 
 // IconPackInfo moved here to avoid circular imports
 data class IconPackInfo(
