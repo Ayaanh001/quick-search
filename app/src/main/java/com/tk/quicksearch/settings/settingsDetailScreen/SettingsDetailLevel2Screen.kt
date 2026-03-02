@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -45,6 +46,7 @@ import com.tk.quicksearch.search.data.StaticShortcut
 import com.tk.quicksearch.settings.shared.AppShortcutSource
 import com.tk.quicksearch.settings.shared.SettingsScreenCallbacks
 import com.tk.quicksearch.settings.shared.SettingsScreenState
+import com.tk.quicksearch.settings.shared.settingsContentWidth
 import com.tk.quicksearch.ui.theme.DesignTokens
 
 @Composable
@@ -107,7 +109,9 @@ internal fun SettingsDetailLevel2Screen(
                     onRefreshApps = callbacks.onRefreshApps,
                     modifier =
                         Modifier
-                            .fillMaxSize()
+                            .settingsContentWidth()
+                            .fillMaxHeight()
+                            .align(androidx.compose.ui.Alignment.CenterHorizontally)
                             .padding(
                                 start = DesignTokens.ContentHorizontalPadding,
                                 end = DesignTokens.ContentHorizontalPadding,
@@ -134,7 +138,9 @@ internal fun SettingsDetailLevel2Screen(
                     onFocusHandled = onAppShortcutFocusHandled,
                     modifier =
                         Modifier
-                            .fillMaxSize()
+                            .settingsContentWidth()
+                            .fillMaxHeight()
+                            .align(androidx.compose.ui.Alignment.CenterHorizontally)
                             .padding(
                                 start = DesignTokens.ContentHorizontalPadding,
                                 end = DesignTokens.ContentHorizontalPadding,
@@ -145,7 +151,9 @@ internal fun SettingsDetailLevel2Screen(
                 Column(
                     modifier =
                         Modifier
-                            .fillMaxSize()
+                            .settingsContentWidth()
+                            .fillMaxHeight()
+                            .align(androidx.compose.ui.Alignment.CenterHorizontally)
                             .verticalScroll(scrollState)
                             .padding(
                                 start = DesignTokens.ContentHorizontalPadding,

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,6 +34,7 @@ import com.tk.quicksearch.search.utils.PermissionUtils
 import com.tk.quicksearch.settings.searchEnginesScreen.SearchEngines
 import com.tk.quicksearch.settings.shared.SettingsScreenCallbacks
 import com.tk.quicksearch.settings.shared.SettingsScreenState
+import com.tk.quicksearch.settings.shared.settingsContentWidth
 import com.tk.quicksearch.ui.theme.DesignTokens
 
 @Composable
@@ -83,7 +85,9 @@ internal fun SettingsDetailLevel1Screen(
             Column(
                 modifier =
                     Modifier
-                        .fillMaxSize()
+                        .settingsContentWidth()
+                        .fillMaxHeight()
+                        .align(Alignment.CenterHorizontally)
                         .verticalScroll(scrollState)
                         .padding(
                             start = DesignTokens.ContentHorizontalPadding,
