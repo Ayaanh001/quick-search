@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
@@ -78,7 +79,7 @@ private const val OVERLAY_ENTER_START_DELAY_MS = 32
 private const val OVERLAY_ENTER_START_SCALE = 0.9f
 private val OVERLAY_TOP_OFFSET = 16.dp
 private val OVERLAY_ENTER_START_OFFSET = 56.dp
-private val OVERLAY_EXTERNAL_SEARCH_BAR_RESERVED_HEIGHT = 62.dp
+private val OVERLAY_EXTERNAL_SEARCH_BAR_MIN_RESERVED_HEIGHT = 62.dp
 private val OVERLAY_EXTERNAL_SEARCH_BAR_BOTTOM_PADDING = DesignTokens.SpacingMedium
 private val OVERLAY_OPERATOR_PILLS_RESERVED_HEIGHT = 48.dp
 
@@ -129,6 +130,8 @@ fun OverlayRoot(
                         val uiState by viewModel.uiState.collectAsState()
                         var overlayNumberKeyboardSelected by remember { mutableStateOf(false) }
                         var overlayImeVisible by remember { mutableStateOf(false) }
+                        var overlayExternalSearchBarHeight by
+                                remember { mutableStateOf(OVERLAY_EXTERNAL_SEARCH_BAR_MIN_RESERVED_HEIGHT) }
                         val showOverlayOperatorPills =
                                 overlayNumberKeyboardSelected && overlayImeVisible
                         val layoutDirection = LocalLayoutDirection.current
@@ -147,7 +150,7 @@ fun OverlayRoot(
                         val showExternalBottomSearchBar = uiState.bottomSearchBarEnabled
                         val externalBottomBarReservedHeight =
                                 if (showExternalBottomSearchBar) {
-                                        OVERLAY_EXTERNAL_SEARCH_BAR_RESERVED_HEIGHT +
+                                        overlayExternalSearchBarHeight +
                                                 if (showOverlayOperatorPills) {
                                                         OVERLAY_OPERATOR_PILLS_RESERVED_HEIGHT
                                                 } else {
@@ -421,6 +424,18 @@ fun OverlayRoot(
                                         },
                                         modifier =
                                                 Modifier.align(Alignment.BottomCenter)
+                                                        .onSizeChanged { size ->
+                                                                val measuredHeight = with(density) { size.height.toDp() }
+                                                                val reservedHeight =
+                                                                        (measuredHeight - bottomSafePadding)
+                                                                                .coerceAtLeast(
+                                                                                        OVERLAY_EXTERNAL_SEARCH_BAR_MIN_RESERVED_HEIGHT
+                                                                                )
+                                                                if (reservedHeight != overlayExternalSearchBarHeight) {
+                                                                        overlayExternalSearchBarHeight =
+                                                                                reservedHeight
+                                                                }
+                                                        }
                                                         .width(overlayWidth)
                                                         .imePadding()
                                                         .navigationBarsPadding()
@@ -513,7 +528,7 @@ fun OverlayRoot(
 
                         val overlayBottomFloatingPadding =
                                 if (showExternalBottomSearchBar) {
-                                        OVERLAY_EXTERNAL_SEARCH_BAR_RESERVED_HEIGHT +
+                                        overlayExternalSearchBarHeight +
                                                 if (showOverlayOperatorPills) {
                                                         OVERLAY_OPERATOR_PILLS_RESERVED_HEIGHT
                                                 } else {
