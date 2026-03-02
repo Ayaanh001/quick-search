@@ -41,7 +41,7 @@ import com.tk.quicksearch.util.hapticToggle
 
 /** Card for web search suggestions settings. */
 @Composable
-fun WebSearchSuggestionsCard(
+private fun WebSearchSuggestionsCard(
     webSuggestionsEnabled: Boolean,
     onWebSuggestionsToggle: (Boolean) -> Unit,
     webSuggestionsCount: Int,
@@ -106,7 +106,7 @@ fun WebSearchSuggestionsCard(
  * Card for app suggestions, recent queries, calculator and excluded items.
  */
 @Composable
-fun SearchOptionsCard(
+private fun SearchOptionsCard(
     appSuggestionsEnabled: Boolean,
     onAppSuggestionsToggle: (Boolean) -> Unit,
     recentQueriesEnabled: Boolean,
@@ -156,7 +156,7 @@ fun SearchOptionsCard(
 }
 
 @Composable
-fun RefreshDataCard(
+private fun RefreshDataCard(
     onRefreshApps: (Boolean) -> Unit,
     onRefreshContacts: (Boolean) -> Unit,
     onRefreshFiles: (Boolean) -> Unit,

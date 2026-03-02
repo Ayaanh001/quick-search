@@ -24,7 +24,6 @@ import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Contacts
-import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material.icons.rounded.InsertDriveFile
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Shortcut
@@ -519,62 +518,6 @@ private fun SectionRowWithoutDrag(
                 )
             }
         }
-
-        androidx.compose.material3.Switch(
-            checked = isEnabled,
-            onCheckedChange = { enabled ->
-                hapticToggle(view)()
-                onToggle(enabled)
-            },
-            modifier = Modifier.scale(0.85f),
-        )
-    }
-}
-
-@Composable
-private fun SectionRow(
-    section: SearchSection,
-    isEnabled: Boolean,
-    onToggle: (Boolean) -> Unit,
-    dragHandleModifier: Modifier,
-    bottomPadding: Dp = DragConstants.rowVerticalPadding,
-) {
-    val view = LocalView.current
-    val metadata = getSectionMetadata(section)
-
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = DragConstants.rowHorizontalPadding,
-                    end = DragConstants.rowHorizontalPadding,
-                    top = DragConstants.rowVerticalPadding,
-                    bottom = bottomPadding,
-                ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(DragConstants.rowSpacing),
-    ) {
-        Icon(
-            imageVector = Icons.Rounded.DragHandle,
-            contentDescription = stringResource(R.string.settings_action_reorder),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(DragConstants.iconSize).then(dragHandleModifier),
-        )
-
-        Icon(
-            imageVector = metadata.icon,
-            contentDescription = metadata.name,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(DragConstants.iconSize),
-        )
-
-        Text(
-            text = metadata.name,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f),
-        )
 
         androidx.compose.material3.Switch(
             checked = isEnabled,

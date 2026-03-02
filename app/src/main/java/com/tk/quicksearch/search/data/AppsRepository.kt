@@ -102,14 +102,6 @@ class AppsRepository(
      * @param limit Maximum number of apps to return
      * @return List of apps sorted by last used time (descending)
      */
-    fun extractRecentlyOpenedApps(
-        apps: List<AppInfo>,
-        limit: Int,
-    ): List<AppInfo> {
-        if (apps.isEmpty() || limit <= 0) return emptyList()
-        return apps.sortedByDescending { it.lastUsedTime }.take(limit)
-    }
-
     /**
      * Returns all recently opened apps sorted by last used timestamp.
      */

@@ -11,7 +11,6 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.tk.quicksearch.widget.customButtons.CustomWidgetButtonAction
 import com.tk.quicksearch.widget.voiceSearch.MicAction
-import com.tk.quicksearch.widget.voiceSearch.MicAction.DEFAULT_VOICE_SEARCH
 import com.tk.quicksearch.widget.voiceSearch.MicAction.OFF
 import kotlinx.parcelize.Parcelize
 
@@ -70,9 +69,6 @@ internal object WidgetDefaults {
     const val BACKGROUND_ALPHA = 0.35f
     const val BORDER_ALPHA = BACKGROUND_ALPHA
     val MIC_ACTION = MicAction.DEFAULT_VOICE_SEARCH
-
-    // Default to theme-based colors (null means follow theme)
-    val TEXT_ICON_COLOR_OVERRIDE: Boolean? = null
     val CUSTOM_BUTTONS: List<CustomWidgetButtonAction?> =
         List(WidgetButtonSlotConfig.STANDARD_COUNT) { null }
 }

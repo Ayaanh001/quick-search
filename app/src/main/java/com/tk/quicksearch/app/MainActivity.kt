@@ -41,6 +41,12 @@ class MainActivity : ComponentActivity() {
         const val ACTION_SEARCH_TARGET_SHORTCUT = "com.tk.quicksearch.action.SEARCH_TARGET_SHORTCUT"
         const val EXTRA_SHORTCUT_QUERY = "com.tk.quicksearch.extra.SHORTCUT_QUERY"
         const val EXTRA_SHORTCUT_TARGET_ENGINE = "com.tk.quicksearch.extra.SHORTCUT_TARGET_ENGINE"
+
+        private const val EXTRA_CONTACT_ACTION_PICKER = "overlay_contact_action_picker"
+        private const val EXTRA_CONTACT_ACTION_PICKER_ID = "overlay_contact_action_picker_id"
+        private const val EXTRA_CONTACT_ACTION_PICKER_IS_PRIMARY = "overlay_contact_action_picker_primary"
+        private const val EXTRA_CONTACT_ACTION_PICKER_SERIALIZED_ACTION =
+            "overlay_contact_action_picker_serialized_action"
     }
 
     private val searchViewModel: SearchViewModel by viewModels()
@@ -273,23 +279,23 @@ class MainActivity : ComponentActivity() {
         }
         val contactActionIntent = intent
         if (contactActionIntent?.getBooleanExtra(
-                OverlayModeController.EXTRA_CONTACT_ACTION_PICKER,
+                EXTRA_CONTACT_ACTION_PICKER,
                 false,
             ) == true
         ) {
             val contactId =
                 contactActionIntent.getLongExtra(
-                    OverlayModeController.EXTRA_CONTACT_ACTION_PICKER_ID,
+                    EXTRA_CONTACT_ACTION_PICKER_ID,
                     -1L,
                 )
             val isPrimary =
                 contactActionIntent.getBooleanExtra(
-                    OverlayModeController.EXTRA_CONTACT_ACTION_PICKER_IS_PRIMARY,
+                    EXTRA_CONTACT_ACTION_PICKER_IS_PRIMARY,
                     true,
                 )
             val serializedAction =
                 contactActionIntent.getStringExtra(
-                    OverlayModeController.EXTRA_CONTACT_ACTION_PICKER_SERIALIZED_ACTION,
+                    EXTRA_CONTACT_ACTION_PICKER_SERIALIZED_ACTION,
                 )
             if (contactId != -1L) {
                 searchViewModel.requestContactActionPicker(
@@ -298,13 +304,13 @@ class MainActivity : ComponentActivity() {
                     serializedAction = serializedAction,
                 )
             }
-            contactActionIntent.removeExtra(OverlayModeController.EXTRA_CONTACT_ACTION_PICKER)
-            contactActionIntent.removeExtra(OverlayModeController.EXTRA_CONTACT_ACTION_PICKER_ID)
+            contactActionIntent.removeExtra(EXTRA_CONTACT_ACTION_PICKER)
+            contactActionIntent.removeExtra(EXTRA_CONTACT_ACTION_PICKER_ID)
             contactActionIntent.removeExtra(
-                OverlayModeController.EXTRA_CONTACT_ACTION_PICKER_IS_PRIMARY,
+                EXTRA_CONTACT_ACTION_PICKER_IS_PRIMARY,
             )
             contactActionIntent.removeExtra(
-                OverlayModeController.EXTRA_CONTACT_ACTION_PICKER_SERIALIZED_ACTION,
+                EXTRA_CONTACT_ACTION_PICKER_SERIALIZED_ACTION,
             )
         }
 

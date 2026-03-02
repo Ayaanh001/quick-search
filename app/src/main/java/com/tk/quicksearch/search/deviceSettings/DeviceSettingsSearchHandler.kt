@@ -6,7 +6,6 @@ import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.search.recentSearches.RecentSearchEntry
 import com.tk.quicksearch.search.utils.SearchRankingUtils
 import com.tk.quicksearch.search.utils.SearchTextNormalizer
-import kotlinx.coroutines.CoroutineScope
 import java.util.Locale
 
 private const val RESULT_LIMIT = 25
@@ -21,7 +20,6 @@ class DeviceSettingsSearchHandler(
     private val context: Context,
     private val repository: DeviceSettingsRepository,
     private val userPreferences: UserAppPreferences,
-    private val scope: CoroutineScope,
     private val showToastCallback: (Int) -> Unit,
 ) {
     private var availableSettings: List<DeviceSetting> = emptyList()
@@ -66,7 +64,6 @@ class DeviceSettingsSearchHandler(
     fun getSettingsState(
         query: String,
         isSettingsSectionEnabled: Boolean,
-        currentResults: List<DeviceSetting>,
     ): DeviceSettingsSearchResults {
         // Cache preference reads to avoid repeated SharedPreferences lookups
         val pinnedIds = userPreferences.getPinnedSettingIds()

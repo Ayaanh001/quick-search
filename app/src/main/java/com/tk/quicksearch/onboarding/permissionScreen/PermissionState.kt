@@ -16,9 +16,6 @@ data class PermissionState(
         /** Creates a state for a granted permission that is enabled */
         fun granted() = PermissionState(isGranted = true, isEnabled = true)
 
-        /** Creates a state for a permission that was denied */
-        fun denied() = PermissionState(wasDenied = true)
-
         /** Creates the initial state for a permission (not granted, not enabled) */
         fun initial() = PermissionState()
     }

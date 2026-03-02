@@ -119,8 +119,4 @@ object PermissionRequestHandler {
     fun launchAppSettingsRequest(context: Context): Boolean =
         launchIfResolvable(context, createAppSettingsIntent(context)) ||
             launchIfResolvable(context, createGeneralSettingsIntent())
-
-    fun shouldRequestWallpaperPermission(context: Context): Boolean =
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            !checkWallpaperPermission(context)
 }

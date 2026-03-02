@@ -42,7 +42,6 @@ import com.tk.quicksearch.search.directSearch.DirectSearchHandler
 import com.tk.quicksearch.search.directSearch.GeminiModelCatalog
 import com.tk.quicksearch.search.files.FileManagementHandler
 import com.tk.quicksearch.search.files.FileSearchHandler
-import com.tk.quicksearch.search.fuzzy.FuzzySearchConfigurationManager
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
@@ -261,14 +260,8 @@ class SearchViewModel(
 
     val calculatorHandler by lazy {
         CalculatorHandler(
-                scope = viewModelScope,
                 userPreferences = userPreferences,
-                uiStateUpdater = this::updateUiState,
         )
-    }
-
-    val fuzzySearchConfigManager by lazy {
-        FuzzySearchConfigurationManager(userPreferences.uiPreferences)
     }
 
     val appSearchManager by lazy {
@@ -282,7 +275,6 @@ class SearchViewModel(
                     _uiState.update { it.copy(isLoading = isLoading, errorMessage = error) }
                 },
                 showToastCallback = this::showToast,
-                initialFuzzyConfig = fuzzySearchConfigManager.getAppFuzzyConfig(),
         )
     }
 
@@ -291,7 +283,6 @@ class SearchViewModel(
                 context = application.applicationContext,
                 repository = settingsShortcutRepository,
                 userPreferences = userPreferences,
-                scope = viewModelScope,
                 showToastCallback = this::showToast,
         )
     }
@@ -1315,9 +1306,6 @@ class SearchViewModel(
                         query = _uiState.value.query,
                         isSettingsSectionEnabled =
                                 SearchSection.SETTINGS !in sectionManager.disabledSections,
-                        currentResults =
-                                currentResults, // Pass current results to avoid re-search if not
-                        // needed? Actually logic handles it
                         )
 
         _uiState.update { state ->

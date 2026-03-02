@@ -4,7 +4,6 @@ import android.app.Application
 import android.os.Build
 import com.tk.quicksearch.search.core.SearchUiState
 import com.tk.quicksearch.search.data.UserAppPreferences
-import kotlinx.coroutines.flow.update
 
 class ReleaseNotesHandler(
     private val application: Application,

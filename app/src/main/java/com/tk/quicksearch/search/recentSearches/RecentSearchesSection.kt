@@ -2,7 +2,6 @@ package com.tk.quicksearch.search.recentSearches
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -18,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Card
@@ -102,7 +100,6 @@ fun RecentSearchesSection(
     onSettingClick: (DeviceSetting) -> Unit,
     onAppShortcutClick: (StaticShortcut) -> Unit,
     onDeleteRecentItem: (RecentSearchEntry) -> Unit,
-    onDisableSearchHistory: () -> Unit = {},
     showSearchHistoryTip: Boolean = false,
     onOpenSearchHistorySettings: () -> Unit = {},
     onDismissSearchHistoryTip: () -> Unit = {},

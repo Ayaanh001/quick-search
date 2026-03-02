@@ -1,7 +1,6 @@
 package com.tk.quicksearch.navigation
 
 import android.app.Application
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.tk.quicksearch.R
@@ -28,9 +27,6 @@ class NavigationHandler(
     private val showToastCallback: (Int) -> Unit,
 ) {
     private val mainHandler = Handler(Looper.getMainLooper())
-
-    private val context: Context
-        get() = application.applicationContext
 
     fun openUsageAccessSettings() {
         IntentHelpers.openUsageAccessSettings(application)

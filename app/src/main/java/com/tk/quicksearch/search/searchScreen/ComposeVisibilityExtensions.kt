@@ -6,11 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.tk.quicksearch.search.core.*
-import com.tk.quicksearch.search.searchScreen.AppsSectionParams
-import com.tk.quicksearch.search.searchScreen.ContactsSectionParams
-import com.tk.quicksearch.search.searchScreen.FilesSectionParams
-import com.tk.quicksearch.search.searchScreen.SectionRenderingState
-import com.tk.quicksearch.search.searchScreen.SettingsSectionParams
 
 /**
  * Composable extension functions for conditional rendering based on visibility states.
@@ -71,46 +66,6 @@ fun SearchEnginesVisibility(
     }
 }
 
-// ============================================================================
-// Visibility State Helpers
-// ============================================================================
-
-/**
- * Checks if any section will show content based on the new visibility states.
- * This replaces the old hasAnySearchContent logic.
- */
-fun hasAnySectionContent(state: SearchUiState): Boolean {
-    val appsShowing =
-        when (state.appsSectionState) {
-            is AppsSectionVisibility.ShowingResults -> true
-            else -> false
-        }
-    val appShortcutsShowing =
-        when (state.appShortcutsSectionState) {
-            is AppShortcutsSectionVisibility.ShowingResults -> true
-            else -> false
-        }
-    val contactsShowing =
-        when (state.contactsSectionState) {
-            is ContactsSectionVisibility.ShowingResults -> true
-            else -> false
-        }
-    val filesShowing =
-        when (state.filesSectionState) {
-            is FilesSectionVisibility.ShowingResults -> true
-            else -> false
-        }
-    val settingsShowing =
-        when (state.settingsSectionState) {
-            is SettingsSectionVisibility.ShowingResults -> true
-            else -> false
-        }
-
-    val hasContent = appsShowing || appShortcutsShowing || contactsShowing || filesShowing || settingsShowing
-
-    return hasContent
-}
-
 /**
  * Checks if there are any search results (dynamic results from searching),
  * not including pinned/static content.
@@ -127,6 +82,3 @@ fun hasAnySearchResults(state: SearchUiState): Boolean {
     return hasResults
 }
 
-// ============================================================================
-// Visibility State Helpers
-// ============================================================================

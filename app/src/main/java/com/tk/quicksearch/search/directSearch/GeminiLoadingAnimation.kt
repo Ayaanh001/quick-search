@@ -103,7 +103,7 @@ fun GeminiLoadingAnimation(
     }
 }
 
-fun Modifier.geminiLoadingEffect(
+private fun Modifier.geminiLoadingEffect(
     primaryColor: Color,
     containerColor: Color,
 ): Modifier =

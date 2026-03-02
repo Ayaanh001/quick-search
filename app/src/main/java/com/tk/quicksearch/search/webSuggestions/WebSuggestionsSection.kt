@@ -8,15 +8,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.NorthWest
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,10 +52,6 @@ fun WebSuggestionsSection(
     showWallpaperBackground: Boolean = false,
     reverseOrder: Boolean = false,
     isShortcutDetected: Boolean = false,
-    isRecentQuery: Boolean = false,
-    onDeleteRecentQuery: ((String) -> Unit)? = null,
-    paddingTop: androidx.compose.ui.unit.Dp = 0.dp,
-    paddingBottom: androidx.compose.ui.unit.Dp = 0.dp,
 ) {
     if (suggestions.isEmpty()) return
 
@@ -68,8 +61,7 @@ fun WebSuggestionsSection(
     Column(
         modifier =
             modifier
-                .fillMaxWidth()
-                .padding(top = paddingTop, bottom = paddingBottom),
+                .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
     ) {
         WebSuggestionsCard(
@@ -77,8 +69,6 @@ fun WebSuggestionsSection(
             onSuggestionClick = onSuggestionClick,
             showWallpaperBackground = showWallpaperBackground,
             isShortcutDetected = isShortcutDetected,
-            isRecentQuery = isRecentQuery,
-            onDeleteRecentQuery = onDeleteRecentQuery,
         )
     }
 }
@@ -93,8 +83,6 @@ private fun WebSuggestionsCard(
     onSuggestionClick: (String) -> Unit,
     showWallpaperBackground: Boolean = false,
     isShortcutDetected: Boolean = false,
-    isRecentQuery: Boolean = false,
-    onDeleteRecentQuery: ((String) -> Unit)? = null,
 ) {
     val overlayCardColor = LocalOverlayResultCardColor.current
     val overlayDividerColor = LocalOverlayDividerColor.current
@@ -132,13 +120,6 @@ private fun WebSuggestionsCard(
                     iconColor = iconColor,
                     modifier = Modifier.fillMaxWidth(),
                     isShortcutDetected = isShortcutDetected,
-                    isRecentQuery = isRecentQuery,
-                    onDeleteClick =
-                        if (isRecentQuery && onDeleteRecentQuery != null) {
-                            { onDeleteRecentQuery(suggestion) }
-                        } else {
-                            null
-                        },
                 )
 
                 // Add divider between items, but not after the last one
@@ -168,8 +149,6 @@ private fun WebSuggestionItem(
     iconColor: Color,
     modifier: Modifier = Modifier,
     isShortcutDetected: Boolean = false,
-    isRecentQuery: Boolean = false,
-    onDeleteClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier =
@@ -187,7 +166,6 @@ private fun WebSuggestionItem(
     ) {
         val icon =
             when {
-                isRecentQuery -> Icons.Rounded.History
                 isShortcutDetected -> Icons.Rounded.Search
                 else -> Icons.Rounded.NorthWest
             }
@@ -212,20 +190,5 @@ private fun WebSuggestionItem(
             overflow = TextOverflow.Clip,
             modifier = Modifier.weight(1f),
         )
-
-        // Show delete icon for recent queries
-        if (onDeleteClick != null) {
-            IconButton(
-                onClick = onDeleteClick,
-                modifier = Modifier.size(40.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Close,
-                    contentDescription = "Delete recent query",
-                    tint = iconColor,
-                    modifier = Modifier.size(DesignTokens.IconSizeSmall),
-                )
-            }
-        }
     }
 }

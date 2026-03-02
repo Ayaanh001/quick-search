@@ -29,7 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.onboarding.permissionScreen.PermissionRequestHandler
-import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.utils.PermissionUtils
 import com.tk.quicksearch.settings.searchEnginesScreen.SearchEngines
 import com.tk.quicksearch.settings.shared.SettingsScreenCallbacks
@@ -241,14 +240,6 @@ internal fun SettingsDetailLevel1Screen(
                         )
                     }
 
-                    SettingsDetailType.FEEDBACK_DEVELOPMENT -> {
-                        Text(
-                            text = "Feedback & development options will be implemented here",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(vertical = 24.dp),
-                        )
-                    }
-
                     SettingsDetailType.EXCLUDED_ITEMS,
                     SettingsDetailType.APP_MANAGEMENT,
                     SettingsDetailType.APP_SHORTCUTS,
@@ -313,7 +304,6 @@ internal fun SettingsDetailType.titleResId(): Int =
         SettingsDetailType.FILES -> R.string.settings_file_types_title
         SettingsDetailType.LAUNCH_OPTIONS -> R.string.settings_launch_options_title
         SettingsDetailType.PERMISSIONS -> R.string.settings_permissions_title
-        SettingsDetailType.FEEDBACK_DEVELOPMENT -> R.string.settings_feedback_development_title
         SettingsDetailType.DIRECT_SEARCH_CONFIGURE -> R.string.settings_direct_search_configure_title
     }
 
@@ -343,6 +333,5 @@ enum class SettingsDetailType {
     FILES,
     LAUNCH_OPTIONS,
     PERMISSIONS,
-    FEEDBACK_DEVELOPMENT,
     DIRECT_SEARCH_CONFIGURE,
 }

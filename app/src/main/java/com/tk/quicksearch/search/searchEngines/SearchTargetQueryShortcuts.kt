@@ -5,10 +5,10 @@ import java.util.Locale
 
 private const val SEARCH_TARGET_SHORTCUT_PACKAGE_PREFIX = "com.tk.quicksearch.searchtarget"
 
-fun getSearchTargetShortcutPackageName(target: SearchTarget): String =
+private fun getSearchTargetShortcutPackageName(target: SearchTarget): String =
     getSearchTargetShortcutPackageName(target.getId())
 
-fun getSearchTargetShortcutPackageName(targetId: String): String {
+private fun getSearchTargetShortcutPackageName(targetId: String): String {
     val sanitizedId =
         targetId
             .lowercase(Locale.US)

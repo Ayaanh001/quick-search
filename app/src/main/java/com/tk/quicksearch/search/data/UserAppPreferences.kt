@@ -40,41 +40,6 @@ class UserAppPreferences(
     private val amazonPreferences by lazy { AmazonPreferences(context) }
     private val recentSearchesPreferences by lazy { RecentSearchesPreferences(context) }
 
-    /** Minimal preferences needed for first frame render - only layout-affecting values. */
-    data class CriticalPreferences(
-            val oneHandedMode: Boolean,
-            val bottomSearchBarEnabled: Boolean,
-    )
-
-    /**
-     * Optimized: Loads only critical preference using direct access. Uses the underlying
-     * SharedPreferences directly for minimal overhead.
-     */
-    fun getCriticalPreferences(): CriticalPreferences {
-        // Direct access to avoid lazy initialization overhead
-        val prefs =
-                context.getSharedPreferences(
-                        com.tk.quicksearch.search.data.preferences.BasePreferences.PREFS_NAME,
-                        android.content.Context.MODE_PRIVATE,
-                )
-        val oneHandedMode =
-                prefs.getBoolean(
-                        com.tk.quicksearch.search.data.preferences.UiPreferences
-                                .KEY_ONE_HANDED_MODE,
-                        false,
-                )
-        val bottomSearchBarEnabled =
-                prefs.getBoolean(
-                        com.tk.quicksearch.search.data.preferences.UiPreferences
-                                .KEY_BOTTOM_SEARCH_BAR_ENABLED,
-                        false,
-                )
-        return CriticalPreferences(
-                oneHandedMode = oneHandedMode,
-                bottomSearchBarEnabled = bottomSearchBarEnabled,
-        )
-    }
-
     /**
      * Data class to hold all preferences needed during app startup for performance optimization.
      */

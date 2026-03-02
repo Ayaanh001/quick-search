@@ -149,19 +149,6 @@ private fun <T> getListForRendering(
     }
 }
 
-/**
- * Gets the ordered sections list. Always returns sections in priority order (highest first). Visual
- * reversal is handled by reverseScrolling property in ScrollView.
- */
-fun getOrderedSections(
-    renderingState: SectionRenderingState,
-    isReversed: Boolean,
-): List<SearchSection> {
-    // Always return sections in natural priority order
-    // In one-handed mode, reverseScrolling property handles visual reversal
-    return renderingState.orderedSections
-}
-
 // ============================================================================
 // Section Rendering Data Classes
 // ============================================================================

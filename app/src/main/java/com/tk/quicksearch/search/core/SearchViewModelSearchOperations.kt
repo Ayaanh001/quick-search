@@ -2,7 +2,6 @@ package com.tk.quicksearch.search.core
 
 import com.tk.quicksearch.search.data.ContactRepository
 import com.tk.quicksearch.search.models.ContactInfo
-import kotlinx.coroutines.CoroutineScope
 
 class SearchOperations(
     private val contactRepository: ContactRepository,
@@ -10,31 +9,9 @@ class SearchOperations(
     companion object {
         private const val CONTACT_RESULT_LIMIT = 25
 
-        // Prefetch more than we display so ranking isn't biased by provider sort order.
-        // Short queries like "mum" can match many contacts; fetch a wider candidate set so
-        // strong matches like "Mummy" are not dropped before ranking.
         private const val SHORT_QUERY_PREFETCH_MULTIPLIER = 10
         private const val DEFAULT_CONTACT_PREFETCH_MULTIPLIER = 4
         private const val SHORT_QUERY_LENGTH_THRESHOLD = 3
-        private const val MIN_QUERY_LENGTH = 2
-    }
-
-    suspend fun performSearches(
-        query: String,
-        canSearchContacts: Boolean,
-        excludedContactIds: Set<Long>,
-        scope: CoroutineScope,
-    ): List<ContactInfo> {
-        val trimmedQuery = query.trim()
-        if (trimmedQuery.length < MIN_QUERY_LENGTH) {
-            return emptyList()
-        }
-
-        return if (canSearchContacts) {
-            searchContacts(trimmedQuery, excludedContactIds)
-        } else {
-            emptyList()
-        }
     }
 
     suspend fun searchContacts(

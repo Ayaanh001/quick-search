@@ -29,12 +29,4 @@ data class FuzzySearchConfig(
             priority: Int = DEFAULT_APP_CONFIG.priority,
         ) = FuzzySearchConfig(matchThreshold, minQueryLength, priority)
     }
-
-    /**
-     * Validates the configuration parameters.
-     */
-    fun validate(): Boolean =
-        matchThreshold in 0..100 &&
-            minQueryLength >= 1 &&
-            priority >= 0
 }

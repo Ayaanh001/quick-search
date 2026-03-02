@@ -1,7 +1,5 @@
 package com.tk.quicksearch.search.models
 
-import java.util.Locale
-
 /**
  * Snapshot of a launchable application that can be rendered inside the quick search grid.
  * [userHandleId] is set for work profile apps so they can be launched in the correct profile.

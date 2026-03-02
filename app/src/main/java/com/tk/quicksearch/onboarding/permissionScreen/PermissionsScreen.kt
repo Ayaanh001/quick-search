@@ -250,9 +250,6 @@ fun PermissionsScreen(
                                     permissionState = filesPermissionState,
                                     runtimeLauncher = multiplePermissionsLauncher,
                                     allFilesLauncher = allFilesAccessLauncher,
-                                    onStateUpdate = { newState ->
-                                        filesPermissionState = newState
-                                    },
                                 )
                             }
                         },
@@ -281,18 +278,6 @@ fun PermissionsScreen(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Text(
-                text = stringResource(R.string.permissions_privacy_notice),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Start,
-                modifier =
-                    Modifier
-                        .fillMaxWidth(),
-            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -450,7 +435,6 @@ private fun handleFilesPermissionRequest(
     permissionState: PermissionState,
     runtimeLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>,
     allFilesLauncher: androidx.activity.result.ActivityResultLauncher<Intent>,
-    onStateUpdate: (PermissionState) -> Unit,
 ) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         // Android R+ - always open settings

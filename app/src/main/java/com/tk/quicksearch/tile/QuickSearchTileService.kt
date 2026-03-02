@@ -56,18 +56,18 @@ class QuickSearchTileService : TileService() {
 
     override fun onStartListening() {
         super.onStartListening()
-        updateTileState(Tile.STATE_ACTIVE)
+        updateTileState()
     }
 
     override fun onTileAdded() {
         super.onTileAdded()
-        updateTileState(Tile.STATE_ACTIVE)
+        updateTileState()
     }
 
-    private fun updateTileState(state: Int) {
+    private fun updateTileState() {
         qsTile?.let { tile ->
             tile.label = getString(R.string.quick_settings_tile_label)
-            tile.state = state
+            tile.state = Tile.STATE_ACTIVE
             tile.icon = Icon.createWithResource(this, R.drawable.ic_widget_search)
             tile.updateTile()
         }

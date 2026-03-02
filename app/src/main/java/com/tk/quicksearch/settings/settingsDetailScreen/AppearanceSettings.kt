@@ -79,7 +79,7 @@ import kotlin.math.roundToInt
 
 /** Combined card for keyboard alignment and icon pack settings. */
 @Composable
-fun CombinedLayoutIconCard(
+private fun CombinedLayoutIconCard(
         oneHandedMode: Boolean,
         onToggleOneHandedMode: (Boolean) -> Unit,
         showAppLabels: Boolean,

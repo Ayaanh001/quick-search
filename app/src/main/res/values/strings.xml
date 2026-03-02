@@ -27,17 +27,12 @@
     <string name="direct_search_error_generic">Couldn\u2019t fetch a direct answer. Try again.</string>
     <string name="direct_search_enter_query">Please enter a query to search.</string>
     <string name="direct_search_powered_by">Powered by</string>
-    <string name="direct_search_mode">Model: %1$s</string>
-    <string name="direct_search_grounding">Google search grounding: %1$s</string>
-    <string name="direct_search_grounding_enabled">Enabled</string>
-    <string name="direct_search_grounding_disabled">Disabled</string>
     <string name="error_open_email">No email app found to send mail.</string>
     <string name="error_open_search_engine">Unable to open %1$s</string>
     <string name="keyboard_switch_back">Switch to regular keyboard</string>
     <string name="customize_search_engines">Customize Search Engines</string>
     <string name="keyboard_switch_to_number">Switch to number keyboard</string>
     <string name="action_open_keyboard">Open keyboard</string>
-    <string name="action_expand">Expand</string>
     <string name="direct_answer_contact_name">Direct Answer</string>
 
     <!-- ============================================================================
@@ -83,9 +78,6 @@
     <string name="error_whatsapp_video_call_failed">Failed to open WhatsApp video call</string>
     <string name="error_whatsapp_video_call_unavailable">WhatsApp not available for video calls</string>
     <string name="error_telegram_not_installed">Telegram is not installed</string>
-    <string name="error_telegram_invalid_phone">Invalid phone number for Telegram</string>
-    <string name="error_telegram_process_phone">Could not process phone number for Telegram</string>
-    <string name="error_telegram_web_fallback_failed">Telegram is not installed and web fallback failed</string>
     <string name="error_telegram_chat_failed">Failed to open Telegram chat</string>
     <string name="error_telegram_call_failed">Telegram call failed. Please ensure Telegram is installed.</string>
     <string name="error_signal_not_installed">Signal is not installed</string>
@@ -181,7 +173,6 @@
     <string name="action_edit_nickname">Edit Nickname</string>
     <string name="action_expand_more">More</string>
     <string name="action_more_search_history">More History</string>
-    <string name="action_disable_search_history">Disable Search History</string>
     <string name="action_remove_from_history">Remove From History</string>
     <string name="search_history_tip_message">You can disable search history in</string>
     <string name="search_history_tip_link">settings</string>
@@ -215,8 +206,6 @@
     <string name="dialog_nickname_title_edit">Edit nickname</string>
     <string name="dialog_nickname_message">Enter a nickname for "%1$s". You can search for it using this nickname.</string>
     <string name="dialog_nickname_hint">Nickname</string>
-    <string name="dialog_gemini_api_key_title">Enter Gemini API Key</string>
-    <string name="dialog_gemini_api_key_message">Enter your Gemini API key to enable Direct Search feature.</string>
     <string name="dialog_enjoying_app_title">Do you find this app useful?</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
@@ -240,20 +229,16 @@
     <string name="settings_action_move_up">Move to top</string>
     <string name="settings_action_move_down">Move to bottom</string>
     <string name="settings_action_reorder">Drag to reorder</string>
-    <string name="settings_action_unhide_app">Unhide</string>
     <string name="settings_action_clear_all">Clear All</string>
     <string name="settings_action_remove">Remove</string>
 
     <!-- ============================================================================
          Settings - Permissions
          ============================================================================ -->
-    <string name="settings_section_permissions">Permissions</string>
     <string name="settings_usage_access_title">Usage Access</string>
     <string name="settings_contacts_permission_title">Contacts</string>
     <string name="settings_files_permission_title">Files</string>
     <string name="settings_call_permission_title">Calling</string>
-    <string name="settings_usage_access_granted">Granted</string>
-    <string name="settings_permission_grant">Grant</string>
 
     <!-- ============================================================================
          Settings - App Index
@@ -271,14 +256,10 @@
     <!-- ============================================================================
          Settings - Hidden Apps
          ============================================================================ -->
-    <string name="settings_hidden_apps_title">Hidden apps</string>
-    <string name="settings_hidden_apps_desc">These apps stay out of Quick Search until you restore them.</string>
-    <string name="settings_hidden_apps_empty">No hidden apps yet.</string>
 
     <!-- ============================================================================
          Settings - Appearance
          ============================================================================ -->
-    <string name="settings_app_labels_title">Appearance</string>
     <string name="settings_wallpaper_transparency_label">Transparency</string>
     <string name="settings_wallpaper_blur_label">Blur</string>
     <string name="wallpaper_permission_fallback_title">Wallpaper Error</string>
@@ -310,7 +291,6 @@
     <string name="settings_overlay_theme_aurora">Aurora</string>
     <string name="settings_overlay_theme_sunset">Sunset</string>
     <string name="settings_overlay_theme_monochrome">Mono</string>
-    <string name="settings_overlay_theme_tone_label">Tone</string>
     <string name="settings_overlay_theme_tone_lighter">Lighter</string>
     <string name="settings_overlay_theme_tone_darker">Darker</string>
     <string name="settings_overlay_source_wallpaper">Wallpaper</string>
@@ -323,18 +303,13 @@
     <!-- ============================================================================
          Settings - Search Engines
          ============================================================================ -->
-    <string name="settings_internet_search_title">Internet Search</string>
     <string name="settings_search_results_title">Search Results</string>
     <string name="settings_search_results_desc">Manage result types, web suggestions, and search history</string>
     <string name="settings_search_engines_title">Search Engines</string>
     <string name="settings_search_engines_desc">Manage search engines and configure Gemini API key</string>
-    <string name="settings_search_engines_at_least_one_required">At least one search engine must remain enabled</string>
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_desc">Wallpaper, search engine styles, one-handed mode, etc.</string>
     <string name="settings_calls_texts_title">Calls &amp; Texts</string>
-    <string name="settings_calls_texts_desc">Configure direct dial and default calling/messaging apps</string>
-    <string name="settings_files_title">Files</string>
-    <string name="settings_files_desc">Control which file types appear in results</string>
     <string name="settings_launch_options_title">Launch Options</string>
     <string name="settings_launch_options_desc">Different ways to launch this app</string>
     <string name="settings_permissions_title">Permissions</string>
@@ -349,15 +324,11 @@
     <string name="settings_backup_export_failed">Unable to export settings.</string>
     <string name="settings_backup_import_success">Settings imported successfully.</string>
     <string name="settings_backup_import_failed">Unable to import settings.</string>
-    <string name="settings_feedback_development_title">Feedback &amp; Development</string>
-    <string name="settings_feedback_development_desc">Send feedback, see app\'s source code</string>
     <string name="settings_add_search_engine_button">Add Search Engine</string>
     <string name="settings_add_search_engine_dialog_title">Add Search Engine</string>
     <string name="settings_add_search_engine_dialog_message">Enter URL template with query placeholder.\n\nExample:\nwww.google.com/search?q={{query}}</string>
     <string name="settings_add_search_engine_loading_metadata">Fetching search engine details…</string>
     <string name="settings_add_search_engine_error_required">Please enter a URL template.</string>
-    <string name="settings_add_search_engine_error_invalid_url">Enter a valid URL.</string>
-    <string name="settings_add_search_engine_error_scheme">URL must start with http:// or https://</string>
     <string name="settings_add_search_engine_error_placeholder">URL must include {{query}}</string>
     <string name="settings_add_search_engine_error_multiple_placeholders">Use {{query}} only once.</string>
     <string name="settings_edit_search_engine_dialog_title">Edit Search Engine</string>
@@ -380,8 +351,6 @@
     <string name="settings_search_engine_display_inline_desc">Shown as cards in the results area when searching</string>
     <string name="settings_amazon_domain_default">amazon.com</string>
     <string name="settings_amazon_domain_label">Domain:</string>
-    <string name="settings_gemini_api_key_placeholder">Paste your API Key</string>
-    <string name="settings_gemini_api_key_paste">Paste from clipboard</string>
     <string name="settings_gemini_api_key_add">Add Key</string>
     <string name="settings_gemini_api_key_reset">Reset Key</string>
     <string name="settings_direct_search_configure">Configure</string>
@@ -397,8 +366,6 @@
     <!-- ============================================================================
          Settings - Shortcuts
          ============================================================================ -->
-    <string name="settings_shortcuts_title">Shortcuts</string>
-    <string name="settings_shortcuts_desc">Adding shortcuts at the end of your query will start search instantly.</string>
     <string name="settings_shortcuts_hint_message">Tip: Add a search engine shortcut at the start or end of your query to quickly search with that engine.</string>
     <string name="settings_default_search_engine_hint_message">Tip: The first search engine in the list becomes your default. It is used when you press the keyboard\'s search button when there are no other results.</string>
     <string name="settings_shortcut_label">Shortcut:</string>
@@ -429,7 +396,6 @@
     <!-- ============================================================================
          Settings - More Options
          ============================================================================ -->
-    <string name="settings_more_options_title">More Options</string>
     <string name="settings_refresh_data_title">Refresh Data</string>
     <string name="settings_refresh_apps_title">Apps</string>
     <string name="settings_refresh_contacts_title">Contacts</string>
@@ -468,15 +434,12 @@
     <string name="settings_manage_files_desc">Manage which file types appear in results</string>
     <string name="settings_view_all_desc">View all settings</string>
     <string name="settings_app_shortcuts_empty">No app shortcuts found.</string>
-    <string name="settings_app_shortcuts_description">Tap any app to view its shortcuts. Enable, disable, or add custom shortcuts.</string>
     <string name="settings_app_shortcuts_description_with_count">Tap any app to view its shortcuts. Enable, disable, or add custom shortcuts.\n\nAvailable Shortcuts: %1$s</string>
-    <string name="settings_app_shortcuts_available_count">Available shortcuts: %1$d</string>
     <string name="settings_app_shortcuts_filter_all_apps">All Apps</string>
     <string name="settings_app_shortcuts_filter_apps_with_shortcuts">Apps with Shortcuts</string>
     <string name="settings_app_shortcuts_filter_search_engines">Search Engines</string>
     <string name="settings_app_shortcuts_filter_browsers">Browsers</string>
     <string name="settings_app_shortcuts_add_button">Add Shortcut</string>
-    <string name="settings_app_shortcuts_search_button">Search</string>
     <string name="settings_app_shortcuts_search_hint">Search App Shortcuts</string>
     <string name="settings_app_shortcuts_expand_all">Expand all</string>
     <string name="settings_app_shortcuts_collapse_all">Collapse all</string>
@@ -517,7 +480,6 @@
     <string name="settings_app_sort_descending">Sort descending</string>
     <string name="settings_app_apk_size_format">APK Size: %1$.2f Mb</string>
     <string name="settings_app_uninstall_selected_format">Uninstall (%1$d)</string>
-    <string name="settings_app_icon_tap_for_details">Tap app icon for app details</string>
     <string name="settings_app_info_not_available">Not available</string>
     <string name="settings_app_info_package_name">Package Name</string>
     <string name="settings_app_info_version">Version</string>
@@ -526,15 +488,6 @@
     <string name="settings_app_info_minimum_sdk">Minimum SDK</string>
     <string name="settings_app_info_install_date">Install Date</string>
     <string name="settings_app_info_last_update">Last Update</string>
-    <string name="settings_app_info_launch_count">Launch Count</string>
-    <string name="settings_app_info_last_used">Last Used</string>
-    <string name="settings_app_info_total_foreground_time">Foreground Time</string>
-    <string name="settings_app_info_first_installed">First Installed</string>
-    <string name="settings_app_info_type">App Type</string>
-    <string name="settings_app_info_type_system">System App</string>
-    <string name="settings_app_info_type_user">User App</string>
-    <string name="settings_app_info_profile_id">Profile ID</string>
-    <string name="settings_app_info_component_name">Component</string>
     <string name="section_contacts">Contacts</string>
     <string name="section_files">Files</string>
     <string name="section_settings">Device Settings</string>
@@ -547,8 +500,6 @@
     <string name="settings_excluded_items_title">Excluded Items</string>
     <string name="settings_excluded_items_desc">View and manage items you have excluded</string>
     <string name="settings_excluded_items_empty">You have no excluded items.</string>
-    <string name="settings_additional_settings_title">Additional Settings</string>
-    <string name="settings_additional_settings_desc">Advanced options and additional configuration.</string>
     <string name="settings_default_assistant_title">Default Assistant</string>
     <string name="settings_default_assistant_desc">Set this app as your default digital assistant app.</string>
     <string name="settings_default_assistant_desc_change">Change your default digital assistant app.</string>
@@ -594,7 +545,6 @@
     <string name="widget_slider_transparency_border">Border</string>
     <string name="widget_toggle_show_label">Quick Search Text</string>
     <string name="widget_mic_icon">Mic Icon</string>
-    <string name="widget_mic_action">Mic Icon Action</string>
     <string name="widget_mic_action_default">Default</string>
     <string name="widget_mic_action_digital_assistant">Assistant</string>
     <string name="widget_mic_action_off">Off</string>
@@ -607,7 +557,6 @@
     <string name="widget_theme_light">Light</string>
     <string name="widget_theme_dark">Dark</string>
     <string name="widget_theme_system">System</string>
-    <string name="widget_background_color">Background Color</string>
     <string name="widget_background_color_custom">Custom</string>
     <string name="widget_background_color_custom_dialog_title">Custom Color</string>
     <string name="widget_background_color_custom_dialog_hint">Hex Color (RRGGBB)</string>
@@ -617,7 +566,6 @@
     <string name="widget_custom_buttons_dialog_title">Select Action</string>
     <string name="widget_custom_buttons_dialog_hint">You can search for Apps, App Shortcuts, Contacts, Files, Folders &amp; Device settings.</string>
     <string name="widget_custom_buttons_no_results">No results found.</string>
-    <string name="widget_custom_button_reset">Reset</string>
     <string name="widget_custom_button_add">Add</string>
     <string name="widget_custom_button_add_desc">Add custom button</string>
     <string name="widget_custom_buttons_restriction">Not available when custom buttons are active.</string>
@@ -643,7 +591,6 @@
     <string name="permissions_files_desc">Required to search through your documents and other files.</string>
     <string name="permissions_calling_title">Calling</string>
     <string name="permissions_calling_desc">Required to call your contacts directly without opening the dialer.</string>
-    <string name="permissions_privacy_notice"></string>
     <string name="permissions_granted">Granted</string>
     <string name="permissions_reminder_dialog_title">Permissions Not Granted</string>
     <string name="permissions_reminder_dialog_message">If you later change your mind about %1$s permission, you can grant the permission from app settings.</string>
@@ -714,7 +661,6 @@
     <!-- ============================================================================
          Settings - Feedback
          ============================================================================ -->
-    <string name="settings_section_feedback">Feedback &amp; Development</string>
     <string name="settings_feedback_send_title">Send Feedback</string>
     <string name="settings_feedback_send_desc">Report bugs or request features</string>
     <string name="settings_feedback_rate_title">Rate Quick Search</string>
@@ -752,6 +698,4 @@
     <!-- ============================================================================
          Contacts Permission Tip Banner
          ============================================================================ -->
-    <string name="settings_contacts_permission_needed_message">Contacts permission is needed to access these features.\n%1$s</string>
-    <string name="settings_contacts_permission_give_permission">Give permission</string>
 </resources>

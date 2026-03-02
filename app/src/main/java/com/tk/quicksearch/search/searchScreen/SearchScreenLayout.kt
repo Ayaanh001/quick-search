@@ -124,7 +124,6 @@ fun SearchContentArea(
     onCustomizeSearchEnginesClick: () -> Unit = {},
     onOpenDirectSearchConfigure: () -> Unit = {},
     onDeleteRecentItem: (RecentSearchEntry) -> Unit = {},
-    onDisableSearchHistory: () -> Unit = {},
     onOpenSearchHistorySettings: () -> Unit = {},
     onDismissSearchHistoryTip: () -> Unit = {},
     onGeminiModelInfoClick: () -> Unit = {},
@@ -457,7 +456,6 @@ fun SearchContentArea(
                         onOpenDirectSearchConfigure = onOpenDirectSearchConfigure,
                         onSearchTargetClick = onSearchTargetClick,
                         onDeleteRecentItem = onDeleteRecentItem,
-                        onDisableSearchHistory = onDisableSearchHistory,
                         onOpenSearchHistorySettings = onOpenSearchHistorySettings,
                         onDismissSearchHistoryTip = onDismissSearchHistoryTip,
                         onGeminiModelInfoClick = onGeminiModelInfoClick,
@@ -571,7 +569,6 @@ fun ContentLayout(
     onOpenDirectSearchConfigure: () -> Unit = {},
     onSearchTargetClick: (String, SearchTarget) -> Unit = { _, _ -> },
     onDeleteRecentItem: (RecentSearchEntry) -> Unit = {},
-    onDisableSearchHistory: () -> Unit = {},
     onOpenSearchHistorySettings: () -> Unit = {},
     onDismissSearchHistoryTip: () -> Unit = {},
     onGeminiModelInfoClick: () -> Unit = {},
@@ -704,7 +701,6 @@ fun ContentLayout(
                             calculatorState = state.calculatorState,
                             showWallpaperBackground =
                                 effectiveShowWallpaperBackground,
-                            oneHandedMode = state.oneHandedMode,
                         )
                     }
                 }
@@ -762,11 +758,10 @@ fun ContentLayout(
                                 }
                             }
                             DirectSearchResult(
-                                DirectSearchState =
+                                directSearchState =
                                 directSearchState,
                                 showWallpaperBackground =
                                     effectiveShowWallpaperBackground,
-                                oneHandedMode = state.oneHandedMode,
                                 onGeminiModelInfoClick = onGeminiModelInfoClick,
                                 onOpenDirectSearchConfigure =
                                 onOpenDirectSearchConfigure,
@@ -858,7 +853,6 @@ fun ContentLayout(
                                 isShortcutDetected =
                                     state.detectedShortcutTarget !=
                                         null,
-                                isRecentQuery = false,
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }
@@ -928,8 +922,6 @@ fun ContentLayout(
                                             .onShortcutClick,
                                     onDeleteRecentItem =
                                     onDeleteRecentItem,
-                                    onDisableSearchHistory =
-                                    onDisableSearchHistory,
                                     showSearchHistoryTip = !state.hasDismissedSearchHistoryTip,
                                     onOpenSearchHistorySettings = onOpenSearchHistorySettings,
                                     onDismissSearchHistoryTip = onDismissSearchHistoryTip,

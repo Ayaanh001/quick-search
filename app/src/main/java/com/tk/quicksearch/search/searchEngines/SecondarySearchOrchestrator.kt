@@ -161,14 +161,6 @@ class SecondarySearchOrchestrator(
                             lastQueryWithNoAppShortcuts = null
                         }
 
-                        val stateBeforeUpdate = currentStateProvider()
-                        val hasAnyResults =
-                            unifiedResults.contactResults.isNotEmpty() ||
-                                unifiedResults.fileResults.isNotEmpty() ||
-                                unifiedResults.settingResults.isNotEmpty() ||
-                                unifiedResults.appShortcutResults.isNotEmpty() ||
-                                stateBeforeUpdate.searchResults.isNotEmpty()
-
                         uiStateUpdater { state ->
                             state.copy(
                                 contactResults = unifiedResults.contactResults,

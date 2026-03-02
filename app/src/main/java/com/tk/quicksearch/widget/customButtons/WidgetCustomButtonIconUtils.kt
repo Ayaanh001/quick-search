@@ -10,28 +10,15 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Typeface
 import android.net.Uri
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
-import androidx.compose.material.icons.rounded.Apps
-import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.graphics.drawable.toBitmap
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.managers.IconPackManager
-import com.tk.quicksearch.search.models.FileType
-import androidx.compose.ui.graphics.Canvas as ComposeCanvas
 
 data class WidgetButtonIcon(
     val bitmap: Bitmap? = null,

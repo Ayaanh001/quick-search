@@ -91,7 +91,6 @@ private const val THUMBNAIL_CACHE_MAX_SIZE = 60
 private const val THUMBNAIL_FAILURE_RETRY_DELAY_MS = 30_000L
 private const val EXPAND_BUTTON_TOP_PADDING = 2
 private const val EXPAND_BUTTON_HORIZONTAL_PADDING = 12
-private const val DROPDOWN_CORNER_RADIUS = 24
 
 private object FileThumbnailCache {
     private val loadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)

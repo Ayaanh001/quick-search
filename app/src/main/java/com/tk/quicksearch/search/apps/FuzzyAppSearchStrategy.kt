@@ -21,24 +21,7 @@ class FuzzyAppSearchStrategy(
         query: String,
         candidates: List<AppInfo>,
     ): List<FuzzySearchStrategy.Match<AppInfo>> {
-        if (query.isBlank()) return emptyList()
-
-        return candidates.filterByFuzzySearch(query) { app ->
-            // Get nickname from app (this would be provided by AppSearchManager)
-            val nickname = getAppNickname(app)
-            engine.computeScore(query, app.appName, nickname, config.minQueryLength)
-        }
-    }
-
-    /**
-     * Gets the nickname for an app.
-     * This method would typically access cached nicknames from AppSearchManager.
-     * For now, returns null - AppSearchManager will provide nicknames.
-     */
-    private fun getAppNickname(app: AppInfo): String? {
-        // This will be overridden or nicknames will be passed in
-        // when AppSearchManager uses this strategy
-        return null
+        return findMatchesWithNicknames(query, candidates) { null }
     }
 
     /**

@@ -147,43 +147,10 @@ object ItemPriorityConfig {
     fun getLayoutOrder(hasQuery: Boolean): List<ItemType> = if (hasQuery) SEARCHING_STATE_LAYOUT else APP_OPEN_STATE_LAYOUT
 
     /**
-     * Gets the complete layout for searching state (query present).
-     * Includes calculator, direct search, all sections, web suggestions, and search engines.
-     *
-     * @return ordered list of items for searching state
-     */
-    fun getSearchingStateOrder(): List<ItemType> = SEARCHING_STATE_LAYOUT
-
-    /**
-     * Gets the complete layout for app open state (no query).
-     * Includes pinned sections and recent queries.
-     *
-     * @return ordered list of items for app open state
-     */
-    fun getAppOpenStateOrder(): List<ItemType> = APP_OPEN_STATE_LAYOUT
-
-    /**
      * Gets the priority order for search results sections.
      * This is used when rendering section results (query present state).
      *
      * @return ordered list of sections by search result priority
      */
     fun getSearchResultsPriority(): List<SearchSection> = searchingStatePriority
-
-    /**
-     * Gets the priority order for pinned items sections and app open state.
-     * This is used when displaying pinned sections and recent apps (query absent state).
-     *
-     * @return ordered list of sections by app open state priority
-     */
-    fun getAppOpenPriority(): List<SearchSection> = appOpenStatePriority
-
-    /**
-     * Gets the priority order based on the current query state.
-     * Returns the appropriate section ordering for the current state.
-     *
-     * @param hasQuery true when query is present (searching), false when query is absent (app open)
-     * @return ordered list of sections by priority
-     */
-    fun getPriorityOrder(hasQuery: Boolean): List<SearchSection> = if (hasQuery) searchingStatePriority else appOpenStatePriority
 }

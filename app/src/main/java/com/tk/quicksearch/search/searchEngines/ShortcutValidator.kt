@@ -26,17 +26,6 @@ object ShortcutValidator {
     }
 
     /**
-     * Validates shortcut input for display purposes (allows shorter codes for UI feedback). Same as
-     * isValidShortcutCode but allows single character codes.
-     */
-    fun isValidShortcutCodeForDisplay(input: String): Boolean {
-        val normalized = normalizeShortcutCodeInput(input)
-        return normalized.isNotEmpty() &&
-            normalized.length >= 1 &&
-            normalized.all { it.isLetterOrDigit() }
-    }
-
-    /**
      * Validates that a shortcut does not conflict with any existing shortcut. A conflict occurs if
      * one shortcut is a prefix of another (e.g., "br" conflicts with "brvt"). This prevents
      * ambiguity where multiple shortcuts could potentially match the same input.

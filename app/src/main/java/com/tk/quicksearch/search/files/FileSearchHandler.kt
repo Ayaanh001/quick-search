@@ -10,71 +10,12 @@ import com.tk.quicksearch.search.utils.SearchRankingUtils
 import com.tk.quicksearch.search.utils.SearchTextNormalizer
 import java.util.Locale
 
-data class FileSearchResults(
-    val pinned: List<DeviceFile>,
-    val excluded: List<DeviceFile>,
-    val results: List<DeviceFile>,
-)
-
 class FileSearchHandler(
     private val fileRepository: FileSearchRepository,
     private val userPreferences: UserAppPreferences,
 ) {
     companion object {
         const val FILE_SEARCH_RESULT_LIMIT = 25
-    }
-
-    fun getFileState(
-        query: String,
-        enabledFileTypes: Set<FileType>,
-        isFilesSectionEnabled: Boolean,
-        currentResults: List<DeviceFile>,
-    ): FileSearchResults {
-        // Cache preference reads to avoid repeated SharedPreferences lookups
-        val pinnedUris = userPreferences.getPinnedFileUris()
-        val excludedUris = userPreferences.getExcludedFileUris()
-        val excludedExtensions = userPreferences.getExcludedFileExtensions()
-        val folderWhitelistPatterns = userPreferences.getFolderWhitelistPatterns()
-        val folderBlacklistPatterns = userPreferences.getFolderBlacklistPatterns()
-        val pathMatcher =
-            FolderPathPatternMatcher.createPathMatcher(
-                whitelistPatterns = folderWhitelistPatterns,
-                blacklistPatterns = folderBlacklistPatterns,
-            )
-
-        val pinned =
-            fileRepository
-                .getFilesByUris(pinnedUris)
-                .filter { file ->
-                    val fileType = FileTypeUtils.getFileType(file)
-                    fileType in enabledFileTypes &&
-                        pathMatcher(file) &&
-                        !excludedUris.contains(file.uri.toString())
-                }.sortedBy { it.displayName.lowercase(Locale.getDefault()) }
-
-        val excluded =
-            fileRepository.getFilesByUris(excludedUris).sortedBy {
-                it.displayName.lowercase(Locale.getDefault())
-            }
-
-        val results =
-            if (query.isNotBlank() && isFilesSectionEnabled) {
-                searchFilesInternal(
-                    query,
-                    enabledFileTypes,
-                    excludedUris,
-                    excludedExtensions,
-                    folderWhitelistPatterns,
-                    folderBlacklistPatterns,
-                    userPreferences.getShowFoldersInResults(),
-                    userPreferences.getShowSystemFiles(),
-                    userPreferences.getShowHiddenFiles(),
-                )
-            } else {
-                emptyList()
-            }
-
-        return FileSearchResults(pinned, excluded, results)
     }
 
     fun searchFiles(

@@ -1,10 +1,7 @@
 package com.tk.quicksearch.search.directSearch
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,14 +26,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -58,19 +51,18 @@ import com.tk.quicksearch.ui.theme.DesignTokens
 /** Composable that displays direct search results with loading, success, and error states. */
 @Composable
 fun DirectSearchResult(
-        DirectSearchState: DirectSearchState,
+        directSearchState: DirectSearchState,
         showWallpaperBackground: Boolean = false,
-        oneHandedMode: Boolean = false,
         onGeminiModelInfoClick: () -> Unit = {},
         onOpenDirectSearchConfigure: () -> Unit = {},
         onPhoneNumberClick: (String) -> Unit = {},
         onEmailClick: (String) -> Unit = {},
 ) {
-    if (DirectSearchState.status == DirectSearchStatus.Idle) return
+    if (directSearchState.status == DirectSearchStatus.Idle) return
 
     val showAttribution =
-            DirectSearchState.status == DirectSearchStatus.Success &&
-                    !DirectSearchState.answer.isNullOrBlank()
+            directSearchState.status == DirectSearchStatus.Success &&
+                    !directSearchState.answer.isNullOrBlank()
 
     val clipboardManager = LocalClipboardManager.current
     val overlayCardColor = LocalOverlayResultCardColor.current
@@ -89,12 +81,12 @@ fun DirectSearchResult(
                     modifier = Modifier.fillMaxWidth().padding(DesignTokens.SpacingLarge),
                     verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
             ) {
-                when (DirectSearchState.status) {
+                when (directSearchState.status) {
                     DirectSearchStatus.Loading -> {
                         GeminiLoadingAnimation()
                     }
                     DirectSearchStatus.Success -> {
-                        DirectSearchState.answer?.let { answer ->
+                        directSearchState.answer?.let { answer ->
                             Box(
                                     modifier =
                                             Modifier.fillMaxWidth().pointerInput(answer) {
@@ -119,7 +111,7 @@ fun DirectSearchResult(
                     }
                     DirectSearchStatus.Error -> {
                         Text(
-                                text = DirectSearchState.errorMessage
+                                text = directSearchState.errorMessage
                                                 ?: stringResource(
                                                         R.string.direct_search_error_generic
                                                 ),
@@ -157,7 +149,7 @@ fun DirectSearchResult(
             GeminiAttributionRow(
                     modifier = Modifier.fillMaxWidth(),
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    usedModelId = DirectSearchState.usedModelId,
+                    usedModelId = directSearchState.usedModelId,
                     onClick = onGeminiModelInfoClick,
                     onLongClick = onOpenDirectSearchConfigure,
             )
@@ -170,7 +162,6 @@ fun DirectSearchResult(
 fun CalculatorResult(
         calculatorState: CalculatorState,
         showWallpaperBackground: Boolean = false,
-        oneHandedMode: Boolean = false,
 ) {
     val result = calculatorState.result
     if (result == null) return
@@ -185,16 +176,6 @@ fun CalculatorResult(
             }
     val cardElevation =
             AppColors.getCardElevation(showWallpaperBackground = showWallpaperBackground)
-
-    // Track if the animation has already played (only animate first time)
-    var hasAnimated by remember { mutableStateOf(false) }
-    val shouldAnimate = result.isNotEmpty() && !hasAnimated
-    val resultAlpha =
-            animateFloatAsState(
-                    targetValue = if (shouldAnimate) 1f else 1f,
-                    animationSpec = tween(durationMillis = 150),
-                    label = "calculatorResultFadeIn",
-            ) { hasAnimated = true }
 
     val onLongClick = { clipboardManager.setText(AnnotatedString(result)) }
 
@@ -221,7 +202,6 @@ fun CalculatorResult(
                     modifier =
                             Modifier.fillMaxWidth()
                                     .heightIn(min = 175.dp)
-                                    .graphicsLayer(alpha = resultAlpha.value)
                                     .combinedClickable(
                                             onClick = {},
                                             onLongClick = onLongClick,
@@ -235,7 +215,6 @@ fun CalculatorResult(
                     modifier =
                             Modifier.fillMaxWidth()
                                     .heightIn(min = 175.dp)
-                                    .graphicsLayer(alpha = resultAlpha.value)
                                     .combinedClickable(
                                             onClick = {},
                                             onLongClick = onLongClick,
