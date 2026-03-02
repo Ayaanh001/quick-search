@@ -44,10 +44,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.common.AddToHomeHandler
-import com.tk.quicksearch.search.data.AppShortcutRepository
-import com.tk.quicksearch.search.data.StaticShortcut
-import com.tk.quicksearch.search.data.launchStaticShortcut
-import com.tk.quicksearch.search.data.shortcutKey
+import com.tk.quicksearch.search.data.AppShortcutRepository.AppShortcutRepository
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.launchStaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutKey
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.search.searchScreen.predictedSubmitHighlight

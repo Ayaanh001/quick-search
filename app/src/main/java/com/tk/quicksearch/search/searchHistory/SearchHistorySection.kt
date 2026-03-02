@@ -53,7 +53,7 @@ import com.tk.quicksearch.search.contacts.utils.ContactCallingAppResolver
 import com.tk.quicksearch.search.contacts.utils.ContactMessagingAppResolver
 import com.tk.quicksearch.search.core.CallingApp
 import com.tk.quicksearch.search.core.MessagingApp
-import com.tk.quicksearch.search.data.StaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.deviceSettings.SettingResultRow
 import com.tk.quicksearch.search.files.FileResultRow

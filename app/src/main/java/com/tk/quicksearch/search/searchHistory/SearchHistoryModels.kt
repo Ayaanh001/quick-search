@@ -1,6 +1,6 @@
 package com.tk.quicksearch.search.searchHistory
 
-import com.tk.quicksearch.search.data.StaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.DeviceFile

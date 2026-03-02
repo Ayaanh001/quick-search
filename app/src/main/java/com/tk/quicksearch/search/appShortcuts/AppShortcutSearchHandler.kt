@@ -1,11 +1,11 @@
 package com.tk.quicksearch.search.appShortcuts
 
-import com.tk.quicksearch.search.data.AppShortcutRepository
-import com.tk.quicksearch.search.data.StaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.AppShortcutRepository
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.data.UserAppPreferences
-import com.tk.quicksearch.search.data.isUserCreatedShortcut
-import com.tk.quicksearch.search.data.shortcutDisplayName
-import com.tk.quicksearch.search.data.shortcutKey
+import com.tk.quicksearch.search.data.AppShortcutRepository.isUserCreatedShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutDisplayName
+import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutKey
 import com.tk.quicksearch.search.utils.SearchRankingUtils
 import com.tk.quicksearch.search.utils.SearchTextNormalizer
 import java.util.Locale

@@ -1,7 +1,7 @@
 package com.tk.quicksearch.search.core
 
 import com.tk.quicksearch.search.contacts.models.ContactCardAction
-import com.tk.quicksearch.search.data.StaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.data.preferences.UiPreferences
 import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.tools.directSearch.GeminiModelCatalog

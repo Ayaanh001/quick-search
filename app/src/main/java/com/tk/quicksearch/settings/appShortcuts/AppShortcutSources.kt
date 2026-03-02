@@ -8,9 +8,9 @@ import android.os.Build
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
-import com.tk.quicksearch.search.data.StaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.models.AppInfo
-import com.tk.quicksearch.search.data.shortcutDisplayName
+import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutDisplayName
 import java.util.Locale
 
 data class AppShortcutSource(

@@ -44,11 +44,11 @@ import androidx.compose.ui.window.PopupProperties
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.apps.rememberAppIcon
 import com.tk.quicksearch.search.contacts.ExpandButton
-import com.tk.quicksearch.search.data.ShortcutIcon
-import com.tk.quicksearch.search.data.StaticShortcut
-import com.tk.quicksearch.search.data.rememberShortcutIcon
-import com.tk.quicksearch.search.data.shortcutDisplayName
-import com.tk.quicksearch.search.data.shortcutKey
+import com.tk.quicksearch.search.data.AppShortcutRepository.ShortcutIcon
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.rememberShortcutIcon
+import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutDisplayName
+import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutKey
 import com.tk.quicksearch.search.searchScreen.LocalOverlayDividerColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget

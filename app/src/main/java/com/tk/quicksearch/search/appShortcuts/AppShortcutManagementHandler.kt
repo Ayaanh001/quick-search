@@ -4,7 +4,7 @@ import com.tk.quicksearch.search.core.AppShortcutManagementConfig
 import com.tk.quicksearch.search.core.GenericManagementHandler
 import com.tk.quicksearch.search.core.ManagementHandler
 import com.tk.quicksearch.search.core.SearchUiState
-import com.tk.quicksearch.search.data.StaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.data.UserAppPreferences
 import kotlinx.coroutines.CoroutineScope
 

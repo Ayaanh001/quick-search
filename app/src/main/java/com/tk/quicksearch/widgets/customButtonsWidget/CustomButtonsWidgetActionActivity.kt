@@ -19,7 +19,7 @@ import com.tk.quicksearch.search.contacts.utils.ContactIntentHelpers
 import com.tk.quicksearch.search.contacts.utils.TelegramContactUtils
 import com.tk.quicksearch.search.core.IntentHelpers
 import com.tk.quicksearch.search.data.ContactRepository
-import com.tk.quicksearch.search.data.launchStaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.launchStaticShortcut
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
 import com.tk.quicksearch.search.utils.PhoneNumberUtils

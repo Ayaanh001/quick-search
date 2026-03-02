@@ -5,7 +5,7 @@ import com.tk.quicksearch.search.contacts.dialogs.ContactMethodsDialog
 import com.tk.quicksearch.search.contacts.dialogs.DirectDialChoiceDialog
 import com.tk.quicksearch.search.contacts.dialogs.PhoneNumberSelectionDialog
 import com.tk.quicksearch.search.core.*
-import com.tk.quicksearch.search.data.StaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.models.ContactInfo

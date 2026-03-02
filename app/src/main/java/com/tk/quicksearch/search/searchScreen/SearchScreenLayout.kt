@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.FilledTonalButton
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -88,11 +89,11 @@ data class SectionRenderingState(
     val shouldShowSettings: Boolean,
     val hasMultipleExpandableSections: Boolean,
     val displayApps: List<AppInfo>,
-    val appShortcutResults: List<com.tk.quicksearch.search.data.StaticShortcut>,
+    val appShortcutResults: List<StaticShortcut>,
     val contactResults: List<ContactInfo>,
     val fileResults: List<DeviceFile>,
     val settingResults: List<DeviceSetting>,
-    val pinnedAppShortcuts: List<com.tk.quicksearch.search.data.StaticShortcut>,
+    val pinnedAppShortcuts: List<StaticShortcut>,
     val pinnedContacts: List<ContactInfo>,
     val pinnedFiles: List<DeviceFile>,
     val pinnedSettings: List<DeviceSetting>,

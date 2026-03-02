@@ -70,8 +70,8 @@ import com.tk.quicksearch.search.core.SearchViewModel
 import com.tk.quicksearch.tools.directSearch.GeminiModelCatalog
 import com.tk.quicksearch.tools.directSearch.GeminiModelPickerDialog
 import com.tk.quicksearch.tools.directSearch.GeminiTextModel
-import com.tk.quicksearch.search.data.StaticShortcut
-import com.tk.quicksearch.search.data.shortcutDisplayName
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutDisplayName
 import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.models.ContactInfo

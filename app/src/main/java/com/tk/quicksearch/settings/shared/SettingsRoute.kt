@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.ChevronRight
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import androidx.compose.material.icons.rounded.Contacts
 import androidx.compose.material.icons.rounded.InsertDriveFile
 import androidx.compose.material.icons.rounded.Settings
@@ -82,7 +83,7 @@ data class SettingsScreenState(
     val excludedContacts: List<com.tk.quicksearch.search.models.ContactInfo>,
     val excludedFiles: List<com.tk.quicksearch.search.models.DeviceFile>,
     val excludedSettings: List<com.tk.quicksearch.search.deviceSettings.DeviceSetting>,
-    val excludedAppShortcuts: List<com.tk.quicksearch.search.data.StaticShortcut>,
+    val excludedAppShortcuts: List<StaticShortcut>,
     val searchEngineOrder: List<SearchTarget>,
     val disabledSearchEngines: Set<String>,
     val enabledFileTypes: Set<com.tk.quicksearch.search.models.FileType>,
@@ -98,7 +99,7 @@ data class SettingsScreenState(
     val hasSeenOverlayAssistantTip: Boolean = true,
     val shortcutCodes: Map<String, String>,
     val shortcutEnabled: Map<String, Boolean>,
-    val allAppShortcuts: List<com.tk.quicksearch.search.data.StaticShortcut>,
+    val allAppShortcuts: List<StaticShortcut>,
     val allDeviceSettings: List<com.tk.quicksearch.search.deviceSettings.DeviceSetting>,
     val allApps: List<com.tk.quicksearch.search.models.AppInfo>,
     val disabledAppShortcutIds: Set<String>,
@@ -146,7 +147,7 @@ data class SettingsScreenCallbacks(
     val onRemoveExcludedContact: (com.tk.quicksearch.search.models.ContactInfo) -> Unit,
     val onRemoveExcludedFile: (com.tk.quicksearch.search.models.DeviceFile) -> Unit,
     val onRemoveExcludedSetting: (com.tk.quicksearch.search.deviceSettings.DeviceSetting) -> Unit,
-    val onRemoveExcludedAppShortcut: (com.tk.quicksearch.search.data.StaticShortcut) -> Unit,
+    val onRemoveExcludedAppShortcut: (StaticShortcut) -> Unit,
     val onClearAllExclusions: () -> Unit,
     val onToggleSearchEngine: (SearchTarget, Boolean) -> Unit,
     val onReorderSearchEngines: (List<SearchTarget>) -> Unit,
@@ -195,13 +196,13 @@ data class SettingsScreenCallbacks(
     val onSetGeminiGroundingEnabled: (Boolean) -> Unit,
     val onRefreshAvailableGeminiModels: () -> Unit,
     val onOpenDirectSearchConfigure: () -> Unit,
-    val onToggleAppShortcutEnabled: (com.tk.quicksearch.search.data.StaticShortcut, Boolean) -> Unit,
-    val onLaunchAppShortcut: (com.tk.quicksearch.search.data.StaticShortcut) -> Unit,
+    val onToggleAppShortcutEnabled: (StaticShortcut, Boolean) -> Unit,
+    val onLaunchAppShortcut: (StaticShortcut) -> Unit,
     val onOpenAddAppShortcutDialog: () -> Unit,
     val onAddAppShortcutFromSource: (AppShortcutSource) -> Unit,
     val onAddSearchTargetQueryShortcut: (SearchTarget, String, String) -> Unit,
-    val onUpdateCustomAppShortcut: (com.tk.quicksearch.search.data.StaticShortcut, String, String?) -> Unit,
-    val onDeleteCustomAppShortcut: (com.tk.quicksearch.search.data.StaticShortcut) -> Unit,
+    val onUpdateCustomAppShortcut: (StaticShortcut, String, String?) -> Unit,
+    val onDeleteCustomAppShortcut: (StaticShortcut) -> Unit,
     val onLaunchDeviceSetting: (com.tk.quicksearch.search.deviceSettings.DeviceSetting) -> Unit,
     val onRequestAppUninstall: (com.tk.quicksearch.search.models.AppInfo) -> Unit,
     val onOpenAppInfo: (com.tk.quicksearch.search.models.AppInfo) -> Unit,
