@@ -1,4 +1,4 @@
-package com.tk.quicksearch.settings.settingsDetailScreen
+package com.tk.quicksearch.settings.AppearanceSettings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,36 +11,26 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Android
-import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LightMode
-import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,383 +39,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.search.apps.rememberAppIcon
-import com.tk.quicksearch.search.core.IconPackInfo
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.OverlayGradientTheme
 import com.tk.quicksearch.search.data.preferences.UiPreferences
 import com.tk.quicksearch.search.searchScreen.overlayGradientColors
-import com.tk.quicksearch.settings.searchEnginesScreen.SearchEngineAppearanceCard
-import com.tk.quicksearch.settings.shared.*
 import com.tk.quicksearch.shared.util.WallpaperUtils
 import com.tk.quicksearch.shared.util.hapticToggle
 import kotlin.math.roundToInt
 
-/** Combined card for keyboard alignment and icon pack settings. */
 @Composable
-private fun CombinedLayoutIconCard(
-        oneHandedMode: Boolean,
-        onToggleOneHandedMode: (Boolean) -> Unit,
-        showAppLabels: Boolean,
-        onToggleAppLabels: (Boolean) -> Unit,
-        bottomSearchBarEnabled: Boolean,
-        onToggleBottomSearchBar: (Boolean) -> Unit,
-        iconPackTitle: String,
-        iconPackDescription: String,
-        onIconPackClick: () -> Unit,
-        onRefreshIconPacks: () -> Unit = {},
-        modifier: Modifier = Modifier,
-) {
-    ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
-        Column {
-            // Results alignment toggle
-            SettingsToggleRow(
-                    title = stringResource(R.string.settings_layout_option_bottom_title),
-                    subtitle = stringResource(R.string.settings_layout_option_bottom_desc),
-                    checked = oneHandedMode,
-                    onCheckedChange = onToggleOneHandedMode,
-                    isFirstItem = true,
-                    extraVerticalPadding = 8.dp,
-            )
-
-            SettingsToggleRow(
-                    title = stringResource(R.string.settings_show_app_labels_title),
-                    subtitle = stringResource(R.string.settings_show_app_labels_desc),
-                    checked = showAppLabels,
-                    onCheckedChange = onToggleAppLabels,
-                    extraVerticalPadding = 8.dp,
-            )
-
-            SettingsToggleRow(
-                    title = stringResource(R.string.settings_bottom_searchbar_title),
-                    subtitle = stringResource(R.string.settings_bottom_searchbar_desc),
-                    checked = bottomSearchBarEnabled,
-                    onCheckedChange = onToggleBottomSearchBar,
-                    extraVerticalPadding = 8.dp,
-                    showDivider = false,
-            )
-
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-            // Icon Pack Section (with navigation)
-            val hasIconPacks =
-                    iconPackDescription != stringResource(R.string.settings_icon_pack_empty)
-            Row(
-                    modifier =
-                            Modifier.fillMaxWidth()
-                                    .clickable(onClick = onIconPackClick)
-                                    .padding(
-                                            start = 24.dp,
-                                            top = 16.dp,
-                                            end = 24.dp,
-                                            bottom = if (hasIconPacks) 16.dp else 20.dp,
-                                    ),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(
-                            text = iconPackTitle,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                            text = iconPackDescription,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Icon(
-                        imageVector =
-                                if (hasIconPacks) {
-                                    Icons.Rounded.ChevronRight
-                                } else {
-                                    Icons.Rounded.Refresh
-                                },
-                        contentDescription =
-                                if (hasIconPacks) {
-                                    stringResource(R.string.desc_navigate_forward)
-                                } else {
-                                    stringResource(R.string.settings_refresh_icon_packs)
-                                },
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier =
-                                Modifier.padding(start = 8.dp)
-                                        .then(
-                                                if (!hasIconPacks) {
-                                                    Modifier.clickable(
-                                                            interactionSource =
-                                                                    remember {
-                                                                        MutableInteractionSource()
-                                                                    },
-                                                            indication = null,
-                                                            onClick = onRefreshIconPacks,
-                                                    )
-                                                } else {
-                                                    Modifier
-                                                },
-                                        ),
-                )
-            }
-        }
-    }
-}
-
-/** Complete appearance settings section with all appearance-related components and dialogs. */
-@Composable
-fun AppearanceSettingsSection(
-        oneHandedMode: Boolean,
-        onToggleOneHandedMode: (Boolean) -> Unit,
-        bottomSearchBarEnabled: Boolean,
-        onToggleBottomSearchBar: (Boolean) -> Unit,
-        wallpaperBackgroundAlpha: Float,
-        wallpaperBlurRadius: Float,
-        onWallpaperBackgroundAlphaChange: (Float) -> Unit,
-        onWallpaperBlurRadiusChange: (Float) -> Unit,
-        overlayGradientTheme: OverlayGradientTheme,
-        overlayThemeIntensity: Float,
-        fontScaleMultiplier: Float,
-        onSetOverlayGradientTheme: (OverlayGradientTheme) -> Unit,
-        onOverlayThemeIntensityChange: (Float) -> Unit,
-        onFontScaleMultiplierChange: (Float) -> Unit,
-        backgroundSource: BackgroundSource,
-        customImageUri: String?,
-        onSetBackgroundSource: (BackgroundSource) -> Unit,
-        onPickCustomImage: () -> Unit,
-        onRequestWallpaperPermission: () -> Unit,
-        isSearchEngineCompactMode: Boolean,
-        searchEngineCompactRowCount: Int,
-        onToggleSearchEngineCompactMode: (Boolean) -> Unit,
-        onSetSearchEngineCompactRowCount: (Int) -> Unit,
-        selectedIconPackPackage: String?,
-        availableIconPacks: List<IconPackInfo>,
-        showAppLabels: Boolean,
-        onToggleAppLabels: (Boolean) -> Unit,
-        onSelectIconPack: (String?) -> Unit,
-        onRefreshIconPacks: () -> Unit,
-        onSearchIconPacks: () -> Unit,
-        hasWallpaperPermission: Boolean = true,
-        modifier: Modifier = Modifier,
-) {
-    val appearanceContext = androidx.compose.ui.platform.LocalContext.current
-    var showIconPackDialog by remember { mutableStateOf(false) }
-
-    val hasIconPacks = availableIconPacks.isNotEmpty()
-    val systemIconPackLabel = stringResource(R.string.settings_icon_pack_option_system)
-    val selectedIconPackLabel =
-            remember(selectedIconPackPackage, availableIconPacks, systemIconPackLabel) {
-                availableIconPacks.firstOrNull { it.packageName == selectedIconPackPackage }?.label
-                        ?: systemIconPackLabel
-            }
-
-    Column(modifier = modifier) {
-        FontSizeCard(
-                fontScaleMultiplier = fontScaleMultiplier,
-                onFontScaleMultiplierChange = onFontScaleMultiplierChange,
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OverlayThemeCard(
-                selectedTheme = overlayGradientTheme,
-                overlayThemeIntensity = overlayThemeIntensity,
-                onThemeSelected = onSetOverlayGradientTheme,
-                onOverlayThemeIntensityChange = onOverlayThemeIntensityChange,
-                wallpaperBackgroundAlpha = wallpaperBackgroundAlpha,
-                wallpaperBlurRadius = wallpaperBlurRadius,
-                onWallpaperBackgroundAlphaChange = onWallpaperBackgroundAlphaChange,
-                onWallpaperBlurRadiusChange = onWallpaperBlurRadiusChange,
-                backgroundSource = backgroundSource,
-                customImageUri = customImageUri,
-                onSetBackgroundSource = onSetBackgroundSource,
-                onPickCustomImage = onPickCustomImage,
-                hasWallpaperPermission = hasWallpaperPermission,
-                onRequestWallpaperPermission = onRequestWallpaperPermission,
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Search Engine Style Card
-        SearchEngineAppearanceCard(
-                isSearchEngineCompactMode = isSearchEngineCompactMode,
-                onToggleSearchEngineCompactMode = onToggleSearchEngineCompactMode,
-                compactRowCount = searchEngineCompactRowCount,
-                onSetCompactRowCount = onSetSearchEngineCompactRowCount,
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // One-Handed Mode and Icon Pack Card
-        CombinedLayoutIconCard(
-                oneHandedMode = oneHandedMode,
-                onToggleOneHandedMode = onToggleOneHandedMode,
-                showAppLabels = showAppLabels,
-                onToggleAppLabels = onToggleAppLabels,
-                bottomSearchBarEnabled = bottomSearchBarEnabled,
-                onToggleBottomSearchBar = onToggleBottomSearchBar,
-                iconPackTitle =
-                        androidx.compose.ui.res.stringResource(R.string.settings_icon_pack_title),
-                iconPackDescription =
-                        if (hasIconPacks) {
-                            androidx.compose.ui.res.stringResource(
-                                    R.string.settings_icon_pack_selected_label,
-                                    selectedIconPackLabel,
-                            )
-                        } else {
-                            androidx.compose.ui.res.stringResource(
-                                    R.string.settings_icon_pack_empty,
-                            )
-                        },
-                onIconPackClick = {
-                    if (hasIconPacks) {
-                        showIconPackDialog = true
-                    } else {
-                        onSearchIconPacks()
-                    }
-                },
-                onRefreshIconPacks = onRefreshIconPacks,
-        )
-    }
-
-    // Icon Pack Picker Dialog
-    if (showIconPackDialog) {
-        IconPackPickerDialog(
-                availableIconPacks = availableIconPacks,
-                selectedPackage = selectedIconPackPackage,
-                onSelect = { packageName: String? ->
-                    onSelectIconPack(packageName)
-                    showIconPackDialog = false
-                },
-                onDismiss = { showIconPackDialog = false },
-        )
-    }
-}
-
-@Composable
-private fun FontSizeCard(
-        fontScaleMultiplier: Float,
-        onFontScaleMultiplierChange: (Float) -> Unit,
-        modifier: Modifier = Modifier,
-) {
-    val view = LocalView.current
-    val smallSelected = kotlin.math.abs(fontScaleMultiplier - 0.95f) < 0.001f
-    val mediumSelected = kotlin.math.abs(fontScaleMultiplier - 1.0f) < 0.001f
-    val bigSelected = kotlin.math.abs(fontScaleMultiplier - 1.05f) < 0.001f
-
-    ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
-        Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                    text = stringResource(R.string.settings_font_size_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 4.dp),
-            )
-
-            Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    FontSizeChip(
-                            labelRes = R.string.settings_font_size_small,
-                            selected = smallSelected,
-                            onClick = {
-                                hapticToggle(view)()
-                                onFontScaleMultiplierChange(0.95f)
-                            },
-                    )
-                }
-                Box(modifier = Modifier.weight(1f)) {
-                    FontSizeChip(
-                            labelRes = R.string.settings_font_size_medium,
-                            selected = mediumSelected,
-                            onClick = {
-                                hapticToggle(view)()
-                                onFontScaleMultiplierChange(1.0f)
-                            },
-                    )
-                }
-                Box(modifier = Modifier.weight(1f)) {
-                    FontSizeChip(
-                            labelRes = R.string.settings_font_size_big,
-                            selected = bigSelected,
-                            onClick = {
-                                hapticToggle(view)()
-                                onFontScaleMultiplierChange(1.05f)
-                            },
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun FontSizeChip(
-        labelRes: Int,
-        selected: Boolean,
-        onClick: () -> Unit,
-) {
-    AssistChip(
-            onClick = {
-                if (!selected) {
-                    onClick()
-                }
-            },
-            label = {
-                Text(
-                        text = stringResource(labelRes),
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                )
-            },
-            shape = RoundedCornerShape(999.dp),
-            colors =
-                    AssistChipDefaults.assistChipColors(
-                            containerColor =
-                                    if (selected) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-                                    },
-                            labelColor =
-                                    if (selected) {
-                                        MaterialTheme.colorScheme.onPrimary
-                                    } else {
-                                        MaterialTheme.colorScheme.primary
-                                    },
-                    ),
-            modifier = Modifier.fillMaxWidth(),
-    )
-}
-
-@Composable
-private fun OverlayThemeCard(
+fun OverlayThemeCard(
         selectedTheme: OverlayGradientTheme,
         overlayThemeIntensity: Float,
         onThemeSelected: (OverlayGradientTheme) -> Unit,
@@ -653,12 +290,12 @@ private fun OverlayThemeCard(
                                                                     Color.Black.copy(
                                                                             alpha =
                                                                                     wallpaperBackgroundAlpha
-                                                                            )
+                                                                    )
                                                                 } else {
                                                                     Color.White.copy(
                                                                             alpha =
                                                                                     wallpaperBackgroundAlpha
-                                                                            )
+                                                                    )
                                                                 },
                                                         ),
                                 )
@@ -728,12 +365,12 @@ private fun OverlayThemeCard(
                                                                     Color.Black.copy(
                                                                             alpha =
                                                                                     wallpaperBackgroundAlpha
-                                                                            )
+                                                                    )
                                                                 } else {
                                                                     Color.White.copy(
                                                                             alpha =
                                                                                     wallpaperBackgroundAlpha
-                                                                            )
+                                                                    )
                                                                 },
                                                         ),
                                 )
@@ -934,114 +571,3 @@ private data class OverlayThemeOption(
         val theme: OverlayGradientTheme,
         val labelRes: Int,
 )
-
-@Composable
-private fun IconPackPickerDialog(
-        availableIconPacks: List<IconPackInfo>,
-        selectedPackage: String?,
-        onSelect: (String?) -> Unit,
-        onDismiss: () -> Unit,
-) {
-    AlertDialog(
-            onDismissRequest = onDismiss,
-            title = {
-                Text(
-                        text =
-                                androidx.compose.ui.res.stringResource(
-                                        R.string.settings_icon_pack_picker_title,
-                                ),
-                )
-            },
-            text = {
-                Column(
-                        modifier =
-                                Modifier.fillMaxWidth()
-                                        .heightIn(max = 400.dp)
-                                        .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    if (availableIconPacks.isEmpty()) {
-                        Text(
-                                text =
-                                        androidx.compose.ui.res.stringResource(
-                                                R.string.settings_icon_pack_empty,
-                                        ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    } else {
-                        Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            IconPackOptionRow(
-                                    label =
-                                            androidx.compose.ui.res.stringResource(
-                                                    R.string.settings_icon_pack_option_system,
-                                            ),
-                                    packageName = null,
-                                    selected = selectedPackage == null,
-                                    onClick = { onSelect(null) },
-                            )
-                            availableIconPacks.forEach { pack ->
-                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                                IconPackOptionRow(
-                                        label = pack.label,
-                                        packageName = pack.packageName,
-                                        selected = selectedPackage == pack.packageName,
-                                        onClick = { onSelect(pack.packageName) },
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = onDismiss, modifier = Modifier.padding(horizontal = 16.dp)) {
-                    Text(
-                            androidx.compose.ui.res.stringResource(R.string.dialog_done),
-                    )
-                }
-            },
-    )
-}
-
-@Composable
-private fun IconPackOptionRow(
-        label: String,
-        packageName: String?,
-        selected: Boolean,
-        onClick: () -> Unit,
-) {
-    val iconBitmap = packageName?.let { rememberAppIcon(packageName = it).bitmap }
-    Row(
-            modifier =
-                    Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 6.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        RadioButton(
-                selected = selected,
-                onClick = onClick,
-                modifier = Modifier.offset(x = (-4).dp),
-        )
-        if (iconBitmap != null) {
-            Image(bitmap = iconBitmap, contentDescription = null, modifier = Modifier.size(24.dp))
-        } else {
-            Icon(
-                    imageVector = Icons.Rounded.Android,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-        )
-    }
-}
