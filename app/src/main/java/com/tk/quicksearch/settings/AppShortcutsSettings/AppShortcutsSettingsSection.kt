@@ -27,8 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -47,11 +48,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.SearchTarget
+import com.tk.quicksearch.searchEngines.getDisplayNameResId
 import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.data.AppShortcutRepository.isUserCreatedShortcut
 import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutDisplayName
 import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutKey
-import com.tk.quicksearch.searchEngines.getContentDescription
+import com.tk.quicksearch.searchEngines.getDisplayName
 import com.tk.quicksearch.searchEngines.isSearchTargetShortcutPackageName
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
@@ -97,8 +99,8 @@ fun AppShortcutsSettingsSection(
                 currentPackageName = context.packageName,
             )
         }
-    val searchTargetShortcutSources =
-        remember(searchTargets, displayShortcuts, filteredShortcutSources) {
+    val searchTargetShortcutSources by remember(searchTargets, displayShortcuts, filteredShortcutSources) {
+        derivedStateOf {
             val existingPackageNames =
                 (
                     displayShortcuts.map { it.packageName } +
@@ -114,7 +116,11 @@ fun AppShortcutsSettingsSection(
                                     target = target,
                                     existingPackages = existingPackageNames,
                                 ),
-                            label = target.getContentDescription(),
+                            label = when (target) {
+                                is SearchTarget.Engine -> context.getString(target.engine.getDisplayNameResId())
+                                is SearchTarget.Browser -> target.app.label
+                                is SearchTarget.Custom -> target.custom.name
+                            },
                             kind = SearchTargetShortcutKind.QUERY,
                         )
                     if (target is SearchTarget.Browser) {
@@ -127,6 +133,7 @@ fun AppShortcutsSettingsSection(
                     }
                 }
         }
+    }
     val allPackageNames =
         remember(displayShortcuts, filteredShortcutSources, searchTargetShortcutSources) {
             (

@@ -1243,13 +1243,13 @@ class SearchViewModel(
                         is com.tk.quicksearch.search.contacts.models.ContactCardAction.Phone -> {
                             contactActionHandler.handleContactMethod(
                                     contactInfo,
-                                    ContactMethod.Phone("Call", action.phoneNumber),
+                                    ContactMethod.Phone(appContext.getString(R.string.contact_method_call_label), action.phoneNumber),
                             )
                         }
                         is com.tk.quicksearch.search.contacts.models.ContactCardAction.Sms -> {
                             contactActionHandler.handleContactMethod(
                                     contactInfo,
-                                    ContactMethod.Sms("Message", action.phoneNumber),
+                                    ContactMethod.Sms(appContext.getString(R.string.contact_method_message_label), action.phoneNumber),
                             )
                         }
                         else -> {

@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import androidx.browser.customtabs.CustomTabsService
+import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.BrowserApp
 import com.tk.quicksearch.search.core.CustomSearchEngine
 import com.tk.quicksearch.search.core.SearchEngine
@@ -140,6 +141,7 @@ class SearchEngineManager(
 
             val customEngine =
                 createCustomSearchEngine(
+                    context = context,
                     name = trimmedName,
                     normalizedTemplate = normalizedTemplate,
                     faviconBase64 = resolvedFavicon.ifBlank { null },
@@ -615,7 +617,7 @@ class SearchEngineManager(
                     }.getOrNull()
                 val displayLabel =
                     when (packageName) {
-                        BRAVE_BROWSER_PACKAGE -> "Brave Browser"
+                        BRAVE_BROWSER_PACKAGE -> context.getString(R.string.browser_brave_name)
                         else -> label
                     }
                 displayLabel?.let { BrowserApp(packageName = packageName, label = it) }

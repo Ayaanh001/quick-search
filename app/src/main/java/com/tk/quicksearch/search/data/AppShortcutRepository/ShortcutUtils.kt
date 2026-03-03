@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.util.Base64
 import android.util.TypedValue
 import androidx.core.graphics.drawable.toBitmap
+import com.tk.quicksearch.R
 import com.tk.quicksearch.search.data.AppShortcutRepository.HARDCODED_SHORTCUT_KEYS
 import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.data.AppShortcutRepository.isUserCreatedShortcut
@@ -605,33 +606,33 @@ fun launchStaticShortcut(
     shortcut: StaticShortcut,
 ): String? {
     if (!shortcut.enabled) {
-        return "Shortcut is disabled."
+        return context.getString(R.string.error_shortcut_disabled)
     }
 
-    val baseIntent = shortcut.intents.lastOrNull() ?: return "Shortcut has no intent."
+    val baseIntent = shortcut.intents.lastOrNull() ?: return context.getString(R.string.error_shortcut_no_intent)
     val intent = Intent(baseIntent).apply { putExtra(Intent.EXTRA_SHORTCUT_ID, shortcut.id) }
 
     val pm = context.packageManager
     val details = formatIntentDetails(intent)
     val resolved =
         pm.resolveActivity(intent, 0)
-            ?: return "No activity resolves intent.${details.toSuffixDetail()}"
+            ?: return context.getString(R.string.error_shortcut_no_activity_resolves) + details.toSuffixDetail()
 
     val activityInfo = resolved.activityInfo
     if (!activityInfo.exported) {
-        return "Resolved activity is not exported.${details.toSuffixDetail()}"
+        return context.getString(R.string.error_shortcut_activity_not_exported) + details.toSuffixDetail()
     }
     val requiredPermission = activityInfo.permission?.takeIf { it.isNotBlank() }
     if (requiredPermission != null &&
         context.checkSelfPermission(requiredPermission) !=
         PackageManager.PERMISSION_GRANTED
     ) {
-        return "Shortcut requires permission: $requiredPermission.${details.toSuffixDetail()}"
+        return context.getString(R.string.error_shortcut_requires_permission, requiredPermission) + details.toSuffixDetail()
     }
 
     val error = kotlin.runCatching { context.startActivity(intent) }.exceptionOrNull()
     if (error != null) {
-        return "Failed to launch shortcut: ${error.message ?: "unknown error"}.${details.toSuffixDetail()}"
+        return context.getString(R.string.error_shortcut_launch_failed, error.message ?: context.getString(R.string.error_unknown)) + details.toSuffixDetail()
     }
 
     return null

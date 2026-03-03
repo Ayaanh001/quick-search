@@ -20,9 +20,3 @@ fun SearchTarget.getDisplayName(): String =
         is SearchTarget.Custom -> custom.name
     }
 
-fun SearchTarget.getContentDescription(): String =
-    when (this) {
-        is SearchTarget.Engine -> engine.getContentDescription()
-        is SearchTarget.Browser -> app.label
-        is SearchTarget.Custom -> custom.name
-    }

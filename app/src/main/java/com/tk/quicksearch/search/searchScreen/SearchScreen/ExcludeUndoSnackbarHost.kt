@@ -8,11 +8,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import com.tk.quicksearch.R
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
@@ -24,7 +26,7 @@ internal fun ExcludeUndoSnackbarHost(
         hostState = hostState,
         snackbar = { data ->
             val message = data.visuals.message
-            val marker = " excluded from "
+            val marker = stringResource(R.string.exclude_marker)
             val markerIndex = message.indexOf(marker)
             val annotatedMessage =
                 if (markerIndex > 0) {

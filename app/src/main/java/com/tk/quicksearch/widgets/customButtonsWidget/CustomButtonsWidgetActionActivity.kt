@@ -136,10 +136,10 @@ class WidgetActionActivity : ComponentActivity() {
 
         when (action) {
             is ContactCardAction.Phone -> {
-                handleContactMethod(ContactMethod.Phone("Call", action.phoneNumber))
+                handleContactMethod(ContactMethod.Phone(getString(R.string.contact_method_call_label), action.phoneNumber))
             }
             is ContactCardAction.Sms -> {
-                handleContactMethod(ContactMethod.Sms("Message", action.phoneNumber))
+                handleContactMethod(ContactMethod.Sms(getString(R.string.contact_method_message_label), action.phoneNumber))
             }
             else -> showToast(R.string.error_action_not_available)
         }

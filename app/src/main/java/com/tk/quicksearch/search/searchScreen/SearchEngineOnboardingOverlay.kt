@@ -295,7 +295,7 @@ private fun OnboardingContent(
         ) {
             Icon(
                     imageVector = Icons.Rounded.Close,
-                    contentDescription = "Close",
+                    contentDescription = stringResource(R.string.desc_close),
                     tint = Color.White,
                     modifier = Modifier.size(20.dp),
             )

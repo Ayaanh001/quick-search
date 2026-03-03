@@ -114,7 +114,7 @@ fun DirectSearchSetupCard(
                 if (onToggleExpanded != null) {
                     Icon(
                         imageVector = if (isExpanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
-                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        contentDescription = if (isExpanded) stringResource(R.string.desc_collapse) else stringResource(R.string.desc_expand),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(24.dp),
                     )
@@ -197,7 +197,7 @@ fun DirectSearchSetupCard(
                                 // Overlay clickable text when field is empty
                                 if (apiKeyInput.isEmpty()) {
                                     Text(
-                                        text = "Paste Gemini API Key",
+                                        text = stringResource(R.string.settings_gemini_api_key_paste_hint),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.primary,
                                         modifier =

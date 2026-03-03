@@ -103,7 +103,7 @@ sealed class ContactMethod {
     ) : ContactMethod()
 
     data class GoogleMeet(
-        override val displayLabel: String = GOOGLE_MEET_LABEL,
+        override val displayLabel: String,
         override val data: String,
         override val dataId: Long? = null,
         override val isPrimary: Boolean = false,
@@ -119,15 +119,13 @@ sealed class ContactMethod {
     ) : ContactMethod()
 
     data class ViewInContactsApp(
-        override val displayLabel: String = VIEW_IN_CONTACTS_LABEL,
+        override val displayLabel: String,
         override val data: String = "",
         override val dataId: Long? = null,
         override val isPrimary: Boolean = false,
     ) : ContactMethod()
 
     companion object {
-        private const val GOOGLE_MEET_LABEL = "Google Meet"
-        private const val VIEW_IN_CONTACTS_LABEL = "View in contacts app"
     }
 }
 

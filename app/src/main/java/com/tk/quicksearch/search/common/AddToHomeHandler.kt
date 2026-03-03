@@ -308,13 +308,13 @@ class AddToHomeHandler(private val context: Context) {
     private fun showUnsupportedMessage() {
         Toast.makeText(
                         context,
-                        "Adding shortcuts to home screen is not supported on this device",
+                        context.getString(R.string.error_shortcuts_not_supported),
                         Toast.LENGTH_SHORT,
                 )
                 .show()
     }
 
     private fun showErrorMessage() {
-        Toast.makeText(context, "Failed to create shortcut", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.error_shortcut_creation_failed), Toast.LENGTH_SHORT).show()
     }
 }

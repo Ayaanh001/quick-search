@@ -11,7 +11,7 @@ import com.tk.quicksearch.shared.util.PackageConstants
 
 private data class SearchEngineMetadata(
     @DrawableRes val drawableResId: Int,
-    val contentDescription: String,
+    @StringRes val contentDescriptionResId: Int,
     val urlTemplate: String,
     val defaultShortcutCode: String,
 )
@@ -21,175 +21,175 @@ private val SEARCH_ENGINE_METADATA: Map<SearchEngine, SearchEngineMetadata> =
         SearchEngine.DIRECT_SEARCH to
             SearchEngineMetadata(
                 drawableResId = R.drawable.direct_search,
-                contentDescription = "Direct Search",
+                contentDescriptionResId = R.string.search_engine_direct_search,
                 urlTemplate = "",
                 defaultShortcutCode = "dsh",
             ),
         SearchEngine.GOOGLE to
             SearchEngineMetadata(
                 drawableResId = R.drawable.google,
-                contentDescription = "Google",
+                contentDescriptionResId = R.string.search_engine_google,
                 urlTemplate = "https://www.google.com/search?q=%s",
                 defaultShortcutCode = "ggl",
             ),
         SearchEngine.CHATGPT to
             SearchEngineMetadata(
                 drawableResId = R.drawable.chatgpt,
-                contentDescription = "ChatGPT",
+                contentDescriptionResId = R.string.search_engine_chatgpt,
                 urlTemplate = "https://chatgpt.com/?prompt=%s",
                 defaultShortcutCode = "cgpt",
             ),
         SearchEngine.GEMINI to
             SearchEngineMetadata(
                 drawableResId = R.drawable.ic_gemini_sparkle_search_engine,
-                contentDescription = "Gemini",
+                contentDescriptionResId = R.string.search_engine_gemini,
                 urlTemplate = "https://gemini.google.com/app?text=%s",
                 defaultShortcutCode = "gmi",
             ),
         SearchEngine.PERPLEXITY to
             SearchEngineMetadata(
                 drawableResId = R.drawable.perplexity,
-                contentDescription = "Perplexity",
+                contentDescriptionResId = R.string.search_engine_perplexity,
                 urlTemplate = "https://www.perplexity.ai/search?q=%s",
                 defaultShortcutCode = "ppx",
             ),
         SearchEngine.GROK to
             SearchEngineMetadata(
                 drawableResId = R.drawable.grok,
-                contentDescription = "Grok",
+                contentDescriptionResId = R.string.search_engine_grok,
                 urlTemplate = "https://grok.com/?q=%s",
                 defaultShortcutCode = "grk",
             ),
         SearchEngine.GOOGLE_MAPS to
             SearchEngineMetadata(
                 drawableResId = R.drawable.google_maps,
-                contentDescription = "Google Maps",
+                contentDescriptionResId = R.string.search_engine_google_maps,
                 urlTemplate = "https://maps.google.com/?q=%s",
                 defaultShortcutCode = "mps",
             ),
         SearchEngine.WAZE to
             SearchEngineMetadata(
                 drawableResId = R.drawable.waze,
-                contentDescription = "Waze",
+                contentDescriptionResId = R.string.search_engine_waze,
                 urlTemplate = "https://www.waze.com/ul?q=%s",
                 defaultShortcutCode = "wze",
             ),
         SearchEngine.GOOGLE_DRIVE to
             SearchEngineMetadata(
                 drawableResId = R.drawable.google_drive,
-                contentDescription = "Google Drive",
+                contentDescriptionResId = R.string.search_engine_google_drive,
                 urlTemplate = "https://drive.google.com/drive/u/0/search?q=%s",
                 defaultShortcutCode = "gdr",
             ),
         SearchEngine.GOOGLE_PHOTOS to
             SearchEngineMetadata(
                 drawableResId = R.drawable.google_photos,
-                contentDescription = "Google Photos",
+                contentDescriptionResId = R.string.search_engine_google_photos,
                 urlTemplate = "https://photos.google.com/search/%s",
                 defaultShortcutCode = "gph",
             ),
         SearchEngine.GOOGLE_PLAY to
             SearchEngineMetadata(
                 drawableResId = R.drawable.google_play,
-                contentDescription = "Google Play",
+                contentDescriptionResId = R.string.search_engine_google_play,
                 urlTemplate = "https://play.google.com/store/search?q=%s&c=apps",
                 defaultShortcutCode = "gpl",
             ),
         SearchEngine.REDDIT to
             SearchEngineMetadata(
                 drawableResId = R.drawable.reddit,
-                contentDescription = "Reddit",
+                contentDescriptionResId = R.string.search_engine_reddit,
                 urlTemplate = "https://www.reddit.com/search/?q=%s",
                 defaultShortcutCode = "rdt",
             ),
         SearchEngine.YOUTUBE to
             SearchEngineMetadata(
                 drawableResId = R.drawable.youtube,
-                contentDescription = "YouTube",
+                contentDescriptionResId = R.string.search_engine_youtube,
                 urlTemplate = "https://www.youtube.com/results?search_query=%s",
                 defaultShortcutCode = "ytb",
             ),
         SearchEngine.YOUTUBE_MUSIC to
             SearchEngineMetadata(
                 drawableResId = R.drawable.youtube_music,
-                contentDescription = "YouTube Music",
+                contentDescriptionResId = R.string.search_engine_youtube_music,
                 urlTemplate = "https://music.youtube.com/search?q=%s",
                 defaultShortcutCode = "ytm",
             ),
         SearchEngine.SPOTIFY to
             SearchEngineMetadata(
                 drawableResId = R.drawable.spotify,
-                contentDescription = "Spotify",
+                contentDescriptionResId = R.string.search_engine_spotify,
                 urlTemplate = "https://open.spotify.com/search/%s",
                 defaultShortcutCode = "sfy",
             ),
         SearchEngine.CLAUDE to
             SearchEngineMetadata(
                 drawableResId = R.drawable.claude,
-                contentDescription = "Claude",
+                contentDescriptionResId = R.string.search_engine_claude,
                 urlTemplate = "https://claude.ai/search?q=%s",
                 defaultShortcutCode = "cld",
             ),
         SearchEngine.FACEBOOK_MARKETPLACE to
             SearchEngineMetadata(
                 drawableResId = R.drawable.facebook_marketplace,
-                contentDescription = "Facebook Marketplace",
+                contentDescriptionResId = R.string.search_engine_facebook_marketplace,
                 urlTemplate = "https://www.facebook.com/marketplace/search/?query=%s",
                 defaultShortcutCode = "fbm",
             ),
         SearchEngine.AMAZON to
             SearchEngineMetadata(
                 drawableResId = R.drawable.amazon,
-                contentDescription = "Amazon",
+                contentDescriptionResId = R.string.search_engine_amazon,
                 urlTemplate = "https://www.amazon.com/s?k=%s",
                 defaultShortcutCode = "amz",
             ),
         SearchEngine.YOU_COM to
             SearchEngineMetadata(
                 drawableResId = R.drawable.you_com,
-                contentDescription = "You.com",
+                contentDescriptionResId = R.string.search_engine_you_com,
                 urlTemplate = "https://you.com/search?q=%s",
                 defaultShortcutCode = "yu",
             ),
         SearchEngine.DUCKDUCKGO to
             SearchEngineMetadata(
                 drawableResId = R.drawable.duckduckgo,
-                contentDescription = "DuckDuckGo",
+                contentDescriptionResId = R.string.search_engine_duckduckgo,
                 urlTemplate = "https://duckduckgo.com/?q=%s",
                 defaultShortcutCode = "ddg",
             ),
         SearchEngine.BRAVE to
             SearchEngineMetadata(
                 drawableResId = R.drawable.brave,
-                contentDescription = "Brave Search",
+                contentDescriptionResId = R.string.search_engine_brave,
                 urlTemplate = "https://search.brave.com/search?q=%s",
                 defaultShortcutCode = "brv",
             ),
         SearchEngine.BING to
             SearchEngineMetadata(
                 drawableResId = R.drawable.bing,
-                contentDescription = "Bing",
+                contentDescriptionResId = R.string.search_engine_bing,
                 urlTemplate = "https://www.bing.com/search?q=%s",
                 defaultShortcutCode = "bng",
             ),
         SearchEngine.X to
             SearchEngineMetadata(
                 drawableResId = R.drawable.x,
-                contentDescription = "X",
+                contentDescriptionResId = R.string.search_engine_x,
                 urlTemplate = "https://x.com/search?q=%s",
                 defaultShortcutCode = "twt",
             ),
         SearchEngine.AI_MODE to
             SearchEngineMetadata(
                 drawableResId = R.drawable.ai_mode,
-                contentDescription = "AI mode",
+                contentDescriptionResId = R.string.search_engine_ai_mode,
                 urlTemplate = "https://www.google.com/search?q=%s&udm=50",
                 defaultShortcutCode = "gai",
             ),
         SearchEngine.STARTPAGE to
             SearchEngineMetadata(
                 drawableResId = R.drawable.startpage,
-                contentDescription = "Startpage",
+                contentDescriptionResId = R.string.search_engine_startpage,
                 urlTemplate = "https://www.startpage.com/sp/search?query=%s",
                 defaultShortcutCode = "stp",
             ),
@@ -198,10 +198,6 @@ private val SEARCH_ENGINE_METADATA: Map<SearchEngine, SearchEngineMetadata> =
 @DrawableRes
 fun SearchEngine.getDrawableResId(): Int =
     SEARCH_ENGINE_METADATA[this]?.drawableResId
-        ?: throw IllegalArgumentException("Unknown SearchEngine: $this")
-
-fun SearchEngine.getContentDescription(): String =
-    SEARCH_ENGINE_METADATA[this]?.contentDescription
         ?: throw IllegalArgumentException("Unknown SearchEngine: $this")
 
 fun SearchEngine.getAppPackageCandidates(): List<String> =
@@ -357,6 +353,11 @@ fun SearchEngine.getDefaultShortcutCode(): String =
         ?: throw IllegalArgumentException("Unknown SearchEngine: $this")
 
 @StringRes
+fun SearchEngine.getContentDescriptionResId(): Int =
+    SEARCH_ENGINE_METADATA[this]?.contentDescriptionResId
+        ?: throw IllegalArgumentException("Unknown SearchEngine: $this")
+
+@StringRes
 fun SearchEngine.getDisplayNameResId(): Int =
     when (this) {
         SearchEngine.DIRECT_SEARCH -> R.string.search_engine_direct_search
@@ -387,7 +388,11 @@ fun SearchEngine.getDisplayNameResId(): Int =
     }
 
 @Composable
+fun SearchEngine.getContentDescription(): String = stringResource(getContentDescriptionResId())
+
+@Composable
 fun SearchEngine.getDisplayName(): String = stringResource(getDisplayNameResId())
+
 
 /**
  * Validates an Amazon domain format.

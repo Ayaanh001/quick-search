@@ -25,14 +25,15 @@ private const val CUSTOM_SHORTCUT_ID_PREFIX = "custom_"
 private data class HardcodedShortcutDefinition(
     val id: String,
     val packageName: String,
-    val shortLabel: String,
-    val longLabel: String = shortLabel,
+    val shortLabelResId: Int,
+    val longLabelResId: Int = shortLabelResId,
     val targetClassName: String? = null,
     val shortcutSourceClassName: String? = targetClassName,
     val intentAction: String? = null,
     val intentDataUri: String? = null,
 ) {
     fun toStaticShortcut(
+        context: Context,
         appLabel: String,
         iconBase64: String?,
     ): StaticShortcut {
@@ -52,8 +53,8 @@ private data class HardcodedShortcutDefinition(
             packageName = packageName,
             appLabel = appLabel,
             id = id,
-            shortLabel = shortLabel,
-            longLabel = longLabel,
+            shortLabel = context.getString(shortLabelResId),
+            longLabel = context.getString(longLabelResId),
             iconResId = null,
             iconBase64 = iconBase64,
             enabled = true,
@@ -67,13 +68,13 @@ private val HARDCODED_SHORTCUT_DEFINITIONS =
         HardcodedShortcutDefinition(
             id = "song_search",
             packageName = "com.google.android.googlequicksearchbox",
-            shortLabel = "Song Search",
+            shortLabelResId = R.string.shortcut_song_search_label,
             targetClassName = "com.google.android.apps.search.soundsearch.shortcut.AliasAddShortcutActivity",
         ),
         HardcodedShortcutDefinition(
             id = "watch_later",
             packageName = "com.google.android.youtube",
-            shortLabel = "Watch Later",
+            shortLabelResId = R.string.shortcut_watch_later_label,
             intentAction = Intent.ACTION_VIEW,
             intentDataUri = "https://www.youtube.com/playlist?list=WL",
         ),
@@ -158,6 +159,7 @@ internal fun loadHardcodedShortcuts(
                 sourceComponentKey?.let { sourceIconByComponent[it] }
                     ?: loadAppIconBase64(context, definition.packageName)
             definition.toStaticShortcut(
+                context = context,
                 appLabel = resolveAppLabel(context, definition.packageName, packageManager),
                 iconBase64 = iconBase64,
             )

@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.Cursor
 import android.provider.ContactsContract
 import android.util.Log
+import com.tk.quicksearch.R
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
 import com.tk.quicksearch.search.models.ContactMethodMimeTypes
@@ -26,6 +27,7 @@ class ContactRepository(
     private val context: Context,
 ) {
     private val contentResolver = context.contentResolver
+    private val otherLabel = context.getString(R.string.contact_method_fallback_label)
 
     // Cache GoogleMeet availability to avoid repeated PackageManager queries
     private val isGoogleMeetInstalled: Boolean by lazy {
@@ -36,6 +38,20 @@ class ContactRepository(
             false
         }
     }
+
+    // Contact method display labels
+    private val callLabel = context.getString(R.string.contact_method_call_label)
+    private val messageLabel = context.getString(R.string.contact_method_message_label)
+    private val emailLabel = context.getString(R.string.contact_method_email_label)
+    private val whatsAppVoiceCallLabel = context.getString(R.string.contact_method_whatsapp_voice_call_label)
+    private val whatsAppMessageLabel = context.getString(R.string.contact_method_whatsapp_message_label)
+    private val whatsAppVideoCallLabel = context.getString(R.string.contact_method_whatsapp_video_call_label)
+    private val telegramMessageLabel = context.getString(R.string.contact_method_telegram_message_label)
+    private val telegramVoiceCallLabel = context.getString(R.string.contact_method_telegram_voice_call_label)
+    private val telegramVideoCallLabel = context.getString(R.string.contact_method_telegram_video_call_label)
+    private val signalMessageLabel = context.getString(R.string.contact_method_signal_message_label)
+    private val signalVoiceCallLabel = context.getString(R.string.contact_method_signal_voice_call_label)
+    private val signalVideoCallLabel = context.getString(R.string.contact_method_signal_video_call_label)
 
     companion object {
         // Common projection fields for phone number queries
@@ -76,21 +92,6 @@ class ContactRepository(
 
         // MIME type prefixes
         private const val VND_MIME_PREFIX = "vnd.android.cursor.item/vnd."
-
-        // Contact method display labels
-        private const val CALL_LABEL = "Call"
-        private const val MESSAGE_LABEL = "Message"
-        private const val EMAIL_LABEL = "Email"
-        private const val WHATSAPP_VOICE_CALL_LABEL = "WhatsApp voice call"
-        private const val WHATSAPP_MESSAGE_LABEL = "WhatsApp"
-        private const val WHATSAPP_VIDEO_CALL_LABEL = "WhatsApp video call"
-        private const val TELEGRAM_MESSAGE_LABEL = "Telegram"
-        private const val TELEGRAM_VOICE_CALL_LABEL = "Telegram voice call"
-        private const val TELEGRAM_VIDEO_CALL_LABEL = "Telegram video call"
-        private const val SIGNAL_MESSAGE_LABEL = "Signal"
-        private const val SIGNAL_VOICE_CALL_LABEL = "Signal voice call"
-        private const val SIGNAL_VIDEO_CALL_LABEL = "Signal video call"
-        private const val OTHER_LABEL = "Other"
 
         // Package name extraction constants
         private const val PACKAGE_SEPARATOR = "."
@@ -368,12 +369,13 @@ class ContactRepository(
                         if (!hasPhoneForThisNumber) {
                             contact.contactMethods.add(method)
                             // Also add SMS method for the same phone number
-                            val smsMethod = ContactMethod.Sms(MESSAGE_LABEL, data1, dataId, isPrimary)
+                            val smsMethod = ContactMethod.Sms(messageLabel, data1, dataId, isPrimary)
                             contact.contactMethods.add(smsMethod)
                             // Add Google Meet method if Meet is available
                             if (isGoogleMeetInstalled) {
                                 val meetMethod =
                                     ContactMethod.GoogleMeet(
+                                        displayLabel = context.getString(R.string.settings_calling_option_google_meet),
                                         data = data1,
                                         dataId = dataId,
                                         isPrimary = isPrimary,
@@ -402,64 +404,64 @@ class ContactRepository(
         try {
             when (mimeType) {
                 ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
-                    ContactMethod.Phone(CALL_LABEL, data1, dataId, isPrimary)
+                    ContactMethod.Phone(callLabel, data1, dataId, isPrimary)
                 }
 
                 ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE -> {
-                    ContactMethod.Email(EMAIL_LABEL, data1, dataId, isPrimary)
+                    ContactMethod.Email(emailLabel, data1, dataId, isPrimary)
                 }
 
                 ContactMethodMimeTypes.WHATSAPP_VOICE_CALL -> {
-                    ContactMethod.WhatsAppCall(WHATSAPP_VOICE_CALL_LABEL, data1, dataId, isPrimary)
+                    ContactMethod.WhatsAppCall(whatsAppVoiceCallLabel, data1, dataId, isPrimary)
                 }
 
                 ContactMethodMimeTypes.WHATSAPP_MESSAGE -> {
-                    ContactMethod.WhatsAppMessage(WHATSAPP_MESSAGE_LABEL, data1, dataId, isPrimary)
+                    ContactMethod.WhatsAppMessage(whatsAppMessageLabel, data1, dataId, isPrimary)
                 }
 
                 ContactMethodMimeTypes.WHATSAPP_VIDEO_CALL -> {
-                    ContactMethod.WhatsAppVideoCall(WHATSAPP_VIDEO_CALL_LABEL, data1, dataId, isPrimary)
+                    ContactMethod.WhatsAppVideoCall(whatsAppVideoCallLabel, data1, dataId, isPrimary)
                 }
 
                 ContactMethodMimeTypes.TELEGRAM_MESSAGE -> {
-                    ContactMethod.TelegramMessage(TELEGRAM_MESSAGE_LABEL, data1, dataId, isPrimary)
+                    ContactMethod.TelegramMessage(telegramMessageLabel, data1, dataId, isPrimary)
                 }
 
                 ContactMethodMimeTypes.TELEGRAM_CALL -> {
-                    ContactMethod.TelegramCall(TELEGRAM_VOICE_CALL_LABEL, data1, dataId, isPrimary)
+                    ContactMethod.TelegramCall(telegramVoiceCallLabel, data1, dataId, isPrimary)
                 }
 
                 ContactMethodMimeTypes.TELEGRAM_VIDEO_CALL -> {
-                    ContactMethod.TelegramVideoCall(TELEGRAM_VIDEO_CALL_LABEL, data1, dataId, isPrimary)
+                    ContactMethod.TelegramVideoCall(telegramVideoCallLabel, data1, dataId, isPrimary)
                 }
 
                 ContactMethodMimeTypes.SIGNAL_MESSAGE -> {
-                    ContactMethod.SignalMessage(SIGNAL_MESSAGE_LABEL, data1, dataId, isPrimary)
+                    ContactMethod.SignalMessage(signalMessageLabel, data1, dataId, isPrimary)
                 }
 
                 ContactMethodMimeTypes.SIGNAL_CALL -> {
-                    ContactMethod.SignalCall(SIGNAL_VOICE_CALL_LABEL, data1, dataId, isPrimary)
+                    ContactMethod.SignalCall(signalVoiceCallLabel, data1, dataId, isPrimary)
                 }
 
                 ContactMethodMimeTypes.SIGNAL_VIDEO_CALL -> {
-                    ContactMethod.SignalVideoCall(SIGNAL_VIDEO_CALL_LABEL, data1, dataId, isPrimary)
+                    ContactMethod.SignalVideoCall(signalVideoCallLabel, data1, dataId, isPrimary)
                 }
 
                 else -> {
                     if (mimeType.startsWith("vnd.android.cursor.item/vnd.org.thoughtcrime.securesms")) {
                         when {
                             mimeType.contains("video", ignoreCase = true) ->
-                                ContactMethod.SignalVideoCall(SIGNAL_VIDEO_CALL_LABEL, data1, dataId, isPrimary)
+                                ContactMethod.SignalVideoCall(signalVideoCallLabel, data1, dataId, isPrimary)
                             mimeType.contains("call", ignoreCase = true) ->
-                                ContactMethod.SignalCall(SIGNAL_VOICE_CALL_LABEL, data1, dataId, isPrimary)
+                                ContactMethod.SignalCall(signalVoiceCallLabel, data1, dataId, isPrimary)
                             else ->
-                                ContactMethod.SignalMessage(SIGNAL_MESSAGE_LABEL, data1, dataId, isPrimary)
+                                ContactMethod.SignalMessage(signalMessageLabel, data1, dataId, isPrimary)
                         }
                     } else
                     if (mimeType.startsWith(VND_MIME_PREFIX)) {
                         val packageName = extractPackageFromMimeType(mimeType)
                         ContactMethod.CustomApp(
-                            displayLabel = packageName ?: OTHER_LABEL,
+                            displayLabel = packageName ?: otherLabel,
                             data = data1,
                             mimeType = mimeType,
                             packageName = packageName,

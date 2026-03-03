@@ -27,6 +27,7 @@
     <string name="direct_search_error_generic">Couldn\u2019t fetch a direct answer. Try again.</string>
     <string name="direct_search_enter_query">Please enter a query to search.</string>
     <string name="direct_search_powered_by">Powered by</string>
+    <string name="error_gemini_models_load_failed">Unable to load Gemini models</string>
     <string name="error_open_email">No email app found to send mail.</string>
     <string name="error_open_search_engine">Unable to open %1$s</string>
     <string name="keyboard_switch_back">Switch to regular keyboard</string>
@@ -34,6 +35,12 @@
     <string name="keyboard_switch_to_number">Switch to number keyboard</string>
     <string name="action_open_keyboard">Open keyboard</string>
     <string name="direct_answer_contact_name">Direct Answer</string>
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_gemini_empty_response">Empty response from Gemini</string>
+    <string name="error_request_failed">Request failed (%1$d)</string>
+    <string name="error_gemini_load_models_failed">Unable to load Gemini models</string>
+    <string name="error_gemini_request_failed">Request failed (%1$d)</string>
+    <string name="gemini_model_flash_latest">Gemini Flash (Latest)</string>
 
     <!-- ============================================================================
          Apps Section
@@ -61,9 +68,24 @@
     <string name="contacts_action_button_chat">Chat</string>
     <string name="contacts_action_button_video_call">Video Call</string>
     <string name="contacts_action_button_meet">Meet</string>
+    <string name="contact_method_call_label">Call</string>
+    <string name="contact_method_message_label">Message</string>
     <string name="contacts_action_button_email">Email</string>
     <string name="contacts_action_button_contacts">Contacts</string>
     <string name="contacts_no_methods_available">No contact methods available</string>
+    <string name="contact_method_email_label">Email</string>
+    <string name="contact_method_whatsapp_voice_call_label">WhatsApp voice call</string>
+    <string name="contact_method_whatsapp_message_label">WhatsApp</string>
+    <string name="contact_method_whatsapp_video_call_label">WhatsApp video call</string>
+    <string name="contact_method_telegram_message_label">Telegram</string>
+    <string name="contact_method_telegram_voice_call_label">Telegram voice call</string>
+    <string name="contact_method_telegram_video_call_label">Telegram video call</string>
+    <string name="contact_method_signal_message_label">Signal</string>
+    <string name="contact_method_signal_voice_call_label">Signal voice call</string>
+    <string name="contact_method_signal_video_call_label">Signal video call</string>
+    <string name="contact_method_google_meet_label">Google Meet</string>
+    <string name="contact_method_fallback_label">Other</string>
+    <string name="contact_method_view_in_contacts_label">View in contacts app</string>
     <string name="contacts_action_previous_number">Previous phone number</string>
     <string name="contacts_action_next_number">Next phone number</string>
     <string name="contacts_action_hint_message">Tip: Press and hold any action here to customize it for individual contacts.</string>
@@ -103,6 +125,7 @@
     <string name="file_info_size">Size</string>
     <string name="file_info_modified">Modified</string>
     <string name="file_info_path">Path</string>
+    <string name="file_extension_label">.%s files</string>
 
     <!-- ============================================================================
          Settings Shortcuts
@@ -144,9 +167,23 @@
     <string name="settings_shortcut_battery_usage">Battery Usage</string>
 
     <!-- ============================================================================
+         Device Settings Categories
+         ============================================================================ -->
+    <string name="device_settings_category_language_input">Language &amp; Input</string>
+    <string name="device_settings_category_notifications_accessibility">Notifications &amp; Accessibility</string>
+    <string name="device_settings_category_apps_permissions">Apps &amp; Permissions</string>
+    <string name="device_settings_category_battery_performance">Battery &amp; Performance</string>
+    <string name="device_settings_category_system_device">System &amp; Device</string>
+    <string name="device_settings_category_network_connectivity">Network &amp; Connectivity</string>
+    <string name="device_settings_category_security_privacy">Security &amp; Privacy</string>
+    <string name="device_settings_category_developer_advanced">Developer &amp; Advanced</string>
+
+    <!-- ============================================================================
          Common Actions
          ============================================================================ -->
     <string name="action_open_settings">Open settings</string>
+    <string name="error_shortcut_creation_failed">Failed to create shortcut</string>
+    <string name="error_shortcuts_not_supported">Adding shortcuts to home screen is not supported on this device</string>
     <string name="action_app_info">App Info</string>
     <string name="action_uninstall_app">Uninstall</string>
     <string name="action_hide_app">Exclude</string>
@@ -171,6 +208,7 @@
     <string name="action_remove">Remove</string>
     <string name="action_add_nickname">Add Nickname</string>
     <string name="action_edit_nickname">Edit Nickname</string>
+    <string name="exclude_marker"> excluded from </string>
     <string name="action_expand_more">More</string>
     <string name="action_more_search_history">More History</string>
     <string name="action_remove_from_history">Remove From History</string>
@@ -179,6 +217,16 @@
     <string name="action_collapse">Collapse</string>
     <string name="action_retry">Retry</string>
     <string name="permission_action_manage_android">Manage in Android settings</string>
+
+    <!-- ============================================================================
+         App Shortcuts
+         ============================================================================ -->
+    <string name="error_shortcut_disabled">Shortcut is disabled.</string>
+    <string name="error_shortcut_no_intent">Shortcut has no intent.</string>
+    <string name="error_shortcut_no_activity_resolves">No activity resolves intent.</string>
+    <string name="error_shortcut_activity_not_exported">Resolved activity is not exported.</string>
+    <string name="error_shortcut_requires_permission">Shortcut requires permission: %1$s.</string>
+    <string name="error_shortcut_launch_failed">Failed to launch shortcut: %1$s.</string>
 
     <!-- ============================================================================
          Dialogs
@@ -362,6 +410,9 @@
     <string name="settings_direct_search_personal_context_hint">Add any context you want Gemini to use when generating answers.</string>
     <string name="dialog_gemini_model_picker_title">Select Model</string>
     <string name="dialog_gemini_model_no_grounding_info">This model does not support personal context and google search grounding</string>
+    <string name="error_gemini_model_unsupported_features">%1$s does not support %2$s.</string>
+    <string name="gemini_feature_personal_context">personal context</string>
+    <string name="gemini_feature_grounding">grounding</string>
 
     <!-- ============================================================================
          Settings - Shortcuts
@@ -376,6 +427,7 @@
     <string name="settings_direct_search_how_to">Get Free API Key</string>
     <string name="settings_gemini_guide_url" translatable="false">https://medium.com/@tejakarlapudi.apps/setting-up-gemini-api-key-in-quick-search-25ee92aa4311</string>
     <string name="settings_gemini_api_key_display">Your Gemini API key:  ****%1$s</string>
+    <string name="settings_gemini_api_key_paste_hint">Paste Gemini API Key</string>
     <string name="settings_direct_dial_title">Direct Dial</string>
     <string name="settings_direct_dial_desc">Place calls directly without opening the dialer. </string>
 
@@ -458,6 +510,8 @@
     <string name="settings_app_shortcuts_delete_action">Delete shortcut</string>
     <string name="settings_app_shortcuts_create_not_supported">No app supports shortcut creation on this device.</string>
     <string name="settings_app_shortcuts_add_success">Shortcut added.</string>
+    <string name="shortcut_song_search_label">Song Search</string>
+    <string name="shortcut_watch_later_label">Watch Later</string>
     <string name="settings_app_shortcuts_add_success_with_app_name">New shortcut is added to %1$s</string>
     <string name="settings_app_shortcuts_add_failed">Unable to add shortcut.</string>
     <string name="settings_app_shortcuts_update_success">Shortcut updated.</string>
@@ -534,6 +588,9 @@
          Widget
          ============================================================================ -->
     <string name="widget_label_text">Quick Search</string>
+    <string name="widget_text_icon_color_theme">Theme</string>
+    <string name="widget_text_icon_color_white">White</string>
+    <string name="widget_text_icon_color_black">Black</string>
     <string name="widget_settings_title">Search Widget</string>
     <string name="widget_custom_buttons_widget_title">Custom Buttons Widget</string>
     <string name="widget_custom_buttons_widget_settings_title">Custom Buttons Widget</string>
@@ -625,6 +682,7 @@
          Search Engine Names
          ============================================================================ -->
     <string name="search_engine_google">Google</string>
+    <string name="browser_brave_name">Brave Browser</string>
     <string name="search_engine_chatgpt">ChatGPT</string>
     <string name="search_engine_perplexity">Perplexity</string>
     <string name="search_engine_grok">Grok</string>
@@ -649,6 +707,7 @@
     <string name="search_engine_ai_mode">AI mode</string>
     <string name="search_engine_direct_search">Direct Search</string>
     <string name="search_engine_startpage">Startpage</string>
+    <string name="search_engine_custom">Custom Search</string>
 
     <!-- ============================================================================
          Search Engine Onboarding

@@ -37,7 +37,7 @@ class DirectSearchHandler(
     private fun ensureInitialized() {
         if (!isInitialized) {
             geminiApiKey = userPreferences.getGeminiApiKey()
-            geminiClient = geminiApiKey?.let { DirectSearchClient(it) }
+            geminiClient = geminiApiKey?.let { DirectSearchClient(it, context) }
             personalContext = userPreferences.getPersonalContext().orEmpty()
             geminiModel = userPreferences.getGeminiModel()
             geminiGroundingEnabled = userPreferences.isGeminiGroundingEnabled()
@@ -82,7 +82,7 @@ class DirectSearchHandler(
         if (normalized == geminiApiKey) return
 
         geminiApiKey = normalized
-        geminiClient = normalized?.let { DirectSearchClient(it) }
+        geminiClient = normalized?.let { DirectSearchClient(it, context) }
         hasLoadedGeminiModelsFromApi = false
         userPreferences.setGeminiApiKey(normalized)
 
@@ -132,7 +132,7 @@ class DirectSearchHandler(
         }
 
         val fetched =
-                DirectSearchClient.fetchAvailableTextModels(apiKey)
+                DirectSearchClient.fetchAvailableTextModels(apiKey, context)
                         .getOrDefault(GeminiModelCatalog.FALLBACK_TEXT_MODELS)
         availableGeminiModels = ensureModelExists(fetched)
         hasLoadedGeminiModelsFromApi = true
@@ -196,11 +196,19 @@ class DirectSearchHandler(
                             }
                             .onFailure { error ->
                                 if (error is CancellationException) return@onFailure
-                                val message =
-                                        error.message
-                                                ?: context.getString(
-                                                        R.string.direct_search_error_generic,
-                                                )
+                                val message = when {
+                                    error.message?.startsWith("Request failed") == true -> {
+                                        val code = error.message?.substringAfter("Request failed (")?.substringBefore(")")?.toIntOrNull()
+                                        if (code != null) {
+                                            context.getString(R.string.error_gemini_request_failed, code)
+                                        } else {
+                                            error.message
+                                        }
+                                    }
+                                    error.message == "Unable to load Gemini models" -> context.getString(R.string.error_gemini_load_models_failed)
+                                    error.message == "Empty response from Gemini" -> context.getString(R.string.error_gemini_empty_response)
+                                    else -> error.message ?: context.getString(R.string.direct_search_error_generic)
+                                }
                                 _directSearchState.update {
                                     DirectSearchState(
                                             status = DirectSearchStatus.Error,

@@ -268,6 +268,7 @@ fun ContactMethodsDialog(
     getLastShownPhoneNumber: (Long) -> String? = { null },
     setLastShownPhoneNumber: (Long, String) -> Unit = { _, _ -> },
 ) {
+    val viewInContactsLabel = stringResource(R.string.contact_method_view_in_contacts_label)
     val hasMultipleNumbers = contactInfo.phoneNumbers.size > 1
     val maxCardHeight = LocalConfiguration.current.screenHeightDp.dp * 0.72f
     val context = LocalContext.current
@@ -340,7 +341,7 @@ fun ContactMethodsDialog(
                             photoUri = contactInfo.photoUri,
                             displayName = contactInfo.displayName,
                             onClick = {
-                                onContactMethodClick(contactInfo, ContactMethod.ViewInContactsApp())
+                                onContactMethodClick(contactInfo, ContactMethod.ViewInContactsApp(viewInContactsLabel))
                                 onDismiss()
                             },
                             modifier = Modifier.size(48.dp),

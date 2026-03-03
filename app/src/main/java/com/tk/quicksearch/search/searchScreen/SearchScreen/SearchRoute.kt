@@ -141,7 +141,7 @@ fun SearchRoute(
         val extension = FileUtils.getFileExtension(file.displayName)
         if (extension != null) {
             viewModel.excludeFileExtension(file)
-            val extensionLabel = ".$extension files"
+            val extensionLabel = context.getString(R.string.file_extension_label, extension)
             showUndoSnackbar(
                 context.getString(R.string.toast_excluded_from_results, extensionLabel),
             ) {

@@ -67,16 +67,16 @@ fun ContactActionPickerDialog(
         return when (action) {
             is ContactCardAction.Phone -> stringResource(R.string.contacts_action_button_call)
             is ContactCardAction.Sms -> stringResource(R.string.contacts_action_button_message)
-            is ContactCardAction.WhatsAppCall -> "WhatsApp Call"
-            is ContactCardAction.WhatsAppMessage -> "WhatsApp"
-            is ContactCardAction.WhatsAppVideoCall -> "WhatsApp Video"
-            is ContactCardAction.TelegramMessage -> "Telegram"
-            is ContactCardAction.TelegramCall -> "Telegram Call"
-            is ContactCardAction.TelegramVideoCall -> "Telegram Video"
-            is ContactCardAction.SignalMessage -> "Signal"
-            is ContactCardAction.SignalCall -> "Signal Call"
-            is ContactCardAction.SignalVideoCall -> "Signal Video"
-            is ContactCardAction.GoogleMeet -> "Google Meet"
+            is ContactCardAction.WhatsAppCall -> stringResource(R.string.contact_method_whatsapp_voice_call_label)
+            is ContactCardAction.WhatsAppMessage -> stringResource(R.string.contact_method_whatsapp_message_label)
+            is ContactCardAction.WhatsAppVideoCall -> stringResource(R.string.contact_method_whatsapp_video_call_label)
+            is ContactCardAction.TelegramMessage -> stringResource(R.string.contact_method_telegram_message_label)
+            is ContactCardAction.TelegramCall -> stringResource(R.string.contact_method_telegram_voice_call_label)
+            is ContactCardAction.TelegramVideoCall -> stringResource(R.string.contact_method_telegram_video_call_label)
+            is ContactCardAction.SignalMessage -> stringResource(R.string.contact_method_signal_message_label)
+            is ContactCardAction.SignalCall -> stringResource(R.string.contact_method_signal_voice_call_label)
+            is ContactCardAction.SignalVideoCall -> stringResource(R.string.contact_method_signal_video_call_label)
+            is ContactCardAction.GoogleMeet -> stringResource(R.string.contact_method_google_meet_label)
         }
     }
 

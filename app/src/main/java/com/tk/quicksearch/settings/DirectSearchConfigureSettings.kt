@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
@@ -108,6 +109,7 @@ fun DirectSearchConfigureSettingsSection(
                                                 contentDescription = null,
                                                 modifier = Modifier.size(24.dp)
                                         )
+                                        val context = LocalContext.current
                                         val message =
                                                 remember(
                                                         selectedModelLabel,
@@ -116,10 +118,10 @@ fun DirectSearchConfigureSettingsSection(
                                                 ) {
                                                         val unsupported = mutableListOf<String>()
                                                         if (!supportsInstructions)
-                                                                unsupported.add("personal context")
+                                                                unsupported.add(context.getString(R.string.gemini_feature_personal_context))
                                                         if (!supportsGrounding)
-                                                                unsupported.add("grounding")
-                                                        "$selectedModelLabel does not support ${unsupported.joinToString(" or ")}."
+                                                                unsupported.add(context.getString(R.string.gemini_feature_grounding))
+                                                        context.getString(R.string.error_gemini_model_unsupported_features, selectedModelLabel, unsupported.joinToString(" or "))
                                                 }
                                         Text(
                                                 text = message,

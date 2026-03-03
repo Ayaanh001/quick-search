@@ -24,6 +24,8 @@ import com.tk.quicksearch.search.core.SearchEngine
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.searchEngines.getAppPackageCandidates
 import com.tk.quicksearch.searchEngines.getContentDescription
+import com.tk.quicksearch.searchEngines.getContentDescriptionResId
+import com.tk.quicksearch.searchEngines.getDisplayName
 import com.tk.quicksearch.searchEngines.getDrawableResId
 
 /**

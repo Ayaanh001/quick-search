@@ -112,18 +112,18 @@ fun TextIconColorChoiceSegmentedButtonRow(
             onClick = { onSelectionChange(TextIconColorOverride.THEME) },
             shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
             icon = {},
-        ) { Text("Theme") }
+        ) { Text(stringResource(R.string.widget_text_icon_color_theme)) }
         SegmentedButton(
             selected = selectedOverride == TextIconColorOverride.WHITE,
             onClick = { onSelectionChange(TextIconColorOverride.WHITE) },
             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
             icon = {},
-        ) { Text("White") }
+        ) { Text(stringResource(R.string.widget_text_icon_color_white)) }
         SegmentedButton(
             selected = selectedOverride == TextIconColorOverride.BLACK,
             onClick = { onSelectionChange(TextIconColorOverride.BLACK) },
             shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
             icon = {},
-        ) { Text("Black") }
+        ) { Text(stringResource(R.string.widget_text_icon_color_black)) }
     }
 }

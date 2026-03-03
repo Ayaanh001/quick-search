@@ -1,6 +1,7 @@
 package com.tk.quicksearch.tools.directSearch
 
 import android.util.Log
+import com.tk.quicksearch.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -19,6 +20,7 @@ import java.net.URL
  */
 class DirectSearchClient(
     private val apiKey: String,
+    private val context: android.content.Context,
 ) {
     companion object {
         private const val LOG_TAG = "DirectSearchClient"
@@ -32,7 +34,7 @@ class DirectSearchClient(
         private const val INITIAL_RETRY_DELAY_MS = 750L
         private const val MODELS_ENDPOINT = "$BASE_API_URL/models"
 
-        suspend fun fetchAvailableTextModels(apiKey: String): Result<List<GeminiTextModel>> =
+        suspend fun fetchAvailableTextModels(apiKey: String, context: android.content.Context): Result<List<GeminiTextModel>> =
             withContext(Dispatchers.IO) {
                 runCatching {
                     val models = mutableListOf<GeminiTextModel>()
@@ -55,7 +57,7 @@ class DirectSearchClient(
                             val responseCode = connection.responseCode
                             val rawResponse = readResponseBody(connection, responseCode)
                             if (responseCode !in 200..299) {
-                                val message = parseError(rawResponse) ?: "Unable to load Gemini models"
+                                val message = parseError(rawResponse) ?: context.getString(R.string.error_gemini_load_models_failed)
                                 throw IOException(message)
                             }
 
@@ -109,7 +111,7 @@ class DirectSearchClient(
                                 deduped +
                                     GeminiTextModel(
                                         id = GeminiModelCatalog.DEFAULT_MODEL_ID,
-                                        displayName = "Gemini Flash (Latest)",
+                                        displayName = context.getString(R.string.gemini_model_flash_latest),
                                     )
                             }
                         withDefault.sortedBy { it.displayName.lowercase() }
@@ -231,11 +233,11 @@ class DirectSearchClient(
             if (responseCode in 200..299) {
                 val answer =
                     extractAnswer(rawResponse) ?: return Result.failure(
-                        IllegalStateException("Empty response from Gemini"),
+                        IllegalStateException(context.getString(R.string.error_gemini_empty_response)),
                     )
                 Result.success(answer)
             } else {
-                val message = parseError(rawResponse) ?: "Request failed ($responseCode)"
+                val message = parseError(rawResponse) ?: context.getString(R.string.error_gemini_request_failed, responseCode)
                 Result.failure(ResponseException(responseCode, message))
             }
         } catch (e: Exception) {

@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
+import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.CustomSearchEngine
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -88,6 +89,7 @@ fun buildCustomSearchUrl(
 }
 
 fun createCustomSearchEngine(
+    context: Context,
     name: String?,
     normalizedTemplate: String,
     faviconBase64: String?,
@@ -97,7 +99,7 @@ fun createCustomSearchEngine(
         return null
     }
 
-    val inferredName = inferCustomSearchEngineName(validated.normalizedTemplate) ?: "Custom Search"
+    val inferredName = inferCustomSearchEngineName(validated.normalizedTemplate) ?: context.getString(R.string.search_engine_custom)
     val resolvedName = name?.trim().takeUnless { it.isNullOrBlank() } ?: inferredName
     val id = "custom_${sha256Hex(validated.normalizedTemplate).take(12)}"
 
