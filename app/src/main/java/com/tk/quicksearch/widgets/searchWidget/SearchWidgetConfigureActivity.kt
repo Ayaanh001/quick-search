@@ -26,7 +26,7 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.SearchViewModel
 import com.tk.quicksearch.shared.ui.theme.QuickSearchTheme
-import com.tk.quicksearch.widgets.WidgetConfigScreen
+import com.tk.quicksearch.widgets.WidgetConfigScreen.WidgetConfigScreen
 import com.tk.quicksearch.widgets.utils.WidgetPreferences
 import com.tk.quicksearch.widgets.utils.WidgetVariant
 import com.tk.quicksearch.widgets.utils.applyWidgetPreferences
