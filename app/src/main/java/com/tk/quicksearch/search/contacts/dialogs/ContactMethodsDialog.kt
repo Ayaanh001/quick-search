@@ -1,8 +1,6 @@
 package com.tk.quicksearch.search.contacts.dialogs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -22,20 +19,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,203 +48,10 @@ import com.tk.quicksearch.search.contacts.components.ContactActionButton
 import com.tk.quicksearch.search.contacts.components.ContactAvatar
 import com.tk.quicksearch.search.contacts.models.ContactCardAction
 import com.tk.quicksearch.search.contacts.utils.TelegramContactUtils
-import com.tk.quicksearch.search.core.DirectDialOption
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
 import kotlin.reflect.KClass
-
-// ============================================================================
-// Phone Number Selection Dialog
-// ============================================================================
-
-@Composable
-fun PhoneNumberSelectionDialog(
-    contactInfo: ContactInfo,
-    isCall: Boolean,
-    onPhoneNumberSelected: (String, Boolean) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var rememberChoice by remember { mutableStateOf(false) }
-    var selectedNumber by remember { mutableStateOf<String?>(contactInfo.phoneNumbers.firstOrNull()) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(text = stringResource(R.string.dialog_select_phone_number_title))
-        },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text(
-                    text =
-                        stringResource(
-                            R.string.dialog_select_phone_number_message,
-                            contactInfo.displayName,
-                        ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // List of phone numbers
-                contactInfo.phoneNumbers.forEach { number ->
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .clickable { selectedNumber = number },
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        RadioButton(
-                            selected = selectedNumber == number,
-                            onClick = { selectedNumber = number },
-                        )
-                        Text(
-                            text = PhoneNumberUtils.formatPhoneNumberForDisplay(number),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Remember choice checkbox
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Checkbox(
-                        checked = rememberChoice,
-                        onCheckedChange = { rememberChoice = it },
-                    )
-                    Text(
-                        text = stringResource(R.string.dialog_remember_choice),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    selectedNumber?.let { number ->
-                        onPhoneNumberSelected(number, rememberChoice)
-                    }
-                },
-                enabled = selectedNumber != null,
-            ) {
-                Text(
-                    text =
-                        if (isCall) {
-                            stringResource(R.string.dialog_call)
-                        } else {
-                            stringResource(R.string.dialog_sms)
-                        },
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.dialog_cancel))
-            }
-        },
-    )
-}
-
-@Composable
-fun DirectDialChoiceDialog(
-    contactName: String,
-    phoneNumber: String,
-    onSelectOption: (DirectDialOption, Boolean) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var selectedOption by remember { mutableStateOf(DirectDialOption.DIRECT_CALL) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(text = stringResource(R.string.dialog_direct_dial_title))
-        },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    DirectDialOption.values().forEach { option ->
-                        val title =
-                            when (option) {
-                                DirectDialOption.DIRECT_CALL -> stringResource(R.string.dialog_direct_dial_option_direct)
-                                DirectDialOption.DIALER -> stringResource(R.string.dialog_direct_dial_option_dialer)
-                            }
-                        val description =
-                            when (option) {
-                                DirectDialOption.DIRECT_CALL -> stringResource(R.string.dialog_direct_dial_option_direct_desc)
-                                DirectDialOption.DIALER -> stringResource(R.string.dialog_direct_dial_option_dialer_desc)
-                            }
-
-                        Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .clickable { selectedOption = option },
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            RadioButton(
-                                selected = selectedOption == option,
-                                onClick = { selectedOption = option },
-                            )
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(2.dp),
-                            ) {
-                                Text(
-                                    text = title,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                )
-                                Text(
-                                    text = description,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = stringResource(R.string.dialog_direct_dial_change_later),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = { onSelectOption(selectedOption, true) }) {
-                Text(text = stringResource(R.string.dialog_ok))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.dialog_cancel))
-            }
-        },
-    )
-}
 
 // ============================================================================
 // Contact Methods Dialog
@@ -592,166 +390,3 @@ fun ContactMethodsDialog(
         }
     }
 }
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Reorders phone numbers to prioritize the last shown number for better UX.
- * Only applies when there are multiple phone numbers.
- */
-private fun reorderPhoneNumbersForDisplay(
-    contactInfo: ContactInfo,
-    hasMultipleNumbers: Boolean,
-    getLastShownPhoneNumber: (Long) -> String?,
-): List<String> {
-    if (!hasMultipleNumbers) {
-        return contactInfo.phoneNumbers
-    }
-
-    val lastShownNumber = getLastShownPhoneNumber(contactInfo.contactId)
-    if (lastShownNumber == null || contactInfo.phoneNumbers.isEmpty()) {
-        return contactInfo.phoneNumbers
-    }
-
-    // Find the index of the last shown number (using phone number matching)
-    val lastShownIndex =
-        contactInfo.phoneNumbers.indexOfFirst { number ->
-            PhoneNumberUtils.isSameNumber(number, lastShownNumber)
-        }
-
-    return if (lastShownIndex >= 0) {
-        // Move the last shown number to the front
-        val reordered = contactInfo.phoneNumbers.toMutableList()
-        val lastShown = reordered.removeAt(lastShownIndex)
-        reordered.add(0, lastShown)
-        reordered
-    } else {
-        contactInfo.phoneNumbers
-    }
-}
-
-/**
- * Filters contact methods to only include those that match the selected phone number.
- * Telegram methods use special utility functions for matching, while other methods
- * use phone number normalization for comparison.
- */
-private fun filterMethodsByPhoneNumber(
-    contactMethods: List<ContactMethod>,
-    selectedPhoneNumber: String?,
-    context: android.content.Context,
-): List<ContactMethod> =
-    contactMethods.filter { method ->
-        when {
-            // Telegram methods require special handling with utility functions
-            method is ContactMethod.TelegramMessage ||
-                method is ContactMethod.TelegramCall ||
-                method is ContactMethod.TelegramVideoCall -> {
-                if (selectedPhoneNumber != null) {
-                    TelegramContactUtils.isTelegramMethodForPhoneNumber(
-                        context = context,
-                        phoneNumber = selectedPhoneNumber,
-                        telegramMethod = method,
-                    )
-                } else {
-                    // If no phone number is selected, show all Telegram methods
-                    true
-                }
-            }
-
-            method is ContactMethod.SignalMessage ||
-                method is ContactMethod.SignalCall ||
-                method is ContactMethod.SignalVideoCall -> {
-                if (selectedPhoneNumber == null) {
-                    true
-                } else {
-                    method.data.isBlank() || PhoneNumberUtils.isSameNumber(method.data, selectedPhoneNumber)
-                }
-            }
-
-            // For other methods, require phone number match with the selected number
-            else -> {
-                val methodData = method.data?.takeIf { it.isNotBlank() }
-                methodData != null && selectedPhoneNumber != null &&
-                    PhoneNumberUtils.isSameNumber(methodData, selectedPhoneNumber)
-            }
-        }
-    }
-
-/**
- * Renders a row of contact methods if any methods of the specified types are available.
- */
-@Composable
-private inline fun renderMethodRow(
-    methods: List<ContactMethod>,
-    methodTypes: List<KClass<out ContactMethod>>,
-    crossinline onMethodClick: (ContactMethod) -> Unit,
-    crossinline onMethodLongClick: (ContactMethod) -> Unit,
-) {
-    val filteredMethods =
-        methods.filter { method ->
-            methodTypes.any { type -> type.isInstance(method) }
-        }
-
-    if (filteredMethods.isNotEmpty()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.Top,
-        ) {
-            filteredMethods.forEach { method ->
-                ContactActionButton(
-                    method = method,
-                    onClick = { onMethodClick(method) },
-                    onLongClick = { onMethodLongClick(method) },
-                )
-            }
-        }
-    }
-}
-
-private fun contactMethodToCardAction(
-    method: ContactMethod,
-    selectedPhoneNumber: String?,
-): ContactCardAction? {
-    val phoneNumber = selectedPhoneNumber ?: method.data.takeIf { it.isNotBlank() } ?: return null
-    return when (method) {
-        is ContactMethod.Phone -> ContactCardAction.Phone(phoneNumber)
-        is ContactMethod.Sms -> ContactCardAction.Sms(phoneNumber)
-        is ContactMethod.WhatsAppCall -> ContactCardAction.WhatsAppCall(phoneNumber)
-        is ContactMethod.WhatsAppMessage -> ContactCardAction.WhatsAppMessage(phoneNumber)
-        is ContactMethod.WhatsAppVideoCall -> ContactCardAction.WhatsAppVideoCall(phoneNumber)
-        is ContactMethod.TelegramMessage -> ContactCardAction.TelegramMessage(phoneNumber)
-        is ContactMethod.TelegramCall -> ContactCardAction.TelegramCall(phoneNumber)
-        is ContactMethod.TelegramVideoCall -> ContactCardAction.TelegramVideoCall(phoneNumber)
-        is ContactMethod.SignalMessage -> ContactCardAction.SignalMessage(phoneNumber)
-        is ContactMethod.SignalCall -> ContactCardAction.SignalCall(phoneNumber)
-        is ContactMethod.SignalVideoCall -> ContactCardAction.SignalVideoCall(phoneNumber)
-        is ContactMethod.GoogleMeet -> ContactCardAction.GoogleMeet(phoneNumber)
-        else -> null
-    }
-}
-
-private fun methodShortcutLabel(
-    context: android.content.Context,
-    method: ContactMethod,
-): String? =
-    when (method) {
-        is ContactMethod.Phone -> context.getString(R.string.contacts_action_button_call)
-        is ContactMethod.Sms -> context.getString(R.string.contacts_action_button_message)
-        is ContactMethod.WhatsAppCall,
-        is ContactMethod.TelegramCall,
-        is ContactMethod.SignalCall,
-        -> context.getString(R.string.contacts_action_button_voice_call)
-        is ContactMethod.WhatsAppMessage,
-        is ContactMethod.TelegramMessage,
-        is ContactMethod.SignalMessage,
-        -> context.getString(R.string.contacts_action_button_chat)
-        is ContactMethod.WhatsAppVideoCall,
-        is ContactMethod.TelegramVideoCall,
-        is ContactMethod.SignalVideoCall,
-        -> context.getString(R.string.contacts_action_button_video_call)
-        is ContactMethod.GoogleMeet -> context.getString(R.string.contacts_action_button_meet)
-        else -> null
-    }
