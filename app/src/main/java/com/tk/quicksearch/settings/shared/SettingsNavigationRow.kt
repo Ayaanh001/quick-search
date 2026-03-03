@@ -19,8 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 /**
  * Data class for settings card items.
@@ -55,7 +55,7 @@ fun SettingsNavigationRow(
         Row(
             modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingMedium),
         ) {
             // Icon (either ImageVector or painter resource)
             when {
@@ -64,7 +64,7 @@ fun SettingsNavigationRow(
                         imageVector = item.icon,
                         contentDescription = null,
                         tint = item.iconTint ?: MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(DesignTokens.IconSizeSmall),
                     )
                 }
 
@@ -73,14 +73,14 @@ fun SettingsNavigationRow(
                         painter = painterResource(id = item.iconResId),
                         contentDescription = null,
                         tint = item.iconTint ?: Color.Unspecified,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(DesignTokens.IconSizeSmall),
                     )
                 }
             }
 
             // Title and description
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXSmall),
             ) {
                 androidx.compose.material3.Text(
                     text = item.title,
@@ -100,7 +100,7 @@ fun SettingsNavigationRow(
             imageVector = item.actionIcon,
             contentDescription = stringResource(R.string.desc_navigate_forward),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 8.dp),
+            modifier = Modifier.padding(start = DesignTokens.SpacingSmall),
         )
     }
 }

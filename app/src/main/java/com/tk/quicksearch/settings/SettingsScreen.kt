@@ -263,7 +263,11 @@ fun SettingsScreen(
                     navigationItems.forEachIndexed { index, item ->
                         SettingsNavigationRow(
                             item = item,
-                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                            contentPadding =
+                                PaddingValues(
+                                    horizontal = DesignTokens.SpacingXXLarge,
+                                    vertical = DesignTokens.SpacingLarge,
+                                ),
                         )
 
                         if (index < navigationItems.lastIndex) {
@@ -293,7 +297,11 @@ fun SettingsScreen(
                                     onNavigateToDetail(SettingsDetailType.LAUNCH_OPTIONS)
                                 },
                             ),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                        contentPadding =
+                            PaddingValues(
+                                horizontal = DesignTokens.SpacingXXLarge,
+                                vertical = DesignTokens.SpacingLarge,
+                            ),
                     )
 
                     HorizontalDivider(
@@ -310,7 +318,11 @@ fun SettingsScreen(
                                     onNavigateToDetail(SettingsDetailType.PERMISSIONS)
                                 },
                             ),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                        contentPadding =
+                            PaddingValues(
+                                horizontal = DesignTokens.SpacingXXLarge,
+                                vertical = DesignTokens.SpacingLarge,
+                            ),
                     )
 
                     HorizontalDivider(
@@ -334,7 +346,7 @@ fun SettingsScreen(
             SettingsMoreOptions()
 
             // App Version
-            SettingsVersionDisplay(modifier = Modifier.padding(top = 40.dp, bottom = 60.dp))
+            SettingsVersionDisplay(modifier = Modifier.padding(top = DesignTokens.Spacing40, bottom = 60.dp))
         }
     }
 
@@ -499,7 +511,11 @@ fun SettingsMoreOptions(
             feedbackItems.forEachIndexed { index, item ->
                 SettingsNavigationRow(
                     item = item,
-                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                    contentPadding =
+                        PaddingValues(
+                            horizontal = DesignTokens.SpacingXXLarge,
+                            vertical = DesignTokens.SpacingLarge,
+                        ),
                 )
 
                 if (index < feedbackItems.lastIndex) {
@@ -518,7 +534,10 @@ fun SettingsMoreOptions(
                     Modifier
                         .fillMaxWidth()
                         .clickable(onClick = onOpenOssLicenses)
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                        .padding(
+                            horizontal = DesignTokens.SpacingXXLarge,
+                            vertical = DesignTokens.SpacingLarge,
+                        ),
             ) {
                 Text(
                     text = stringResource(R.string.settings_open_source_licenses_title),
@@ -541,8 +560,11 @@ private fun BackupRestoreRow(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(
+                    horizontal = DesignTokens.SpacingXXLarge,
+                    vertical = DesignTokens.SpacingLarge,
+                ),
+        verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingMedium),
     ) {
         Text(
             text = stringResource(R.string.settings_backup_restore_title),
@@ -556,7 +578,7 @@ private fun BackupRestoreRow(
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingMedium),
         ) {
             OutlinedButton(
                 onClick = onImportClick,
@@ -570,7 +592,7 @@ private fun BackupRestoreRow(
                     imageVector = Icons.Rounded.Download,
                     contentDescription = null,
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(DesignTokens.SpacingSmall))
                 Text(text = stringResource(R.string.settings_backup_import_button))
             }
             OutlinedButton(
@@ -585,7 +607,7 @@ private fun BackupRestoreRow(
                     imageVector = Icons.Rounded.Upload,
                     contentDescription = null,
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(DesignTokens.SpacingSmall))
                 Text(text = stringResource(R.string.settings_backup_export_button))
             }
         }
@@ -659,7 +681,10 @@ fun SettingsVersionDisplay(modifier: Modifier = Modifier) {
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 20.dp),
+                .padding(
+                    horizontal = DesignTokens.SpacingXXLarge,
+                    vertical = DesignTokens.SpacingXLarge,
+                ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
@@ -670,7 +695,7 @@ fun SettingsVersionDisplay(modifier: Modifier = Modifier) {
         )
 
         androidx.compose.foundation.layout
-            .Spacer(modifier = Modifier.height(4.dp))
+            .Spacer(modifier = Modifier.height(DesignTokens.SpacingXSmall))
 
         Text(
             text = annotatedDeveloperDesc,

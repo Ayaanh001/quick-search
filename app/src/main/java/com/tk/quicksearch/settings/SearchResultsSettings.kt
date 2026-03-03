@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Contacts
@@ -53,7 +52,7 @@ private fun WebSearchSuggestionsCard(
 ) {
     val view = LocalView.current
     ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
-        Column(modifier = Modifier.padding(bottom = 8.dp)) {
+        Column(modifier = Modifier.padding(bottom = DesignTokens.SpacingSmall)) {
             SettingsToggleRow(
                 title = stringResource(R.string.web_search_suggestions_title),
                 checked = webSuggestionsEnabled,
@@ -70,13 +69,13 @@ private fun WebSearchSuggestionsCard(
                         Modifier
                             .fillMaxWidth()
                             .padding(
-                                start = 24.dp,
-                                end = 24.dp,
+                                start = DesignTokens.SpacingXXLarge,
+                                end = DesignTokens.SpacingXXLarge,
                                 top = 0.dp,
-                                bottom = 24.dp,
+                                bottom = DesignTokens.SpacingXXLarge,
                             ),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingLarge),
                 ) {
                     Slider(
                         value = webSuggestionsCount.toFloat(),
@@ -96,7 +95,7 @@ private fun WebSearchSuggestionsCard(
                         text = webSuggestionsCount.toString(),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.width(24.dp),
+                        modifier = Modifier.width(DesignTokens.SpacingXXLarge),
                     )
                 }
             }
@@ -151,7 +150,11 @@ private fun SearchOptionsCard(
                             icon = Icons.Rounded.VisibilityOff,
                             actionOnPress = onNavigateToExcludedItems,
                         ),
-                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                    contentPadding =
+                        PaddingValues(
+                            horizontal = DesignTokens.SpacingXXLarge,
+                            vertical = DesignTokens.SpacingLarge,
+                        ),
                 )
             }
         }
@@ -169,20 +172,31 @@ private fun RefreshDataCard(
 ) {
     ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = DesignTokens.SpacingMedium),
+            verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
         ) {
             Text(
                 text = stringResource(R.string.settings_refresh_data_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 24.dp, top = 8.dp, end = 16.dp, bottom = 12.dp),
+                modifier =
+                    Modifier.padding(
+                        start = DesignTokens.SpacingXXLarge,
+                        top = DesignTokens.SpacingSmall,
+                        end = DesignTokens.SpacingLarge,
+                        bottom = DesignTokens.SpacingMedium,
+                    ),
             )
-            val itemShape = RoundedCornerShape(12.dp)
+            val itemShape = DesignTokens.ShapeMedium
             val borderColor = MaterialTheme.colorScheme.outlineVariant
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier =
+                    Modifier.fillMaxWidth().padding(
+                        start = DesignTokens.SpacingLarge,
+                        end = DesignTokens.SpacingLarge,
+                        bottom = DesignTokens.SpacingSmall,
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(
@@ -190,10 +204,10 @@ private fun RefreshDataCard(
                         .weight(1f)
                         .clip(itemShape)
                         .clickable(onClick = { onRefreshApps(true) })
-                        .border(1.dp, borderColor, itemShape)
-                        .padding(12.dp),
+                        .border(DesignTokens.BorderWidth, borderColor, itemShape)
+                        .padding(DesignTokens.SpacingMedium),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Apps,
@@ -213,10 +227,10 @@ private fun RefreshDataCard(
                             .weight(1f)
                             .clip(itemShape)
                             .clickable(onClick = { onRefreshContacts(true) })
-                            .border(1.dp, borderColor, itemShape)
-                            .padding(12.dp),
+                            .border(DesignTokens.BorderWidth, borderColor, itemShape)
+                            .padding(DesignTokens.SpacingMedium),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Contacts,
@@ -237,10 +251,10 @@ private fun RefreshDataCard(
                             .weight(1f)
                             .clip(itemShape)
                             .clickable(onClick = { onRefreshFiles(true) })
-                            .border(1.dp, borderColor, itemShape)
-                            .padding(12.dp),
+                            .border(DesignTokens.BorderWidth, borderColor, itemShape)
+                            .padding(DesignTokens.SpacingMedium),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.InsertDriveFile,

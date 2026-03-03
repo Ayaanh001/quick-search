@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 internal fun Modifier.predictedSubmitHighlight(
@@ -24,7 +23,7 @@ internal fun Modifier.predictedSubmitHighlight(
                     shape = shape,
                 )
                 .border(
-                    width = 1.dp,
+                    width = DesignTokens.BorderWidth,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
                     shape = shape,
                 )
@@ -40,7 +39,7 @@ internal fun Modifier.predictedSubmitCardBorder(
             this
         } else {
             this.border(
-                width = 1.dp,
+                width = DesignTokens.BorderWidth,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
                 shape = shape,
             )

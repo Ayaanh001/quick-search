@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.searchEngines.extendToScreenEdges
+import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
@@ -37,16 +38,16 @@ internal fun KeyboardSwitchPill(
 ) {
     Surface(
         modifier = modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(999.dp),
-        color = Color.Black.copy(alpha = 0.4f),
-        tonalElevation = 0.dp,
+        shape = DesignTokens.ShapeFull,
+        color = AppColors.OverlayMedium,
+        tonalElevation = DesignTokens.ElevationLevel0,
     ) {
         Row(
             modifier =
                 Modifier
                     .padding(
                         horizontal = DesignTokens.SpacingMedium,
-                        vertical = 4.dp,
+                        vertical = DesignTokens.SpacingXSmall,
                     ).height(DesignTokens.IconSize),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
@@ -69,16 +70,16 @@ internal fun OverlayExpandPill(
 ) {
     Surface(
         modifier = modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(999.dp),
-        color = Color.Black.copy(alpha = 0.4f),
-        tonalElevation = 0.dp,
+        shape = DesignTokens.ShapeFull,
+        color = AppColors.OverlayMedium,
+        tonalElevation = DesignTokens.ElevationLevel0,
     ) {
         Row(
             modifier =
                 Modifier
                     .padding(
                         horizontal = DesignTokens.SpacingMedium,
-                        vertical = 4.dp,
+                        vertical = DesignTokens.SpacingXSmall,
                     ).height(DesignTokens.IconSize),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
@@ -89,7 +90,7 @@ internal fun OverlayExpandPill(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Medium,
             )
-            Spacer(modifier = Modifier.size(4.dp))
+            Spacer(modifier = Modifier.size(DesignTokens.SpacingXSmall))
             Icon(
                 imageVector = Icons.Rounded.ExpandMore,
                 contentDescription = stringResource(R.string.desc_expand),
@@ -117,7 +118,7 @@ internal fun NumberKeyboardOperatorPills(
                 MaterialTheme.colorScheme.background.green < 0.1f &&
                 MaterialTheme.colorScheme.background.blue < 0.1f
         ) {
-            Color.Black.copy(alpha = 0.5f)
+            AppColors.SearchBarBackground
         } else {
             MaterialTheme.colorScheme.surface
         }
@@ -128,7 +129,7 @@ internal fun NumberKeyboardOperatorPills(
         modifier = if (extendToScreenEdges) modifier.extendToScreenEdges() else modifier,
         color = containerBackgroundColor,
         shape = RoundedCornerShape(ZeroCornerSize),
-        tonalElevation = 0.dp,
+        tonalElevation = DesignTokens.ElevationLevel0,
     ) {
         Row(
             modifier =
@@ -139,16 +140,16 @@ internal fun NumberKeyboardOperatorPills(
                         top = 9.dp,
                         bottom = 7.dp,
                     ),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             operators.forEach { operator ->
                 Surface(
                     modifier =
                         Modifier.weight(1f).clickable { onOperatorClick(operator) },
-                    shape = RoundedCornerShape(999.dp),
+                    shape = DesignTokens.ShapeFull,
                     color = operatorChipColor,
-                    tonalElevation = 0.dp,
+                    tonalElevation = DesignTokens.ElevationLevel0,
                 ) {
                     Box(
                         modifier =

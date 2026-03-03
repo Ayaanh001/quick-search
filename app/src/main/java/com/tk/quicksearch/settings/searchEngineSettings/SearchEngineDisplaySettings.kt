@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ElevatedCard
@@ -19,6 +18,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticToggle
 
 /**
@@ -44,14 +44,19 @@ fun SearchEngineAppearanceCard(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(vertical = DesignTokens.SpacingMedium),
+            verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
         ) {
             Text(
                 text = stringResource(R.string.settings_search_engine_display_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 24.dp, top = 8.dp, end = 16.dp),
+                modifier =
+                    Modifier.padding(
+                        start = DesignTokens.SpacingXXLarge,
+                        top = DesignTokens.SpacingSmall,
+                        end = DesignTokens.SpacingLarge,
+                    ),
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
@@ -102,18 +107,23 @@ private fun SearchEngineDisplayOption(
             Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(start = 24.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(
+                    start = DesignTokens.SpacingXXLarge,
+                    end = DesignTokens.SpacingLarge,
+                    top = DesignTokens.SpacingMedium,
+                    bottom = DesignTokens.SpacingMedium,
+                ),
+        verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingLarge),
         ) {
             androidx.compose.material3.RadioButton(
                 selected = selected,
                 onClick = null, // Handled by Row clickable
             )
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXSmall)) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyLarge,
@@ -141,14 +151,14 @@ private fun CompactRowCountPills(
     val twoRowsSelected = selectedRowCount == 2
 
     Row(
-        modifier = Modifier.padding(start = 52.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(start = DesignTokens.IconSizeXLarge),
+        horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AssistChip(
             onClick = { onSelectRowCount(1) },
             label = { Text(stringResource(R.string.settings_compact_rows_one_row)) },
-            shape = RoundedCornerShape(999.dp),
+            shape = DesignTokens.ShapeFull,
             colors =
                 AssistChipDefaults.assistChipColors(
                     containerColor =
@@ -169,7 +179,7 @@ private fun CompactRowCountPills(
         AssistChip(
             onClick = { onSelectRowCount(2) },
             label = { Text(stringResource(R.string.settings_compact_rows_two_rows)) },
-            shape = RoundedCornerShape(999.dp),
+            shape = DesignTokens.ShapeFull,
             colors =
                 AssistChipDefaults.assistChipColors(
                     containerColor =

@@ -41,7 +41,7 @@ fun SettingsToggleRow(
     leadingIcon: ImageVector? = null,
     titleTextStyle: TextStyle = MaterialTheme.typography.titleMedium,
     horizontalPadding: Dp = DesignTokens.SpacingXXLarge,
-    leadingIconSize: Dp = 20.dp,
+    leadingIconSize: Dp = DesignTokens.IconSizeSmall,
     isFirstItem: Boolean = false,
     isLastItem: Boolean = false,
     extraVerticalPadding: Dp = 0.dp,

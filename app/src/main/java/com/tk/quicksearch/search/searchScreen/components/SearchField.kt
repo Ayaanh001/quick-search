@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -66,6 +65,7 @@ import com.tk.quicksearch.search.core.SearchEngine
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.searchEngines.shared.IconRenderStyle
 import com.tk.quicksearch.searchEngines.shared.SearchTargetIcon
+import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticStrong
 import kotlinx.coroutines.delay
@@ -96,9 +96,9 @@ internal fun PersistentSearchField(
 
     val searchBarBackground =
         if (opaqueBackground) {
-            Color.Black
+            AppColors.DialogBackground
         } else {
-            Color.Black.copy(alpha = 0.5f)
+            AppColors.SearchBarBackground
         }
     // Light color for icons and text on dark grey background
     val iconAndTextColor = DesignTokens.ColorSearchText
@@ -277,7 +277,7 @@ internal fun PersistentSearchField(
                     val alpha = glowAlpha.value
                     if (alpha > 0f) {
                         val strokeWidth = 2.dp.toPx()
-                        val cornerRadiusVal = 28.dp.toPx()
+                        val cornerRadiusVal = DesignTokens.Spacing28.toPx()
 
                         // Calculate gradient movement based on animation
                         // progress
@@ -356,8 +356,8 @@ internal fun PersistentSearchField(
                 }.border(
                     width = 2.dp,
                     color = Color.White.copy(alpha = borderAlpha.value),
-                    shape = RoundedCornerShape(28.dp),
-                ).clip(RoundedCornerShape(28.dp))
+                    shape = DesignTokens.ShapeXXLarge,
+                ).clip(DesignTokens.ShapeXXLarge)
                 .background(searchBarBackground),
     ) {
         TextField(
@@ -371,7 +371,7 @@ internal fun PersistentSearchField(
                     .fillMaxWidth()
                     .focusRequester(focusRequester)
                     .animateContentSize(),
-            shape = RoundedCornerShape(28.dp),
+            shape = DesignTokens.ShapeXXLarge,
             placeholder = {
                 Text(
                     text = stringResource(R.string.search_hint),
