@@ -1,467 +1,35 @@
 package com.tk.quicksearch.search.searchScreen
 
-import android.Manifest
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tk.quicksearch.R
-import com.tk.quicksearch.search.contacts.dialogs.ContactActionPickerDialog
 import com.tk.quicksearch.search.contacts.models.ContactCardAction
-import com.tk.quicksearch.search.contacts.utils.ContactCallingAppResolver
-import com.tk.quicksearch.search.contacts.utils.ContactMessagingAppResolver
-import com.tk.quicksearch.search.core.*
 import com.tk.quicksearch.search.core.DirectDialOption
-import com.tk.quicksearch.search.core.DirectSearchState
-import com.tk.quicksearch.search.core.DirectSearchStatus
-import com.tk.quicksearch.search.core.MessagingApp
+import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.core.SearchUiState
-import com.tk.quicksearch.search.core.SearchViewModel
-import com.tk.quicksearch.tools.directSearch.GeminiModelCatalog
-import com.tk.quicksearch.tools.directSearch.GeminiModelPickerDialog
-import com.tk.quicksearch.tools.directSearch.GeminiTextModel
-import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
-import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutDisplayName
-import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
 import com.tk.quicksearch.search.models.DeviceFile
+import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
-import com.tk.quicksearch.search.searchScreen.dialogs.NicknameDialogState
-import com.tk.quicksearch.search.searchScreen.dialogs.SearchScreenDialogs
-import com.tk.quicksearch.search.utils.FileUtils
-import com.tk.quicksearch.shared.ui.theme.DesignTokens
-import com.tk.quicksearch.shared.util.WallpaperUtils
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.launch
+import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
+import com.tk.quicksearch.search.core.BackgroundSource
+import com.tk.quicksearch.search.core.OverlayGradientTheme
+import com.tk.quicksearch.search.searchScreen.SearchEngineOnboardingOverlay
+import com.tk.quicksearch.search.searchScreen.SearchScreenBackground
+import com.tk.quicksearch.search.searchScreen.SearchScreenContent
+import com.tk.quicksearch.search.searchScreen.SectionParams
+import com.tk.quicksearch.search.searchScreen.DerivedState
 
-@Composable
-internal fun ExcludeUndoSnackbarHost(
-    hostState: SnackbarHostState,
-    modifier: Modifier = Modifier,
-) {
-    SnackbarHost(
-        hostState = hostState,
-        snackbar = { data ->
-            val message = data.visuals.message
-            val marker = " excluded from "
-            val markerIndex = message.indexOf(marker)
-            val annotatedMessage =
-                if (markerIndex > 0) {
-                    buildAnnotatedString {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(message.substring(0, markerIndex))
-                        }
-                        append(message.substring(markerIndex))
-                    }
-                } else {
-                    AnnotatedString(message)
-                }
-            val actionLabel = data.visuals.actionLabel
-            Snackbar(
-                action =
-                    actionLabel?.let { label ->
-                        {
-                            TextButton(onClick = { data.performAction() }) {
-                                Text(text = label)
-                            }
-                        }
-                    },
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                actionContentColor = MaterialTheme.colorScheme.primary,
-                shape = DesignTokens.ShapeLarge,
-            ) {
-                Text(
-                    text = annotatedMessage,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        },
-        modifier = modifier,
-    )
-}
-
-@Composable
-fun SearchRoute(
-    modifier: Modifier = Modifier,
-    onSettingsClick: () -> Unit = {},
-    onOpenSearchHistorySettings: () -> Unit = {},
-    onSearchEngineLongPress: () -> Unit = {},
-    onCustomizeSearchEnginesClick: () -> Unit = {},
-    onOpenDirectSearchConfigure: () -> Unit = {},
-    onOverlayDismissRequest: (() -> Unit)? = null,
-    onShowToast: (Int) -> Unit = {},
-    viewModel: SearchViewModel = viewModel(),
-    onWelcomeAnimationCompleted: (() -> Unit)? = null,
-    onWallpaperLoaded: (() -> Unit)? = null,
-    isOverlayPresentation: Boolean = false,
-    overlaySnackbarHostState: SnackbarHostState? = null,
-    onOverlayExpandRequest: (() -> Unit)? = null,
-    isOverlayExpanded: Boolean = false,
-    onOverlayNumberKeyboardUiChanged: ((Boolean, Boolean) -> Unit)? = null,
-    onOverlayScrollableContentChanged: ((Boolean) -> Unit)? = null,
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalContext.current
-
-    val nicknameUpdateVersion = uiState.nicknameUpdateVersion
-    val getAppNickname: (String) -> String? =
-        remember(nicknameUpdateVersion) {
-            { packageName -> viewModel.getAppNickname(packageName) }
-        }
-    val getContactNickname: (Long) -> String? =
-        remember(nicknameUpdateVersion) {
-            { contactId -> viewModel.getContactNickname(contactId) }
-        }
-    val getFileNickname: (String) -> String? =
-        remember(nicknameUpdateVersion) { { uri -> viewModel.getFileNickname(uri) } }
-    val getSettingNickname: (String) -> String? =
-        remember(nicknameUpdateVersion) { { id -> viewModel.getSettingNickname(id) } }
-    val getAppShortcutNickname: (String) -> String? =
-        remember(nicknameUpdateVersion) { { id -> viewModel.getAppShortcutNickname(id) } }
-
-    val snackbarHostState = remember { SnackbarHostState() }
-    val effectiveSnackbarHostState = overlaySnackbarHostState ?: snackbarHostState
-    val snackbarScope = rememberCoroutineScope()
-    val undoLabel = stringResource(R.string.action_undo)
-
-    val showUndoSnackbar: (String, () -> Unit) -> Unit = { message, onUndo ->
-        snackbarScope.launch {
-            val result =
-                effectiveSnackbarHostState.showSnackbar(
-                    message = message,
-                    actionLabel = undoLabel,
-                    duration = SnackbarDuration.Short,
-                )
-            if (result == SnackbarResult.ActionPerformed) {
-                onUndo()
-            }
-        }
-    }
-
-    val onHideAppWithUndo: (AppInfo) -> Unit = @Suppress("LocalContextGetResourceValueCall") { app ->
-        val isSearching = uiState.query.isNotBlank()
-        viewModel.hideApp(app)
-        val messageRes =
-            if (isSearching) {
-                R.string.toast_excluded_from_results
-            } else {
-                R.string.toast_excluded_from_suggestions
-            }
-        showUndoSnackbar(context.getString(messageRes, app.appName)) {
-            if (isSearching) {
-                viewModel.unhideAppFromResults(app)
-            } else {
-                viewModel.unhideAppFromSuggestions(app)
-            }
-        }
-    }
-
-    val onExcludeContactWithUndo: (ContactInfo) -> Unit = @Suppress("LocalContextGetResourceValueCall") { contact ->
-        viewModel.excludeContact(contact)
-        showUndoSnackbar(
-            context.getString(R.string.toast_excluded_from_results, contact.displayName),
-        ) {
-            viewModel.removeExcludedContact(contact)
-        }
-    }
-
-    val onExcludeFileWithUndo: (DeviceFile) -> Unit = @Suppress("LocalContextGetResourceValueCall") { file ->
-        viewModel.excludeFile(file)
-        showUndoSnackbar(
-            context.getString(R.string.toast_excluded_from_results, file.displayName),
-        ) {
-            viewModel.removeExcludedFile(file)
-        }
-    }
-
-    val onExcludeFileExtensionWithUndo: (DeviceFile) -> Unit = @Suppress("LocalContextGetResourceValueCall") { file ->
-        val extension = FileUtils.getFileExtension(file.displayName)
-        if (extension != null) {
-            viewModel.excludeFileExtension(file)
-            val extensionLabel = ".$extension files"
-            showUndoSnackbar(
-                context.getString(R.string.toast_excluded_from_results, extensionLabel),
-            ) {
-                viewModel.removeExcludedFileExtension(extension)
-            }
-        }
-    }
-
-    val onExcludeSettingWithUndo: (DeviceSetting) -> Unit = @Suppress("LocalContextGetResourceValueCall") { setting ->
-        viewModel.excludeSetting(setting)
-        showUndoSnackbar(
-            context.getString(R.string.toast_excluded_from_results, setting.title),
-        ) {
-            viewModel.removeExcludedSetting(setting)
-        }
-    }
-
-    val onExcludeAppShortcutWithUndo: (StaticShortcut) -> Unit = @Suppress("LocalContextGetResourceValueCall") { shortcut ->
-        viewModel.excludeAppShortcut(shortcut)
-        showUndoSnackbar(
-            context.getString(
-                R.string.toast_excluded_from_results,
-                shortcutDisplayName(shortcut),
-            ),
-        ) {
-            viewModel.removeExcludedAppShortcut(shortcut)
-        }
-    }
-
-    // Set up toast callback for ViewModel
-    val showToast: (Int) -> Unit = @Suppress("LocalContextGetResourceValueCall") { stringResId ->
-        android.widget.Toast
-            .makeText(
-                context,
-                context.getString(stringResId),
-                android.widget.Toast.LENGTH_SHORT,
-            ).show()
-    }
-
-    // UI feedback is now handled by UiFeedbackService in the ViewModel
-
-    // Wrapper function that calls directly - performCall will handle permission check and fallback
-    // to dialer
-    val callContactWithPermission: (ContactInfo) -> Unit = { contact ->
-        viewModel.callContact(contact)
-    }
-
-    val showContactMethodsBottomSheet: (ContactInfo) -> Unit = { contact ->
-        viewModel.trackRecentContactTap(contact)
-        viewModel.showContactMethodsBottomSheet(contact)
-    }
-
-    val dismissContactMethodsBottomSheet: () -> Unit = {
-        viewModel.dismissContactMethodsBottomSheet()
-    }
-
-    val callPermissionLauncher =
-        if (context is android.app.Activity) {
-            rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.RequestPermission(),
-            ) { isGranted -> viewModel.onCallPermissionResult(isGranted) }
-        } else {
-            null
-        }
-
-    DisposableEffect(lifecycleOwner) {
-        val observer =
-            LifecycleEventObserver { _, event ->
-                when (event) {
-                    Lifecycle.Event.ON_RESUME -> {
-                        viewModel.handleOnResume()
-                    }
-
-                    else -> {}
-                }
-            }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-
-    LaunchedEffect(uiState.pendingDirectCallNumber, uiState.pendingWhatsAppCallDataId) {
-        val pendingNumber = uiState.pendingDirectCallNumber
-        val pendingWhatsAppCall = uiState.pendingWhatsAppCallDataId
-
-        if (pendingNumber != null || pendingWhatsAppCall != null) {
-            if (context is android.app.Activity) {
-                callPermissionLauncher?.launch(Manifest.permission.CALL_PHONE)
-            } else {
-                viewModel.onCallPermissionResult(false)
-            }
-        }
-    }
-
-    val containerModifier =
-        if (isOverlayPresentation) {
-            modifier.fillMaxWidth()
-        } else {
-            modifier.fillMaxSize()
-        }
-
-    Box(modifier = containerModifier) {
-        SearchScreen(
-            modifier =
-                if (isOverlayPresentation) {
-                    Modifier.fillMaxWidth()
-                } else {
-                    Modifier.fillMaxSize()
-                },
-            state = uiState,
-            onQueryChanged = viewModel::onQueryChange,
-            onClearQuery = viewModel::clearQuery,
-            onRequestUsagePermission = { viewModel.openUsageAccessSettings() },
-            onSettingsClick = onSettingsClick,
-            onAppClick = { app -> viewModel.launchApp(app) },
-            onAppInfoClick = { app -> viewModel.openAppInfo(app) },
-            onUninstallClick = { app -> viewModel.requestUninstall(app) },
-            onHideApp = onHideAppWithUndo,
-            onPinApp = viewModel::pinApp,
-            onUnpinApp = viewModel::unpinApp,
-            onContactClick = viewModel::openContact,
-            onShowContactMethods = showContactMethodsBottomSheet,
-            onDismissContactMethods = dismissContactMethodsBottomSheet,
-            onCallContact = callContactWithPermission,
-            onSmsContact = viewModel::smsContact,
-            onContactMethodClick = viewModel::handleContactMethod,
-            onFileClick = { file -> viewModel.openFile(file) },
-            onOpenFolder = { file -> viewModel.openContainingFolder(file) },
-            onPinContact = viewModel::pinContact,
-            onUnpinContact = viewModel::unpinContact,
-            onExcludeContact = onExcludeContactWithUndo,
-            onPinFile = viewModel::pinFile,
-            onUnpinFile = viewModel::unpinFile,
-            onExcludeFile = onExcludeFileWithUndo,
-            onExcludeFileExtension = onExcludeFileExtensionWithUndo,
-            onSettingClick = { setting -> viewModel.openSetting(setting) },
-            onPinSetting = viewModel::pinSetting,
-            onUnpinSetting = viewModel::unpinSetting,
-            onExcludeSetting = onExcludeSettingWithUndo,
-            onAppShortcutClick = { shortcut -> viewModel.launchAppShortcut(shortcut) },
-            onPinAppShortcut = viewModel::pinAppShortcut,
-            onUnpinAppShortcut = viewModel::unpinAppShortcut,
-            onExcludeAppShortcut = onExcludeAppShortcutWithUndo,
-            onIncludeAppShortcut = viewModel::removeExcludedAppShortcut,
-            onAppShortcutAppInfoClick = { shortcut -> viewModel.openAppInfo(shortcut.packageName) },
-            onPhoneNumberSelected = viewModel::onPhoneNumberSelected,
-            onDismissPhoneNumberSelection = viewModel::dismissPhoneNumberSelection,
-            onSearchTargetClick = { query, target -> viewModel.openSearchTarget(query, target) },
-            onSearchEngineLongPress = onSearchEngineLongPress,
-            onDirectSearchEmailClick = { email -> viewModel.openEmail(email) },
-            onSetPersonalContext = viewModel::setPersonalContext,
-            onSetGeminiModel = viewModel::setGeminiModel,
-            onSetGeminiGroundingEnabled = viewModel::setGeminiGroundingEnabled,
-            onRefreshAvailableGeminiModels = viewModel::refreshAvailableGeminiModels,
-            onOpenAppSettings = { viewModel.openAppSettings() },
-            onOpenStorageAccessSettings = { viewModel.openAllFilesAccessSettings() },
-            onAppNicknameClick = { app ->
-                // This will be handled by the dialog state in SearchScreen
-            },
-            onClearDetectedShortcut = viewModel::clearDetectedShortcut,
-            onContactNicknameClick = { contact ->
-                // This will be handled by the dialog state in SearchScreen
-            },
-            onFileNicknameClick = { file ->
-                // This will be handled by the dialog state in SearchScreen
-            },
-            getAppNickname = getAppNickname,
-            getContactNickname = getContactNickname,
-            getFileNickname = getFileNickname,
-            getAppShortcutNickname = getAppShortcutNickname,
-            onSaveAppNickname = viewModel::setAppNickname,
-            onSaveAppShortcutNickname = viewModel::setAppShortcutNickname,
-            onSaveContactNickname = viewModel::setContactNickname,
-            onSaveFileNickname = viewModel::setFileNickname,
-            getSettingNickname = getSettingNickname,
-            onSaveSettingNickname = viewModel::setSettingNickname,
-            getLastShownPhoneNumber = viewModel::getLastShownPhoneNumber,
-            setLastShownPhoneNumber = viewModel::setLastShownPhoneNumber,
-            onDirectDialChoiceSelected = viewModel::onDirectDialChoiceSelected,
-            onDismissDirectDialChoice = viewModel::dismissDirectDialChoice,
-            onReleaseNotesAcknowledged = viewModel::acknowledgeReleaseNotes,
-            onWebSuggestionClick = { suggestion: String ->
-                viewModel.onWebSuggestionTap(suggestion)
-            },
-            onSearchEngineOnboardingDismissed = viewModel::onSearchEngineOnboardingDismissed,
-            onContactActionHintDismissed = viewModel::onContactActionHintDismissed,
-            onPersonalContextHintDismissed = viewModel::onPersonalContextHintDismissed,
-            onCustomizeSearchEnginesClick = onCustomizeSearchEnginesClick,
-            onOpenDirectSearchConfigure = onOpenDirectSearchConfigure,
-            onDeleteRecentItem = viewModel::deleteRecentItem,
-            onOpenSearchHistorySettings = onOpenSearchHistorySettings,
-            onDismissSearchHistoryTip = viewModel::dismissSearchHistoryTip,
-            onWelcomeAnimationCompleted = onWelcomeAnimationCompleted,
-            onCustomAction = viewModel::onCustomAction,
-            getPrimaryContactCardAction = viewModel::getPrimaryContactCardAction,
-            getSecondaryContactCardAction = viewModel::getSecondaryContactCardAction,
-            onSavePrimaryContactCardAction = viewModel::setPrimaryContactCardAction,
-            onSaveSecondaryContactCardAction = viewModel::setSecondaryContactCardAction,
-            onWallpaperLoaded = onWallpaperLoaded,
-            isOverlayPresentation = isOverlayPresentation,
-            onOverlayExpandRequest = onOverlayExpandRequest,
-            isOverlayExpanded = isOverlayExpanded,
-            onOverlayNumberKeyboardUiChanged = onOverlayNumberKeyboardUiChanged,
-            onOverlayScrollableContentChanged = onOverlayScrollableContentChanged,
-        )
-
-        if (overlaySnackbarHostState == null) {
-            ExcludeUndoSnackbarHost(
-                hostState = snackbarHostState,
-                modifier =
-                    Modifier
-                        .align(Alignment.BottomCenter)
-                        .imePadding()
-                        .padding(
-                            start = DesignTokens.SpacingLarge,
-                            end = DesignTokens.SpacingLarge,
-                            bottom = DesignTokens.SpacingHuge,
-                        ),
-            )
-        }
-    }
-}
-
-data class ContactActionPickerDialogState(
-    val contact: ContactInfo,
-    val isPrimary: Boolean,
-    val currentAction: com.tk.quicksearch.search.contacts.models.ContactCardAction?,
-)
+// Import the extracted components
+import com.tk.quicksearch.search.searchScreen.SearchRoute
+import com.tk.quicksearch.search.searchScreen.SearchScreenStateManagement
+import com.tk.quicksearch.search.searchScreen.SearchScreenDialogLogic
 
 @Composable
 fun SearchScreen(
@@ -555,322 +123,96 @@ fun SearchScreen(
     onOverlayNumberKeyboardUiChanged: ((Boolean, Boolean) -> Unit)? = null,
     onOverlayScrollableContentChanged: ((Boolean) -> Unit)? = null,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val context = LocalContext.current
     val directAnswerContactName = stringResource(R.string.direct_answer_contact_name)
 
-    val sourceWallpaperBitmap by
-        produceState<ImageBitmap?>(
-            initialValue = null,
-            key1 = state.backgroundSource,
-            key2 = state.hasWallpaperPermission,
-        ) {
-            value =
-                if (state.backgroundSource == BackgroundSource.SYSTEM_WALLPAPER) {
-                    WallpaperUtils.getCachedWallpaperBitmap()?.asImageBitmap()
-                        ?: when (val result = WallpaperUtils.getWallpaperBitmapResult(context)) {
-                            is WallpaperUtils.WallpaperLoadResult.Success -> {
-                                if (!isOverlayPresentation) {
-                                    onWallpaperLoaded?.invoke()
-                                }
-                                result.bitmap.asImageBitmap()
-                            }
-
-                            else -> {
-                                null
-                            }
-                        }
-                } else {
-                    null
-                }
-        }
-    val sourceCustomBitmap by
-        produceState<ImageBitmap?>(
-            initialValue = null,
-            key1 = state.backgroundSource,
-            key2 = state.customImageUri,
-        ) {
-            value =
-                if (state.backgroundSource == BackgroundSource.CUSTOM_IMAGE) {
-                    WallpaperUtils.getOverlayCustomImageBitmap(context, state.customImageUri)
-                } else {
-                    null
-                }
-        }
-    val imageBitmap =
-        when (state.backgroundSource) {
-            BackgroundSource.SYSTEM_WALLPAPER -> sourceWallpaperBitmap
-            BackgroundSource.CUSTOM_IMAGE -> sourceCustomBitmap
-            BackgroundSource.THEME -> null
-        }
-    val useImageBackground =
-        state.backgroundSource != BackgroundSource.THEME && imageBitmap != null
-    val useMonoThemeFallback =
-        !isOverlayPresentation &&
-            state.backgroundSource == BackgroundSource.SYSTEM_WALLPAPER &&
-            imageBitmap == null
-
-    val derivedState = rememberDerivedState(state)
-
-    fun getDefaultContactAction(
-        contact: ContactInfo,
-        isPrimary: Boolean,
-    ): ContactCardAction? {
-        val currentAction =
-            if (isPrimary) {
-                getPrimaryContactCardAction(contact.contactId)
-            } else {
-                getSecondaryContactCardAction(contact.contactId)
-            }
-        if (currentAction != null) return currentAction
-
-        val phoneNumber = contact.phoneNumbers.firstOrNull() ?: return null
-        return if (isPrimary) {
-            when (
-                ContactCallingAppResolver.resolveCallingAppForContact(
-                    contactInfo = contact,
-                    defaultApp = state.callingApp,
-                )
-            ) {
-                CallingApp.CALL -> ContactCardAction.Phone(phoneNumber)
-                CallingApp.WHATSAPP -> ContactCardAction.WhatsAppCall(phoneNumber)
-                CallingApp.TELEGRAM -> ContactCardAction.TelegramCall(phoneNumber)
-                CallingApp.SIGNAL -> ContactCardAction.SignalCall(phoneNumber)
-                CallingApp.GOOGLE_MEET -> ContactCardAction.GoogleMeet(phoneNumber)
-            }
-        } else {
-            when (
-                ContactMessagingAppResolver.resolveMessagingAppForContact(
-                    contactInfo = contact,
-                    defaultApp = state.messagingApp,
-                )
-            ) {
-                MessagingApp.MESSAGES -> ContactCardAction.Sms(phoneNumber)
-                MessagingApp.WHATSAPP -> ContactCardAction.WhatsAppMessage(phoneNumber)
-                MessagingApp.TELEGRAM -> ContactCardAction.TelegramMessage(phoneNumber)
-                MessagingApp.SIGNAL -> ContactCardAction.SignalMessage(phoneNumber)
-            }
-        }
-    }
-
-    // Section expansion state
-    var expandedSection by remember { mutableStateOf<ExpandedSection>(ExpandedSection.NONE) }
-    val scrollState = rememberScrollState()
-    val showDirectSearch = state.DirectSearchState.status != DirectSearchStatus.Idle
-    val alignResultsToBottom =
-        state.oneHandedMode && expandedSection == ExpandedSection.NONE && !showDirectSearch
-
-    // Nickname dialog state
-    var nicknameDialogState by remember { mutableStateOf<NicknameDialogState?>(null) }
-
-    // Contact Action Picker state
-    var contactActionPickerDialogState by remember {
-        mutableStateOf<ContactActionPickerDialogState?>(null)
-    }
-    val contactActionRequest = state.contactActionPickerRequest
-    LaunchedEffect(contactActionRequest) {
-        contactActionRequest?.let { request ->
-            contactActionPickerDialogState =
-                ContactActionPickerDialogState(
-                    contact = request.contactInfo,
-                    isPrimary = request.isPrimary,
-                    currentAction = request.currentAction,
-                )
-            onConsumeContactActionRequest()
-        }
-    }
-
-    // Keyboard switching state
-    var manuallySwitchedToNumberKeyboard by remember { mutableStateOf(false) }
-
-    var showPersonalContextDialog by remember { mutableStateOf(false) }
-    var showGeminiModelDialog by remember { mutableStateOf(false) }
-    var personalContextInput by remember {
-        mutableStateOf(
-            TextFieldValue(
-                text = state.personalContext,
-                selection = TextRange(state.personalContext.length),
-            ),
-        )
-    }
-    val personalContextFocusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(showPersonalContextDialog) {
-        if (showPersonalContextDialog) {
-            delay(100)
-            personalContextInput =
-                personalContextInput.copy(
-                    selection = TextRange(personalContextInput.text.length),
-                )
-            personalContextFocusRequester.requestFocus()
-            keyboardController?.show()
-        }
-    }
-
-    // Reset expansion when query changes
-    LaunchedEffect(state.query) { expandedSection = ExpandedSection.NONE }
-
-    LaunchedEffect(isOverlayPresentation, onOverlayScrollableContentChanged, scrollState) {
-        if (!isOverlayPresentation) return@LaunchedEffect
-
-        onOverlayScrollableContentChanged?.invoke(scrollState.maxValue > 0)
-        snapshotFlow { scrollState.maxValue > 0 }
-            .distinctUntilChanged()
-            .collect { isScrollable ->
-                onOverlayScrollableContentChanged?.invoke(isScrollable)
-            }
-    }
-
-    val openPersonalContextDialog = {
-        personalContextInput =
-            TextFieldValue(
-                text = state.personalContext,
-                selection = TextRange(state.personalContext.length),
-            )
-        showPersonalContextDialog = true
-    }
-
-    // Handle back button when section is expanded
-    BackHandler(enabled = expandedSection != ExpandedSection.NONE) {
-        keyboardController?.show()
-        expandedSection = ExpandedSection.NONE
-    }
-
-    // Handle scroll behavior for one-handed mode
-    OneHandedModeScrollBehavior(
-        scrollState = scrollState,
-        expandedSection = expandedSection,
-        oneHandedMode = state.oneHandedMode,
-        query = state.query,
-        displayAppsSize = derivedState.displayApps.size,
-        contactResultsSize = state.contactResults.size,
-        appShortcutResultsSize = state.appShortcutResults.size,
-        fileResultsSize = state.fileResults.size,
-        pinnedContactsSize = state.pinnedContacts.size,
-        pinnedAppShortcutsSize = state.pinnedAppShortcuts.size,
-        pinnedFilesSize = state.pinnedFiles.size,
-        settingResultsSize = state.settingResults.size,
-        pinnedSettingsSize = state.pinnedSettings.size,
-        hasUsagePermission = state.hasUsagePermission,
-        errorMessage = state.errorMessage,
-        reverseScrolling = alignResultsToBottom,
+    val stateResult = SearchScreenStateManagement(
+        state = state,
+        onQueryChanged = onQueryChanged,
+        onClearQuery = onClearQuery,
+        onSettingsClick = onSettingsClick,
+        onRequestUsagePermission = onRequestUsagePermission,
+        onAppClick = onAppClick,
+        onAppInfoClick = onAppInfoClick,
+        onUninstallClick = onUninstallClick,
+        onHideApp = onHideApp,
+        onPinApp = onPinApp,
+        onUnpinApp = onUnpinApp,
+        onContactClick = onContactClick,
+        onShowContactMethods = onShowContactMethods,
+        onDismissContactMethods = onDismissContactMethods,
+        onCallContact = onCallContact,
+        onSmsContact = onSmsContact,
+        onContactMethodClick = onContactMethodClick,
+        onFileClick = onFileClick,
+        onOpenFolder = onOpenFolder,
+        onPinContact = onPinContact,
+        onUnpinContact = onUnpinContact,
+        onExcludeContact = onExcludeContact,
+        onPinFile = onPinFile,
+        onUnpinFile = onUnpinFile,
+        onExcludeFile = onExcludeFile,
+        onExcludeFileExtension = onExcludeFileExtension,
+        onSettingClick = onSettingClick,
+        onPinSetting = onPinSetting,
+        onUnpinSetting = onUnpinSetting,
+        onExcludeSetting = onExcludeSetting,
+        onAppShortcutClick = onAppShortcutClick,
+        onPinAppShortcut = onPinAppShortcut,
+        onUnpinAppShortcut = onUnpinAppShortcut,
+        onExcludeAppShortcut = onExcludeAppShortcut,
+        onIncludeAppShortcut = onIncludeAppShortcut,
+        onAppShortcutAppInfoClick = onAppShortcutAppInfoClick,
+        onSearchTargetClick = onSearchTargetClick,
+        onSearchEngineLongPress = onSearchEngineLongPress,
+        onDirectSearchEmailClick = onDirectSearchEmailClick,
+        onSetPersonalContext = onSetPersonalContext,
+        onSetGeminiModel = onSetGeminiModel,
+        onSetGeminiGroundingEnabled = onSetGeminiGroundingEnabled,
+        onRefreshAvailableGeminiModels = onRefreshAvailableGeminiModels,
+        onOpenAppSettings = onOpenAppSettings,
+        onOpenStorageAccessSettings = onOpenStorageAccessSettings,
+        onAppNicknameClick = onAppNicknameClick,
+        onClearDetectedShortcut = onClearDetectedShortcut,
+        onContactNicknameClick = onContactNicknameClick,
+        onFileNicknameClick = onFileNicknameClick,
+        getAppNickname = getAppNickname,
+        getContactNickname = getContactNickname,
+        getFileNickname = getFileNickname,
+        getAppShortcutNickname = getAppShortcutNickname,
+        onSaveAppNickname = onSaveAppNickname,
+        onSaveAppShortcutNickname = onSaveAppShortcutNickname,
+        onSaveContactNickname = onSaveContactNickname,
+        onSaveFileNickname = onSaveFileNickname,
+        getSettingNickname = getSettingNickname,
+        onSaveSettingNickname = onSaveSettingNickname,
+        getLastShownPhoneNumber = getLastShownPhoneNumber,
+        setLastShownPhoneNumber = setLastShownPhoneNumber,
+        onDirectDialChoiceSelected = onDirectDialChoiceSelected,
+        onDismissDirectDialChoice = onDismissDirectDialChoice,
+        onReleaseNotesAcknowledged = onReleaseNotesAcknowledged,
+        onWebSuggestionClick = onWebSuggestionClick,
+        onSearchEngineOnboardingDismissed = onSearchEngineOnboardingDismissed,
+        onContactActionHintDismissed = onContactActionHintDismissed,
+        onPersonalContextHintDismissed = onPersonalContextHintDismissed,
+        onCustomizeSearchEnginesClick = onCustomizeSearchEnginesClick,
+        onOpenDirectSearchConfigure = onOpenDirectSearchConfigure,
+        onDeleteRecentItem = onDeleteRecentItem,
+        onOpenSearchHistorySettings = onOpenSearchHistorySettings,
+        onDismissSearchHistoryTip = onDismissSearchHistoryTip,
+        onWelcomeAnimationCompleted = onWelcomeAnimationCompleted,
+        onWallpaperLoaded = onWallpaperLoaded,
+        onCustomAction = onCustomAction,
+        getPrimaryContactCardAction = getPrimaryContactCardAction,
+        getSecondaryContactCardAction = getSecondaryContactCardAction,
+        onSavePrimaryContactCardAction = onSavePrimaryContactCardAction,
+        onSaveSecondaryContactCardAction = onSaveSecondaryContactCardAction,
+        isOverlayPresentation = isOverlayPresentation,
+        onOverlayExpandRequest = onOverlayExpandRequest,
+        isOverlayExpanded = isOverlayExpanded,
+        onOverlayNumberKeyboardUiChanged = onOverlayNumberKeyboardUiChanged,
+        onOverlayScrollableContentChanged = onOverlayScrollableContentChanged,
+        onConsumeContactActionRequest = onConsumeContactActionRequest,
     )
-
-    // Handle keyboard visibility based on scroll position when overlay mode is off
-    ScrollBasedKeyboardBehavior(
-        scrollState = scrollState,
-        overlayModeEnabled = state.overlayModeEnabled,
-        oneHandedMode = state.oneHandedMode,
-        reverseScrolling = alignResultsToBottom,
-    )
-
-    val effectiveStateForCards = state.copy(showWallpaperBackground = useImageBackground)
-
-    val sectionParams =
-        buildSectionParams(
-            state = effectiveStateForCards,
-            derivedState = derivedState,
-            isOverlayPresentation = isOverlayPresentation,
-            onFileClick = onFileClick,
-            onOpenFolder = onOpenFolder,
-            onPinFile = onPinFile,
-            onUnpinFile = onUnpinFile,
-            onExcludeFile = onExcludeFile,
-            onExcludeFileExtension = onExcludeFileExtension,
-            onOpenStorageAccessSettings = onOpenStorageAccessSettings,
-            onSettingClick = onSettingClick,
-            onPinSetting = onPinSetting,
-            onUnpinSetting = onUnpinSetting,
-            onExcludeSetting = onExcludeSetting,
-            onAppShortcutClick = onAppShortcutClick,
-            onPinAppShortcut = onPinAppShortcut,
-            onUnpinAppShortcut = onUnpinAppShortcut,
-            onExcludeAppShortcut = onExcludeAppShortcut,
-            onIncludeAppShortcut = onIncludeAppShortcut,
-            onAppShortcutAppInfoClick = onAppShortcutAppInfoClick,
-            onContactClick = onContactClick,
-            onShowContactMethods = onShowContactMethods,
-            onCallContact = onCallContact,
-            onSmsContact = onSmsContact,
-            onContactMethodClick = onContactMethodClick,
-            onPinContact = onPinContact,
-            onUnpinContact = onUnpinContact,
-            onExcludeContact = onExcludeContact,
-            onOpenAppSettings = onOpenAppSettings,
-            onAppClick = onAppClick,
-            onAppInfoClick = onAppInfoClick,
-            onUninstallClick = onUninstallClick,
-            onHideApp = onHideApp,
-            onPinApp = onPinApp,
-            onUnpinApp = onUnpinApp,
-            getFileNickname = getFileNickname,
-            getContactNickname = getContactNickname,
-            getSettingNickname = getSettingNickname,
-            getAppNickname = getAppNickname,
-            getAppShortcutNickname = getAppShortcutNickname,
-            onPrimaryActionLongPress = { contact ->
-                contactActionPickerDialogState =
-                    ContactActionPickerDialogState(
-                        contact,
-                        true,
-                        getDefaultContactAction(contact, true),
-                    )
-            },
-            onSecondaryActionLongPress = { contact ->
-                contactActionPickerDialogState =
-                    ContactActionPickerDialogState(
-                        contact,
-                        false,
-                        getDefaultContactAction(contact, false),
-                    )
-            },
-            onCustomAction = onCustomAction,
-            getPrimaryContactCardAction = getPrimaryContactCardAction,
-            getSecondaryContactCardAction = getSecondaryContactCardAction,
-            onContactActionHintDismissed = onContactActionHintDismissed,
-            onUpdateNicknameDialogState = { newState -> nicknameDialogState = newState },
-            onUpdateExpandedSection = { newSection ->
-                expandedSection = newSection
-                if (newSection == ExpandedSection.NONE) {
-                    keyboardController?.show()
-                } else {
-                    keyboardController?.hide()
-                }
-            },
-            expandedSection = expandedSection,
-        )
-
-    val renderingState =
-        SectionRenderingState(
-            isSearching = derivedState.isSearching,
-            expandedSection = expandedSection,
-            hasAppResults = derivedState.hasAppResults,
-            hasAppShortcutResults = derivedState.hasAppShortcutResults,
-            hasContactResults = derivedState.hasContactResults,
-            hasFileResults = derivedState.hasFileResults,
-            hasSettingResults = derivedState.hasSettingResults,
-            hasPinnedAppShortcuts = derivedState.hasPinnedAppShortcuts,
-            hasPinnedContacts = derivedState.hasPinnedContacts,
-            hasPinnedFiles = derivedState.hasPinnedFiles,
-            hasPinnedSettings = derivedState.hasPinnedSettings,
-            shouldShowApps = derivedState.shouldShowApps,
-            shouldShowAppShortcuts = derivedState.shouldShowAppShortcuts,
-            shouldShowContacts = derivedState.shouldShowContacts,
-            shouldShowFiles = derivedState.shouldShowFiles,
-            shouldShowSettings = derivedState.shouldShowSettings,
-            hasMultipleExpandableSections = derivedState.hasMultipleExpandableSections,
-            displayApps = derivedState.displayApps,
-            appShortcutResults = state.appShortcutResults,
-            contactResults = state.contactResults,
-            fileResults = state.fileResults,
-            settingResults = state.settingResults,
-            pinnedAppShortcuts = state.pinnedAppShortcuts,
-            pinnedContacts = state.pinnedContacts,
-            pinnedFiles = state.pinnedFiles,
-            pinnedSettings = state.pinnedSettings,
-            orderedSections = derivedState.orderedSections,
-            shortcutDetected = state.detectedShortcutTarget != null,
-        )
 
     val screenModifier =
         if (isOverlayPresentation) {
@@ -882,20 +224,20 @@ fun SearchScreen(
     Box(modifier = screenModifier) {
         if (!isOverlayPresentation) {
             SearchScreenBackground(
-                showWallpaperBackground = useImageBackground,
-                wallpaperBitmap = imageBitmap,
+                showWallpaperBackground = stateResult.useImageBackground,
+                wallpaperBitmap = stateResult.imageBitmap,
                 wallpaperBackgroundAlpha = state.wallpaperBackgroundAlpha,
                 wallpaperBlurRadius = state.wallpaperBlurRadius,
                 fallbackBackgroundAlpha =
-                    if (state.backgroundSource == BackgroundSource.THEME || useMonoThemeFallback) {
+                    if (state.backgroundSource == com.tk.quicksearch.search.core.BackgroundSource.THEME || stateResult.useMonoThemeFallback) {
                         0.6f
                     } else {
                         1f
                     },
                 useGradientFallback =
-                    state.backgroundSource == BackgroundSource.THEME || useMonoThemeFallback,
+                    state.backgroundSource == com.tk.quicksearch.search.core.BackgroundSource.THEME || stateResult.useMonoThemeFallback,
                 overlayGradientTheme =
-                    if (useMonoThemeFallback) {
+                    if (stateResult.useMonoThemeFallback) {
                         OverlayGradientTheme.MONOCHROME
                     } else {
                         state.overlayGradientTheme
@@ -912,13 +254,13 @@ fun SearchScreen(
                 } else {
                     Modifier.fillMaxSize()
                 },
-            state = effectiveStateForCards,
-            renderingState = renderingState,
-            contactsParams = sectionParams.contactsParams,
-            filesParams = sectionParams.filesParams,
-            appShortcutsParams = sectionParams.appShortcutsParams,
-            settingsParams = sectionParams.settingsParams,
-            appsParams = sectionParams.appsParams,
+            state = stateResult.effectiveStateForCards,
+            renderingState = stateResult.renderingState,
+            contactsParams = stateResult.sectionParams.contactsParams,
+            filesParams = stateResult.sectionParams.filesParams,
+            appShortcutsParams = stateResult.sectionParams.appShortcutsParams,
+            settingsParams = stateResult.sectionParams.settingsParams,
+            appsParams = stateResult.sectionParams.appsParams,
             onQueryChanged = onQueryChanged,
             onClearQuery = onClearQuery,
             onSettingsClick = onSettingsClick,
@@ -927,7 +269,7 @@ fun SearchScreen(
             onSearchTargetClick = onSearchTargetClick,
             onSearchEngineLongPress = onSearchEngineLongPress,
             onDirectSearchEmailClick = onDirectSearchEmailClick,
-            onOpenPersonalContextDialog = openPersonalContextDialog,
+            onOpenPersonalContextDialog = stateResult.openPersonalContextDialog,
             onPersonalContextHintDismissed = onPersonalContextHintDismissed,
             onWelcomeAnimationCompleted = onWelcomeAnimationCompleted,
             onPhoneNumberClick = { phoneNumber ->
@@ -947,16 +289,16 @@ fun SearchScreen(
             onDeleteRecentItem = onDeleteRecentItem,
             onOpenSearchHistorySettings = onOpenSearchHistorySettings,
             onDismissSearchHistoryTip = onDismissSearchHistoryTip,
-            onGeminiModelInfoClick = { showGeminiModelDialog = true },
+            onGeminiModelInfoClick = { stateResult.setShowGeminiModelDialog(true) },
             onKeyboardSwitchToggle = {
-                manuallySwitchedToNumberKeyboard = !manuallySwitchedToNumberKeyboard
+                stateResult.setManuallySwitchedToNumberKeyboard(!stateResult.manuallySwitchedToNumberKeyboard)
             },
             onOverlayNumberKeyboardUiChanged = onOverlayNumberKeyboardUiChanged,
             onOverlayExpandRequest = { onOverlayExpandRequest?.invoke() },
             isOverlayExpanded = isOverlayExpanded,
-            expandedSection = expandedSection,
-            manuallySwitchedToNumberKeyboard = manuallySwitchedToNumberKeyboard,
-            scrollState = scrollState,
+            expandedSection = stateResult.expandedSection,
+            manuallySwitchedToNumberKeyboard = stateResult.manuallySwitchedToNumberKeyboard,
+            scrollState = stateResult.scrollState,
             onClearDetectedShortcut = onClearDetectedShortcut,
             isOverlayPresentation = isOverlayPresentation,
             showSearchField = !(isOverlayPresentation && state.bottomSearchBarEnabled),
@@ -971,79 +313,11 @@ fun SearchScreen(
         )
     }
 
-    if (showPersonalContextDialog) {
-        AlertDialog(
-            onDismissRequest = { showPersonalContextDialog = false },
-            title = {
-                Text(text = stringResource(R.string.settings_direct_search_personal_context_title))
-            },
-            text = {
-                OutlinedTextField(
-                    value = personalContextInput,
-                    onValueChange = { personalContextInput = it },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 180.dp)
-                            .focusRequester(personalContextFocusRequester),
-                    placeholder = {
-                        Text(text = stringResource(R.string.settings_direct_search_personal_context_hint))
-                    },
-                    shape = MaterialTheme.shapes.large,
-                    singleLine = false,
-                    minLines = 5,
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val trimmed = personalContextInput.text.trim()
-                        onSetPersonalContext(trimmed.takeIf { it.isNotEmpty() })
-                        showPersonalContextDialog = false
-                    },
-                ) {
-                    Text(text = stringResource(R.string.dialog_save))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showPersonalContextDialog = false }) {
-                    Text(text = stringResource(R.string.dialog_cancel))
-                }
-            },
-        )
-    }
-
-    if (showGeminiModelDialog) {
-        val modelOptions = remember(state.geminiModel, state.availableGeminiModels) {
-            val allKnown = state.availableGeminiModels + GeminiModelCatalog.FALLBACK_TEXT_MODELS
-            val currentModel = allKnown.find { it.id == state.geminiModel }
-                ?: GeminiTextModel(state.geminiModel, state.geminiModel)
-            (state.availableGeminiModels + currentModel).distinctBy { it.id }
-                .sortedBy { it.displayName.lowercase() }
-        }
-        GeminiModelPickerDialog(
-            selectedModelId = state.geminiModel,
-            models = modelOptions,
-            groundingEnabled = state.geminiGroundingEnabled,
-            onGroundingChange = onSetGeminiGroundingEnabled,
-            onModelSelected = { modelId ->
-                onSetGeminiModel(modelId)
-                val newModel = modelOptions.firstOrNull { it.id == modelId }
-                if (newModel?.supportsGrounding == false && state.geminiGroundingEnabled) {
-                    onSetGeminiGroundingEnabled(false)
-                }
-            },
-            onDismiss = {
-                showGeminiModelDialog = false
-                onRefreshAvailableGeminiModels()
-            },
-        )
-    }
-
-    // All dialogs
-    SearchScreenDialogs(
+    // Dialogs
+    SearchScreenDialogLogic(
         state = state,
-        nicknameDialogState = nicknameDialogState,
+        nicknameDialogState = stateResult.nicknameDialogState,
+        contactActionPickerDialogState = stateResult.contactActionPickerDialogState,
         onPhoneNumberSelected = onPhoneNumberSelected,
         onDismissPhoneNumberSelection = onDismissPhoneNumberSelection,
         onDirectDialChoiceSelected = onDirectDialChoiceSelected,
@@ -1051,47 +325,42 @@ fun SearchScreen(
         onContactMethodClick = onContactMethodClick,
         onDismissContactMethods = onDismissContactMethods,
         onReleaseNotesAcknowledged = onReleaseNotesAcknowledged,
-        onDismissNicknameDialog = { nicknameDialogState = null },
+        onDismissNicknameDialog = { stateResult.setNicknameDialogState(null) },
         onSaveAppNickname = { app, nickname ->
             onSaveAppNickname(app, nickname)
-            nicknameDialogState = null
+            stateResult.setNicknameDialogState(null)
         },
         onSaveAppShortcutNickname = { shortcut, nickname ->
             onSaveAppShortcutNickname(shortcut, nickname)
-            nicknameDialogState = null
+            stateResult.setNicknameDialogState(null)
         },
         onSaveContactNickname = { contact, nickname ->
             onSaveContactNickname(contact, nickname)
-            nicknameDialogState = null
+            stateResult.setNicknameDialogState(null)
         },
         onSaveFileNickname = { file, nickname ->
             onSaveFileNickname(file, nickname)
-            nicknameDialogState = null
+            stateResult.setNicknameDialogState(null)
         },
         onSaveSettingNickname = { setting, nickname ->
             onSaveSettingNickname(setting, nickname)
-            nicknameDialogState = null
+            stateResult.setNicknameDialogState(null)
         },
         getLastShownPhoneNumber = getLastShownPhoneNumber,
         setLastShownPhoneNumber = setLastShownPhoneNumber,
+        onSetPersonalContext = onSetPersonalContext,
+        onSetGeminiModel = onSetGeminiModel,
+        onSetGeminiGroundingEnabled = onSetGeminiGroundingEnabled,
+        onRefreshAvailableGeminiModels = onRefreshAvailableGeminiModels,
+        showPersonalContextDialog = stateResult.showPersonalContextDialog,
+        setShowPersonalContextDialog = stateResult.setShowPersonalContextDialog,
+        showGeminiModelDialog = stateResult.showGeminiModelDialog,
+        setShowGeminiModelDialog = stateResult.setShowGeminiModelDialog,
+        personalContextInput = stateResult.personalContextInput,
+        setPersonalContextInput = stateResult.setPersonalContextInput,
+        getPrimaryContactCardAction = getPrimaryContactCardAction,
+        getSecondaryContactCardAction = getSecondaryContactCardAction,
+        onSavePrimaryContactCardAction = onSavePrimaryContactCardAction,
+        onSaveSecondaryContactCardAction = onSaveSecondaryContactCardAction,
     )
-
-    // Render Contact Action Picker Dialog
-    contactActionPickerDialogState?.let { pickerState ->
-        ContactActionPickerDialog(
-            contactInfo = pickerState.contact,
-            currentAction = pickerState.currentAction,
-            onActionSelected = { action ->
-                if (pickerState.isPrimary) {
-                    onSavePrimaryContactCardAction(pickerState.contact.contactId, action)
-                } else {
-                    onSaveSecondaryContactCardAction(pickerState.contact.contactId, action)
-                }
-                contactActionPickerDialogState = null
-            },
-            onDismiss = { contactActionPickerDialogState = null },
-            getLastShownPhoneNumber = getLastShownPhoneNumber,
-            setLastShownPhoneNumber = setLastShownPhoneNumber,
-        )
-    }
 }

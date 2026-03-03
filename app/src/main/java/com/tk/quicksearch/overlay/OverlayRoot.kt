@@ -337,7 +337,7 @@ fun OverlayRoot(
                                                         viewModel.onSearchBarWelcomeAnimationCompleted()
                                                 },
                                                 onOverlayNumberKeyboardUiChanged =
-                                                        { isNumberKeyboardSelected, isImeOpen ->
+                                                        { isNumberKeyboardSelected: Boolean, isImeOpen: Boolean ->
                                                                 overlayNumberKeyboardSelected =
                                                                         isNumberKeyboardSelected
                                                                 overlayImeVisible = isImeOpen
