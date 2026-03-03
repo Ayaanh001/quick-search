@@ -3,6 +3,7 @@ package com.tk.quicksearch.search.searchScreen
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import com.tk.quicksearch.search.core.OverlayGradientTheme
+import com.tk.quicksearch.shared.ui.theme.AppColors
 
 private const val NEUTRAL_OVERLAY_THEME_INTENSITY = 0.5f
 private const val MAX_OVERLAY_THEME_TONE_SHIFT = 0.38f
@@ -17,64 +18,24 @@ internal fun overlayGradientColors(
         if (isDarkMode) {
             when (theme) {
                 OverlayGradientTheme.FOREST ->
-                    listOf(
-                        Color(0xFF27382F),
-                        Color(0xFF2F4640),
-                        Color(0xFF435034),
-                        Color(0xFF1F3340),
-                    )
+                    AppColors.OverlayForestDarkPalette
                 OverlayGradientTheme.AURORA ->
-                    listOf(
-                        Color(0xFF1F2E4A),
-                        Color(0xFF1F4A5A),
-                        Color(0xFF3A3E6B),
-                        Color(0xFF2A3150),
-                    )
+                    AppColors.OverlayAuroraDarkPalette
                 OverlayGradientTheme.SUNSET ->
-                    listOf(
-                        Color(0xFF4A2C34),
-                        Color(0xFF5A3A2A),
-                        Color(0xFF5C3046),
-                        Color(0xFF3E2A3B),
-                    )
+                    AppColors.OverlaySunsetDarkPalette
                 OverlayGradientTheme.MONOCHROME ->
-                    listOf(
-                        Color(0xFF121212),
-                        Color(0xFF2A2A2A),
-                        Color(0xFF3E3E3E),
-                        Color(0xFFE8E8E8),
-                    )
+                    AppColors.OverlayMonochromeDarkPalette
             }
         } else {
             when (theme) {
                 OverlayGradientTheme.FOREST ->
-                    listOf(
-                        Color(0xFFE4ECE7),
-                        Color(0xFFE4ECE9),
-                        Color(0xFFEBEEE2),
-                        Color(0xFFE0E9EC),
-                    )
+                    AppColors.OverlayForestLightPalette
                 OverlayGradientTheme.AURORA ->
-                    listOf(
-                        Color(0xFFDCE8F8),
-                        Color(0xFFD8F1F0),
-                        Color(0xFFE2E2FA),
-                        Color(0xFFDCE6F4),
-                    )
+                    AppColors.OverlayAuroraLightPalette
                 OverlayGradientTheme.SUNSET ->
-                    listOf(
-                        Color(0xFFF8E1D8),
-                        Color(0xFFF8E8D8),
-                        Color(0xFFF4DCE8),
-                        Color(0xFFF6E1DF),
-                    )
+                    AppColors.OverlaySunsetLightPalette
                 OverlayGradientTheme.MONOCHROME ->
-                    listOf(
-                        Color(0xFFF0F0F0),
-                        Color(0xFFE2E2E2),
-                        Color(0xFFD5D5D5),
-                        Color(0xFFBFBFBF),
-                    )
+                    AppColors.OverlayMonochromeLightPalette
             }
         }
 

@@ -42,6 +42,7 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.MessagingApp
 import com.tk.quicksearch.search.core.SearchViewModel
 import com.tk.quicksearch.search.models.FileType
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.settings.settingsDetailScreen.MessagingSection
 
 /** Gets the icon for a file type. */
@@ -80,7 +81,7 @@ fun FinalSetupScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .safeDrawingPadding()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = DesignTokens.OnboardingHorizontalPadding),
         horizontalAlignment = Alignment.Start,
     ) {
         OnboardingHeader(
@@ -89,19 +90,19 @@ fun FinalSetupScreen(
             totalSteps = totalSteps,
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(DesignTokens.OnboardingCompactSpacing))
 
         val scrollState = rememberScrollState()
 
         Column(
             modifier = Modifier.weight(1f).verticalScroll(scrollState),
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+            verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXXLarge),
         ) {
             if (hasContactsPermission) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingMedium),
                 ) {
                     MessagingSection(
                         messagingApp = uiState.messagingApp,
@@ -190,7 +191,7 @@ fun FinalSetupScreen(
                             ),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 12.dp),
+                        modifier = Modifier.padding(bottom = DesignTokens.SpacingMedium),
                     )
 
                     // Folders toggle
@@ -203,8 +204,8 @@ fun FinalSetupScreen(
                                 Modifier
                                     .fillMaxWidth()
                                     .padding(
-                                        horizontal = 16.dp,
-                                        vertical = 12.dp,
+                                        horizontal = DesignTokens.SpacingLarge,
+                                        vertical = DesignTokens.SpacingMedium,
                                     ),
                             horizontalArrangement =
                                 Arrangement.SpaceBetween,
@@ -216,7 +217,7 @@ fun FinalSetupScreen(
                                 verticalAlignment =
                                     Alignment.CenterVertically,
                                 horizontalArrangement =
-                                    Arrangement.spacedBy(12.dp),
+                                    Arrangement.spacedBy(DesignTokens.SpacingMedium),
                             ) {
                                 Icon(
                                     imageVector =
@@ -228,7 +229,7 @@ fun FinalSetupScreen(
                                             .colorScheme
                                             .onSurfaceVariant,
                                     modifier =
-                                        Modifier.size(24.dp),
+                                        Modifier.size(DesignTokens.IconSize),
                                 )
                                 Text(
                                     text =
@@ -257,7 +258,7 @@ fun FinalSetupScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(DesignTokens.SpacingMedium))
 
                     ElevatedCard(
                         modifier = Modifier.fillMaxWidth(),
@@ -274,9 +275,9 @@ fun FinalSetupScreen(
                                             .fillMaxWidth()
                                             .padding(
                                                 horizontal =
-                                                    16.dp,
+                                                    DesignTokens.SpacingLarge,
                                                 vertical =
-                                                    12.dp,
+                                                    DesignTokens.SpacingMedium,
                                             ),
                                     horizontalArrangement =
                                         Arrangement
@@ -296,7 +297,7 @@ fun FinalSetupScreen(
                                         horizontalArrangement =
                                             Arrangement
                                                 .spacedBy(
-                                                    12.dp,
+                                                    DesignTokens.SpacingMedium,
                                                 ),
                                     ) {
                                         Icon(
@@ -312,7 +313,7 @@ fun FinalSetupScreen(
                                                     .onSurfaceVariant,
                                             modifier =
                                                 Modifier.size(
-                                                    24.dp,
+                                                    DesignTokens.IconSize,
                                                 ),
                                         )
                                         Text(
@@ -398,16 +399,22 @@ fun FinalSetupScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(DesignTokens.OnboardingCompactSpacing))
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(DesignTokens.OnboardingSectionSpacing))
 
         Button(
             onClick = onContinue,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-            shape = RoundedCornerShape(24.dp),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(horizontal = DesignTokens.OnboardingButtonOuterHorizontalPadding),
+            shape = RoundedCornerShape(DesignTokens.OnboardingButtonCornerRadius),
+            contentPadding =
+                PaddingValues(
+                    horizontal = DesignTokens.OnboardingButtonHorizontalPadding,
+                    vertical = DesignTokens.OnboardingButtonVerticalPadding,
+                ),
         ) {
             Text(
                 text = stringResource(R.string.setup_action_start),
@@ -416,6 +423,6 @@ fun FinalSetupScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(DesignTokens.OnboardingSectionSpacing))
     }
 }

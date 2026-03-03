@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
+import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 /**
@@ -76,9 +77,9 @@ internal fun SearchEngineOnboardingOverlay(
                                             Brush.verticalGradient(
                                                     colors =
                                                             listOf(
-                                                                    Color.Black.copy(alpha = 0.7f),
-                                                                    Color.Black.copy(alpha = 0.5f),
-                                                                    Color.Black.copy(alpha = 0.2f),
+                                                                    AppColors.OnboardingScrimTop,
+                                                                    AppColors.OnboardingScrimMiddle,
+                                                                    AppColors.OnboardingScrimBottom,
                                                                     Color.Transparent,
                                                             ),
                                                     startY = 0f,
@@ -95,7 +96,7 @@ internal fun SearchEngineOnboardingOverlay(
                             Modifier.align(Alignment.BottomCenter)
                                     .let { if (isOverlayPresentation) it else it.imePadding() }
                                     .padding(bottom = 70.dp)
-                                    .padding(horizontal = 32.dp),
+                                    .padding(horizontal = DesignTokens.OnboardingSectionSpacing),
             )
         }
     }
@@ -115,10 +116,11 @@ private fun OnboardingContent(
                 modifier =
                         Modifier.fillMaxWidth()
                                 .drawBehind {
-                                    val cornerRadius = 20.dp.toPx()
-                                    val arrowWidth = 40.dp.toPx()
-                                    val arrowHeight = 20.dp.toPx()
-                                    val borderWidth = 2.dp.toPx()
+                                    val cornerRadius =
+                                            DesignTokens.OnboardingPermissionCardCornerRadius.toPx()
+                                    val arrowWidth = DesignTokens.Spacing40.toPx()
+                                    val arrowHeight = DesignTokens.SpacingXLarge.toPx()
+                                    val borderWidth = DesignTokens.SearchFieldBorderWidth.toPx()
 
                                     val rect =
                                             Rect(
@@ -234,22 +236,22 @@ private fun OnboardingContent(
                                     // Border
                                     drawPath(
                                             path = path,
-                                            color = Color.White.copy(alpha = 0.3f),
+                                            color = AppColors.OnboardingBubbleBorder,
                                             style = Stroke(width = borderWidth),
                                     )
                                 }
-                                .padding(bottom = 20.dp) // Account for arrow height
+                                .padding(bottom = DesignTokens.SpacingXLarge) // Account for arrow height
                                 .padding(
-                                        horizontal = 16.dp,
-                                        vertical = 16.dp
+                                        horizontal = DesignTokens.SpacingLarge,
+                                        vertical = DesignTokens.SpacingLarge
                                 ) // Reduced horizontal padding
-                                .padding(end = 20.dp), // Extra padding for close button
+                                .padding(end = DesignTokens.SpacingXLarge), // Extra padding for close button
         ) {
             Column(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = DesignTokens.SpacingXSmall),
                     // Add padding below text
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
             ) {
                 // Title
                 Text(
@@ -264,7 +266,7 @@ private fun OnboardingContent(
                 Text(
                         text = stringResource(R.string.search_engine_onboarding_description),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.9f),
+                        color = AppColors.OnboardingBubbleBodyText,
                         textAlign = TextAlign.Center,
                         lineHeight = MaterialTheme.typography.bodySmall.lineHeight * 1.3f,
                 )
@@ -272,8 +274,12 @@ private fun OnboardingContent(
                     Button(
                         onClick = onDismiss,
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                        shape = RoundedCornerShape(DesignTokens.OnboardingButtonCornerRadius),
+                        contentPadding =
+                            PaddingValues(
+                                horizontal = DesignTokens.OnboardingButtonHorizontalPadding,
+                                vertical = DesignTokens.OnboardingButtonVerticalPadding,
+                            ),
                     ) {
                         Text(
                             text = stringResource(R.string.setup_action_start),
@@ -290,14 +296,17 @@ private fun OnboardingContent(
                 onClick = onDismiss,
                 modifier =
                         Modifier.align(Alignment.TopEnd)
-                                .padding(top = 4.dp, end = 8.dp) // Move slightly to the left
-                                .size(32.dp),
+                                .padding(
+                                    top = DesignTokens.SpacingXSmall,
+                                    end = DesignTokens.SpacingSmall,
+                                )
+                                .size(DesignTokens.SpacingHuge),
         ) {
             Icon(
                     imageVector = Icons.Rounded.Close,
                     contentDescription = stringResource(R.string.desc_close),
                     tint = Color.White,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(DesignTokens.IconSizeSmall),
             )
         }
     }

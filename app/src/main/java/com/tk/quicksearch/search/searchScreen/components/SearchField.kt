@@ -57,7 +57,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.tk.quicksearch.R
@@ -136,16 +135,18 @@ internal fun PersistentSearchField(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    // Animation constants
-    val animationDuration = 4000
-
     // Animation state
     // We use a linear progression 0 -> 1 to scan the gradient exactly once
     val animationProgress = remember { Animatable(0f) }
 
     val glowAlpha = remember { Animatable(0f) }
     // If we aren't showing the welcome animation, start with the standard UI (0.3f alpha)
-    val borderAlpha = remember { Animatable(if (showWelcomeAnimation) 0f else 0.3f) }
+    val borderAlpha =
+        remember {
+            Animatable(
+                if (showWelcomeAnimation) 0f else DesignTokens.SearchFieldBorderAlphaDefault,
+            )
+        }
 
     LaunchedEffect(showWelcomeAnimation) {
         if (showWelcomeAnimation) {
@@ -158,7 +159,7 @@ internal fun PersistentSearchField(
             // This scans the colors and arrives at the end (White)
             animationProgress.animateTo(
                 targetValue = 1f,
-                animationSpec = tween(animationDuration, easing = LinearEasing),
+                animationSpec = tween(DesignTokens.AnimationDurationLong, easing = LinearEasing),
             )
 
             // Phase 2: Arrived at White. Make it permanent.
@@ -168,105 +169,30 @@ internal fun PersistentSearchField(
             // This maintains the "Glow" look during the hold.
 
             // Hold for a tiny beat (imperceptible, just ensures scan completion)
-            delay(50)
+            delay(DesignTokens.AnimationDurationMicro.toLong())
 
             // Phase 3: Dissipate Heat / Cool Down
             // Quicker fade out (500ms) to prevent lingering
             launch {
                 glowAlpha.animateTo(
                     targetValue = 0f,
-                    animationSpec = tween(500, easing = LinearOutSlowInEasing),
+                    animationSpec = tween(DesignTokens.AnimationDurationFast, easing = LinearOutSlowInEasing),
                 )
             }
             launch {
                 borderAlpha.animateTo(
-                    targetValue = 0.3f,
-                    animationSpec = tween(500, easing = LinearOutSlowInEasing),
+                    targetValue = DesignTokens.SearchFieldBorderAlphaDefault,
+                    animationSpec = tween(DesignTokens.AnimationDurationFast, easing = LinearOutSlowInEasing),
                 )
             }
 
             // Wait for fade out to complete, then reset the animation flag
-            delay(500)
+            delay(DesignTokens.AnimationDurationFast.toLong())
             onWelcomeAnimationCompleted?.invoke()
         }
     }
-
-    // --- Color Palettes ---
-
-    // 1. Northern Lights (Cool & Mystical) - Best for dark calm themes
-    val auroraColors =
-        listOf(
-            Color(0xFF00E5FF), // Cyan Accent
-            Color(0xFF2979FF), // Royal Blue
-            Color(0xFF651FFF), // Deep Purple
-            Color(0xFFD500F9), // Neon Violet
-            Color(0xFF2979FF), // Back to Blue
-            Color(0xFF00E5FF), // Back to Cyan loop
-        )
-
-    // 2. Electric Cyberpunk (Vibrant & High Energy) - Best for "expensive" tech look
-    val electricColors =
-        listOf(
-            Color(0xFFD500F9), // Neon Purple
-            Color(0xFFFF00CC), // Hot Pink
-            Color(0xFFFF3D00), // Electric Orange
-            Color(0xFFFF00CC), // Hot Pink
-            Color(0xFFD500F9), // Neon Purple
-            Color(0xFF2979FF), // Electric Blue
-            Color(0xFFD500F9), // Loop
-        )
-
-    // 3. Golden Luxury (Warm & Premium) - Best for "Gold" status feel
-    val goldenColors =
-        listOf(
-            Color(0xFFFFD700), // Gold
-            Color(0xFFFF9100), // Deep Orange
-            Color(0xFFFFEA00), // Bright Yellow
-            Color(0xFFFFD700), // Gold
-            Color(0xFFFFA000), // Amber
-            Color(0xFFFFD700), // Loop
-        )
-
-    // 4. Google Brand Colors (Familiar & Playful)
-    // "Vibrant Path": High-fidelity spectrum to avoid muddy RGB blends
-    val googleColors =
-        listOf(
-            Color(0xFF4285F4), // 1. Blue
-            Color(0xFF5E35B1), // 1.1 Indigo (Bridge to Purple)
-            Color(0xFF9C27B0), // 1.2 Purple (Bridge to Red)
-            Color(0xFFE91E63), // 1.3 Pink (Bridge to Red)
-            Color(0xFFEA4335), // 2. Red
-            Color(0xFFFF5722), // 2.1 Deep Orange
-            Color(0xFFFF9800), // 2.2 Orange
-            Color(0xFFFFC107), // 2.3 Amber
-            Color(0xFFFBBC05), // 3. Yellow
-            Color(0xFFD4E157), // 3.1 Lime
-            Color(0xFFCDDC39), // 3.2 Light Green
-            Color(0xFF34A853), // 4. Green
-            Color(0xFF00BFA5), // 4.1 Teal Accent
-            Color(0xFF00BCD4), // 4.2 Cyan
-            Color(0xFF03A9F4), // 4.3 Light Blue
-            Color(0xFF4285F4), // 5. Back to Blue
-            // End Block: Solid White
-            // We need a long tail of white (>25% of total list) to ensure the screen is
-            // fully white
-            // when the scan reaches the end.
-            Color.White,
-            Color.White,
-            Color.White,
-            Color.White,
-            Color.White,
-            Color.White,
-            Color.White,
-            Color.White,
-            Color.White,
-            Color.White,
-            Color.White,
-            Color.White,
-        )
-
-    // Select the active palette here (Change this to try others!)
-    val activeColors = googleColors
+    // Palettes are centralized in AppColors to keep color tokens out of feature files.
+    val activeColors = AppColors.SearchFieldGooglePalette
 
     Box(
         modifier =
@@ -276,7 +202,7 @@ internal fun PersistentSearchField(
                 .drawBehind {
                     val alpha = glowAlpha.value
                     if (alpha > 0f) {
-                        val strokeWidth = 2.dp.toPx()
+                        val strokeWidth = DesignTokens.SearchFieldBorderWidth.toPx()
                         val cornerRadiusVal = DesignTokens.Spacing28.toPx()
 
                         // Calculate gradient movement based on animation
@@ -292,8 +218,7 @@ internal fun PersistentSearchField(
                         // offset) until the
                         // end is visible.
 
-                        val gradientWidth =
-                            size.width * 4 // Ultra wide gradient
+                        val gradientWidth = size.width * DesignTokens.SearchFieldGradientWidthMultiplier
 
                         // xOffset moves from 0 down to -3*width.
                         // At -3*width, the brush starts 3 screens to the
@@ -304,7 +229,7 @@ internal fun PersistentSearchField(
                         // This is the last 25% of the gradient, which is
                         // White.
                         val xOffset =
-                            -(animationProgress.value * size.width * 3)
+                            -(animationProgress.value * size.width * DesignTokens.SearchFieldGradientTravelMultiplier)
 
                         val brush =
                             Brush.linearGradient(
@@ -354,8 +279,8 @@ internal fun PersistentSearchField(
                         )
                     }
                 }.border(
-                    width = 2.dp,
-                    color = Color.White.copy(alpha = borderAlpha.value),
+                    width = DesignTokens.SearchFieldBorderWidth,
+                    color = AppColors.DialogText.copy(alpha = borderAlpha.value),
                     shape = DesignTokens.ShapeXXLarge,
                 ).clip(DesignTokens.ShapeXXLarge)
                 .background(searchBarBackground),
@@ -376,7 +301,7 @@ internal fun PersistentSearchField(
                 Text(
                     text = stringResource(R.string.search_hint),
                     style = MaterialTheme.typography.titleMedium,
-                    color = iconAndTextColor.copy(alpha = 0.6f),
+                    color = iconAndTextColor.copy(alpha = DesignTokens.SearchFieldPlaceholderAlpha),
                 )
             },
             textStyle =

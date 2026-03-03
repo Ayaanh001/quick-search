@@ -273,6 +273,15 @@ object DesignTokens {
     /** Standard animation duration for medium transitions (e.g. entry/exit fade) */
     val AnimationDurationMedium = 300
 
+    /** Long animation duration for welcome/promo effects */
+    const val AnimationDurationLong = 4000
+
+    /** Micro-hold duration used between animation phases */
+    const val AnimationDurationMicro = 50
+
+    /** Fast fade duration for glow and border cool-down effects */
+    const val AnimationDurationFast = 500
+
     /** Luminance threshold for determining dark mode (0.5f = 50% luminance) */
     val DarkModeLuminanceThreshold = 0.5f
 
@@ -284,6 +293,56 @@ object DesignTokens {
 
     /** Blue channel coefficient for luminance calculation (ITU-R BT.709 standard) */
     val LuminanceBlueCoefficient = 0.114f
+
+    // ============================================================================
+    // ONBOARDING
+    // ============================================================================
+
+    /** Horizontal padding for onboarding screens */
+    val OnboardingHorizontalPadding = SpacingXXLarge
+
+    /** Standard spacer used between onboarding sections */
+    val OnboardingSectionSpacing = SpacingHuge
+
+    /** Compact spacer used in onboarding content blocks */
+    val OnboardingCompactSpacing = SpacingLarge
+
+    /** Insets applied to full-width onboarding CTA buttons */
+    val OnboardingButtonOuterHorizontalPadding = SpacingSmall
+
+    /** Internal horizontal padding for onboarding CTA buttons */
+    val OnboardingButtonHorizontalPadding = SpacingXXLarge
+
+    /** Internal vertical padding for onboarding CTA buttons */
+    val OnboardingButtonVerticalPadding = SpacingLarge
+
+    /** Corner radius for onboarding CTA buttons */
+    val OnboardingButtonCornerRadius = ButtonCornerRadius
+
+    /** Corner radius for permission cards in onboarding */
+    val OnboardingPermissionCardCornerRadius = SpacingXLarge
+
+    /** Backdrop blur radius used by full-screen onboarding dialogs */
+    val OnboardingDialogBlurRadius = SpacingXLarge
+
+    // ============================================================================
+    // SEARCH FIELD
+    // ============================================================================
+
+    /** Border width for the animated search field border */
+    val SearchFieldBorderWidth = 2.dp
+
+    /** Default resting alpha of the search field border */
+    const val SearchFieldBorderAlphaDefault = 0.3f
+
+    /** Placeholder alpha for search field hint text */
+    const val SearchFieldPlaceholderAlpha = 0.6f
+
+    /** Width multiplier for animated search border gradient */
+    const val SearchFieldGradientWidthMultiplier = 4f
+
+    /** Progress multiplier used to slide search border gradient across the field */
+    const val SearchFieldGradientTravelMultiplier = 3f
 
     // ============================================================================
     // UTILITY FUNCTIONS

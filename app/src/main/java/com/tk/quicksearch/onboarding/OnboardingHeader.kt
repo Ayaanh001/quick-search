@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
 fun OnboardingHeader(
@@ -25,7 +26,7 @@ fun OnboardingHeader(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(top = 40.dp, bottom = 8.dp),
+                .padding(top = DesignTokens.Spacing40, bottom = DesignTokens.SpacingSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // Title
@@ -45,7 +46,7 @@ fun OnboardingHeader(
         ) {
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                modifier = Modifier.padding(horizontal = DesignTokens.SpacingMedium, vertical = 6.dp),
             ) {
                 Text(
                     text = "$currentStep/$totalSteps",

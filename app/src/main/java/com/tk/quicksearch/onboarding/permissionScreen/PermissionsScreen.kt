@@ -38,13 +38,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
@@ -55,6 +53,8 @@ import com.tk.quicksearch.onboarding.OnboardingHeader
 import com.tk.quicksearch.search.data.AppsRepository
 import com.tk.quicksearch.search.data.ContactRepository
 import com.tk.quicksearch.search.data.FileSearchRepository
+import com.tk.quicksearch.shared.ui.theme.AppColors
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 /**
  * Main permissions screen that allows users to grant optional permissions for enhanced functionality.
@@ -163,7 +163,7 @@ fun PermissionsScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .safeDrawingPadding()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = DesignTokens.OnboardingHorizontalPadding),
         horizontalAlignment = Alignment.Start,
     ) {
         OnboardingHeader(
@@ -177,10 +177,10 @@ fun PermissionsScreen(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Start,
-            modifier = Modifier.padding(top = 8.dp),
+            modifier = Modifier.padding(top = DesignTokens.SpacingSmall),
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(DesignTokens.OnboardingSectionSpacing))
 
         Column(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
@@ -192,7 +192,7 @@ fun PermissionsScreen(
                     CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     ),
-                shape = RoundedCornerShape(20.dp), // Slightly more rounded as per modern design
+                shape = RoundedCornerShape(DesignTokens.OnboardingPermissionCardCornerRadius),
             ) {
                 Column {
                     // Usage Permission Item
@@ -209,8 +209,8 @@ fun PermissionsScreen(
                     )
 
                     HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        thickness = 0.5.dp,
+                        modifier = Modifier.padding(horizontal = DesignTokens.SpacingXLarge),
+                        thickness = DesignTokens.DividerThickness,
                         color = MaterialTheme.colorScheme.outlineVariant,
                     )
 
@@ -231,8 +231,8 @@ fun PermissionsScreen(
                     )
 
                     HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        thickness = 0.5.dp,
+                        modifier = Modifier.padding(horizontal = DesignTokens.SpacingXLarge),
+                        thickness = DesignTokens.DividerThickness,
                         color = MaterialTheme.colorScheme.outlineVariant,
                     )
 
@@ -256,8 +256,8 @@ fun PermissionsScreen(
                     )
 
                     HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        thickness = 0.5.dp,
+                        modifier = Modifier.padding(horizontal = DesignTokens.SpacingXLarge),
+                        thickness = DesignTokens.DividerThickness,
                         color = MaterialTheme.colorScheme.outlineVariant,
                     )
 
@@ -280,7 +280,7 @@ fun PermissionsScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(DesignTokens.OnboardingCompactSpacing))
 
         Button(
             onClick = {
@@ -299,9 +299,13 @@ fun PermissionsScreen(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-            shape = RoundedCornerShape(24.dp), // Premium rounded button
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                    .padding(horizontal = DesignTokens.OnboardingButtonOuterHorizontalPadding),
+            shape = RoundedCornerShape(DesignTokens.OnboardingButtonCornerRadius),
+            contentPadding =
+                PaddingValues(
+                    horizontal = DesignTokens.OnboardingButtonHorizontalPadding,
+                    vertical = DesignTokens.OnboardingButtonVerticalPadding,
+                ),
         ) {
             Text(
                 text = stringResource(R.string.setup_action_next),
@@ -310,7 +314,7 @@ fun PermissionsScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(DesignTokens.OnboardingSectionSpacing))
     }
 
     // Permission reminder dialog
@@ -361,8 +365,8 @@ private fun PermissionReminderDialog(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.75f))
-                    .blur(radius = 20.dp),
+                    .background(AppColors.OverlayVeryHigh)
+                    .blur(radius = DesignTokens.OnboardingDialogBlurRadius),
             contentAlignment = Alignment.Center,
         ) {
             AlertDialog(

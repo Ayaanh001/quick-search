@@ -27,11 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.SearchViewModel
 import com.tk.quicksearch.searchEngines.getId
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.settings.searchEnginesScreen.SearchEngines
 import kotlinx.coroutines.delay
 
@@ -55,7 +55,7 @@ fun SearchEngineSetupScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .safeDrawingPadding()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = DesignTokens.OnboardingHorizontalPadding),
         horizontalAlignment = Alignment.Start,
     ) {
         OnboardingHeader(
@@ -69,10 +69,10 @@ fun SearchEngineSetupScreen(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Start,
-            modifier = Modifier.padding(top = 8.dp),
+            modifier = Modifier.padding(top = DesignTokens.SpacingSmall),
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(DesignTokens.OnboardingSectionSpacing))
 
         val allEngines = uiState.searchTargetsOrder
 
@@ -144,19 +144,23 @@ fun SearchEngineSetupScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(DesignTokens.OnboardingSectionSpacing))
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(DesignTokens.OnboardingSectionSpacing))
 
         Button(
             onClick = onContinue,
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-            shape = RoundedCornerShape(24.dp),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                    .padding(horizontal = DesignTokens.OnboardingButtonOuterHorizontalPadding),
+            shape = RoundedCornerShape(DesignTokens.OnboardingButtonCornerRadius),
+            contentPadding =
+                PaddingValues(
+                    horizontal = DesignTokens.OnboardingButtonHorizontalPadding,
+                    vertical = DesignTokens.OnboardingButtonVerticalPadding,
+                ),
         ) {
             Text(
                 text = stringResource(continueButtonTextRes),
@@ -165,6 +169,6 @@ fun SearchEngineSetupScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(DesignTokens.OnboardingSectionSpacing))
     }
 }
