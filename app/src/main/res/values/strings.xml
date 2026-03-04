@@ -236,8 +236,8 @@
     <string name="dialog_done">Done</string>
     <string name="dialog_ok">Continue</string>
     <string name="dialog_okay">Okay</string>
-    <string name="call_permission_settings_dialog_title">Phone Permission Required</string>
-    <string name="call_permission_settings_dialog_message">Phone permission is required for this action. You will be taken to app settings to enable it.</string>
+    <string name="permission_settings_dialog_title">%1$s Permission Required</string>
+    <string name="permission_settings_dialog_message">This action requires %1$s permission. You will be taken to system settings to grant it.</string>
     <string name="dialog_call">Call</string>
     <string name="dialog_sms">Message</string>
     <string name="dialog_edit_shortcut_title">Edit shortcut</string>

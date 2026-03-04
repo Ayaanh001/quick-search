@@ -11,10 +11,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.core.SearchViewModel
+import com.tk.quicksearch.shared.permissions.PermissionSettingsDialog
 import com.tk.quicksearch.shared.permissions.PermissionHelper
 
 /**
@@ -30,6 +33,13 @@ fun rememberSectionToggleHandler(
     val pendingSectionEnable = remember { mutableStateOf<SearchSection?>(null) }
     val contactsWasDenied = remember { mutableStateOf(false) }
     val filesWasDenied = remember { mutableStateOf(false) }
+    var showPermissionSettingsDialog by remember { mutableStateOf(false) }
+    var settingsDialogTargetSection by remember { mutableStateOf<SearchSection?>(null) }
+
+    val openSettingsWithDialog: (SearchSection) -> Unit = { section ->
+        settingsDialogTargetSection = section
+        showPermissionSettingsDialog = true
+    }
 
     // Launcher for runtime permissions (contacts, files on pre-R)
     val runtimePermissionsLauncher =
@@ -59,7 +69,9 @@ fun rememberSectionToggleHandler(
                                 context = context,
                                 permission = Manifest.permission.READ_CONTACTS,
                                 wasPreviouslyDenied = true,
-                                onOpenSettings = viewModel::openContactPermissionSettings,
+                                onOpenSettings = {
+                                    openSettingsWithDialog(SearchSection.CONTACTS)
+                                },
                             )
                         }
                     }
@@ -78,7 +90,9 @@ fun rememberSectionToggleHandler(
                                 context = context,
                                 permission = Manifest.permission.READ_EXTERNAL_STORAGE,
                                 wasPreviouslyDenied = true,
-                                onOpenSettings = viewModel::openFilesPermissionSettings,
+                                onOpenSettings = {
+                                    openSettingsWithDialog(SearchSection.FILES)
+                                },
                             )
                         }
                     }
@@ -106,7 +120,7 @@ fun rememberSectionToggleHandler(
             }
         }
 
-    return androidx.compose.runtime.remember(viewModel, disabledSections) {
+    val onToggleSection = androidx.compose.runtime.remember(viewModel, disabledSections) {
         { section: SearchSection, enabled: Boolean ->
             if (enabled) {
                 // Check if section can be enabled (has permissions)
@@ -122,7 +136,9 @@ fun rememberSectionToggleHandler(
                                 permission = Manifest.permission.READ_CONTACTS,
                                 wasPreviouslyDenied = contactsWasDenied.value,
                                 runtimeLauncher = runtimePermissionsLauncher,
-                                onOpenSettings = viewModel::openContactPermissionSettings,
+                                onOpenSettings = {
+                                    openSettingsWithDialog(SearchSection.CONTACTS)
+                                },
                             )
                         }
 
@@ -133,7 +149,9 @@ fun rememberSectionToggleHandler(
                                 wasPreviouslyDenied = filesWasDenied.value,
                                 runtimeLauncher = runtimePermissionsLauncher,
                                 allFilesLauncher = allFilesAccessLauncher,
-                                onOpenSettings = viewModel::openFilesPermissionSettings,
+                                onOpenSettings = {
+                                    openSettingsWithDialog(SearchSection.FILES)
+                                },
                             )
                         }
 
@@ -170,6 +188,33 @@ fun rememberSectionToggleHandler(
             }
         }
     }
+
+    if (showPermissionSettingsDialog) {
+        val permissionType =
+            when (settingsDialogTargetSection) {
+                SearchSection.CONTACTS -> context.getString(R.string.settings_contacts_permission_title)
+                SearchSection.FILES -> context.getString(R.string.settings_files_permission_title)
+                else -> context.getString(R.string.settings_permissions_title)
+            }
+        PermissionSettingsDialog(
+            permissionType = permissionType,
+            onConfirm = {
+                showPermissionSettingsDialog = false
+                when (settingsDialogTargetSection) {
+                    SearchSection.CONTACTS -> viewModel.openContactPermissionSettings()
+                    SearchSection.FILES -> viewModel.openFilesPermissionSettings()
+                    else -> Unit
+                }
+                settingsDialogTargetSection = null
+            },
+            onDismiss = {
+                showPermissionSettingsDialog = false
+                settingsDialogTargetSection = null
+            },
+        )
+    }
+
+    return onToggleSection
 }
 
 /** Creates a standardized permission request handler that tries popup first, then settings. */

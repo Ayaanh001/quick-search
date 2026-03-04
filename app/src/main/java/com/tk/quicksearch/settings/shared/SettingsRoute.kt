@@ -63,6 +63,7 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.*
 import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.shared.permissions.PermissionHelper
+import com.tk.quicksearch.shared.permissions.PermissionSettingsDialog
 import com.tk.quicksearch.tools.directSearch.GeminiTextModel
 import com.tk.quicksearch.tile.requestAddQuickSearchTile
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
@@ -99,6 +100,14 @@ fun SettingsRoute(
     val shouldShowBanner = remember { mutableStateOf(uiState.shouldShowUsagePermissionBanner) }
     val lifecycleOwner = LocalLifecycleOwner.current
     val pendingEnableDirectDial = remember { mutableStateOf(false) }
+    var showPermissionSettingsDialog by remember { mutableStateOf(false) }
+    var pendingPermissionSettingsAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    var pendingPermissionSettingsType by remember { mutableStateOf<String?>(null) }
+    val requestSettingsPermissionConfirmation: (String, () -> Unit) -> Unit = { permissionType, action ->
+        pendingPermissionSettingsType = permissionType
+        pendingPermissionSettingsAction = action
+        showPermissionSettingsDialog = true
+    }
     val wallpaperPermissionController =
         rememberWallpaperPermissionController(
             onSetWallpaperAvailable = viewModel::setWallpaperAvailable,
@@ -119,7 +128,12 @@ fun SettingsRoute(
                 isGranted = isGranted,
                 context = context,
                 permission = Manifest.permission.READ_CONTACTS,
-                onPermanentlyDenied = viewModel::openContactPermissionSettings,
+                onPermanentlyDenied = {
+                    requestSettingsPermissionConfirmation(
+                        context.getString(R.string.settings_contacts_permission_title),
+                        viewModel::openContactPermissionSettings,
+                    )
+                },
                 onPermissionChanged = viewModel::handleOptionalPermissionChange,
             )
         }
@@ -129,7 +143,12 @@ fun SettingsRoute(
             context = context,
             permissionLauncher = contactsPermissionLauncher,
             permission = Manifest.permission.READ_CONTACTS,
-            fallbackAction = viewModel::openContactPermissionSettings,
+            fallbackAction = {
+                requestSettingsPermissionConfirmation(
+                    context.getString(R.string.settings_contacts_permission_title),
+                    viewModel::openContactPermissionSettings,
+                )
+            },
         )
 
     val callPermissionLauncher =
@@ -140,7 +159,12 @@ fun SettingsRoute(
                 isGranted = isGranted,
                 context = context,
                 permission = Manifest.permission.CALL_PHONE,
-                onPermanentlyDenied = viewModel::openAppSettings,
+                onPermanentlyDenied = {
+                    requestSettingsPermissionConfirmation(
+                        context.getString(R.string.settings_call_permission_title),
+                        viewModel::openAppSettings,
+                    )
+                },
                 onPermissionChanged = viewModel::handleOptionalPermissionChange,
                 onGranted = {
                     if (pendingEnableDirectDial.value) {
@@ -156,7 +180,12 @@ fun SettingsRoute(
             context = context,
             permissionLauncher = callPermissionLauncher,
             permission = Manifest.permission.CALL_PHONE,
-            fallbackAction = viewModel::openAppSettings,
+            fallbackAction = {
+                requestSettingsPermissionConfirmation(
+                    context.getString(R.string.settings_call_permission_title),
+                    viewModel::openAppSettings,
+                )
+            },
         )
 
     val onRequestWallpaperPermission: () -> Unit = wallpaperPermissionController.onRequestPermission
@@ -234,8 +263,18 @@ fun SettingsRoute(
     }
 
     // Define permission request handlers
-    val onRequestUsagePermission = viewModel::openUsageAccessSettings
-    val onRequestFilePermission = viewModel::openFilesPermissionSettings
+    val onRequestUsagePermission = {
+        requestSettingsPermissionConfirmation(
+            context.getString(R.string.settings_usage_access_title),
+            viewModel::openUsageAccessSettings,
+        )
+    }
+    val onRequestFilePermission = {
+        requestSettingsPermissionConfirmation(
+            context.getString(R.string.settings_files_permission_title),
+            viewModel::openFilesPermissionSettings,
+        )
+    }
 
     val callbacks =
         SettingsScreenCallbacks(
@@ -428,9 +467,9 @@ fun SettingsRoute(
         hasFilePermission = uiState.hasFilePermission,
         hasCallPermission = uiState.hasCallPermission,
         shouldShowBanner = shouldShowBanner.value,
-        onRequestUsagePermission = viewModel::openUsageAccessSettings,
+        onRequestUsagePermission = onRequestUsagePermission,
         onRequestContactPermission = onRequestContactPermission,
-        onRequestFilePermission = viewModel::openFilesPermissionSettings,
+        onRequestFilePermission = onRequestFilePermission,
         onRequestCallPermission = onRequestCallPermission,
         onDismissBanner = onDismissBanner,
         onNavigateToDetail = onNavigateToDetail,
@@ -443,4 +482,20 @@ fun SettingsRoute(
         flowState = appShortcutSourceFlow,
         sources = filteredAppShortcutSources,
     )
+    if (showPermissionSettingsDialog) {
+        PermissionSettingsDialog(
+            permissionType = pendingPermissionSettingsType ?: context.getString(R.string.settings_permissions_title),
+            onConfirm = {
+                showPermissionSettingsDialog = false
+                pendingPermissionSettingsAction?.invoke()
+                pendingPermissionSettingsAction = null
+                pendingPermissionSettingsType = null
+            },
+            onDismiss = {
+                showPermissionSettingsDialog = false
+                pendingPermissionSettingsAction = null
+                pendingPermissionSettingsType = null
+            },
+        )
+    }
 }

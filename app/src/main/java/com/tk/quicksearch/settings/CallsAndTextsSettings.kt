@@ -40,7 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.*
-import com.tk.quicksearch.shared.permissions.CallPermissionSettingsDialog
+import com.tk.quicksearch.shared.permissions.PermissionSettingsDialog
 import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.settings.shared.*
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
@@ -221,21 +221,12 @@ private fun DirectDialCard(
             if (isGranted) {
                 onToggleDirectDial(true)
             } else {
-                val shouldShowSettingsDialog =
-                    PermissionHelper.shouldOpenSettingsForRuntimePermission(
-                        context = context,
-                        permission = Manifest.permission.CALL_PHONE,
-                        wasPreviouslyDenied = true,
-                    )
-                if (shouldShowSettingsDialog) {
-                    showCallPermissionSettingsDialog = true
-                } else {
-                    PermissionHelper.handleDeniedRuntimePermission(
+                PermissionHelper.handleDeniedRuntimePermission(
                     context = context,
                     permission = Manifest.permission.CALL_PHONE,
                     wasPreviouslyDenied = true,
+                    onOpenSettings = { showCallPermissionSettingsDialog = true },
                 )
-                }
             }
         }
 
@@ -264,7 +255,8 @@ private fun DirectDialCard(
     }
 
     if (showCallPermissionSettingsDialog) {
-        CallPermissionSettingsDialog(
+        PermissionSettingsDialog(
+            permissionType = stringResource(R.string.settings_call_permission_title),
             onConfirm = {
                 showCallPermissionSettingsDialog = false
                 PermissionHelper.launchAppSettingsRequest(context)
@@ -624,15 +616,12 @@ fun CallsTextsSettingsSection(
                 return@rememberLauncherForActivityResult
             }
             if (!isGranted) {
-                val shouldShowSettingsDialog =
-                    PermissionHelper.shouldOpenSettingsForRuntimePermission(
-                        context = context,
-                        permission = Manifest.permission.CALL_PHONE,
-                        wasPreviouslyDenied = true,
-                    )
-                if (shouldShowSettingsDialog) {
-                    showCallPermissionSettingsDialog = true
-                }
+                PermissionHelper.handleDeniedRuntimePermission(
+                    context = context,
+                    permission = Manifest.permission.CALL_PHONE,
+                    wasPreviouslyDenied = true,
+                    onOpenSettings = { showCallPermissionSettingsDialog = true },
+                )
             }
         }
 
@@ -748,7 +737,8 @@ fun CallsTextsSettingsSection(
     )
 
     if (showCallPermissionSettingsDialog) {
-        CallPermissionSettingsDialog(
+        PermissionSettingsDialog(
+            permissionType = stringResource(R.string.settings_call_permission_title),
             onConfirm = {
                 showCallPermissionSettingsDialog = false
                 PermissionHelper.launchAppSettingsRequest(context)

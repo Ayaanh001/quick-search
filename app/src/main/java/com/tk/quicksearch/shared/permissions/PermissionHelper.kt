@@ -91,6 +91,47 @@ object PermissionHelper {
             true
         }
 
+    fun requestWallpaperPermission(
+        context: Context,
+        requiresImagePermissionAfterSecurityError: Boolean,
+        imagePermissionLauncher: ActivityResultLauncher<String>,
+        legacyFilesPermissionLauncher: ActivityResultLauncher<String>,
+        allFilesLauncher: ActivityResultLauncher<Intent>,
+        onRequestingFilesPermission: (() -> Unit)? = null,
+        onFilesPermissionAlreadyGranted: (() -> Unit)? = null,
+    ) {
+        if (
+            requiresImagePermissionAfterSecurityError &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        ) {
+            imagePermissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
+            return
+        }
+
+        if (!checkFilesPermission(context)) {
+            onRequestingFilesPermission?.invoke()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                launchAllFilesAccessRequest(allFilesLauncher, context)
+            } else {
+                legacyFilesPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+            return
+        }
+
+        onFilesPermissionAlreadyGranted?.invoke()
+    }
+
+    fun requestWallpaperGalleryPermission(
+        imagePermissionLauncher: ActivityResultLauncher<String>,
+        onUnsupportedVersion: (() -> Unit)? = null,
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            imagePermissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
+        } else {
+            onUnsupportedVersion?.invoke()
+        }
+    }
+
     fun shouldOpenSettingsForFiles(
         context: Context,
         wasPreviouslyDenied: Boolean,

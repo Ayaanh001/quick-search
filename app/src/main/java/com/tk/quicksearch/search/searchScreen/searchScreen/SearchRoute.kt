@@ -37,7 +37,7 @@ import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.DeviceFile
 import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
 import com.tk.quicksearch.search.utils.FileUtils
-import com.tk.quicksearch.shared.permissions.CallPermissionSettingsDialog
+import com.tk.quicksearch.shared.permissions.PermissionSettingsDialog
 import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.search.searchScreen.SearchScreen as SearchScreenComposable
@@ -199,7 +199,9 @@ fun SearchRoute(
     val dismissContactMethodsBottomSheet: () -> Unit = {
         viewModel.dismissContactMethodsBottomSheet()
     }
-    var showCallPermissionSettingsDialog by remember { mutableStateOf(false) }
+    var showPermissionSettingsDialog by remember { mutableStateOf(false) }
+    var pendingPermissionSettingsAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    var pendingPermissionSettingsType by remember { mutableStateOf<Int?>(null) }
 
     val callPermissionLauncher =
         if (context is android.app.Activity) {
@@ -209,19 +211,22 @@ fun SearchRoute(
                 if (isGranted) {
                     viewModel.onCallPermissionResult(true)
                 } else {
-                    val shouldShowSettingsDialog =
-                        PermissionHelper.shouldOpenSettingsForRuntimePermission(
-                            context = context,
-                            permission = Manifest.permission.CALL_PHONE,
-                            wasPreviouslyDenied = true,
-                        )
+                    var shouldShowSettingsDialog = false
+                    PermissionHelper.handleDeniedRuntimePermission(
+                        context = context,
+                        permission = Manifest.permission.CALL_PHONE,
+                        wasPreviouslyDenied = true,
+                        onOpenSettings = {
+                            shouldShowSettingsDialog = true
+                            pendingPermissionSettingsType = R.string.settings_call_permission_title
+                            pendingPermissionSettingsAction = viewModel::openAppSettings
+                            showPermissionSettingsDialog = true
+                        },
+                    )
                     viewModel.onCallPermissionResult(
                         isGranted = false,
                         shouldShowPermissionError = !shouldShowSettingsDialog,
                     )
-                    if (shouldShowSettingsDialog) {
-                        showCallPermissionSettingsDialog = true
-                    }
                 }
             }
         } else {
@@ -316,8 +321,16 @@ fun SearchRoute(
             onSetGeminiModel = viewModel::setGeminiModel,
             onSetGeminiGroundingEnabled = viewModel::setGeminiGroundingEnabled,
             onRefreshAvailableGeminiModels = viewModel::refreshAvailableGeminiModels,
-            onOpenAppSettings = { viewModel.openAppSettings() },
-            onOpenStorageAccessSettings = { viewModel.openAllFilesAccessSettings() },
+            onOpenAppSettings = {
+                pendingPermissionSettingsType = R.string.settings_permissions_title
+                pendingPermissionSettingsAction = viewModel::openAppSettings
+                showPermissionSettingsDialog = true
+            },
+            onOpenStorageAccessSettings = {
+                pendingPermissionSettingsType = R.string.settings_files_permission_title
+                pendingPermissionSettingsAction = viewModel::openAllFilesAccessSettings
+                showPermissionSettingsDialog = true
+            },
             onAppNicknameClick = { app: com.tk.quicksearch.search.models.AppInfo ->
                 // This will be handled by the dialog state in SearchScreen
             },
@@ -383,14 +396,19 @@ fun SearchRoute(
             )
         }
 
-        if (showCallPermissionSettingsDialog) {
-            CallPermissionSettingsDialog(
+        if (showPermissionSettingsDialog) {
+            PermissionSettingsDialog(
+                permissionType = stringResource(pendingPermissionSettingsType ?: R.string.settings_permissions_title),
                 onConfirm = {
-                    showCallPermissionSettingsDialog = false
-                    viewModel.openAppSettings()
+                    showPermissionSettingsDialog = false
+                    pendingPermissionSettingsAction?.invoke()
+                    pendingPermissionSettingsAction = null
+                    pendingPermissionSettingsType = null
                 },
                 onDismiss = {
-                    showCallPermissionSettingsDialog = false
+                    showPermissionSettingsDialog = false
+                    pendingPermissionSettingsAction = null
+                    pendingPermissionSettingsType = null
                 },
             )
         }

@@ -8,17 +8,22 @@ import androidx.compose.ui.res.stringResource
 import com.tk.quicksearch.R
 
 @Composable
-fun CallPermissionSettingsDialog(
+fun PermissionSettingsDialog(
+    permissionType: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = stringResource(R.string.call_permission_settings_dialog_title))
+            Text(
+                text = stringResource(R.string.permission_settings_dialog_title, permissionType),
+            )
         },
         text = {
-            Text(text = stringResource(R.string.call_permission_settings_dialog_message))
+            Text(
+                text = stringResource(R.string.permission_settings_dialog_message, permissionType),
+            )
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {

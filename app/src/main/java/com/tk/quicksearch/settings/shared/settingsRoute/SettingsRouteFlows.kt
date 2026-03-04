@@ -1,9 +1,7 @@
 package com.tk.quicksearch.settings.shared
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
@@ -120,21 +118,19 @@ internal fun rememberWallpaperPermissionController(
         }
 
     val onRequestWallpaperPermission: () -> Unit = {
-        if (requiresImagePermissionAfterSecurityError && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            wallpaperPermissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
-        } else if (!PermissionHelper.checkFilesPermission(context)) {
-            wallpaperButtonHasPermission = false
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                PermissionHelper.launchAllFilesAccessRequest(
-                    wallpaperFilesAccessLauncher,
-                    context,
-                )
-            } else {
-                legacyFilesPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-            }
-        } else {
-            scope.launch { tryFetchWallpaperWithFilesPermission() }
-        }
+        PermissionHelper.requestWallpaperPermission(
+            context = context,
+            requiresImagePermissionAfterSecurityError = requiresImagePermissionAfterSecurityError,
+            imagePermissionLauncher = wallpaperPermissionLauncher,
+            legacyFilesPermissionLauncher = legacyFilesPermissionLauncher,
+            allFilesLauncher = wallpaperFilesAccessLauncher,
+            onRequestingFilesPermission = {
+                wallpaperButtonHasPermission = false
+            },
+            onFilesPermissionAlreadyGranted = {
+                scope.launch { tryFetchWallpaperWithFilesPermission() }
+            },
+        )
     }
 
     return WallpaperPermissionController(
@@ -152,11 +148,12 @@ internal fun rememberWallpaperPermissionController(
         },
         onConfirmFallbackDialog = {
             showWallpaperFallbackDialog = false
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                wallpaperPermissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
-            } else {
-                scope.launch { tryFetchWallpaperWithFilesPermission() }
-            }
+            PermissionHelper.requestWallpaperGalleryPermission(
+                imagePermissionLauncher = wallpaperPermissionLauncher,
+                onUnsupportedVersion = {
+                    scope.launch { tryFetchWallpaperWithFilesPermission() }
+                },
+            )
         },
         onCancelFallbackDialog = {
             showWallpaperFallbackDialog = false
