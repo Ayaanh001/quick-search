@@ -137,6 +137,13 @@ data class DirectDialChoice(
         val phoneNumber: String,
 )
 
+data class PendingThirdPartyCall(
+        val app: CallingApp,
+        val dataId: Long? = null,
+        val phoneNumber: String? = null,
+        val isVideoCall: Boolean = false,
+)
+
 enum class DirectDialOption {
     DIRECT_CALL,
     DIALER,
@@ -292,7 +299,7 @@ data class SearchUiState(
         val contactMethodsBottomSheet: com.tk.quicksearch.search.models.ContactInfo? = null,
         val contactActionPickerRequest: ContactActionPickerRequest? = null,
         val pendingDirectCallNumber: String? = null,
-        val pendingWhatsAppCallDataId: String? = null,
+        val pendingThirdPartyCall: PendingThirdPartyCall? = null,
         val directDialEnabled: Boolean = false,
         val enabledFileTypes: Set<com.tk.quicksearch.search.models.FileType> =
                 com.tk.quicksearch.search.models.FileType.values()

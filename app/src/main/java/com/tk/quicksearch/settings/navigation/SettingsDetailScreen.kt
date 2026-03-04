@@ -28,8 +28,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.onboarding.permissionScreen.PermissionRequestHandler
 import com.tk.quicksearch.search.utils.PermissionUtils
+import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.settings.searchEnginesScreen.SearchEngines
 import com.tk.quicksearch.settings.shared.SettingsScreenCallbacks
 import com.tk.quicksearch.settings.shared.SettingsScreenState
@@ -142,7 +142,7 @@ internal fun SettingsDetailLevel1Screen(
                             state = state,
                             callbacks = callbacks,
                             hasContactPermission = PermissionUtils.hasContactsPermission(context),
-                            hasFilePermission = PermissionRequestHandler.checkFilesPermission(context),
+                            hasFilePermission = PermissionHelper.checkFilesPermission(context),
                             onNavigateToExcludedItems = {
                                 if (hasExcludedItems) {
                                     onNavigateToDetail(SettingsDetailType.EXCLUDED_ITEMS)

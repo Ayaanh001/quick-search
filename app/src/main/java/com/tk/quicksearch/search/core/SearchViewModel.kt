@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.tk.quicksearch.R
 import com.tk.quicksearch.app.ReleaseNotesHandler
 import com.tk.quicksearch.app.navigation.NavigationHandler
-import com.tk.quicksearch.onboarding.permissionScreen.PermissionRequestHandler
 import com.tk.quicksearch.search.appShortcuts.AppShortcutManagementHandler
 import com.tk.quicksearch.search.appShortcuts.AppShortcutSearchHandler
 import com.tk.quicksearch.search.apps.AppManagementService
@@ -58,6 +57,7 @@ import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
 import com.tk.quicksearch.search.utils.SearchTextNormalizer
 import com.tk.quicksearch.search.webSuggestions.WebSuggestionHandler
+import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.shared.util.PackageConstants
 import com.tk.quicksearch.shared.util.getAppGridColumns
 import java.util.Calendar
@@ -388,10 +388,10 @@ class SearchViewModel(
     private fun hasFilePermission(): Boolean = fileRepository.hasPermission()
 
     private fun hasCallPermission(): Boolean =
-            PermissionRequestHandler.checkCallPermission(getApplication())
+            PermissionHelper.checkCallPermission(getApplication())
 
     private fun hasWallpaperPermission(): Boolean =
-            PermissionRequestHandler.checkWallpaperPermission(getApplication())
+            PermissionHelper.checkWallpaperPermission(getApplication())
 
     private var wallpaperAvailable: Boolean = false
 
@@ -2892,8 +2892,14 @@ class SearchViewModel(
         }
     }
 
-    fun onCallPermissionResult(isGranted: Boolean) {
-        contactActionHandler.onCallPermissionResult(isGranted)
+    fun onCallPermissionResult(
+            isGranted: Boolean,
+            shouldShowPermissionError: Boolean = true,
+    ) {
+        contactActionHandler.onCallPermissionResult(
+                isGranted = isGranted,
+                shouldShowPermissionError = shouldShowPermissionError,
+        )
         // Refresh permission state after request result
         handleOptionalPermissionChange()
     }

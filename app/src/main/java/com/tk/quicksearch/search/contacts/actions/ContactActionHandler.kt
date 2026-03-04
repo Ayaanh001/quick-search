@@ -3,7 +3,6 @@ package com.tk.quicksearch.search.contacts.actions
 import android.app.Application
 import android.util.Log
 import com.tk.quicksearch.R
-import com.tk.quicksearch.onboarding.permissionScreen.PermissionRequestHandler
 import com.tk.quicksearch.search.contacts.utils.ContactIntentHelpers
 import com.tk.quicksearch.search.contacts.utils.ContactCallingAppResolver
 import com.tk.quicksearch.search.contacts.utils.ContactMessagingAppResolver
@@ -11,12 +10,14 @@ import com.tk.quicksearch.search.core.CallingApp
 import com.tk.quicksearch.search.core.DirectDialChoice
 import com.tk.quicksearch.search.core.DirectDialOption
 import com.tk.quicksearch.search.core.MessagingApp
+import com.tk.quicksearch.search.core.PendingThirdPartyCall
 import com.tk.quicksearch.search.core.PhoneNumberSelection
 import com.tk.quicksearch.search.core.SearchUiState
 import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
 import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
+import com.tk.quicksearch.shared.permissions.PermissionHelper
 
 /**
  * Handles contact action coordination logic.
@@ -136,7 +137,7 @@ class ContactActionHandler(
     }
 
     private fun startDirectCallFlow(phoneNumber: String) {
-        val hasPermission = PermissionRequestHandler.checkCallPermission(context)
+        val hasPermission = PermissionHelper.checkCallPermission(context)
         if (hasPermission) {
             performDirectCall(phoneNumber)
         } else {
@@ -169,15 +170,18 @@ class ContactActionHandler(
         uiStateUpdater { it.copy(directDialChoice = null) }
     }
 
-    fun onCallPermissionResult(isGranted: Boolean) {
+    fun onCallPermissionResult(
+        isGranted: Boolean,
+        shouldShowPermissionError: Boolean = true,
+    ) {
         val state = getCurrentState()
         val pendingNumber = state.pendingDirectCallNumber
-        val pendingWhatsAppCallDataId = state.pendingWhatsAppCallDataId
+        val pendingThirdPartyCall = state.pendingThirdPartyCall
 
         uiStateUpdater {
             it.copy(
                 pendingDirectCallNumber = null,
-                pendingWhatsAppCallDataId = null,
+                pendingThirdPartyCall = null,
             )
         }
 
@@ -186,22 +190,18 @@ class ContactActionHandler(
             if (pendingNumber != null) {
                 performDirectCall(pendingNumber)
             }
-            // Handle WhatsApp call if present
-            if (pendingWhatsAppCallDataId != null) {
-                val dataId = pendingWhatsAppCallDataId.toLongOrNull()
-                val success = ContactIntentHelpers.openWhatsAppCall(context, dataId) { resId -> showToastCallback(resId) }
-                if (success) {
-                    clearQueryIfEnabled()
-                }
+            // Handle third-party call if present
+            if (pendingThirdPartyCall != null) {
+                executePendingThirdPartyCall(pendingThirdPartyCall)
             }
         } else {
             // If permission is denied for direct call, fall back to the dialer
             if (pendingNumber != null) {
                 openDialer(pendingNumber)
             }
-            // If permission is denied for WhatsApp call, show error
-            if (pendingWhatsAppCallDataId != null) {
-                showToastCallback(R.string.error_whatsapp_call_permission)
+            // If permission is denied for third-party call, show guidance toast.
+            if (pendingThirdPartyCall != null && shouldShowPermissionError) {
+                showToastCallback(R.string.error_call_permission_required)
             }
         }
     }
@@ -253,17 +253,11 @@ class ContactActionHandler(
             }
 
             is ContactMethod.TelegramCall -> {
-                val success = ContactIntentHelpers.openTelegramCall(context, method.dataId) { resId -> showToastCallback(resId) }
-                if (success) {
-                    clearQueryIfEnabled()
-                }
+                handleTelegramCallWithPermission(method.dataId)
             }
 
             is ContactMethod.TelegramVideoCall -> {
-                val success = ContactIntentHelpers.openTelegramVideoCall(context, method.dataId, method.data)
-                if (success) {
-                    clearQueryIfEnabled()
-                }
+                handleTelegramVideoCallWithPermission(method.dataId, method.data)
             }
 
             is ContactMethod.SignalMessage -> {
@@ -274,17 +268,11 @@ class ContactActionHandler(
             }
 
             is ContactMethod.SignalCall -> {
-                val success = ContactIntentHelpers.openSignalCall(context, method.dataId) { resId -> showToastCallback(resId) }
-                if (success) {
-                    clearQueryIfEnabled()
-                }
+                handleSignalCallWithPermission(method.dataId)
             }
 
             is ContactMethod.SignalVideoCall -> {
-                val success = ContactIntentHelpers.openSignalVideoCall(context, method.dataId) { resId -> showToastCallback(resId) }
-                if (success) {
-                    clearQueryIfEnabled()
-                }
+                handleSignalVideoCallWithPermission(method.dataId)
             }
 
             is ContactMethod.VideoCall -> {
@@ -385,23 +373,16 @@ class ContactActionHandler(
                     contactInfo.contactMethods
                         .firstOrNull { it is ContactMethod.TelegramCall && it.dataId != null } as? ContactMethod.TelegramCall
                 if (preferredMethod?.dataId != null) {
-                    val success = ContactIntentHelpers.openTelegramCall(context, preferredMethod.dataId) { resId -> showToastCallback(resId) }
-                    if (success) {
-                        clearQueryIfEnabled()
-                    }
+                    handleTelegramCallWithPermission(preferredMethod.dataId)
                 } else {
-                    ContactIntentHelpers.openTelegramCall(context, number) { resId -> showToastCallback(resId) }
-                    clearQueryIfEnabled()
+                    handleTelegramCallWithPermission(phoneNumber = number)
                 }
             }
             CallingApp.SIGNAL -> {
                 val method =
                     contactInfo.contactMethods.firstOrNull { it is ContactMethod.SignalCall && it.dataId != null && (it.data.isBlank() || com.tk.quicksearch.search.utils.PhoneNumberUtils.isSameNumber(it.data, number)) } as? ContactMethod.SignalCall
                 if (method?.dataId != null) {
-                    val success = ContactIntentHelpers.openSignalCall(context, method.dataId) { resId -> showToastCallback(resId) }
-                    if (success) {
-                        clearQueryIfEnabled()
-                    }
+                    handleSignalCallWithPermission(method.dataId)
                 } else {
                     beginRegularCallFlow(contactInfo.displayName, number)
                 }
@@ -430,15 +411,19 @@ class ContactActionHandler(
      * WhatsApp calls require CALL_PHONE permission.
      */
     private fun handleWhatsAppCallWithPermission(dataId: Long?) {
-        val hasPermission = PermissionRequestHandler.checkCallPermission(context)
+        val hasPermission = PermissionHelper.checkCallPermission(context)
         if (hasPermission) {
             val success = ContactIntentHelpers.openWhatsAppCall(context, dataId) { resId -> showToastCallback(resId) }
             if (success) {
                 clearQueryIfEnabled()
             }
         } else {
-            // Store pending WhatsApp call dataId and request permission
-            uiStateUpdater { it.copy(pendingWhatsAppCallDataId = dataId?.toString()) }
+            queuePendingThirdPartyCall(
+                PendingThirdPartyCall(
+                    app = CallingApp.WHATSAPP,
+                    dataId = dataId,
+                ),
+            )
         }
     }
 
@@ -453,15 +438,153 @@ class ContactActionHandler(
             return
         }
 
-        val hasPermission = PermissionRequestHandler.checkCallPermission(context)
+        val hasPermission = PermissionHelper.checkCallPermission(context)
         if (hasPermission) {
             val success = ContactIntentHelpers.openWhatsAppVideoCall(context, dataId) { resId -> showToastCallback(resId) }
             if (success) {
                 clearQueryIfEnabled()
             }
         } else {
-            // Store pending WhatsApp video call dataId and request permission
-            uiStateUpdater { it.copy(pendingWhatsAppCallDataId = dataId.toString()) }
+            queuePendingThirdPartyCall(
+                PendingThirdPartyCall(
+                    app = CallingApp.WHATSAPP,
+                    dataId = dataId,
+                    isVideoCall = true,
+                ),
+            )
+        }
+    }
+
+    private fun handleTelegramCallWithPermission(
+        dataId: Long? = null,
+        phoneNumber: String? = null,
+    ) {
+        if (PermissionHelper.checkCallPermission(context)) {
+            if (dataId != null) {
+                val success = ContactIntentHelpers.openTelegramCall(context, dataId) { resId -> showToastCallback(resId) }
+                if (success) {
+                    clearQueryIfEnabled()
+                }
+            } else if (!phoneNumber.isNullOrBlank()) {
+                ContactIntentHelpers.openTelegramCall(context, phoneNumber) { resId -> showToastCallback(resId) }
+                clearQueryIfEnabled()
+            }
+            return
+        }
+
+        queuePendingThirdPartyCall(
+            PendingThirdPartyCall(
+                app = CallingApp.TELEGRAM,
+                dataId = dataId,
+                phoneNumber = phoneNumber,
+            ),
+        )
+    }
+
+    private fun handleTelegramVideoCallWithPermission(
+        dataId: Long?,
+        phoneNumber: String?,
+    ) {
+        if (PermissionHelper.checkCallPermission(context)) {
+            val success = ContactIntentHelpers.openTelegramVideoCall(context, dataId, phoneNumber)
+            if (success) {
+                clearQueryIfEnabled()
+            }
+            return
+        }
+
+        queuePendingThirdPartyCall(
+            PendingThirdPartyCall(
+                app = CallingApp.TELEGRAM,
+                dataId = dataId,
+                phoneNumber = phoneNumber,
+                isVideoCall = true,
+            ),
+        )
+    }
+
+    private fun handleSignalCallWithPermission(dataId: Long?) {
+        if (PermissionHelper.checkCallPermission(context)) {
+            val success = ContactIntentHelpers.openSignalCall(context, dataId) { resId -> showToastCallback(resId) }
+            if (success) {
+                clearQueryIfEnabled()
+            }
+            return
+        }
+
+        queuePendingThirdPartyCall(
+            PendingThirdPartyCall(
+                app = CallingApp.SIGNAL,
+                dataId = dataId,
+            ),
+        )
+    }
+
+    private fun handleSignalVideoCallWithPermission(dataId: Long?) {
+        if (PermissionHelper.checkCallPermission(context)) {
+            val success = ContactIntentHelpers.openSignalVideoCall(context, dataId) { resId -> showToastCallback(resId) }
+            if (success) {
+                clearQueryIfEnabled()
+            }
+            return
+        }
+
+        queuePendingThirdPartyCall(
+            PendingThirdPartyCall(
+                app = CallingApp.SIGNAL,
+                dataId = dataId,
+                isVideoCall = true,
+            ),
+        )
+    }
+
+    private fun queuePendingThirdPartyCall(pendingCall: PendingThirdPartyCall) {
+        uiStateUpdater { it.copy(pendingThirdPartyCall = pendingCall) }
+    }
+
+    private fun executePendingThirdPartyCall(pendingCall: PendingThirdPartyCall) {
+        when (pendingCall.app) {
+            CallingApp.WHATSAPP -> {
+                val success =
+                    if (pendingCall.isVideoCall) {
+                        ContactIntentHelpers.openWhatsAppVideoCall(context, pendingCall.dataId) { resId -> showToastCallback(resId) }
+                    } else {
+                        ContactIntentHelpers.openWhatsAppCall(context, pendingCall.dataId) { resId -> showToastCallback(resId) }
+                    }
+                if (success) {
+                    clearQueryIfEnabled()
+                }
+            }
+            CallingApp.TELEGRAM -> {
+                val success =
+                    if (pendingCall.isVideoCall) {
+                        ContactIntentHelpers.openTelegramVideoCall(context, pendingCall.dataId, pendingCall.phoneNumber)
+                    } else {
+                        pendingCall.dataId?.let { dataId ->
+                            ContactIntentHelpers.openTelegramCall(context, dataId) { resId -> showToastCallback(resId) }
+                        } ?: run {
+                            pendingCall.phoneNumber?.let { number ->
+                                ContactIntentHelpers.openTelegramCall(context, number) { resId -> showToastCallback(resId) }
+                                true
+                            } ?: false
+                        }
+                    }
+                if (success) {
+                    clearQueryIfEnabled()
+                }
+            }
+            CallingApp.SIGNAL -> {
+                val success =
+                    if (pendingCall.isVideoCall) {
+                        ContactIntentHelpers.openSignalVideoCall(context, pendingCall.dataId) { resId -> showToastCallback(resId) }
+                    } else {
+                        ContactIntentHelpers.openSignalCall(context, pendingCall.dataId) { resId -> showToastCallback(resId) }
+                    }
+                if (success) {
+                    clearQueryIfEnabled()
+                }
+            }
+            else -> Unit
         }
     }
 }

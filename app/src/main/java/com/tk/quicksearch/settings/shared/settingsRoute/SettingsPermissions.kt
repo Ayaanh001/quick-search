@@ -1,7 +1,6 @@
 package com.tk.quicksearch.settings.shared
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.os.Environment
@@ -10,15 +9,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
 import com.tk.quicksearch.R
-import com.tk.quicksearch.onboarding.permissionScreen.PermissionRequestHandler
 import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.core.SearchViewModel
-import com.tk.quicksearch.shared.util.hapticToggle
+import com.tk.quicksearch.shared.permissions.PermissionHelper
 
 /**
  * Handles permission requests and section toggling for the settings screen. Returns a callback
@@ -31,6 +28,8 @@ fun rememberSectionToggleHandler(
 ): (SearchSection, Boolean) -> Unit {
     val context = LocalContext.current
     val pendingSectionEnable = remember { mutableStateOf<SearchSection?>(null) }
+    val contactsWasDenied = remember { mutableStateOf(false) }
+    val filesWasDenied = remember { mutableStateOf(false) }
 
     // Launcher for runtime permissions (contacts, files on pre-R)
     val runtimePermissionsLauncher =
@@ -52,12 +51,21 @@ fun rememberSectionToggleHandler(
             pendingSectionEnable.value?.let { section ->
                 when (section) {
                     SearchSection.CONTACTS -> {
+                        contactsWasDenied.value = !contactsGranted
                         if (contactsGranted) {
                             viewModel.setSectionEnabled(section, true)
+                        } else {
+                            PermissionHelper.handleDeniedRuntimePermission(
+                                context = context,
+                                permission = Manifest.permission.READ_CONTACTS,
+                                wasPreviouslyDenied = true,
+                                onOpenSettings = viewModel::openContactPermissionSettings,
+                            )
                         }
                     }
 
                     SearchSection.FILES -> {
+                        filesWasDenied.value = !filesGranted
                         if (filesGranted ||
                             (
                                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
@@ -65,6 +73,13 @@ fun rememberSectionToggleHandler(
                             )
                         ) {
                             viewModel.setSectionEnabled(section, true)
+                        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                            PermissionHelper.handleDeniedRuntimePermission(
+                                context = context,
+                                permission = Manifest.permission.READ_EXTERNAL_STORAGE,
+                                wasPreviouslyDenied = true,
+                                onOpenSettings = viewModel::openFilesPermissionSettings,
+                            )
                         }
                     }
 
@@ -79,7 +94,7 @@ fun rememberSectionToggleHandler(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult(),
         ) {
-            val filesGranted = PermissionRequestHandler.checkFilesPermission(context)
+            val filesGranted = PermissionHelper.checkFilesPermission(context)
 
             // Refresh permission state
             viewModel.handleOptionalPermissionChange()
@@ -102,23 +117,24 @@ fun rememberSectionToggleHandler(
                     when (section) {
                         SearchSection.CONTACTS -> {
                             pendingSectionEnable.value = section
-                            runtimePermissionsLauncher.launch(
-                                arrayOf(Manifest.permission.READ_CONTACTS),
+                            PermissionHelper.requestRuntimePermissionOrOpenSettings(
+                                context = context,
+                                permission = Manifest.permission.READ_CONTACTS,
+                                wasPreviouslyDenied = contactsWasDenied.value,
+                                runtimeLauncher = runtimePermissionsLauncher,
+                                onOpenSettings = viewModel::openContactPermissionSettings,
                             )
                         }
 
                         SearchSection.FILES -> {
                             pendingSectionEnable.value = section
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                PermissionRequestHandler.launchAllFilesAccessRequest(
-                                    allFilesAccessLauncher,
-                                    context,
-                                )
-                            } else {
-                                runtimePermissionsLauncher.launch(
-                                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                                )
-                            }
+                            PermissionHelper.requestFilesPermission(
+                                context = context,
+                                wasPreviouslyDenied = filesWasDenied.value,
+                                runtimeLauncher = runtimePermissionsLauncher,
+                                allFilesLauncher = allFilesAccessLauncher,
+                                onOpenSettings = viewModel::openFilesPermissionSettings,
+                            )
                         }
 
                         SearchSection.APPS -> {
@@ -164,15 +180,12 @@ fun createPermissionRequestHandler(
     permission: String,
     fallbackAction: () -> Unit,
 ): () -> Unit =
-    androidx.compose.runtime.remember(context, permissionLauncher, permission, fallbackAction) {
-        {
-            if (context !is Activity) {
-                fallbackAction()
-            } else {
-                permissionLauncher.launch(permission)
-            }
-        }
-    }
+    PermissionHelper.rememberPermissionRequestHandler(
+        context = context,
+        permissionLauncher = permissionLauncher,
+        permission = permission,
+        fallbackAction = fallbackAction,
+    )
 
 /** Handles the result of a permission request with standardized logic. */
 fun handlePermissionResult(
@@ -184,18 +197,13 @@ fun handlePermissionResult(
     onGranted: (() -> Unit)? = null,
     onComplete: (() -> Unit)? = null,
 ) {
-    onPermissionChanged()
-
-    if (isGranted) {
-        onGranted?.invoke()
-    } else if (context is Activity) {
-        val shouldShowRationale =
-            ActivityCompat.shouldShowRequestPermissionRationale(context, permission)
-        if (!shouldShowRationale) {
-            // Permission permanently denied, open settings
-            onPermanentlyDenied()
-        }
-    }
-
-    onComplete?.invoke()
+    PermissionHelper.handlePermissionResult(
+        isGranted = isGranted,
+        context = context,
+        permission = permission,
+        onPermanentlyDenied = onPermanentlyDenied,
+        onPermissionChanged = onPermissionChanged,
+        onGranted = onGranted,
+        onComplete = onComplete,
+    )
 }

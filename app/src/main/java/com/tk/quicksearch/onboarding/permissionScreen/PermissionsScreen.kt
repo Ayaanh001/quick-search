@@ -1,10 +1,7 @@
 package com.tk.quicksearch.onboarding.permissionScreen
 
 import android.Manifest
-import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -25,7 +22,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,6 +49,7 @@ import com.tk.quicksearch.onboarding.OnboardingHeader
 import com.tk.quicksearch.search.data.AppsRepository
 import com.tk.quicksearch.search.data.ContactRepository
 import com.tk.quicksearch.search.data.FileSearchRepository
+import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
@@ -100,21 +97,34 @@ fun PermissionsScreen(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestMultiplePermissions(),
         ) { permissions ->
-            val contactsGranted = permissions[Manifest.permission.READ_CONTACTS] == true
-            contactsPermissionState = updatePermissionState(contactsGranted, contactsGranted)
+            permissions[Manifest.permission.READ_CONTACTS]?.let { contactsGranted ->
+                contactsPermissionState =
+                    updatePermissionState(
+                        isGranted = contactsGranted,
+                        isEnabled = contactsGranted,
+                        wasDenied = !contactsGranted,
+                    )
+            }
 
-            val callingGranted = permissions[Manifest.permission.CALL_PHONE] == true
-            callingPermissionState = updatePermissionState(callingGranted, callingGranted)
+            permissions[Manifest.permission.CALL_PHONE]?.let { callingGranted ->
+                callingPermissionState =
+                    updatePermissionState(
+                        isGranted = callingGranted,
+                        isEnabled = callingGranted,
+                        wasDenied = !callingGranted,
+                    )
+            }
 
             // Handle files permission for pre-R Android
             if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R) {
-                val filesGranted = permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true
-                filesPermissionState =
-                    updatePermissionState(
-                        filesGranted,
-                        filesGranted,
-                        wasDenied = !filesGranted,
-                    )
+                permissions[Manifest.permission.READ_EXTERNAL_STORAGE]?.let { filesGranted ->
+                    filesPermissionState =
+                        updatePermissionState(
+                            filesGranted,
+                            filesGranted,
+                            wasDenied = !filesGranted,
+                        )
+                }
             }
         }
 
@@ -122,7 +132,7 @@ fun PermissionsScreen(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult(),
         ) {
-            val filesGranted = PermissionRequestHandler.checkFilesPermission(context)
+            val filesGranted = PermissionHelper.checkFilesPermission(context)
             filesPermissionState = updatePermissionState(filesGranted, filesGranted)
         }
 
@@ -148,7 +158,12 @@ fun PermissionsScreen(
 
                     val hasCallingPermission =
                         ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED
-                    callingPermissionState = updatePermissionState(hasCallingPermission, hasCallingPermission)
+                    callingPermissionState =
+                        if (hasCallingPermission) {
+                            updatePermissionState(isGranted = true, isEnabled = true, wasDenied = false)
+                        } else {
+                            callingPermissionState.copy(isGranted = false)
+                        }
                 }
             }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -186,36 +201,20 @@ fun PermissionsScreen(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.Start,
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors =
-                    CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    ),
-                shape = RoundedCornerShape(DesignTokens.OnboardingPermissionCardCornerRadius),
-            ) {
-                Column {
-                    // Usage Permission Item
-                    PermissionItem(
+            val permissionItems =
+                listOf(
+                    PermissionCardItem(
                         title = stringResource(R.string.permissions_usage_title),
                         description = stringResource(R.string.permissions_usage_desc),
                         permissionState = usagePermissionState,
                         isMandatory = false,
                         onToggleChange = { enabled ->
                             if (enabled && !usagePermissionState.isGranted) {
-                                PermissionRequestHandler.launchUsageAccessRequest(context)
+                                PermissionHelper.launchUsageAccessRequest(context)
                             }
                         },
-                    )
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = DesignTokens.SpacingXLarge),
-                        thickness = DesignTokens.DividerThickness,
-                        color = MaterialTheme.colorScheme.outlineVariant,
-                    )
-
-                    // Contacts Permission Item (Optional)
-                    PermissionItem(
+                    ),
+                    PermissionCardItem(
                         title = stringResource(R.string.permissions_contacts_title),
                         description = stringResource(R.string.permissions_contacts_desc),
                         permissionState = contactsPermissionState,
@@ -223,21 +222,16 @@ fun PermissionsScreen(
                         onToggleChange = { enabled ->
                             contactsPermissionState = contactsPermissionState.copy(isEnabled = enabled)
                             if (enabled && !contactsPermissionState.isGranted) {
-                                multiplePermissionsLauncher.launch(
-                                    arrayOf(Manifest.permission.READ_CONTACTS),
+                                PermissionHelper.requestRuntimePermissionOrOpenSettings(
+                                    context = context,
+                                    permission = Manifest.permission.READ_CONTACTS,
+                                    wasPreviouslyDenied = contactsPermissionState.wasDenied,
+                                    runtimeLauncher = multiplePermissionsLauncher,
                                 )
                             }
                         },
-                    )
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = DesignTokens.SpacingXLarge),
-                        thickness = DesignTokens.DividerThickness,
-                        color = MaterialTheme.colorScheme.outlineVariant,
-                    )
-
-                    // Files Permission Item (Optional)
-                    PermissionItem(
+                    ),
+                    PermissionCardItem(
                         title = stringResource(R.string.permissions_files_title),
                         description = stringResource(R.string.permissions_files_desc),
                         permissionState = filesPermissionState,
@@ -245,24 +239,16 @@ fun PermissionsScreen(
                         onToggleChange = { enabled ->
                             filesPermissionState = filesPermissionState.copy(isEnabled = enabled)
                             if (enabled && !filesPermissionState.isGranted) {
-                                handleFilesPermissionRequest(
+                                PermissionHelper.requestFilesPermission(
                                     context = context,
-                                    permissionState = filesPermissionState,
+                                    wasPreviouslyDenied = filesPermissionState.wasDenied,
                                     runtimeLauncher = multiplePermissionsLauncher,
                                     allFilesLauncher = allFilesAccessLauncher,
                                 )
                             }
                         },
-                    )
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = DesignTokens.SpacingXLarge),
-                        thickness = DesignTokens.DividerThickness,
-                        color = MaterialTheme.colorScheme.outlineVariant,
-                    )
-
-                    // Calling Permission Item (Optional)
-                    PermissionItem(
+                    ),
+                    PermissionCardItem(
                         title = stringResource(R.string.permissions_calling_title),
                         description = stringResource(R.string.permissions_calling_desc),
                         permissionState = callingPermissionState,
@@ -270,14 +256,33 @@ fun PermissionsScreen(
                         onToggleChange = { enabled ->
                             callingPermissionState = callingPermissionState.copy(isEnabled = enabled)
                             if (enabled && !callingPermissionState.isGranted) {
-                                multiplePermissionsLauncher.launch(
-                                    arrayOf(Manifest.permission.CALL_PHONE),
+                                PermissionHelper.requestRuntimePermissionOrOpenSettings(
+                                    context = context,
+                                    permission = Manifest.permission.CALL_PHONE,
+                                    wasPreviouslyDenied = callingPermissionState.wasDenied,
+                                    runtimeLauncher = multiplePermissionsLauncher,
                                 )
                             }
                         },
-                    )
-                }
-            }
+                    ),
+                )
+
+            PermissionCard(
+                items = permissionItems,
+                modifier = Modifier.fillMaxWidth(),
+                cardContainer = { cardModifier, content ->
+                    Card(
+                        modifier = cardModifier,
+                        colors =
+                            CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            ),
+                        shape = RoundedCornerShape(DesignTokens.OnboardingPermissionCardCornerRadius),
+                    ) {
+                        content()
+                    }
+                },
+            )
         }
 
         Spacer(modifier = Modifier.height(DesignTokens.OnboardingCompactSpacing))
@@ -429,31 +434,3 @@ private fun updatePermissionState(
         wasDenied = wasDenied,
     )
 
-/**
- * Handles files permission request with different logic for Android versions.
- * - Android R+: Always opens settings to request "All files access" permission
- * - Pre-R: Opens settings if permission was previously denied, otherwise requests runtime permission
- */
-private fun handleFilesPermissionRequest(
-    context: Context,
-    permissionState: PermissionState,
-    runtimeLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>,
-    allFilesLauncher: androidx.activity.result.ActivityResultLauncher<Intent>,
-) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        // Android R+ - always open settings
-        PermissionRequestHandler.launchAllFilesAccessRequest(allFilesLauncher, context)
-    } else {
-        // Pre-R Android - check if we should open settings or request permission
-        if (PermissionRequestHandler.shouldOpenSettingsForFiles(
-                context,
-                permissionState.wasDenied,
-            )
-        ) {
-            PermissionRequestHandler.launchAppSettingsRequest(context)
-        } else {
-            // First time or can show rationale - request permission
-            runtimeLauncher.launch(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE))
-        }
-    }
-}

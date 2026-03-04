@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -27,6 +28,43 @@ import com.tk.quicksearch.shared.util.hapticToggle
  * Color for granted checkmark - Material Green (same as phone action color)
  */
 private val GrantedCheckmarkColor = DesignTokens.ColorPhone
+
+data class PermissionCardItem(
+    val title: String,
+    val description: String,
+    val permissionState: PermissionState,
+    val isMandatory: Boolean,
+    val onToggleChange: (Boolean) -> Unit,
+)
+
+@Composable
+fun PermissionCard(
+    items: List<PermissionCardItem>,
+    cardContainer: @Composable (modifier: Modifier, content: @Composable () -> Unit) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    cardContainer(modifier) {
+        Column {
+            items.forEachIndexed { index, item ->
+                PermissionItem(
+                    title = item.title,
+                    description = item.description,
+                    permissionState = item.permissionState,
+                    isMandatory = item.isMandatory,
+                    onToggleChange = item.onToggleChange,
+                )
+
+                if (index < items.lastIndex) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = DesignTokens.SpacingXLarge),
+                        thickness = DesignTokens.DividerThickness,
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                    )
+                }
+            }
+        }
+    }
+}
 
 /**
  * An item component that displays a permission with its title, description, and toggle/status.
@@ -91,7 +129,7 @@ fun PermissionItem(
             )
         } else {
             Switch(
-                checked = permissionState.isEnabled,
+                checked = false,
                 onCheckedChange = { newValue ->
                     hapticToggle(view)()
                     if (newValue) {

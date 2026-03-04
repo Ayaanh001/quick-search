@@ -111,6 +111,13 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".widgets.customButtonsWidget.WidgetActionActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@style/Theme.QuickSearch" />
+
         <!-- Settings Activities -->
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"

@@ -39,10 +39,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.onboarding.permissionScreen.PermissionRequestHandler
 import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
+import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.settings.AppShortcutsSettings.AppShortcutSource
 import com.tk.quicksearch.settings.shared.SettingsScreenCallbacks
 import com.tk.quicksearch.settings.shared.SettingsScreenState
@@ -205,7 +205,7 @@ internal fun SettingsDetailLevel2Screen(
                                 onSetCallingApp = callbacks.onSetCallingApp,
                                 directDialEnabled = state.directDialEnabled,
                                 onToggleDirectDial = callbacks.onToggleDirectDial,
-                                hasCallPermission = PermissionRequestHandler.checkCallPermission(context),
+                                hasCallPermission = PermissionHelper.checkCallPermission(context),
                                 contactsSectionEnabled = true,
                                 isWhatsAppInstalled = state.isWhatsAppInstalled,
                                 isTelegramInstalled = state.isTelegramInstalled,

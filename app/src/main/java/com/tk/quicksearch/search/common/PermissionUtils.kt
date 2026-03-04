@@ -4,10 +4,9 @@ import android.Manifest
 import android.app.AppOpsManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
-import android.os.Environment
 import android.os.Process
 import androidx.core.content.ContextCompat
+import com.tk.quicksearch.shared.permissions.PermissionHelper
 
 /**
  * Utility functions for checking various Android permissions.
@@ -45,13 +44,5 @@ object PermissionUtils {
     /**
      * Checks if the app has file access permission (READ_EXTERNAL_STORAGE pre-R, MANAGE_EXTERNAL_STORAGE R+).
      */
-    fun hasFileAccessPermission(context: Context): Boolean =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-            ) == PackageManager.PERMISSION_GRANTED
-        }
+    fun hasFileAccessPermission(context: Context): Boolean = PermissionHelper.checkFilesPermission(context)
 }

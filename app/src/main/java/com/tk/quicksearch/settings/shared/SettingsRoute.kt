@@ -60,9 +60,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tk.quicksearch.R
-import com.tk.quicksearch.onboarding.permissionScreen.PermissionRequestHandler
 import com.tk.quicksearch.search.core.*
 import com.tk.quicksearch.search.data.UserAppPreferences
+import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.tools.directSearch.GeminiTextModel
 import com.tk.quicksearch.tile.requestAddQuickSearchTile
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
@@ -163,7 +163,7 @@ fun SettingsRoute(
 
     val onToggleDirectDial: (Boolean) -> Unit = { enabled ->
         if (enabled) {
-            if (PermissionRequestHandler.checkCallPermission(context)) {
+            if (PermissionHelper.checkCallPermission(context)) {
                 viewModel.setDirectDialEnabled(true)
             } else {
                 pendingEnableDirectDial.value = true

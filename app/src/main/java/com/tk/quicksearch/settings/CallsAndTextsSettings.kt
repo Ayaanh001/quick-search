@@ -24,6 +24,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +40,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.*
+import com.tk.quicksearch.shared.permissions.CallPermissionSettingsDialog
+import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.settings.shared.*
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticConfirm
@@ -206,12 +212,30 @@ private fun DirectDialCard(
     onToggleDirectDial: (Boolean) -> Unit,
     hasCallPermission: Boolean,
 ) {
+    val context = LocalContext.current
+    var showCallPermissionSettingsDialog by remember { mutableStateOf(false) }
     val callPermissionLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
         ) { isGranted ->
             if (isGranted) {
                 onToggleDirectDial(true)
+            } else {
+                val shouldShowSettingsDialog =
+                    PermissionHelper.shouldOpenSettingsForRuntimePermission(
+                        context = context,
+                        permission = Manifest.permission.CALL_PHONE,
+                        wasPreviouslyDenied = true,
+                    )
+                if (shouldShowSettingsDialog) {
+                    showCallPermissionSettingsDialog = true
+                } else {
+                    PermissionHelper.handleDeniedRuntimePermission(
+                    context = context,
+                    permission = Manifest.permission.CALL_PHONE,
+                    wasPreviouslyDenied = true,
+                )
+                }
             }
         }
 
@@ -236,6 +260,18 @@ private fun DirectDialCard(
             },
             isFirstItem = true,
             isLastItem = true,
+        )
+    }
+
+    if (showCallPermissionSettingsDialog) {
+        CallPermissionSettingsDialog(
+            onConfirm = {
+                showCallPermissionSettingsDialog = false
+                PermissionHelper.launchAppSettingsRequest(context)
+            },
+            onDismiss = {
+                showCallPermissionSettingsDialog = false
+            },
         )
     }
 }
@@ -575,6 +611,30 @@ fun CallsTextsSettingsSection(
     }
 
     val context = LocalContext.current
+    var pendingCallingAppSelection by remember { mutableStateOf<CallingApp?>(null) }
+    var showCallPermissionSettingsDialog by remember { mutableStateOf(false) }
+    val callPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+        ) { isGranted ->
+            val pendingApp = pendingCallingAppSelection
+            pendingCallingAppSelection = null
+            if (isGranted && pendingApp != null) {
+                onSetCallingApp(pendingApp)
+                return@rememberLauncherForActivityResult
+            }
+            if (!isGranted) {
+                val shouldShowSettingsDialog =
+                    PermissionHelper.shouldOpenSettingsForRuntimePermission(
+                        context = context,
+                        permission = Manifest.permission.CALL_PHONE,
+                        wasPreviouslyDenied = true,
+                    )
+                if (shouldShowSettingsDialog) {
+                    showCallPermissionSettingsDialog = true
+                }
+            }
+        }
 
     // Callback for calling app selection with installation check
     @Suppress("LocalContextGetResourceValueCall")
@@ -589,7 +649,16 @@ fun CallsTextsSettingsSection(
             }
 
         if (isInstalled) {
-            onSetCallingApp(app)
+            val requiresCallPermission =
+                app == CallingApp.WHATSAPP ||
+                    app == CallingApp.TELEGRAM ||
+                    app == CallingApp.SIGNAL
+            if (requiresCallPermission && !PermissionHelper.checkCallPermission(context)) {
+                pendingCallingAppSelection = app
+                callPermissionLauncher.launch(Manifest.permission.CALL_PHONE)
+            } else {
+                onSetCallingApp(app)
+            }
         } else {
             val appName =
                 when (app) {
@@ -677,4 +746,16 @@ fun CallsTextsSettingsSection(
         showTitle = false,
         modifier = modifier,
     )
+
+    if (showCallPermissionSettingsDialog) {
+        CallPermissionSettingsDialog(
+            onConfirm = {
+                showCallPermissionSettingsDialog = false
+                PermissionHelper.launchAppSettingsRequest(context)
+            },
+            onDismiss = {
+                showCallPermissionSettingsDialog = false
+            },
+        )
+    }
 }

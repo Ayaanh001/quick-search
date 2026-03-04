@@ -27,7 +27,6 @@
     <string name="direct_search_error_generic">Couldn\u2019t fetch a direct answer. Try again.</string>
     <string name="direct_search_enter_query">Please enter a query to search.</string>
     <string name="direct_search_powered_by">Powered by</string>
-    <string name="error_gemini_models_load_failed">Unable to load Gemini models</string>
     <string name="error_open_email">No email app found to send mail.</string>
     <string name="error_open_search_engine">Unable to open %1$s</string>
     <string name="keyboard_switch_back">Switch to regular keyboard</string>
@@ -37,7 +36,6 @@
     <string name="direct_answer_contact_name">Direct Answer</string>
     <string name="error_unknown">Unknown error</string>
     <string name="error_gemini_empty_response">Empty response from Gemini</string>
-    <string name="error_request_failed">Request failed (%1$d)</string>
     <string name="error_gemini_load_models_failed">Unable to load Gemini models</string>
     <string name="error_gemini_request_failed">Request failed (%1$d)</string>
     <string name="gemini_model_flash_latest">Gemini Flash (Latest)</string>
@@ -92,7 +90,7 @@
     <string name="direct_search_personal_context_tip">Tip: Add details to your %1$s for personalized results.</string>
     <string name="error_open_contact">Unable to open that contact</string>
     <string name="error_missing_phone_number">No phone number available</string>
-    <string name="error_whatsapp_call_permission">Phone permission required for WhatsApp calls</string>
+    <string name="error_call_permission_required">Phone permission is required for this action</string>
     <string name="error_whatsapp_video_call_missing_data">Cannot make WhatsApp video call - missing contact data</string>
     <string name="error_whatsapp_not_installed">WhatsApp is not installed</string>
     <string name="error_whatsapp_call_failed">WhatsApp call failed. Please ensure WhatsApp is installed.</string>
@@ -238,6 +236,8 @@
     <string name="dialog_done">Done</string>
     <string name="dialog_ok">Continue</string>
     <string name="dialog_okay">Okay</string>
+    <string name="call_permission_settings_dialog_title">Phone Permission Required</string>
+    <string name="call_permission_settings_dialog_message">Phone permission is required for this action. You will be taken to app settings to enable it.</string>
     <string name="dialog_call">Call</string>
     <string name="dialog_sms">Message</string>
     <string name="dialog_edit_shortcut_title">Edit shortcut</string>
@@ -286,7 +286,7 @@
     <string name="settings_usage_access_title">Usage Access</string>
     <string name="settings_contacts_permission_title">Contacts</string>
     <string name="settings_files_permission_title">Files</string>
-    <string name="settings_call_permission_title">Calling</string>
+    <string name="settings_call_permission_title">Phone</string>
 
     <!-- ============================================================================
          Settings - App Index
@@ -650,7 +650,7 @@
     <string name="permissions_contacts_desc">Required to search your contacts.</string>
     <string name="permissions_files_title">Files Access</string>
     <string name="permissions_files_desc">Required to search through your documents and other files.</string>
-    <string name="permissions_calling_title">Calling</string>
+    <string name="permissions_calling_title">Phone</string>
     <string name="permissions_calling_desc">Required to call your contacts directly without opening the dialer.</string>
     <string name="permissions_granted">Granted</string>
     <string name="permissions_reminder_dialog_title">Permissions Not Granted</string>

@@ -17,8 +17,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.tk.quicksearch.R
-import com.tk.quicksearch.onboarding.permissionScreen.PermissionRequestHandler
 import com.tk.quicksearch.search.core.BackgroundSource
+import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.settings.AppShortcutsSettings.AppActivityPickerDialog
 import com.tk.quicksearch.settings.AppShortcutsSettings.AppActivitySource
 import com.tk.quicksearch.settings.AppShortcutsSettings.AppShortcutSource
@@ -49,7 +49,7 @@ internal fun rememberWallpaperPermissionController(
     var showWallpaperFallbackDialog by remember { mutableStateOf(false) }
     var requiresImagePermissionAfterSecurityError by remember { mutableStateOf(false) }
     var wallpaperButtonHasPermission by
-        remember { mutableStateOf(PermissionRequestHandler.checkFilesPermission(context)) }
+        remember { mutableStateOf(PermissionHelper.checkFilesPermission(context)) }
 
     suspend fun tryFetchWallpaperWithFilesPermission() {
         when (WallpaperUtils.getWallpaperBitmapResult(context)) {
@@ -82,7 +82,7 @@ internal fun rememberWallpaperPermissionController(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult(),
         ) {
-            val filesGranted = PermissionRequestHandler.checkFilesPermission(context)
+            val filesGranted = PermissionHelper.checkFilesPermission(context)
             wallpaperButtonHasPermission = filesGranted && !requiresImagePermissionAfterSecurityError
             if (filesGranted) {
                 scope.launch { tryFetchWallpaperWithFilesPermission() }
@@ -122,10 +122,10 @@ internal fun rememberWallpaperPermissionController(
     val onRequestWallpaperPermission: () -> Unit = {
         if (requiresImagePermissionAfterSecurityError && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             wallpaperPermissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
-        } else if (!PermissionRequestHandler.checkFilesPermission(context)) {
+        } else if (!PermissionHelper.checkFilesPermission(context)) {
             wallpaperButtonHasPermission = false
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                PermissionRequestHandler.launchAllFilesAccessRequest(
+                PermissionHelper.launchAllFilesAccessRequest(
                     wallpaperFilesAccessLauncher,
                     context,
                 )
@@ -142,7 +142,7 @@ internal fun rememberWallpaperPermissionController(
         onRequestPermission = onRequestWallpaperPermission,
         onRefreshPermissionState = {
             wallpaperButtonHasPermission =
-                PermissionRequestHandler.checkFilesPermission(context) &&
+                PermissionHelper.checkFilesPermission(context) &&
                     !requiresImagePermissionAfterSecurityError
         },
         showFallbackDialog = showWallpaperFallbackDialog,

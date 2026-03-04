@@ -37,6 +37,8 @@ import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.DeviceFile
 import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
 import com.tk.quicksearch.search.utils.FileUtils
+import com.tk.quicksearch.shared.permissions.CallPermissionSettingsDialog
+import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.search.searchScreen.SearchScreen as SearchScreenComposable
 import com.tk.quicksearch.search.searchScreen.ExcludeUndoSnackbarHost
@@ -197,12 +199,31 @@ fun SearchRoute(
     val dismissContactMethodsBottomSheet: () -> Unit = {
         viewModel.dismissContactMethodsBottomSheet()
     }
+    var showCallPermissionSettingsDialog by remember { mutableStateOf(false) }
 
     val callPermissionLauncher =
         if (context is android.app.Activity) {
             rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestPermission(),
-            ) { isGranted -> viewModel.onCallPermissionResult(isGranted) }
+            ) { isGranted ->
+                if (isGranted) {
+                    viewModel.onCallPermissionResult(true)
+                } else {
+                    val shouldShowSettingsDialog =
+                        PermissionHelper.shouldOpenSettingsForRuntimePermission(
+                            context = context,
+                            permission = Manifest.permission.CALL_PHONE,
+                            wasPreviouslyDenied = true,
+                        )
+                    viewModel.onCallPermissionResult(
+                        isGranted = false,
+                        shouldShowPermissionError = !shouldShowSettingsDialog,
+                    )
+                    if (shouldShowSettingsDialog) {
+                        showCallPermissionSettingsDialog = true
+                    }
+                }
+            }
         } else {
             null
         }
@@ -222,11 +243,11 @@ fun SearchRoute(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    LaunchedEffect(uiState.pendingDirectCallNumber, uiState.pendingWhatsAppCallDataId) {
+    LaunchedEffect(uiState.pendingDirectCallNumber, uiState.pendingThirdPartyCall) {
         val pendingNumber = uiState.pendingDirectCallNumber
-        val pendingWhatsAppCall = uiState.pendingWhatsAppCallDataId
+        val pendingThirdPartyCall = uiState.pendingThirdPartyCall
 
-        if (pendingNumber != null || pendingWhatsAppCall != null) {
+        if (pendingNumber != null || pendingThirdPartyCall != null) {
             if (context is android.app.Activity) {
                 callPermissionLauncher?.launch(Manifest.permission.CALL_PHONE)
             } else {
@@ -359,6 +380,18 @@ fun SearchRoute(
                             end = DesignTokens.SpacingLarge,
                             bottom = DesignTokens.SpacingHuge,
                         ),
+            )
+        }
+
+        if (showCallPermissionSettingsDialog) {
+            CallPermissionSettingsDialog(
+                onConfirm = {
+                    showCallPermissionSettingsDialog = false
+                    viewModel.openAppSettings()
+                },
+                onDismiss = {
+                    showCallPermissionSettingsDialog = false
+                },
             )
         }
     }
