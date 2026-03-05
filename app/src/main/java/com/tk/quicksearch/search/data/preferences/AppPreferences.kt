@@ -12,9 +12,6 @@ class AppPreferences(
     private val launchCountsPrefs: SharedPreferences =
         appContext.getSharedPreferences(LAUNCH_COUNTS_PREFS_NAME, Context.MODE_PRIVATE)
 
-    init {
-        migrateHiddenPackages()
-    }
 
     // ============================================================================
     // App Preferences
@@ -120,26 +117,4 @@ class AppPreferences(
     // Private Helper Functions
     // ============================================================================
 
-    private fun migrateHiddenPackages() {
-        val legacyHidden = getStringSet(BasePreferences.KEY_HIDDEN_LEGACY)
-        val currentSuggestions = prefs.getStringSet(BasePreferences.KEY_HIDDEN_SUGGESTIONS, null)
-        val currentResults = prefs.getStringSet(BasePreferences.KEY_HIDDEN_RESULTS, null)
-
-        if (legacyHidden.isEmpty()) {
-            // Nothing to migrate; ensure legacy key is cleaned up if present
-            if (prefs.contains(BasePreferences.KEY_HIDDEN_LEGACY)) {
-                prefs.edit().remove(BasePreferences.KEY_HIDDEN_LEGACY).apply()
-            }
-            return
-        }
-
-        val editor = prefs.edit()
-        if (currentSuggestions.isNullOrEmpty()) {
-            editor.putStringSet(BasePreferences.KEY_HIDDEN_SUGGESTIONS, legacyHidden)
-        }
-        if (currentResults.isNullOrEmpty()) {
-            editor.putStringSet(BasePreferences.KEY_HIDDEN_RESULTS, legacyHidden)
-        }
-        editor.remove(BasePreferences.KEY_HIDDEN_LEGACY).apply()
-    }
 }

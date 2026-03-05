@@ -35,18 +35,6 @@ class UiPreferences(
     }
 
     fun getMessagingApp(): MessagingApp {
-        // Migrate from old boolean preference if it exists
-        val oldKeyExists = prefs.contains(UiPreferences.KEY_USE_WHATSAPP_FOR_MESSAGES)
-        if (oldKeyExists) {
-            val useWhatsApp = getBooleanPref(UiPreferences.KEY_USE_WHATSAPP_FOR_MESSAGES, false)
-            val migratedApp = if (useWhatsApp) MessagingApp.WHATSAPP else MessagingApp.MESSAGES
-            // Save migrated value and remove old key
-            setMessagingApp(migratedApp)
-            prefs.edit().remove(UiPreferences.KEY_USE_WHATSAPP_FOR_MESSAGES).apply()
-            return migratedApp
-        }
-
-        // Read new enum preference
         val appName = prefs.getString(UiPreferences.KEY_MESSAGING_APP, null)
         return if (appName != null) {
             try {

@@ -87,8 +87,9 @@ class StartupPreferencesFacade(
                             .filter { it != com.tk.quicksearch.search.models.FileType.OTHER }
                             .toSet()
                 } else {
-                    com.tk.quicksearch.search.data.preferences.PreferenceUtils
-                            .migrateAndGetFileTypes(enabledFileTypesNames)
+                    enabledFileTypesNames
+                        .mapNotNull { name -> com.tk.quicksearch.search.models.FileType.values().find { it.name == name } }
+                        .toSet()
                 }
 
         return StartupPreferences(
@@ -355,8 +356,9 @@ class StartupPreferencesFacade(
                             .filter { it != com.tk.quicksearch.search.models.FileType.OTHER }
                             .toSet()
                 } else {
-                    com.tk.quicksearch.search.data.preferences.PreferenceUtils
-                            .migrateAndGetFileTypes(enabledFileTypesNames)
+                    enabledFileTypesNames
+                        .mapNotNull { name -> com.tk.quicksearch.search.models.FileType.values().find { it.name == name } }
+                        .toSet()
                 }
 
         val startupPreferences =

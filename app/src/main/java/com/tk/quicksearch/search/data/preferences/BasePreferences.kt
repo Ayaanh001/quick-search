@@ -203,29 +203,6 @@ object PreferenceUtils {
         key: String,
     ): Set<Long> = clearLongSet(prefs, key)
 
-    // ============================================================================
-    // File Type Migration Utility
-    // ============================================================================
-
-    fun migrateAndGetFileTypes(enabledNames: Set<String>): Set<FileType> {
-        val migratedNames =
-            enabledNames
-                .flatMap { name ->
-                    when (name) {
-                        "PHOTOS_AND_VIDEOS" -> listOf("PICTURES", "VIDEOS")
-                        "IMAGES" -> listOf("PICTURES")
-                        "VIDEOS" -> listOf("VIDEOS")
-                        else -> listOf(name)
-                    }
-                }.toSet()
-
-        val result =
-            migratedNames
-                .mapNotNull { name -> FileType.values().find { it.name == name } }
-                .toSet()
-
-        return result
-    }
 }
 
 /** Base class containing shared utilities and constants for all preference classes. */
@@ -383,7 +360,6 @@ abstract class BasePreferences(
     /** Generic clear all excluded items operation for long keys. */
     protected fun clearAllExcludedLongItems(key: String): Set<Long> = PreferenceUtils.clearAllExcludedLongItems(prefs, key)
 
-    protected fun migrateAndGetFileTypes(enabledNames: Set<String>): Set<FileType> = PreferenceUtils.migrateAndGetFileTypes(enabledNames)
 
     protected fun getCurrentInstallTime(): Long? =
         try {

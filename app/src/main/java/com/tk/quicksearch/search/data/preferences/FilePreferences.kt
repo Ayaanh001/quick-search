@@ -78,34 +78,9 @@ class FilePreferences(
             FileType.values().filter { it != FileType.OTHER }.toSet()
         } else {
             val enabledNames = prefs.getStringSet(key, emptySet()).orEmpty()
-            val migratedTypes = migrateAndGetFileTypes(enabledNames)
-            // If migration occurred, save the migrated preferences
-            val currentNames =
-                enabledNames
-                    .map { name ->
-                        when (name) {
-                            "PHOTOS_AND_VIDEOS" -> {
-                                listOf("PICTURES", "VIDEOS")
-                            }
-
-                            "IMAGES" -> {
-                                listOf("PICTURES")
-                            }
-
-                            "VIDEOS" -> {
-                                listOf("VIDEOS")
-                            }
-
-                            else -> {
-                                listOf(name)
-                            }
-                        }
-                    }.flatten()
-                    .toSet()
-            if (currentNames != enabledNames) {
-                setEnabledFileTypes(migratedTypes)
-            }
-            migratedTypes
+            enabledNames
+                .mapNotNull { name -> FileType.values().find { it.name == name } }
+                .toSet()
         }
     }
 
