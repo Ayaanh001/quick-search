@@ -233,15 +233,16 @@ private fun sha256Hex(value: String): String {
 
 private fun extractHostForTemplate(template: String): String? {
     val candidate = template.replace(CUSTOM_QUERY_PLACEHOLDER, "test")
-    val uri =
-        if (candidate.startsWith("http://", ignoreCase = true) ||
-            candidate.startsWith("https://", ignoreCase = true)
-        ) {
-            Uri.parse(candidate)
-        } else {
-            Uri.parse("https://$candidate")
-        }
-    return uri.host?.removePrefix("www.")
+    val parsedUri = Uri.parse(candidate)
+    val scheme = parsedUri.scheme?.lowercase(Locale.getDefault())
+    if (!scheme.isNullOrBlank() && scheme != "http" && scheme != "https") {
+        return scheme.removePrefix("www.")
+    }
+    if (!parsedUri.host.isNullOrBlank()) {
+        return parsedUri.host?.removePrefix("www.")
+    }
+
+    return Uri.parse("https://$candidate").host?.removePrefix("www.")
 }
 
 private fun formatHostNameForDisplay(host: String): String {
