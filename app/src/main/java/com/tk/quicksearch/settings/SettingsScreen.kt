@@ -116,7 +116,6 @@ fun SettingsScreen(
     BackHandler(onBack = callbacks.onBack)
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
     var showImportWarningDialog by remember { mutableStateOf(false) }
     val geminiPreferences = remember(context) { GeminiPreferences(context) }
     var includeGeminiApiKeyInNextExport by remember { mutableStateOf(false) }
@@ -153,8 +152,29 @@ fun SettingsScreen(
             contract = ActivityResultContracts.OpenDocument(),
         ) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
-            pendingImportUri = uri
-            showImportWarningDialog = true
+            coroutineScope.launch(Dispatchers.IO) {
+                val isSuccess =
+                    runCatching {
+                        SettingsBackupManager.importFromUri(context, uri)
+                    }.isSuccess
+                withContext(Dispatchers.Main) {
+                    val messageResId =
+                        if (isSuccess) {
+                            R.string.settings_backup_import_success
+                        } else {
+                            R.string.settings_backup_import_failed
+                        }
+                    Toast
+                        .makeText(
+                            context,
+                            context.getString(messageResId),
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    if (isSuccess) {
+                        onSettingsImported()
+                    }
+                }
+            }
         }
 
     Column(
@@ -341,7 +361,7 @@ fun SettingsScreen(
 
                     BackupRestoreRow(
                         onImportClick = {
-                            importLauncher.launch(arrayOf("*/*"))
+                            showImportWarningDialog = true
                         },
                         onExportClick = {
                             if (geminiPreferences.getGeminiApiKey().isNullOrBlank()) {
@@ -365,11 +385,10 @@ fun SettingsScreen(
         }
     }
 
-    if (showImportWarningDialog && pendingImportUri != null) {
+    if (showImportWarningDialog) {
         AlertDialog(
             onDismissRequest = {
                 showImportWarningDialog = false
-                pendingImportUri = null
             },
             title = {
                 Text(text = stringResource(R.string.settings_backup_import_warning_title))
@@ -380,34 +399,8 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val importUri = pendingImportUri
                         showImportWarningDialog = false
-                        pendingImportUri = null
-                        if (importUri == null) return@TextButton
-
-                        coroutineScope.launch(Dispatchers.IO) {
-                            val isSuccess =
-                                runCatching {
-                                    SettingsBackupManager.importFromUri(context, importUri)
-                                }.isSuccess
-                            withContext(Dispatchers.Main) {
-                                val messageResId =
-                                    if (isSuccess) {
-                                        R.string.settings_backup_import_success
-                                    } else {
-                                        R.string.settings_backup_import_failed
-                                    }
-                                Toast
-                                    .makeText(
-                                        context,
-                                        context.getString(messageResId),
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
-                                if (isSuccess) {
-                                    onSettingsImported()
-                                }
-                            }
-                        }
+                        importLauncher.launch(arrayOf("*/*"))
                     },
                 ) {
                     Text(text = stringResource(R.string.dialog_ok))
@@ -417,7 +410,6 @@ fun SettingsScreen(
                 TextButton(
                     onClick = {
                         showImportWarningDialog = false
-                        pendingImportUri = null
                     },
                 ) {
                     Text(text = stringResource(R.string.dialog_cancel))

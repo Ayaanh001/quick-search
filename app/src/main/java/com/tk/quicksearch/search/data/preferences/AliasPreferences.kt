@@ -21,13 +21,18 @@ open class AliasPreferences(
         val aliasKey = "${BasePreferences.KEY_ALIAS_CODE_PREFIX}${engine.name}"
         val legacyKey = "${BasePreferences.KEY_SHORTCUT_CODE_PREFIX_LEGACY}${engine.name}"
         val defaultCode = engine.getDefaultShortcutCode()
+        val aliasValue = prefs.getString(aliasKey, null)
         val storedCode =
-            AliasPreferenceMigration.resolveAliasValue(
-                aliasValue = prefs.getString(aliasKey, null),
-                legacyShortcutValue = prefs.getString(legacyKey, defaultCode),
-            ) ?: defaultCode
+            if (engine == SearchEngine.DIRECT_SEARCH) {
+                aliasValue ?: defaultCode
+            } else {
+                AliasPreferenceMigration.resolveAliasValue(
+                    aliasValue = aliasValue,
+                    legacyShortcutValue = prefs.getString(legacyKey, defaultCode),
+                ) ?: defaultCode
+            }
         val normalizedCode = normalizeShortcutCodeInput(storedCode)
-        if (prefs.getString(aliasKey, null).isNullOrEmpty() && isValidShortcutCode(normalizedCode)) {
+        if (aliasValue.isNullOrEmpty() && isValidShortcutCode(normalizedCode)) {
             prefs.edit().putString(aliasKey, normalizedCode).apply()
         }
         return if (isValidShortcutCode(normalizedCode)) {
@@ -88,7 +93,12 @@ open class AliasPreferences(
         if (prefs.contains(aliasKey)) {
             return getBooleanPref(aliasKey, true)
         }
-        val legacyValue = getBooleanPref(legacyKey, true)
+        val legacyValue =
+            if (engine == SearchEngine.DIRECT_SEARCH) {
+                true
+            } else {
+                getBooleanPref(legacyKey, true)
+            }
         setBooleanPref(aliasKey, legacyValue)
         return legacyValue
     }

@@ -46,6 +46,7 @@ fun AppearanceSettingsSection(
         onRequestWallpaperPermission: () -> Unit,
         isSearchEngineCompactMode: Boolean,
         searchEngineCompactRowCount: Int,
+        hasEnabledSearchEngines: Boolean,
         onToggleSearchEngineCompactMode: (Boolean) -> Unit,
         onSetSearchEngineCompactRowCount: (Int) -> Unit,
         selectedIconPackPackage: String?,
@@ -96,15 +97,17 @@ fun AppearanceSettingsSection(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Search Engine Style Card
-        SearchEngineAppearanceCard(
-                isSearchEngineCompactMode = isSearchEngineCompactMode,
-                onToggleSearchEngineCompactMode = onToggleSearchEngineCompactMode,
-                compactRowCount = searchEngineCompactRowCount,
-                onSetCompactRowCount = onSetSearchEngineCompactRowCount,
-        )
+        if (hasEnabledSearchEngines) {
+            // Search Engine Style Card
+            SearchEngineAppearanceCard(
+                    isSearchEngineCompactMode = isSearchEngineCompactMode,
+                    onToggleSearchEngineCompactMode = onToggleSearchEngineCompactMode,
+                    compactRowCount = searchEngineCompactRowCount,
+                    onSetCompactRowCount = onSetSearchEngineCompactRowCount,
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         // One-Handed Mode and Icon Pack Card
         CombinedLayoutIconCard(

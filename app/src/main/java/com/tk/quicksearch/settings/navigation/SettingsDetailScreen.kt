@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.utils.PermissionUtils
+import com.tk.quicksearch.searchEngines.getId
 import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.settings.searchEnginesScreen.SearchEngines
 import com.tk.quicksearch.settings.shared.SettingsScreenCallbacks
@@ -176,6 +177,11 @@ internal fun SettingsDetailLevel1Screen(
                     }
 
                     SettingsDetailType.APPEARANCE -> {
+                        val hasEnabledSearchEngines =
+                            state.searchEngineOrder.any { target ->
+                                target.getId() !in state.disabledSearchEngines
+                            }
+
                         AppearanceSettingsSection(
                             oneHandedMode = state.oneHandedMode,
                             onToggleOneHandedMode = callbacks.onToggleOneHandedMode,
@@ -198,6 +204,7 @@ internal fun SettingsDetailLevel1Screen(
                             onRequestWallpaperPermission = callbacks.onRequestWallpaperPermission,
                             isSearchEngineCompactMode = state.isSearchEngineCompactMode,
                             searchEngineCompactRowCount = state.searchEngineCompactRowCount,
+                            hasEnabledSearchEngines = hasEnabledSearchEngines,
                             onToggleSearchEngineCompactMode = callbacks.onToggleSearchEngineCompactMode,
                             onSetSearchEngineCompactRowCount = callbacks.onSetSearchEngineCompactRowCount,
                             selectedIconPackPackage = state.selectedIconPackPackage,
