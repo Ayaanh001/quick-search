@@ -12,6 +12,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,6 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.tk.quicksearch.onboarding.FinalSetupScreen
 import com.tk.quicksearch.onboarding.SearchEngineSetupScreen
 import com.tk.quicksearch.onboarding.permissionScreen.PermissionsScreen
@@ -76,6 +80,8 @@ fun MainContent(
     val initialSettingsDetailType = navigationRequest?.settingsDetailType
     var destination by rememberSaveable { mutableStateOf(initialDestination) }
     var settingsDetailType by rememberSaveable { mutableStateOf(initialSettingsDetailType) }
+    var hasEnteredMainForegroundOnce by remember { mutableStateOf(false) }
+    val lifecycleOwner = LocalLifecycleOwner.current
     val uiState by searchViewModel.uiState.collectAsState()
 
     LaunchedEffect(navigationRequest) {
@@ -84,6 +90,27 @@ fun MainContent(
             settingsDetailType = request.settingsDetailType
             onNavigationRequestHandled()
         }
+    }
+
+    LaunchedEffect(settingsDetailType) {
+        settingsDetailType?.let(SettingsNavigationMemory::rememberSettingsDetail)
+    }
+
+    DisposableEffect(lifecycleOwner, currentScreen) {
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event != Lifecycle.Event.ON_START || currentScreen != AppScreen.Main) {
+                    return@LifecycleEventObserver
+                }
+
+                if (hasEnteredMainForegroundOnce) {
+                    destination = RootDestination.Search
+                } else {
+                    hasEnteredMainForegroundOnce = true
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     // Permission request handlers for settings detail screens
@@ -401,31 +428,28 @@ private fun NavigationContent(
                 BackHandler { onSearchBackPressed() }
                 val keyboardController =
                     androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+                val lastOpenedSettingsDetail = SettingsNavigationMemory.getLastOpenedSettingsDetail()
+                val navigateToSettings: (SettingsDetailType?) -> Unit = { detailType ->
+                    onDestinationChange(RootDestination.Settings)
+                    onSettingsDetailTypeChange(detailType)
+                    keyboardController?.hide()
+                }
                 SearchRoute(
                     viewModel = viewModel,
                     onSettingsClick = {
-                        onDestinationChange(RootDestination.Settings)
-                        keyboardController?.hide()
+                        navigateToSettings(settingsDetailType ?: lastOpenedSettingsDetail)
                     },
                     onOpenSearchHistorySettings = {
-                        onDestinationChange(RootDestination.Settings)
-                        onSettingsDetailTypeChange(SettingsDetailType.SEARCH_RESULTS)
-                        keyboardController?.hide()
+                        navigateToSettings(SettingsDetailType.SEARCH_RESULTS)
                     },
                     onSearchEngineLongPress = {
-                        onDestinationChange(RootDestination.Settings)
-                        onSettingsDetailTypeChange(SettingsDetailType.SEARCH_ENGINES)
-                        keyboardController?.hide()
+                        navigateToSettings(SettingsDetailType.SEARCH_ENGINES)
                     },
                     onCustomizeSearchEnginesClick = {
-                        onDestinationChange(RootDestination.Settings)
-                        onSettingsDetailTypeChange(SettingsDetailType.SEARCH_ENGINES)
-                        keyboardController?.hide()
+                        navigateToSettings(SettingsDetailType.SEARCH_ENGINES)
                     },
                     onOpenDirectSearchConfigure = {
-                        onDestinationChange(RootDestination.Settings)
-                        onSettingsDetailTypeChange(SettingsDetailType.DIRECT_SEARCH_CONFIGURE)
-                        keyboardController?.hide()
+                        navigateToSettings(SettingsDetailType.DIRECT_SEARCH_CONFIGURE)
                     },
                     onWelcomeAnimationCompleted = {
                         viewModel.onSearchBarWelcomeAnimationCompleted()

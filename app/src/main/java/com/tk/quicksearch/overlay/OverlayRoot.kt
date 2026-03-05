@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
+import com.tk.quicksearch.app.navigation.SettingsNavigationMemory
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.OverlayGradientTheme
 import com.tk.quicksearch.search.core.SearchViewModel
@@ -303,6 +304,9 @@ fun OverlayRoot(
                                                         OverlayModeController.openMainActivity(
                                                                 context,
                                                                 openSettings = true,
+                                                                settingsDetailType =
+                                                                        SettingsNavigationMemory
+                                                                                .getLastOpenedSettingsDetail(),
                                                         )
                                                         handleClose()
                                                 },

@@ -19,6 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tk.quicksearch.app.navigation.MainContent
 import com.tk.quicksearch.app.navigation.NavigationRequest
 import com.tk.quicksearch.app.navigation.RootDestination
+import com.tk.quicksearch.app.navigation.SettingsNavigationMemory
 import com.tk.quicksearch.search.core.SearchEngine
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.core.SearchViewModel
@@ -270,6 +271,7 @@ class MainActivity : ComponentActivity() {
                     ?.let { name ->
                         runCatching { SettingsDetailType.valueOf(name) }.getOrNull()
                     }
+                    ?: SettingsNavigationMemory.getLastOpenedSettingsDetail()
             navigationRequest.value =
                 NavigationRequest(
                     destination = RootDestination.Settings,
