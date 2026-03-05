@@ -495,7 +495,7 @@ private fun SearchEngineRowContent(
                 color = MaterialTheme.colorScheme.onSurface,
             )
             if (onShortcutCodeChange != null) {
-                ShortcutCodeDisplay(
+                AliasCodeDisplay(
                     shortcutCode = shortcutCode,
                     isEnabled = shortcutEnabled,
                     onCodeChange = onShortcutCodeChange,

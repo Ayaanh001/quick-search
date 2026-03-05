@@ -246,6 +246,11 @@
     <string name="dialog_edit_shortcut_error_prefix">This code overlaps with an existing shortcut code</string>
     <string name="dialog_save">Save</string>
     <string name="dialog_enable_shortcut">Enable shortcut</string>
+    <string name="dialog_edit_alias_title">Edit alias</string>
+    <string name="dialog_edit_alias_message">Enter an alias code for %1$s</string>
+    <string name="dialog_edit_alias_error_length">Alias must be at least 2 characters.</string>
+    <string name="dialog_edit_alias_error_prefix">This code overlaps with an existing alias code</string>
+    <string name="dialog_enable_alias">Enable alias</string>
     <string name="dialog_edit_amazon_domain_title">Edit Amazon Domain</string>
     <string name="dialog_edit_amazon_domain_message">Update Amazon domain for your country.</string>
     <string name="dialog_edit_amazon_domain_hint">Examples: amazon.com, amazon.in, amazon.ca, etc.</string>
@@ -425,6 +430,9 @@
     <string name="settings_default_search_engine_hint_message">Tip: The first search engine in the list becomes your default. It is used when you press the keyboard\'s search button when there are no other results.</string>
     <string name="settings_shortcut_label">Shortcut:</string>
     <string name="settings_add_shortcut">Setup Shortcut</string>
+    <string name="settings_aliases_hint_message">Tip: Add an alias at the start or end of your query to quickly search with that search engine.</string>
+    <string name="settings_alias_label">Alias:</string>
+    <string name="settings_add_alias">Setup Alias</string>
     <string name="settings_edit_label">Edit</string>
     <string name="settings_direct_search_toggle">Direct Search Setup</string>
     <string name="settings_direct_search_desc">Setup Gemini API key to see answers directly within the app.</string>

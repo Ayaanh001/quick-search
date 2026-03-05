@@ -20,55 +20,55 @@ class ShortcutHandler(
     private val directSearchHandler: DirectSearchHandler,
     private val searchTargetsProvider: () -> List<SearchTarget>,
 ) {
-    private var shortcutCodes: Map<String, String> = emptyMap()
-    private var shortcutEnabled: Map<String, Boolean> = emptyMap()
+    private var aliasCodes: Map<String, String> = emptyMap()
+    private var aliasEnabled: Map<String, Boolean> = emptyMap()
 
     private var isInitialized = false
 
     private fun ensureInitialized() {
         if (!isInitialized) {
-            // Ensure shortcuts are always enabled (legacy compatibility)
-            if (!userPreferences.areShortcutsEnabled()) {
-                userPreferences.setShortcutsEnabled(true)
+            // Ensure aliases are always enabled (legacy compatibility)
+            if (!userPreferences.areAliasesEnabled()) {
+                userPreferences.setAliasesEnabled(true)
             }
             val targets =
                 searchTargetsProvider().ifEmpty {
                     SearchEngine.values().map { SearchTarget.Engine(it) }
                 }
-            shortcutCodes =
+            aliasCodes =
                 targets.associate { target ->
                     val id = target.getId()
                     val code =
                         when (target) {
                             is SearchTarget.Engine -> {
-                                userPreferences.getShortcutCode(target.engine)
+                                userPreferences.getAliasCode(target.engine)
                             }
 
                             is SearchTarget.Browser -> {
-                                userPreferences.getShortcutCode(id).orEmpty()
+                                userPreferences.getAliasCode(id).orEmpty()
                             }
 
                             is SearchTarget.Custom -> {
-                                userPreferences.getShortcutCode(id).orEmpty()
+                                userPreferences.getAliasCode(id).orEmpty()
                             }
                         }
                     id to code
                 }
-            shortcutEnabled =
+            aliasEnabled =
                 targets.associate { target ->
                     val id = target.getId()
                     val enabled =
                         when (target) {
                             is SearchTarget.Engine -> {
-                                userPreferences.isShortcutEnabled(target.engine)
+                                userPreferences.isAliasEnabled(target.engine)
                             }
 
                             is SearchTarget.Browser -> {
-                                shortcutCodes[id].orEmpty().isNotEmpty()
+                                aliasCodes[id].orEmpty().isNotEmpty()
                             }
 
                             is SearchTarget.Custom -> {
-                                shortcutCodes[id].orEmpty().isNotEmpty()
+                                aliasCodes[id].orEmpty().isNotEmpty()
                             }
                         }
                     id to enabled
@@ -77,24 +77,35 @@ class ShortcutHandler(
         }
     }
 
-    fun getInitialState(): ShortcutsState {
+    fun getInitialAliasState(): AliasesState {
         ensureInitialized()
-        return ShortcutsState(
-            shortcutsEnabled = true,
-            shortcutCodes = shortcutCodes,
-            shortcutEnabled = shortcutEnabled,
+        return AliasesState(
+            aliasesEnabled = true,
+            aliasCodes = aliasCodes,
+            aliasEnabled = aliasEnabled,
         )
     }
 
-    fun setShortcutsEnabled(enabled: Boolean) {
+    fun getInitialState(): ShortcutsState {
+        val aliasState = getInitialAliasState()
+        return ShortcutsState(
+            shortcutsEnabled = aliasState.aliasesEnabled,
+            shortcutCodes = aliasState.aliasCodes,
+            shortcutEnabled = aliasState.aliasEnabled,
+        )
+    }
+
+    fun setAliasesEnabled(enabled: Boolean) {
         scope.launch(Dispatchers.IO) {
-            // Shortcuts are always enabled
-            userPreferences.setShortcutsEnabled(true)
+            // Aliases are always enabled
+            userPreferences.setAliasesEnabled(true)
             uiStateUpdater { it.copy(shortcutsEnabled = true) }
         }
     }
 
-    fun setShortcutCode(
+    fun setShortcutsEnabled(enabled: Boolean) = setAliasesEnabled(enabled)
+
+    fun setAliasCode(
         target: SearchTarget,
         code: String,
     ) {
@@ -104,78 +115,118 @@ class ShortcutHandler(
                 return@launch
             }
             val id = target.getId()
-            // Filter out the current target's shortcut for validation
-            val existingShortcutsForValidation = shortcutCodes.filterKeys { it != id }
+            // Filter out the current target's alias for validation
+            val existingShortcutsForValidation = aliasCodes.filterKeys { it != id }
             if (!isValidShortcutPrefix(normalizedCode, existingShortcutsForValidation)) {
                 return@launch
             }
             when (target) {
-                is SearchTarget.Engine -> userPreferences.setShortcutCode(target.engine, normalizedCode)
-                is SearchTarget.Browser -> userPreferences.setShortcutCode(id, normalizedCode)
-                is SearchTarget.Custom -> userPreferences.setShortcutCode(id, normalizedCode)
+                is SearchTarget.Engine -> userPreferences.setAliasCode(target.engine, normalizedCode)
+                is SearchTarget.Browser -> userPreferences.setAliasCode(id, normalizedCode)
+                is SearchTarget.Custom -> userPreferences.setAliasCode(id, normalizedCode)
             }
-            shortcutCodes = shortcutCodes.toMutableMap().apply { put(id, normalizedCode) }
-            shortcutEnabled = shortcutEnabled.toMutableMap().apply { put(id, true) }
+            aliasCodes = aliasCodes.toMutableMap().apply { put(id, normalizedCode) }
+            aliasEnabled = aliasEnabled.toMutableMap().apply { put(id, true) }
             uiStateUpdater {
                 it.copy(
-                    shortcutCodes = shortcutCodes,
-                    shortcutEnabled = shortcutEnabled,
+                    shortcutCodes = aliasCodes,
+                    shortcutEnabled = aliasEnabled,
                 )
             }
+        }
+    }
+
+    fun setShortcutCode(
+        target: SearchTarget,
+        code: String,
+    ) = setAliasCode(target, code)
+
+    fun setAliasEnabled(
+        target: SearchTarget,
+        enabled: Boolean,
+    ) {
+        scope.launch(Dispatchers.IO) {
+            if (target is SearchTarget.Engine) {
+                userPreferences.setAliasEnabled(target.engine, enabled)
+            }
+            val id = target.getId()
+            aliasEnabled = aliasEnabled.toMutableMap().apply { put(id, enabled) }
+            uiStateUpdater { it.copy(shortcutEnabled = aliasEnabled) }
         }
     }
 
     fun setShortcutEnabled(
         target: SearchTarget,
         enabled: Boolean,
-    ) {
-        scope.launch(Dispatchers.IO) {
-            if (target is SearchTarget.Engine) {
-                userPreferences.setShortcutEnabled(target.engine, enabled)
+    ) = setAliasEnabled(target, enabled)
+
+    fun getAliasCode(target: SearchTarget): String {
+        val id = target.getId()
+        return aliasCodes[id]
+            ?: when (target) {
+                is SearchTarget.Engine -> userPreferences.getAliasCode(target.engine)
+                is SearchTarget.Browser -> userPreferences.getAliasCode(id).orEmpty()
+                is SearchTarget.Custom -> userPreferences.getAliasCode(id).orEmpty()
             }
-            val id = target.getId()
-            shortcutEnabled = shortcutEnabled.toMutableMap().apply { put(id, enabled) }
-            uiStateUpdater { it.copy(shortcutEnabled = shortcutEnabled) }
+    }
+
+    fun getShortcutCode(target: SearchTarget): String = getAliasCode(target)
+
+    fun isAliasEnabled(target: SearchTarget): Boolean {
+        val id = target.getId()
+        return aliasEnabled[id]
+            ?: when (target) {
+                is SearchTarget.Engine -> userPreferences.isAliasEnabled(target.engine)
+                is SearchTarget.Browser -> getAliasCode(target).isNotEmpty()
+                is SearchTarget.Custom -> getAliasCode(target).isNotEmpty()
+            }
+    }
+
+    fun isShortcutEnabled(target: SearchTarget): Boolean = isAliasEnabled(target)
+
+    fun detectAlias(query: String): Pair<String, AliasTarget>? {
+        ensureInitialized()
+        val trimmedQuery = query.trim()
+        if (trimmedQuery.isEmpty()) return null
+
+        val targets =
+            searchTargetsProvider().ifEmpty {
+                SearchEngine.values().map { SearchTarget.Engine(it) }
+            }
+        val aliases = mutableMapOf<String, AliasTarget>()
+        for (target in targets) {
+            if (target is SearchTarget.Engine &&
+                target.engine == SearchEngine.DIRECT_SEARCH &&
+                directSearchHandler.getGeminiApiKey().isNullOrBlank()
+            ) {
+                continue
+            }
+            if (!isAliasEnabled(target)) continue
+
+            val aliasCode = getAliasCode(target).lowercase(Locale.getDefault())
+            if (aliasCode.isEmpty()) continue
+            aliases[aliasCode] = AliasTarget.Search(target)
         }
-    }
-
-    fun getShortcutCode(target: SearchTarget): String {
-        val id = target.getId()
-        return shortcutCodes[id]
-            ?: when (target) {
-                is SearchTarget.Engine -> userPreferences.getShortcutCode(target.engine)
-                is SearchTarget.Browser -> userPreferences.getShortcutCode(id).orEmpty()
-                is SearchTarget.Custom -> userPreferences.getShortcutCode(id).orEmpty()
-            }
-    }
-
-    fun isShortcutEnabled(target: SearchTarget): Boolean {
-        val id = target.getId()
-        return shortcutEnabled[id]
-            ?: when (target) {
-                is SearchTarget.Engine -> userPreferences.isShortcutEnabled(target.engine)
-                is SearchTarget.Browser -> getShortcutCode(target).isNotEmpty()
-                is SearchTarget.Custom -> getShortcutCode(target).isNotEmpty()
-            }
+        val match = AliasParser.detectSuffixAlias(trimmedQuery, aliases) ?: return null
+        return Pair(match.queryWithoutAlias, match.target)
     }
 
     fun detectShortcut(query: String): Pair<String, SearchTarget>? {
+        val aliasMatch = detectAlias(query) ?: return null
+        val searchTarget = aliasMatch.second.asSearchTargetOrNull() ?: return null
+        return Pair(aliasMatch.first, searchTarget)
+    }
+
+    fun detectAliasAtStart(query: String): Pair<String, AliasTarget>? {
         ensureInitialized()
         val trimmedQuery = query.trim()
         if (trimmedQuery.isEmpty()) return null
 
-        // Look for shortcut at the end of the query (e.g., "search query ggl")
-        // Shortcut should be separated by space
-        val words = trimmedQuery.split("\\s+".toRegex())
-        if (words.size < 2) return null
-
-        val lastWord = words.last().lowercase(Locale.getDefault())
-
-        // Check each enabled search target for matching shortcut
         val targets =
             searchTargetsProvider().ifEmpty {
                 SearchEngine.values().map { SearchTarget.Engine(it) }
             }
+        val aliases = mutableMapOf<String, AliasTarget>()
         for (target in targets) {
             if (target is SearchTarget.Engine &&
                 target.engine == SearchEngine.DIRECT_SEARCH &&
@@ -183,56 +234,27 @@ class ShortcutHandler(
             ) {
                 continue
             }
-            if (!isShortcutEnabled(target)) continue
+            if (!isAliasEnabled(target)) continue
 
-            val shortcutCode = getShortcutCode(target).lowercase(Locale.getDefault())
-            if (shortcutCode.isEmpty()) continue
-            if (lastWord == shortcutCode) {
-                // Extract query without the shortcut
-                val queryWithoutShortcut = words.dropLast(1).joinToString(" ")
-                return Pair(queryWithoutShortcut, target)
-            }
+            val aliasCode = getAliasCode(target).lowercase(Locale.getDefault())
+            if (aliasCode.isEmpty()) continue
+            aliases[aliasCode] = AliasTarget.Search(target)
         }
-
-        return null
+        val match = AliasParser.detectPrefixAlias(trimmedQuery, aliases) ?: return null
+        return Pair(match.queryWithoutAlias, match.target)
     }
 
     fun detectShortcutAtStart(query: String): Pair<String, SearchTarget>? {
-        ensureInitialized()
-        val trimmedQuery = query.trim()
-        if (trimmedQuery.isEmpty()) return null
-
-        // Look for shortcut at the start of the query
-        val words = trimmedQuery.split("\\s+".toRegex())
-        if (words.isEmpty()) return null
-
-        val firstWord = words.first().lowercase(Locale.getDefault())
-
-        // Check each enabled search target for matching shortcut
-        val targets =
-            searchTargetsProvider().ifEmpty {
-                SearchEngine.values().map { SearchTarget.Engine(it) }
-            }
-        for (target in targets) {
-            if (target is SearchTarget.Engine &&
-                target.engine == SearchEngine.DIRECT_SEARCH &&
-                directSearchHandler.getGeminiApiKey().isNullOrBlank()
-            ) {
-                continue
-            }
-            if (!isShortcutEnabled(target)) continue
-
-            val shortcutCode = getShortcutCode(target).lowercase(Locale.getDefault())
-            if (shortcutCode.isEmpty()) continue
-            if (firstWord == shortcutCode) {
-                // Extract query without the shortcut
-                val queryWithoutShortcut = words.drop(1).joinToString(" ")
-                return Pair(queryWithoutShortcut, target)
-            }
-        }
-
-        return null
+        val aliasMatch = detectAliasAtStart(query) ?: return null
+        val searchTarget = aliasMatch.second.asSearchTargetOrNull() ?: return null
+        return Pair(aliasMatch.first, searchTarget)
     }
+
+    data class AliasesState(
+        val aliasesEnabled: Boolean,
+        val aliasCodes: Map<String, String>,
+        val aliasEnabled: Map<String, Boolean>,
+    )
 
     data class ShortcutsState(
         val shortcutsEnabled: Boolean,

@@ -507,10 +507,16 @@ abstract class BasePreferences(
         const val KEY_SEARCH_ENGINE_ONBOARDING_SEEN = "search_engine_onboarding_seen"
         const val KEY_CUSTOM_SEARCH_ENGINES = "custom_search_engines"
 
-        // Shortcut preferences keys
-        const val KEY_SHORTCUTS_ENABLED = "shortcuts_enabled"
-        const val KEY_SHORTCUT_CODE_PREFIX = "shortcut_code_"
-        const val KEY_SHORTCUT_ENABLED_PREFIX = "shortcut_enabled_"
+        // Alias preferences keys
+        const val KEY_ALIASES_ENABLED = "aliases_enabled"
+        const val KEY_ALIAS_CODE_PREFIX = "alias_code_"
+        const val KEY_ALIAS_ENABLED_PREFIX = "alias_enabled_"
+        const val KEY_SHORTCUTS_ENABLED_LEGACY = "shortcuts_enabled"
+        const val KEY_SHORTCUT_CODE_PREFIX_LEGACY = "shortcut_code_"
+        const val KEY_SHORTCUT_ENABLED_PREFIX_LEGACY = "shortcut_enabled_"
+        const val KEY_SHORTCUTS_ENABLED = KEY_SHORTCUTS_ENABLED_LEGACY
+        const val KEY_SHORTCUT_CODE_PREFIX = KEY_SHORTCUT_CODE_PREFIX_LEGACY
+        const val KEY_SHORTCUT_ENABLED_PREFIX = KEY_SHORTCUT_ENABLED_PREFIX_LEGACY
 
         // UI preferences keys
         const val KEY_ONE_HANDED_MODE = "one_handed_mode"

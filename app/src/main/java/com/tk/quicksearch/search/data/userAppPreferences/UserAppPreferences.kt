@@ -34,7 +34,7 @@ class UserAppPreferences(
     private val appShortcutPreferences by lazy { AppShortcutPreferences(context) }
     private val nicknamePreferences by lazy { NicknamePreferences(context) }
     private val searchEnginePreferences by lazy { SearchEnginePreferences(context) }
-    private val shortcutPreferences by lazy { ShortcutPreferences(context) }
+    private val aliasPreferences by lazy { AliasPreferences(context) }
     private val geminiPreferences by lazy { GeminiPreferences(context) }
     val uiPreferences by lazy { UiPreferences(context) }
     private val amazonPreferences by lazy { AmazonPreferences(context) }
@@ -381,36 +381,63 @@ class UserAppPreferences(
             searchEnginePreferences.setCustomSearchEngines(engines)
 
     // ============================================================================
-    // Shortcut Preferences
+    // Alias Preferences
     // ============================================================================
 
-    fun areShortcutsEnabled(): Boolean = shortcutPreferences.areShortcutsEnabled()
+    fun areAliasesEnabled(): Boolean = aliasPreferences.areAliasesEnabled()
 
-    fun setShortcutsEnabled(enabled: Boolean) = shortcutPreferences.setShortcutsEnabled(enabled)
+    fun setAliasesEnabled(enabled: Boolean) = aliasPreferences.setAliasesEnabled(enabled)
 
-    fun getShortcutCode(engine: SearchEngine): String = shortcutPreferences.getShortcutCode(engine)
+    fun getAliasCode(engine: SearchEngine): String = aliasPreferences.getAliasCode(engine)
+
+    fun setAliasCode(
+            engine: SearchEngine,
+            code: String,
+    ) = aliasPreferences.setAliasCode(engine, code)
+
+    fun getAliasCode(targetId: String): String? = aliasPreferences.getAliasCode(targetId)
+
+    fun setAliasCode(
+            targetId: String,
+            code: String,
+    ) = aliasPreferences.setAliasCode(targetId, code)
+
+    fun isAliasEnabled(engine: SearchEngine): Boolean =
+            aliasPreferences.isAliasEnabled(engine)
+
+    fun setAliasEnabled(
+            engine: SearchEngine,
+            enabled: Boolean,
+    ) = aliasPreferences.setAliasEnabled(engine, enabled)
+
+    fun getAllAliasCodes(): Map<SearchEngine, String> = aliasPreferences.getAllAliasCodes()
+
+    fun areShortcutsEnabled(): Boolean = areAliasesEnabled()
+
+    fun setShortcutsEnabled(enabled: Boolean) = setAliasesEnabled(enabled)
+
+    fun getShortcutCode(engine: SearchEngine): String = getAliasCode(engine)
 
     fun setShortcutCode(
             engine: SearchEngine,
             code: String,
-    ) = shortcutPreferences.setShortcutCode(engine, code)
+    ) = setAliasCode(engine, code)
 
-    fun getShortcutCode(targetId: String): String? = shortcutPreferences.getShortcutCode(targetId)
+    fun getShortcutCode(targetId: String): String? = getAliasCode(targetId)
 
     fun setShortcutCode(
             targetId: String,
             code: String,
-    ) = shortcutPreferences.setShortcutCode(targetId, code)
+    ) = setAliasCode(targetId, code)
 
-    fun isShortcutEnabled(engine: SearchEngine): Boolean =
-            shortcutPreferences.isShortcutEnabled(engine)
+    fun isShortcutEnabled(engine: SearchEngine): Boolean = isAliasEnabled(engine)
 
     fun setShortcutEnabled(
             engine: SearchEngine,
             enabled: Boolean,
-    ) = shortcutPreferences.setShortcutEnabled(engine, enabled)
+    ) = setAliasEnabled(engine, enabled)
 
-    fun getAllShortcutCodes(): Map<SearchEngine, String> = shortcutPreferences.getAllShortcutCodes()
+    fun getAllShortcutCodes(): Map<SearchEngine, String> = getAllAliasCodes()
 
     // ============================================================================
     // Amazon Domain Preferences

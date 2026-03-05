@@ -19,7 +19,7 @@ import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 /**
  * Main feature for configuring search engines.
- * Allows reordering, enabling/disabling, and managing shortcuts.
+ * Allows reordering, enabling/disabling, and managing aliases.
  */
 @Composable
 fun SearchEngines(
@@ -50,8 +50,8 @@ fun SearchEngines(
     onOpenDirectSearchConfigure: (() -> Unit)? = null,
     showTitle: Boolean = true,
     directSearchAvailable: Boolean = false,
-    showShortcutHintBanner: Boolean = false,
-    onDismissShortcutHintBanner: (() -> Unit)? = null,
+    showAliasHintBanner: Boolean = false,
+    onDismissAliasHintBanner: (() -> Unit)? = null,
     showDefaultEngineHintBanner: Boolean = false,
     onDismissDefaultEngineHintBanner: (() -> Unit)? = null,
     directSearchSetupExpanded: Boolean = true,
@@ -103,9 +103,9 @@ fun SearchEngines(
         Spacer(modifier = Modifier.height(6.dp))
     }
 
-    if (hasEnabledEngines && showShortcutHintBanner && onDismissShortcutHintBanner != null) {
-        ShortcutHintBanner(
-            onDismiss = onDismissShortcutHintBanner,
+    if (hasEnabledEngines && showAliasHintBanner && onDismissAliasHintBanner != null) {
+        AliasHintBanner(
+            onDismiss = onDismissAliasHintBanner,
             modifier = Modifier.padding(bottom = 18.dp),
         )
     } else if (
@@ -162,12 +162,12 @@ fun SearchEngines(
 }
 
 @Composable
-private fun ShortcutHintBanner(
+private fun AliasHintBanner(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     TipBanner(
-        text = stringResource(R.string.settings_shortcuts_hint_message),
+        text = stringResource(R.string.settings_aliases_hint_message),
         onDismiss = onDismiss,
         modifier = modifier,
     )

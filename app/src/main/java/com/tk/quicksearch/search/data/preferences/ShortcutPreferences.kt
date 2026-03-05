@@ -2,85 +2,38 @@ package com.tk.quicksearch.search.data.preferences
 
 import android.content.Context
 import com.tk.quicksearch.search.core.SearchEngine
-import com.tk.quicksearch.searchEngines.ShortcutValidator.isValidShortcutCode
-import com.tk.quicksearch.searchEngines.ShortcutValidator.normalizeShortcutCodeInput
-import com.tk.quicksearch.searchEngines.getDefaultShortcutCode
 
 /**
- * Preferences for shortcut-related settings such as enabled shortcuts and custom codes.
+ * Backward-compatible wrapper. New code should use [AliasPreferences].
  */
+@Deprecated("Use AliasPreferences instead.")
 class ShortcutPreferences(
     context: Context,
-) : BasePreferences(context) {
-    // ============================================================================
-    // Shortcut Preferences
-    // ============================================================================
+) : AliasPreferences(context) {
+    fun areShortcutsEnabled(): Boolean = areAliasesEnabled()
 
-    fun areShortcutsEnabled(): Boolean = getBooleanPref(BasePreferences.KEY_SHORTCUTS_ENABLED, true)
+    fun setShortcutsEnabled(enabled: Boolean) = setAliasesEnabled(enabled)
 
-    fun setShortcutsEnabled(enabled: Boolean) {
-        setBooleanPref(BasePreferences.KEY_SHORTCUTS_ENABLED, enabled)
-    }
-
-    fun getShortcutCode(engine: SearchEngine): String {
-        val key = "${BasePreferences.KEY_SHORTCUT_CODE_PREFIX}${engine.name}"
-        val defaultCode = engine.getDefaultShortcutCode()
-        val storedCode = prefs.getString(key, defaultCode) ?: defaultCode
-        val normalizedCode = normalizeShortcutCodeInput(storedCode)
-        return if (isValidShortcutCode(normalizedCode)) {
-            normalizedCode
-        } else {
-            defaultCode
-        }
-    }
+    fun getShortcutCode(engine: SearchEngine): String = getAliasCode(engine)
 
     fun setShortcutCode(
         engine: SearchEngine,
         code: String,
-    ) {
-        val key = "${BasePreferences.KEY_SHORTCUT_CODE_PREFIX}${engine.name}"
-        val normalizedCode = normalizeShortcutCodeInput(code)
-        if (!isValidShortcutCode(normalizedCode)) {
-            return
-        }
-        prefs.edit().putString(key, normalizedCode).apply()
-    }
+    ) = setAliasCode(engine, code)
 
-    fun getShortcutCode(targetId: String): String? {
-        val key = "${BasePreferences.KEY_SHORTCUT_CODE_PREFIX}$targetId"
-        val storedCode = prefs.getString(key, null) ?: return null
-        val normalizedCode = normalizeShortcutCodeInput(storedCode)
-        return if (isValidShortcutCode(normalizedCode)) {
-            normalizedCode
-        } else {
-            null
-        }
-    }
+    fun getShortcutCode(targetId: String): String? = getAliasCode(targetId)
 
     fun setShortcutCode(
         targetId: String,
         code: String,
-    ) {
-        val key = "${BasePreferences.KEY_SHORTCUT_CODE_PREFIX}$targetId"
-        val normalizedCode = normalizeShortcutCodeInput(code)
-        if (!isValidShortcutCode(normalizedCode)) {
-            return
-        }
-        prefs.edit().putString(key, normalizedCode).apply()
-    }
+    ) = setAliasCode(targetId, code)
 
-    fun isShortcutEnabled(engine: SearchEngine): Boolean {
-        val key = "${BasePreferences.KEY_SHORTCUT_ENABLED_PREFIX}${engine.name}"
-        return getBooleanPref(key, true)
-    }
+    fun isShortcutEnabled(engine: SearchEngine): Boolean = isAliasEnabled(engine)
 
     fun setShortcutEnabled(
         engine: SearchEngine,
         enabled: Boolean,
-    ) {
-        val key = "${BasePreferences.KEY_SHORTCUT_ENABLED_PREFIX}${engine.name}"
-        setBooleanPref(key, enabled)
-    }
+    ) = setAliasEnabled(engine, enabled)
 
-    fun getAllShortcutCodes(): Map<SearchEngine, String> = SearchEngine.values().associateWith { getShortcutCode(it) }
+    fun getAllShortcutCodes(): Map<SearchEngine, String> = getAllAliasCodes()
 }

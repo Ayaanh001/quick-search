@@ -53,6 +53,7 @@ import com.tk.quicksearch.search.searchHistory.RecentSearchItem
 import com.tk.quicksearch.searchEngines.SearchEngineManager
 import com.tk.quicksearch.searchEngines.SecondarySearchOrchestrator
 import com.tk.quicksearch.searchEngines.ShortcutHandler
+import com.tk.quicksearch.searchEngines.asSearchTargetOrNull
 import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
 import com.tk.quicksearch.search.utils.SearchTextNormalizer
@@ -675,12 +676,10 @@ class SearchViewModel(
             val messagingInfo =
                     getMessagingAppInfo(appSearchManager.cachedApps.map { it.packageName }.toSet())
 
-            // Update state with messaging info and correct search engine/section config
-            // accessing these handlers now is safe as UI is rendered
-            val shortcutsState = shortcutHandler.getInitialState()
-
             // Ensure SearchEngineManager is initialized on IO thread
             searchEngineManager.ensureInitialized()
+            // Update alias map after search targets are initialized.
+            val shortcutsState = shortcutHandler.getInitialState()
 
             _uiState.update { state ->
                 state.copy(
@@ -1474,9 +1473,10 @@ class SearchViewModel(
 
         // If we don't have a locked engine, try to detect one
         if (detectedTarget == null) {
-            val shortcutMatchAtStart = shortcutHandler.detectShortcutAtStart(trimmedQuery)
+            val shortcutMatchAtStart = shortcutHandler.detectAliasAtStart(trimmedQuery)
             if (shortcutMatchAtStart != null) {
-                detectedTarget = shortcutMatchAtStart.second
+                val detectedAliasTarget = shortcutMatchAtStart.second
+                detectedTarget = detectedAliasTarget.asSearchTargetOrNull()
                 lockedShortcutTarget = detectedTarget
 
                 // Strip the shortcut from the query and update recursively
@@ -1490,9 +1490,13 @@ class SearchViewModel(
         }
 
         // Check for shortcuts at the end of query (auto-execute)
-        val shortcutMatchAtEnd = shortcutHandler.detectShortcut(trimmedQuery)
+        val shortcutMatchAtEnd = shortcutHandler.detectAlias(trimmedQuery)
         if (shortcutMatchAtEnd != null) {
-            val (queryWithoutShortcut, target) = shortcutMatchAtEnd
+            val (queryWithoutShortcut, aliasTarget) = shortcutMatchAtEnd
+            val target = aliasTarget.asSearchTargetOrNull()
+            if (target == null) {
+                return
+            }
             // Automatically perform search with the detected target
             navigationHandler.openSearchTarget(queryWithoutShortcut.trim(), target)
             // Update query to remove shortcut but keep the remaining query
@@ -2048,22 +2052,38 @@ class SearchViewModel(
         )
     }
 
-    // Shortcuts
-    fun setShortcutsEnabled(enabled: Boolean) = shortcutHandler.setShortcutsEnabled(enabled)
+    // Aliases
+    fun setAliasesEnabled(enabled: Boolean) = shortcutHandler.setAliasesEnabled(enabled)
+
+    fun setAliasCode(
+            target: SearchTarget,
+            code: String,
+    ) = shortcutHandler.setAliasCode(target, code)
+
+    fun setAliasEnabled(
+            target: SearchTarget,
+            enabled: Boolean,
+    ) = shortcutHandler.setAliasEnabled(target, enabled)
+
+    fun getAliasCode(target: SearchTarget): String = shortcutHandler.getAliasCode(target)
+
+    fun isAliasEnabled(target: SearchTarget): Boolean = shortcutHandler.isAliasEnabled(target)
+
+    fun setShortcutsEnabled(enabled: Boolean) = setAliasesEnabled(enabled)
 
     fun setShortcutCode(
             target: SearchTarget,
             code: String,
-    ) = shortcutHandler.setShortcutCode(target, code)
+    ) = setAliasCode(target, code)
 
     fun setShortcutEnabled(
             target: SearchTarget,
             enabled: Boolean,
-    ) = shortcutHandler.setShortcutEnabled(target, enabled)
+    ) = setAliasEnabled(target, enabled)
 
-    fun getShortcutCode(target: SearchTarget): String = shortcutHandler.getShortcutCode(target)
+    fun getShortcutCode(target: SearchTarget): String = getAliasCode(target)
 
-    fun isShortcutEnabled(target: SearchTarget): Boolean = shortcutHandler.isShortcutEnabled(target)
+    fun isShortcutEnabled(target: SearchTarget): Boolean = isAliasEnabled(target)
 
     fun areShortcutsEnabled(): Boolean = true
 

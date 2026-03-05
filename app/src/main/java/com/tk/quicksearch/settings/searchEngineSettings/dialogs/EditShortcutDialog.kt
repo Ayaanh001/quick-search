@@ -34,7 +34,7 @@ import com.tk.quicksearch.searchEngines.ShortcutValidator.isValidShortcutPrefix
 import com.tk.quicksearch.searchEngines.ShortcutValidator.normalizeShortcutCodeInput
 
 /**
- * Dialog for editing a search engine shortcut code.
+ * Dialog for editing a search target alias code.
  *
  * @param engineName The display name of the search engine
  * @param currentCode The current shortcut code
@@ -46,7 +46,7 @@ import com.tk.quicksearch.searchEngines.ShortcutValidator.normalizeShortcutCodeI
  * @param onDismiss Callback when the dialog is dismissed
  */
 @Composable
-fun EditShortcutDialog(
+fun EditAliasDialog(
     engineName: String,
     currentCode: String,
     isEnabled: Boolean,
@@ -89,7 +89,7 @@ fun EditShortcutDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = stringResource(R.string.dialog_edit_shortcut_title))
+            Text(text = stringResource(R.string.dialog_edit_alias_title))
         },
         text = {
             Column(
@@ -97,7 +97,7 @@ fun EditShortcutDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    text = stringResource(R.string.dialog_edit_shortcut_message, engineName),
+                    text = stringResource(R.string.dialog_edit_alias_message, engineName),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -134,8 +134,8 @@ fun EditShortcutDialog(
                 if (showShortcutError) {
                     val errorMessage =
                         when {
-                            !isValidPrefix -> stringResource(R.string.dialog_edit_shortcut_error_prefix)
-                            !isValidShortcut -> stringResource(R.string.dialog_edit_shortcut_error_length)
+                            !isValidPrefix -> stringResource(R.string.dialog_edit_alias_error_prefix)
+                            !isValidShortcut -> stringResource(R.string.dialog_edit_alias_error_length)
                             else -> ""
                         }
                     Text(
@@ -158,7 +158,7 @@ fun EditShortcutDialog(
                             },
                         )
                         Text(
-                            text = stringResource(R.string.dialog_enable_shortcut),
+                            text = stringResource(R.string.dialog_enable_alias),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f),

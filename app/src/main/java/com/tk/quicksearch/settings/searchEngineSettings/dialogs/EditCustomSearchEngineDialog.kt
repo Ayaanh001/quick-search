@@ -265,7 +265,7 @@ fun EditCustomSearchEngineDialog(
                         shortcutInput = it.copy(text = normalized)
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text(text = stringResource(R.string.settings_shortcut_label)) },
+                    label = { Text(text = stringResource(R.string.settings_alias_label)) },
                     singleLine = true,
                     maxLines = 1,
                     isError = showShortcutError,
@@ -283,8 +283,8 @@ fun EditCustomSearchEngineDialog(
                         if (showShortcutError) {
                             val errorMessage =
                                 when {
-                                    !isShortcutPrefixValid -> stringResource(R.string.dialog_edit_shortcut_error_prefix)
-                                    !isShortcutValid -> stringResource(R.string.dialog_edit_shortcut_error_length)
+                                    !isShortcutPrefixValid -> stringResource(R.string.dialog_edit_alias_error_prefix)
+                                    !isShortcutValid -> stringResource(R.string.dialog_edit_alias_error_length)
                                     else -> ""
                                 }
                             Text(text = errorMessage)

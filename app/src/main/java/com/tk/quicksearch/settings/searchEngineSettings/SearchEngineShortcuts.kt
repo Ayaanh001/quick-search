@@ -15,13 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.settings.searchEnginesScreen.EditShortcutDialog
+import com.tk.quicksearch.settings.searchEnginesScreen.EditAliasDialog
 
 /**
- * Display component for shortcut code with edit dialog.
+ * Display component for alias code with edit dialog.
  */
 @Composable
-internal fun ShortcutCodeDisplay(
+internal fun AliasCodeDisplay(
     shortcutCode: String,
     isEnabled: Boolean,
     onCodeChange: ((String) -> Unit)?,
@@ -32,10 +32,10 @@ internal fun ShortcutCodeDisplay(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val isCustomEngine = currentShortcutId?.startsWith("custom:") == true
-    val allowShortcutDialog = !isCustomEngine
+    val allowAliasDialog = !isCustomEngine
 
-    if (showDialog && onCodeChange != null && allowShortcutDialog) {
-        EditShortcutDialog(
+    if (showDialog && onCodeChange != null && allowAliasDialog) {
+        EditAliasDialog(
             engineName = engineName,
             currentCode = shortcutCode,
             isEnabled = isEnabled,
@@ -59,7 +59,7 @@ internal fun ShortcutCodeDisplay(
             )
         } else if (isEnabled) {
             Text(
-                text = stringResource(R.string.settings_shortcut_label),
+                text = stringResource(R.string.settings_alias_label),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -68,7 +68,7 @@ internal fun ShortcutCodeDisplay(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier =
-                    if (allowShortcutDialog) {
+                    if (allowAliasDialog) {
                         Modifier.clickable { showDialog = true }
                     } else {
                         Modifier
@@ -80,12 +80,12 @@ internal fun ShortcutCodeDisplay(
                     if (isCustomEngine) {
                         stringResource(R.string.settings_edit_label)
                     } else {
-                        stringResource(R.string.settings_add_shortcut)
+                        stringResource(R.string.settings_add_alias)
                     },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier =
-                    if (allowShortcutDialog) {
+                    if (allowAliasDialog) {
                         Modifier.clickable { showDialog = true }
                     } else {
                         Modifier
