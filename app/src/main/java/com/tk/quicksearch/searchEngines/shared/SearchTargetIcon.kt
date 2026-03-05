@@ -27,6 +27,7 @@ import com.tk.quicksearch.searchEngines.getContentDescription
 import com.tk.quicksearch.searchEngines.getContentDescriptionResId
 import com.tk.quicksearch.searchEngines.getDisplayName
 import com.tk.quicksearch.searchEngines.getDrawableResId
+import com.tk.quicksearch.searchEngines.isInstallOnlyEngine
 
 /**
  * Configuration for rendering search target icons with different styles.
@@ -70,7 +71,7 @@ fun SearchTargetIcon(
                     modifier = modifier.size(iconSize),
                     contentScale = ContentScale.Fit,
                 )
-            } else {
+            } else if (!targetEngine.isInstallOnlyEngine()) {
                 when (style) {
                     IconRenderStyle.SIMPLE -> {
                         Icon(

@@ -341,7 +341,8 @@ private fun ScrollableEngineIcons(
 @Composable
 private fun calculateItemWidth(maxWidth: androidx.compose.ui.unit.Dp, itemsPerRow: Int): androidx.compose.ui.unit.Dp {
     val totalSpacing = SearchEngineSectionConstants.SPACING * (itemsPerRow - 1)
-    return (maxWidth - totalSpacing) / itemsPerRow
+    val totalHorizontalContentPadding = SearchEngineSectionConstants.PREDICTION_HIGHLIGHT_WIDTH_EXTRA
+    return (maxWidth - totalSpacing - totalHorizontalContentPadding) / itemsPerRow
 }
 
 @Composable

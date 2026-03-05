@@ -225,6 +225,15 @@ fun SearchEngine.getAppPackageCandidates(): List<String> =
         else -> emptyList()
     }
 
+fun SearchEngine.isInstallOnlyEngine(): Boolean =
+    this in
+        setOf(
+            SearchEngine.YOUTUBE_MUSIC,
+            SearchEngine.SPOTIFY,
+            SearchEngine.WAZE,
+            SearchEngine.CLAUDE,
+        )
+
 /**
  * Builds a search URL for the given query and search engine.
  *

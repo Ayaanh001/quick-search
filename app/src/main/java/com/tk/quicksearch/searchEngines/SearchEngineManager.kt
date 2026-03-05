@@ -333,11 +333,14 @@ class SearchEngineManager(
         return SearchEngine.values().filter { engine ->
             when (engine) {
                 SearchEngine.DIRECT_SEARCH -> hasGemini
-                SearchEngine.YOUTUBE_MUSIC -> isPackageInstalled(packageManager, PackageConstants.YOUTUBE_MUSIC_PACKAGE)
-                SearchEngine.SPOTIFY -> isPackageInstalled(packageManager, PackageConstants.SPOTIFY_PACKAGE)
-                SearchEngine.WAZE -> isPackageInstalled(packageManager, PackageConstants.WAZE_PACKAGE)
-                SearchEngine.CLAUDE -> isPackageInstalled(packageManager, PackageConstants.CLAUDE_PACKAGE)
-                else -> true
+                else ->
+                    if (engine.isInstallOnlyEngine()) {
+                        engine
+                            .getAppPackageCandidates()
+                            .any { packageName -> isPackageInstalled(packageManager, packageName) }
+                    } else {
+                        true
+                    }
             }
         }
     }
