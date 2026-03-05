@@ -383,7 +383,7 @@
     <string name="settings_backup_import_failed">Unable to import settings.</string>
     <string name="settings_add_search_engine_button">Add Search Engine</string>
     <string name="settings_add_search_engine_dialog_title">Add Search Engine</string>
-    <string name="settings_add_search_engine_dialog_message">Enter URL template with query placeholder.\n\nExample:\nwww.google.com/search?q={{query}}</string>
+    <string name="settings_add_search_engine_dialog_message">Enter URL or an Android intent template with query placeholder.\n\nExample:\nwww.google.com/search?q={{query}}</string>
     <string name="settings_add_search_engine_loading_metadata">Fetching search engine details…</string>
     <string name="settings_add_search_engine_error_required">Please enter a URL template.</string>
     <string name="settings_add_search_engine_error_placeholder">URL must include {{query}}</string>
@@ -683,7 +683,7 @@
          ============================================================================ -->
     <string name="release_notes_title">Quick Search v%1$s Release Notes</string>
     <string name="release_notes_title_no_version">Quick Search Release Notes</string>
-    <string name="release_notes_points">Bottom search bar.\nNew Custom Buttons Widget.\nImport / Export app settings.\nChange app font size.\nUI optimisations for Tablets.\nEnhancements &amp; bug fixes.</string>
+    <string name="release_notes_points">Bottom search bar.\nNew Custom Buttons Widget.\nImport / Export app settings.\nChange app font size.\nUI optimisations for Tablets.\nSearch engine shortcuts are now called Aliases.\nEnhancements &amp; bug fixes.</string>
     <string name="release_notes_action_got_it">Got it</string>
     <string name="release_notes_view_all_features">View all features</string>
     <string name="settings_all_quick_search_features">Features List</string>
