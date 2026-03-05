@@ -532,16 +532,16 @@ fun SettingsMoreOptions(
     val feedbackItems =
         listOf(
             SettingsCardItem(
-                title = stringResource(R.string.settings_feedback_rate_title),
-                description = stringResource(R.string.settings_feedback_rate_desc),
-                iconResId = R.drawable.google_play,
-                actionOnPress = onRateApp,
-            ),
-            SettingsCardItem(
                 title = stringResource(R.string.settings_feedback_send_title),
                 description = stringResource(R.string.settings_feedback_send_desc),
                 icon = Icons.Rounded.Email,
                 actionOnPress = onSendFeedback,
+            ),
+            SettingsCardItem(
+                title = stringResource(R.string.settings_feedback_rate_title),
+                description = stringResource(R.string.settings_feedback_rate_desc),
+                iconResId = R.drawable.google_play,
+                actionOnPress = onRateApp,
             ),
             SettingsCardItem(
                 title = stringResource(R.string.settings_feedback_github_title),

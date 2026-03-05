@@ -25,9 +25,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -115,7 +117,9 @@ private fun WebSearchSuggestionsCard(
 @Composable
 private fun SearchOptionsCard(
     appSuggestionsEnabled: Boolean,
+    hasUsagePermission: Boolean,
     onAppSuggestionsToggle: (Boolean) -> Unit,
+    onRequestUsagePermission: () -> Unit,
     recentQueriesEnabled: Boolean,
     onRecentQueriesToggle: (Boolean) -> Unit,
     hasExcludedItems: Boolean,
@@ -124,6 +128,13 @@ private fun SearchOptionsCard(
     onNavigateToExcludedItems: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var appSuggestionsTipDismissed by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(appSuggestionsEnabled) {
+        if (!appSuggestionsEnabled) {
+            appSuggestionsTipDismissed = false
+        }
+    }
+
     ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
         Column {
             SettingsToggleRow(
@@ -134,6 +145,11 @@ private fun SearchOptionsCard(
                 leadingIcon = Icons.Rounded.Apps,
                 isFirstItem = true,
                 isLastItem = false,
+                showTipBanner = appSuggestionsEnabled && !hasUsagePermission && !appSuggestionsTipDismissed,
+                tipBannerText = stringResource(R.string.app_suggestions_usage_access_tip),
+                tipBannerLinkText = stringResource(R.string.app_suggestions_usage_access_link),
+                onTipBannerLinkClick = onRequestUsagePermission,
+                onTipBannerDismiss = { appSuggestionsTipDismissed = true },
             )
 
             SettingsToggleRow(
@@ -284,6 +300,7 @@ private fun RefreshDataCard(
 fun SearchResultsSettingsSection(
     state: SettingsScreenState,
     callbacks: SettingsScreenCallbacks,
+    hasUsagePermission: Boolean,
     hasContactPermission: Boolean,
     hasFilePermission: Boolean,
     onNavigateToExcludedItems: () -> Unit,
@@ -332,7 +349,9 @@ fun SearchResultsSettingsSection(
 
         SearchOptionsCard(
             appSuggestionsEnabled = state.appSuggestionsEnabled,
+            hasUsagePermission = hasUsagePermission,
             onAppSuggestionsToggle = callbacks.onToggleAppSuggestions,
+            onRequestUsagePermission = callbacks.onRequestUsagePermission,
             recentQueriesEnabled = state.recentQueriesEnabled,
             onRecentQueriesToggle = callbacks.onToggleRecentQueries,
             hasExcludedItems = hasExcludedItems,

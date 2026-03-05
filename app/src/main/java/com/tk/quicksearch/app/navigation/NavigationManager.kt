@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import com.tk.quicksearch.onboarding.FinalSetupScreen
 import com.tk.quicksearch.onboarding.SearchEngineSetupScreen
 import com.tk.quicksearch.onboarding.permissionScreen.PermissionsScreen
@@ -30,6 +31,7 @@ import com.tk.quicksearch.settings.navigation.SettingsDetailRoute
 import com.tk.quicksearch.R
 import com.tk.quicksearch.settings.settingsDetailScreen.SettingsDetailType
 import com.tk.quicksearch.settings.shared.SettingsRoute
+import com.tk.quicksearch.shared.permissions.PermissionHelper
 
 enum class RootDestination {
     Search,
@@ -273,6 +275,7 @@ private fun NavigationContent(
     onSearchBackPressed: () -> Unit,
     onFinishActivity: () -> Unit,
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val settingsScrollState = rememberScrollState()
 
@@ -370,6 +373,12 @@ private fun NavigationContent(
                             viewModel = viewModel,
                             detailType = currentDetailType,
                             onNavigateToDetail = onSettingsDetailTypeChange,
+                            onRequestUsagePermission = {
+                                PermissionHelper.launchUsageAccessRequest(context)
+                            },
+                            onRequestContactPermission = viewModel::openContactPermissionSettings,
+                            onRequestFilePermission = viewModel::openFilesPermissionSettings,
+                            onRequestCallPermission = viewModel::openAppSettings,
                         )
                     } else {
                         SettingsRoute(

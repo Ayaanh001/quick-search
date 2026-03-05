@@ -59,6 +59,8 @@ fun DirectSearchSetupCard(
 ) {
     var showInput by remember { mutableStateOf(false) }
     var apiKeyInput by remember { mutableStateOf("") }
+    val hasConfiguredApiKey = directSearchEnabled && geminiApiKeyLast4 != null
+    val buttonRowBottomPadding = DesignTokens.SpacingXSmall
     val context = LocalContext.current
     @Suppress("DEPRECATION")
     val clipboardManager = LocalClipboardManager.current
@@ -128,7 +130,7 @@ fun DirectSearchSetupCard(
                 exit = shrinkVertically(),
             ) {
                 Column {
-                    if (directSearchEnabled && geminiApiKeyLast4 != null) {
+                    if (hasConfiguredApiKey) {
                         Text(
                             text = stringResource(R.string.settings_gemini_api_key_display, geminiApiKeyLast4 ?: ""),
                             style = MaterialTheme.typography.bodyMedium,
@@ -140,7 +142,7 @@ fun DirectSearchSetupCard(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 8.dp),
+                                    .padding(bottom = buttonRowBottomPadding),
                             horizontalArrangement = Arrangement.End,
                         ) {
                             if (onOpenDirectSearchConfigure != null) {
@@ -265,7 +267,7 @@ fun DirectSearchSetupCard(
                                 modifier =
                                     Modifier
                                         .fillMaxWidth()
-                                        .padding(bottom = 8.dp),
+                                        .padding(bottom = buttonRowBottomPadding),
                                 horizontalArrangement = Arrangement.End,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
@@ -296,7 +298,7 @@ fun DirectSearchSetupCard(
                                 modifier =
                                     Modifier
                                         .fillMaxWidth()
-                                        .padding(bottom = 8.dp),
+                                        .padding(bottom = buttonRowBottomPadding),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.End,
                             ) {

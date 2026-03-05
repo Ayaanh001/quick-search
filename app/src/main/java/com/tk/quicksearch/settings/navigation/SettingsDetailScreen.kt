@@ -141,6 +141,7 @@ internal fun SettingsDetailLevel1Screen(
                         SearchResultsSettingsSection(
                             state = state,
                             callbacks = callbacks,
+                            hasUsagePermission = PermissionUtils.hasUsageStatsPermission(context),
                             hasContactPermission = PermissionUtils.hasContactsPermission(context),
                             hasFilePermission = PermissionHelper.checkFilesPermission(context),
                             onNavigateToExcludedItems = {

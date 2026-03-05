@@ -740,6 +740,8 @@
     <string name="web_search_suggestions_title">Web Suggestions</string>
     <string name="app_suggestions_toggle_title">App Suggestions</string>
     <string name="app_suggestions_toggle_desc">Show or hide suggested apps on the home screen</string>
+    <string name="app_suggestions_usage_access_tip">Grant usage access permission to see more appropriate suggestions</string>
+    <string name="app_suggestions_usage_access_link">usage access permission</string>
 
     <!-- ============================================================================
          Recent Queries

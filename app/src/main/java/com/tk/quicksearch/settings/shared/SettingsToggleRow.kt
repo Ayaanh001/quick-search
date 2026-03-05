@@ -20,11 +20,17 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.tk.quicksearch.shared.ui.components.TipBanner
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticToggle
+
+private const val TipBannerLinkTag = "tip_banner_link"
 
 /**
  * Reusable toggle row component for settings cards.
@@ -46,6 +52,11 @@ fun SettingsToggleRow(
     isLastItem: Boolean = false,
     extraVerticalPadding: Dp = 0.dp,
     showDivider: Boolean = true,
+    showTipBanner: Boolean = false,
+    tipBannerText: String? = null,
+    tipBannerLinkText: String? = null,
+    onTipBannerLinkClick: (() -> Unit)? = null,
+    onTipBannerDismiss: (() -> Unit)? = null,
 ) {
     val view = LocalView.current
     val topPadding = DesignTokens.cardItemTopPadding(isFirstItem) + extraVerticalPadding
@@ -112,6 +123,52 @@ fun SettingsToggleRow(
                 checked = checked,
                 onCheckedChange = onToggle,
                 modifier = Modifier.scale(0.85f),
+            )
+        }
+
+        if (showTipBanner && !tipBannerText.isNullOrBlank()) {
+            val annotatedTipText =
+                buildAnnotatedString {
+                    append(tipBannerText)
+                    val linkText = tipBannerLinkText
+                    if (!linkText.isNullOrBlank()) {
+                        val start = tipBannerText.indexOf(linkText)
+                        if (start >= 0) {
+                            val end = start + linkText.length
+                            addStyle(
+                                style =
+                                    SpanStyle(
+                                        color = MaterialTheme.colorScheme.primary,
+                                        textDecoration = TextDecoration.Underline,
+                                    ),
+                                start = start,
+                                end = end,
+                            )
+                            addStringAnnotation(
+                                tag = TipBannerLinkTag,
+                                annotation = linkText,
+                                start = start,
+                                end = end,
+                            )
+                        }
+                    }
+                }
+            TipBanner(
+                annotatedText = annotatedTipText,
+                showDismissButton = onTipBannerDismiss != null,
+                onDismiss = onTipBannerDismiss,
+                onContentClick = onTipBannerLinkClick,
+                onTextClick = { clickOffset ->
+                    if (annotatedTipText.getStringAnnotations(TipBannerLinkTag, clickOffset, clickOffset).isNotEmpty()) {
+                        onTipBannerLinkClick?.invoke()
+                    }
+                },
+                modifier =
+                    Modifier.padding(
+                        start = horizontalPadding,
+                        end = horizontalPadding,
+                        bottom = DesignTokens.SpacingLarge,
+                    ),
             )
         }
 
