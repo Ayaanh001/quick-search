@@ -52,7 +52,12 @@ private fun WebSearchSuggestionsCard(
 ) {
     val view = LocalView.current
     ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
-        Column(modifier = Modifier.padding(bottom = DesignTokens.SpacingSmall)) {
+        Column(
+            modifier =
+                Modifier.padding(
+                    bottom = if (webSuggestionsEnabled) DesignTokens.SpacingSmall else 0.dp,
+                ),
+        ) {
             SettingsToggleRow(
                 title = stringResource(R.string.web_search_suggestions_title),
                 checked = webSuggestionsEnabled,

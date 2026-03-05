@@ -55,18 +55,18 @@ fun CombinedLayoutIconCard(
             )
 
             SettingsToggleRow(
-                    title = stringResource(R.string.settings_show_app_labels_title),
-                    subtitle = stringResource(R.string.settings_show_app_labels_desc),
-                    checked = showAppLabels,
-                    onCheckedChange = onToggleAppLabels,
-                    extraVerticalPadding = 8.dp,
-            )
-
-            SettingsToggleRow(
                     title = stringResource(R.string.settings_bottom_searchbar_title),
                     subtitle = stringResource(R.string.settings_bottom_searchbar_desc),
                     checked = bottomSearchBarEnabled,
                     onCheckedChange = onToggleBottomSearchBar,
+                    extraVerticalPadding = 8.dp,
+            )
+
+            SettingsToggleRow(
+                    title = stringResource(R.string.settings_show_app_labels_title),
+                    subtitle = stringResource(R.string.settings_show_app_labels_desc),
+                    checked = showAppLabels,
+                    onCheckedChange = onToggleAppLabels,
                     extraVerticalPadding = 8.dp,
                     showDivider = false,
             )

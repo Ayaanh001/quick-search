@@ -51,6 +51,7 @@ import com.tk.quicksearch.searchEngines.*
 import com.tk.quicksearch.searchEngines.ShortcutValidator.isValidShortcutCode
 import com.tk.quicksearch.searchEngines.ShortcutValidator.isValidShortcutPrefix
 import com.tk.quicksearch.searchEngines.ShortcutValidator.normalizeShortcutCodeInput
+import com.tk.quicksearch.shared.util.withoutWhitespaces
 
 @Composable
 fun EditCustomSearchEngineDialog(
@@ -156,40 +157,35 @@ fun EditCustomSearchEngineDialog(
                         modifier =
                             Modifier
                                 .size(44.dp)
-                                .offset(y = (-4).dp),
+                                .offset(y = (-4).dp)
+                                .clickable {
+                                    pickIconLauncher.launch(arrayOf("image/*"))
+                                },
                     ) {
-                        androidx.compose.material3.Surface(
+                        Box(
                             modifier =
                                 Modifier
                                     .size(40.dp)
-                                    .align(androidx.compose.ui.Alignment.Center)
-                                    .clip(MaterialTheme.shapes.medium)
-                                    .clickable {
-                                        pickIconLauncher.launch(arrayOf("image/*"))
-                                    },
-                            tonalElevation = 1.dp,
-                            shape = MaterialTheme.shapes.medium,
+                                    .align(androidx.compose.ui.Alignment.Center),
                         ) {
-                            Box(modifier = Modifier.size(40.dp)) {
-                                if (iconBitmap != null) {
-                                    Image(
-                                        bitmap = iconBitmap,
+                            if (iconBitmap != null) {
+                                Image(
+                                    bitmap = iconBitmap,
+                                    contentDescription = customEngine.name,
+                                    modifier = Modifier.size(40.dp),
+                                    contentScale = ContentScale.Fit,
+                                )
+                            } else {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Public,
                                         contentDescription = customEngine.name,
-                                        modifier = Modifier.size(40.dp),
-                                        contentScale = ContentScale.Fit,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
-                                } else {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.Public,
-                                            contentDescription = customEngine.name,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        )
-                                    }
                                 }
                             }
                         }
@@ -229,7 +225,7 @@ fun EditCustomSearchEngineDialog(
                 }
                 OutlinedTextField(
                     value = urlInput,
-                    onValueChange = { urlInput = it },
+                    onValueChange = { urlInput = it.withoutWhitespaces() },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(text = stringResource(R.string.settings_edit_search_engine_url_label)) },
                     singleLine = true,

@@ -50,8 +50,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.apps.rememberAppIcon
@@ -65,6 +65,7 @@ import com.tk.quicksearch.searchEngines.shared.SearchTargetIcon
 import com.tk.quicksearch.settings.AppShortcutsSettings.AppShortcutSource
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticToggle
+import com.tk.quicksearch.shared.util.withoutWhitespaces
 import java.util.Locale
 
 @Composable
@@ -222,7 +223,14 @@ fun AddSearchTargetShortcutDialog(
                 )
                 OutlinedTextField(
                     value = shortcutValue,
-                    onValueChange = { shortcutValue = it },
+                    onValueChange = {
+                        shortcutValue =
+                            if (shortcutKind == SearchTargetShortcutKind.URL) {
+                                it.withoutWhitespaces()
+                            } else {
+                                it
+                            }
+                    },
                     singleLine = false,
                     maxLines = 3,
                     label = { Text(stringResource(valueLabelResId)) },

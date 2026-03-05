@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -43,16 +44,19 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.CustomSearchEngine
 import com.tk.quicksearch.search.core.*
 import com.tk.quicksearch.searchEngines.*
+import com.tk.quicksearch.shared.util.withoutWhitespaces
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 @Composable
@@ -78,8 +82,7 @@ fun AddSearchEngineDialog(
         )
     }
     var iconBase64 by remember { mutableStateOf<String?>(null) }
-    var isMetadataLoading by remember { mutableStateOf(false) }
-    var metadataLoaded by remember { mutableStateOf(false) }
+    var metadataLoadedTemplate by remember { mutableStateOf<String?>(null) }
     var isEditingName by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     val nameFocusRequester = remember { FocusRequester() }
@@ -101,17 +104,12 @@ fun AddSearchEngineDialog(
 
     LaunchedEffect(validTemplate) {
         if (validTemplate == null) {
-            metadataLoaded = false
-            isMetadataLoading = false
+            metadataLoadedTemplate = null
             isEditingName = false
             iconBase64 = null
             nameInput = nameInput.copy(text = "", selection = TextRange(0))
             return@LaunchedEffect
         }
-
-        metadataLoaded = false
-        isMetadataLoading = true
-        isEditingName = false
 
         val inferredName = withContext(Dispatchers.IO) { inferCustomSearchEngineName(validTemplate) }
         val fetchedIcon = withContext(Dispatchers.IO) { fetchFaviconAsBase64(validTemplate) }
@@ -123,12 +121,9 @@ fun AddSearchEngineDialog(
                     text = inferredName,
                     selection = TextRange(inferredName.length),
                 )
-            metadataLoaded = true
-        } else {
-            iconBase64 = null
-            nameInput = nameInput.copy(text = "", selection = TextRange(0))
+            metadataLoadedTemplate = validTemplate
+            isEditingName = false
         }
-        isMetadataLoading = false
     }
 
     LaunchedEffect(isEditingName) {
@@ -139,7 +134,8 @@ fun AddSearchEngineDialog(
 
     val trimmedName = nameInput.text.trim()
     val isNameValid = trimmedName.isNotBlank()
-    val canSave = validTemplate != null && metadataLoaded && isNameValid
+    val hasCurrentTemplateMetadata = validTemplate != null && metadataLoadedTemplate == validTemplate
+    val canSave = hasCurrentTemplateMetadata && isNameValid
     val iconBitmap =
         remember(iconBase64) {
             val encoded = iconBase64 ?: return@remember null
@@ -158,13 +154,7 @@ fun AddSearchEngineDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                if (isMetadataLoading) {
-                    Text(
-                        text = stringResource(R.string.settings_add_search_engine_loading_metadata),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                } else if (metadataLoaded) {
+                if (metadataLoadedTemplate != null) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -174,40 +164,35 @@ fun AddSearchEngineDialog(
                             modifier =
                                 Modifier
                                     .size(38.dp)
-                                    .offset(y = (-4).dp),
+                                    .offset(y = (-4).dp)
+                                    .clickable {
+                                        pickIconLauncher.launch(arrayOf("image/*"))
+                                    },
                         ) {
-                            androidx.compose.material3.Surface(
+                            Box(
                                 modifier =
                                     Modifier
                                         .size(34.dp)
-                                        .align(androidx.compose.ui.Alignment.Center)
-                                        .clip(MaterialTheme.shapes.medium)
-                                        .clickable {
-                                            pickIconLauncher.launch(arrayOf("image/*"))
-                                        },
-                                tonalElevation = 1.dp,
-                                shape = MaterialTheme.shapes.medium,
+                                        .align(androidx.compose.ui.Alignment.Center),
                             ) {
-                                Box(modifier = Modifier.size(34.dp)) {
-                                    if (iconBitmap != null) {
-                                        Image(
-                                            bitmap = iconBitmap,
+                                if (iconBitmap != null) {
+                                    Image(
+                                        bitmap = iconBitmap,
+                                        contentDescription = trimmedName,
+                                        modifier = Modifier.size(34.dp),
+                                        contentScale = ContentScale.Fit,
+                                    )
+                                } else {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Public,
                                             contentDescription = trimmedName,
-                                            modifier = Modifier.size(34.dp),
-                                            contentScale = ContentScale.Fit,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
-                                    } else {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.Center,
-                                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Rounded.Public,
-                                                contentDescription = trimmedName,
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            )
-                                        }
                                     }
                                 }
                             }
@@ -267,7 +252,7 @@ fun AddSearchEngineDialog(
 
                 TextField(
                     value = urlInput,
-                    onValueChange = { newValue -> urlInput = newValue },
+                    onValueChange = { newValue -> urlInput = newValue.withoutWhitespaces() },
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -294,19 +279,75 @@ fun AddSearchEngineDialog(
 
                 when {
                     showValidationError -> {
-                        Text(
-                            text =
-                                when ((validation as CustomSearchTemplateValidation.Invalid).reason) {
-                                    CustomSearchTemplateValidation.Reason.EMPTY ->
-                                        stringResource(R.string.settings_add_search_engine_error_required)
-                                    CustomSearchTemplateValidation.Reason.MISSING_QUERY_PLACEHOLDER ->
-                                        stringResource(R.string.settings_add_search_engine_error_placeholder)
-                                    CustomSearchTemplateValidation.Reason.MULTIPLE_QUERY_PLACEHOLDERS ->
-                                        stringResource(R.string.settings_add_search_engine_error_multiple_placeholders)
-                                },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                        )
+                        when ((validation as CustomSearchTemplateValidation.Invalid).reason) {
+                            CustomSearchTemplateValidation.Reason.EMPTY -> {
+                                Text(
+                                    text = stringResource(R.string.settings_add_search_engine_error_required),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+
+                            CustomSearchTemplateValidation.Reason.MISSING_QUERY_PLACEHOLDER -> {
+                                val fullMessage = stringResource(R.string.settings_add_search_engine_error_placeholder)
+                                val messageText =
+                                    buildAnnotatedString {
+                                        val placeholderStart = fullMessage.indexOf(CUSTOM_QUERY_PLACEHOLDER)
+                                        if (placeholderStart < 0) {
+                                            append(fullMessage)
+                                            return@buildAnnotatedString
+                                        }
+                                        val placeholderEnd = placeholderStart + CUSTOM_QUERY_PLACEHOLDER.length
+                                        append(fullMessage.substring(0, placeholderStart))
+                                        pushStringAnnotation(tag = "placeholder", annotation = CUSTOM_QUERY_PLACEHOLDER)
+                                        withStyle(
+                                            style =
+                                                SpanStyle(
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                ),
+                                        ) {
+                                            append(CUSTOM_QUERY_PLACEHOLDER)
+                                        }
+                                        pop()
+                                        append(fullMessage.substring(placeholderEnd))
+                                    }
+                                ClickableText(
+                                    text = messageText,
+                                    style =
+                                        MaterialTheme.typography.bodySmall.copy(
+                                            color = MaterialTheme.colorScheme.error,
+                                        ),
+                                    onClick = { offset ->
+                                        val hasPlaceholderLink =
+                                            messageText
+                                                .getStringAnnotations(
+                                                    tag = "placeholder",
+                                                    start = offset,
+                                                    end = offset,
+                                                ).isNotEmpty()
+                                        if (hasPlaceholderLink) {
+                                            val appendedText = "${urlInput.text}$CUSTOM_QUERY_PLACEHOLDER"
+                                            urlInput =
+                                                TextFieldValue(
+                                                    text = appendedText,
+                                                    selection = TextRange(appendedText.length),
+                                                )
+                                        }
+                                    },
+                                )
+                            }
+
+                            CustomSearchTemplateValidation.Reason.MULTIPLE_QUERY_PLACEHOLDERS -> {
+                                Text(
+                                    text =
+                                        stringResource(
+                                            R.string.settings_add_search_engine_error_multiple_placeholders,
+                                        ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        }
                     }
 
                 }
