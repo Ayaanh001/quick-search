@@ -2,6 +2,7 @@ package com.tk.quicksearch.widgets.customButtonsWidget
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -67,6 +68,7 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.SearchUiState
 import com.tk.quicksearch.search.core.SearchViewModel
 import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.rememberShortcutIcon
 import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.models.ContactInfo
@@ -254,7 +256,7 @@ private fun CustomButtonsRow(
                 Box(
                     modifier =
                         Modifier
-                            .width(slotSize)
+                            .weight(1f)
                             .height(slotSize)
                             .zIndex(if (isDragging) 1f else 0f)
                             .alpha(alpha)
@@ -372,7 +374,7 @@ private fun CustomButtonSlotContent(
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(if (compactMode) 4.dp else 10.dp),
-            verticalArrangement = Arrangement.spacedBy(if (compactMode) 6.dp else 2.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.spacedBy(if (compactMode) 6.dp else 4.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (action == null) {
@@ -570,12 +572,7 @@ private fun CustomWidgetSearchResultRow(
         horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingMedium),
         verticalAlignment = Alignment.Top,
     ) {
-        CustomWidgetButtonIcon(
-            action = result.toAction(),
-            iconSize = WidgetConfigConstants.CUSTOM_BUTTON_RESULT_ICON_SIZE,
-            iconPackPackage = iconPackPackage,
-            tintColor = MaterialTheme.colorScheme.secondary,
-        )
+        CustomWidgetSearchResultIcon(result = result, iconPackPackage = iconPackPackage)
 
         Text(
             text = result.displayLabel(),
@@ -592,6 +589,33 @@ private fun CustomWidgetSearchResultRow(
             )
         }
     }
+}
+
+@Composable
+private fun CustomWidgetSearchResultIcon(
+    result: CustomWidgetSearchResult,
+    iconPackPackage: String?,
+) {
+    if (result is CustomWidgetSearchResult.AppShortcut) {
+        val iconSize = WidgetConfigConstants.CUSTOM_BUTTON_RESULT_ICON_SIZE
+        val iconSizePx = with(LocalDensity.current) { iconSize.roundToPx() }
+        val iconBitmap = rememberShortcutIcon(shortcut = result.shortcut, iconSizePx = iconSizePx)
+        if (iconBitmap != null) {
+            Image(
+                bitmap = iconBitmap,
+                contentDescription = result.displayLabel(),
+                modifier = Modifier.size(iconSize),
+            )
+            return
+        }
+    }
+
+    CustomWidgetButtonIcon(
+        action = result.toAction(),
+        iconSize = WidgetConfigConstants.CUSTOM_BUTTON_RESULT_ICON_SIZE,
+        iconPackPackage = iconPackPackage,
+        tintColor = MaterialTheme.colorScheme.secondary,
+    )
 }
 
 private sealed class CustomWidgetSearchResult {
@@ -656,6 +680,7 @@ private sealed class CustomWidgetSearchResult {
                     shortLabel = shortcut.shortLabel,
                     longLabel = shortcut.longLabel,
                     iconResId = shortcut.iconResId,
+                    iconBase64 = shortcut.iconBase64,
                     enabled = shortcut.enabled,
                     intents = shortcut.intents,
                 )

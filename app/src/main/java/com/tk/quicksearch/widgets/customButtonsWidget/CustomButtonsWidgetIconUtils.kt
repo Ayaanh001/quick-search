@@ -9,6 +9,7 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Typeface
 import android.net.Uri
+import android.util.Base64
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.ui.graphics.Color
@@ -94,6 +95,19 @@ private fun loadShortcutIconBitmap(
     action: CustomWidgetButtonAction.AppShortcut,
     iconSizePx: Int,
 ): Bitmap? {
+    action.iconBase64?.let { encoded ->
+        val decoded = runCatching { Base64.decode(encoded, Base64.DEFAULT) }.getOrNull()
+        val bitmap = decoded?.let { bytes -> BitmapFactory.decodeByteArray(bytes, 0, bytes.size) }
+        if (bitmap != null) {
+            return Bitmap.createScaledBitmap(
+                bitmap,
+                iconSizePx.coerceAtLeast(1),
+                iconSizePx.coerceAtLeast(1),
+                true,
+            )
+        }
+    }
+
     val resId = action.iconResId ?: return null
     val targetContext =
         runCatching {

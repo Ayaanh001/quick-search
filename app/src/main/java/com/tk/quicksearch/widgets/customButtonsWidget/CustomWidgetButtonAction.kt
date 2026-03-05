@@ -217,6 +217,7 @@ sealed class CustomWidgetButtonAction : Parcelable {
         val shortLabel: String?,
         val longLabel: String?,
         val iconResId: Int?,
+        val iconBase64: String? = null,
         val enabled: Boolean,
         val intents: List<Intent>,
     ) : CustomWidgetButtonAction() {
@@ -236,6 +237,7 @@ sealed class CustomWidgetButtonAction : Parcelable {
                 shortLabel = shortLabel,
                 longLabel = longLabel,
                 iconResId = iconResId,
+                iconBase64 = iconBase64,
                 enabled = enabled,
                 intents = intents,
             )
@@ -249,6 +251,7 @@ sealed class CustomWidgetButtonAction : Parcelable {
                 .put(KEY_SHORT_LABEL, shortLabel)
                 .put(KEY_LONG_LABEL, longLabel)
                 .put(KEY_ICON_RES_ID, iconResId)
+                .put(KEY_ICON_BASE64, iconBase64)
                 .put(KEY_ENABLED, enabled)
                 .put(KEY_INTENTS, intentsToJson(intents))
                 .toString()
@@ -351,6 +354,7 @@ sealed class CustomWidgetButtonAction : Parcelable {
                                 } else {
                                     null
                                 },
+                            iconBase64 = json.optString(KEY_ICON_BASE64).nullIfBlankOrLiteralNull(),
                             enabled = json.optBoolean(KEY_ENABLED, true),
                             intents = jsonToIntents(json.optJSONArray(KEY_INTENTS)),
                         )
@@ -394,6 +398,7 @@ private const val KEY_SHORTCUT_ID = "shortcutId"
 private const val KEY_SHORT_LABEL = "shortLabel"
 private const val KEY_LONG_LABEL = "longLabel"
 private const val KEY_ICON_RES_ID = "iconResId"
+private const val KEY_ICON_BASE64 = "iconBase64"
 private const val KEY_ENABLED = "enabled"
 private const val KEY_INTENTS = "intents"
 
