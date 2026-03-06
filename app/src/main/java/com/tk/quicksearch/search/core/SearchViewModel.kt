@@ -1941,6 +1941,43 @@ class SearchViewModel(
         }
     }
 
+    fun addCustomAppDeepLinkShortcut(
+        packageName: String,
+        shortcutName: String,
+        deepLink: String,
+        iconBase64: String?,
+        showDefaultToast: Boolean = true,
+        onShortcutAdded: ((StaticShortcut) -> Unit)? = null,
+        onAddFailed: (() -> Unit)? = null,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val addedShortcut =
+                appShortcutRepository.addCustomShortcutForAppDeepLink(
+                    packageName = packageName,
+                    shortcutName = shortcutName,
+                    deepLink = deepLink,
+                    iconBase64 = iconBase64,
+                )
+            if (addedShortcut != null) {
+                appShortcutSearchHandler.loadCachedShortcutsOnly()
+                withContext(Dispatchers.Main) {
+                    refreshAppShortcutsState()
+                    onShortcutAdded?.invoke(addedShortcut)
+                    if (showDefaultToast) {
+                        showToast(R.string.settings_app_shortcuts_add_success)
+                    }
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    if (showDefaultToast) {
+                        showToast(R.string.settings_app_shortcuts_add_failed)
+                    }
+                    onAddFailed?.invoke()
+                }
+            }
+        }
+    }
+
     fun deleteCustomAppShortcut(shortcut: StaticShortcut) {
         if (!isUserCreatedShortcut(shortcut)) return
         viewModelScope.launch(Dispatchers.IO) {

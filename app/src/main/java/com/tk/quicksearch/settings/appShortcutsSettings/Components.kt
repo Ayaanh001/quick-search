@@ -35,6 +35,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,11 +44,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -169,6 +173,216 @@ fun SearchTargetShortcutSourceRow(
             )
         }
     }
+}
+
+@Composable
+fun AppDeepLinkSourceRow(
+    source: AppShortcutSource,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(
+                    horizontal = DesignTokens.CardHorizontalPadding,
+                    vertical = DesignTokens.CardVerticalPadding,
+                ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(DesignTokens.ItemRowSpacing),
+    ) {
+        if (source.icon != null) {
+            Image(
+                bitmap = source.icon,
+                contentDescription = source.appLabel,
+                modifier = Modifier.size(DesignTokens.IconSize),
+                contentScale = ContentScale.Fit,
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Rounded.Public,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(DesignTokens.IconSize),
+            )
+        }
+
+        Text(
+            text = stringResource(R.string.settings_app_shortcuts_add_deep_link),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+
+        IconButton(onClick = onClick) {
+            Icon(
+                imageVector = Icons.Rounded.Add,
+                contentDescription = stringResource(R.string.settings_app_shortcuts_add_deep_link),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+}
+
+@Composable
+fun AddAppDeepLinkDialog(
+    packageName: String,
+    appLabel: String,
+    onDismiss: () -> Unit,
+    onSave: (String, String, String?) -> Unit,
+) {
+    val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val nameFocusRequester = remember { FocusRequester() }
+    var shortcutName by remember(appLabel) {
+        mutableStateOf(
+            TextFieldValue(
+                text = "",
+                selection = TextRange(0),
+            ),
+        )
+    }
+    var deepLinkInput by remember(appLabel) {
+        mutableStateOf(
+            TextFieldValue(
+                text = "",
+                selection = TextRange(0),
+            ),
+        )
+    }
+    var iconBase64 by remember(packageName) { mutableStateOf<String?>(null) }
+    val pickIconLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            val encoded = loadCustomIconAsBase64(context, uri) ?: return@rememberLauncherForActivityResult
+            iconBase64 = encoded
+        }
+    val iconBitmap =
+        remember(iconBase64) {
+            val encoded = iconBase64 ?: return@remember null
+            val bytes = runCatching { Base64.decode(encoded, Base64.DEFAULT) }.getOrNull()
+                ?: return@remember null
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
+        }
+    val appIconResult = rememberAppIcon(packageName = packageName, iconPackPackage = null)
+    val trimmedName = shortcutName.text.trim()
+    val normalizedValue = deepLinkInput.text.trim()
+    val canSave = trimmedName.isNotBlank() && normalizedValue.isNotBlank()
+
+    LaunchedEffect(Unit) {
+        nameFocusRequester.requestFocus()
+        keyboardController?.show()
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.settings_app_shortcuts_add_deep_link_dialog_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = stringResource(R.string.settings_app_shortcuts_add_deep_link_dialog_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(50.dp)
+                                .clip(MaterialTheme.shapes.medium)
+                                .clickable { pickIconLauncher.launch(arrayOf("image/*")) },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        when {
+                            iconBitmap != null -> {
+                                Image(
+                                    bitmap = iconBitmap,
+                                    contentDescription = appLabel,
+                                    modifier =
+                                        Modifier
+                                            .size(34.dp)
+                                            .offset(y = 2.dp),
+                                    contentScale = ContentScale.Fit,
+                                )
+                            }
+                            appIconResult.bitmap != null -> {
+                                Image(
+                                    bitmap = appIconResult.bitmap,
+                                    contentDescription = appLabel,
+                                    modifier =
+                                        Modifier
+                                            .size(34.dp)
+                                            .offset(y = 2.dp),
+                                    contentScale = ContentScale.Fit,
+                                )
+                            }
+                            else -> {
+                                Icon(
+                                    imageVector = Icons.Rounded.Public,
+                                    contentDescription = appLabel,
+                                    modifier =
+                                        Modifier
+                                            .size(28.dp)
+                                            .offset(y = 2.dp),
+                                )
+                            }
+                        }
+                        Box(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .offset(x = (-4).dp, y = (-6).dp)
+                                    .size(16.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surface),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Edit,
+                                contentDescription = stringResource(R.string.settings_edit_label),
+                                modifier = Modifier.size(10.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+                    OutlinedTextField(
+                        value = shortcutName,
+                        onValueChange = { shortcutName = it },
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .focusRequester(nameFocusRequester),
+                        singleLine = true,
+                        maxLines = 1,
+                        label = { Text(stringResource(R.string.settings_app_shortcuts_shortcut_name_label)) },
+                    )
+                }
+                OutlinedTextField(
+                    value = deepLinkInput,
+                    onValueChange = { deepLinkInput = it.withoutWhitespaces() },
+                    singleLine = true,
+                    maxLines = 1,
+                    label = { Text(stringResource(R.string.settings_app_shortcuts_deep_link_label)) },
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(trimmedName, normalizedValue, iconBase64) }, enabled = canSave) {
+                Text(text = stringResource(R.string.dialog_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.dialog_cancel))
+            }
+        },
+    )
 }
 
 @Composable

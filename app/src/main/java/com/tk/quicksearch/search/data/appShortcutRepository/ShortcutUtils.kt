@@ -560,12 +560,14 @@ private fun readLabelAttr(
 }
 
 private fun canLaunchShortcut(shortcut: StaticShortcut, packageManager: PackageManager, context: Context): Boolean {
-    val intent = shortcut.intents.lastOrNull() ?: return false
-    val resolved = packageManager.resolveActivity(intent, 0) ?: return false
-    val activityInfo = resolved.activityInfo
-    if (!activityInfo.exported) return false
-    val requiredPermission = activityInfo.permission?.takeIf { it.isNotBlank() } ?: return true
-    return context.checkSelfPermission(requiredPermission) == PackageManager.PERMISSION_GRANTED
+    if (shortcut.intents.isEmpty()) return false
+    return shortcut.intents.asReversed().any { intent ->
+        val resolved = packageManager.resolveActivity(intent, 0) ?: return@any false
+        val activityInfo = resolved.activityInfo
+        if (!activityInfo.exported) return@any false
+        val requiredPermission = activityInfo.permission?.takeIf { it.isNotBlank() } ?: return@any true
+        context.checkSelfPermission(requiredPermission) == PackageManager.PERMISSION_GRANTED
+    }
 }
 
 fun filterShortcuts(
@@ -597,33 +599,52 @@ fun launchStaticShortcut(
         return context.getString(R.string.error_shortcut_disabled)
     }
 
-    val baseIntent = shortcut.intents.lastOrNull() ?: return context.getString(R.string.error_shortcut_no_intent)
-    val intent = Intent(baseIntent).apply { putExtra(Intent.EXTRA_SHORTCUT_ID, shortcut.id) }
-
     val pm = context.packageManager
-    val details = formatIntentDetails(intent)
-    val resolved =
-        pm.resolveActivity(intent, 0)
-            ?: return context.getString(R.string.error_shortcut_no_activity_resolves) + details.toSuffixDetail()
+    val intents = shortcut.intents.asReversed()
+    var lastErrorMessage: String? = null
+    var noActivityIntentDetails: String = ""
+    intents.forEach { baseIntent ->
+        val intent = Intent(baseIntent).apply { putExtra(Intent.EXTRA_SHORTCUT_ID, shortcut.id) }
+        val details = formatIntentDetails(intent)
+        val resolved = pm.resolveActivity(intent, 0)
+        if (resolved == null) {
+            noActivityIntentDetails = details
+            return@forEach
+        }
 
-    val activityInfo = resolved.activityInfo
-    if (!activityInfo.exported) {
-        return context.getString(R.string.error_shortcut_activity_not_exported) + details.toSuffixDetail()
-    }
-    val requiredPermission = activityInfo.permission?.takeIf { it.isNotBlank() }
-    if (requiredPermission != null &&
-        context.checkSelfPermission(requiredPermission) !=
-        PackageManager.PERMISSION_GRANTED
-    ) {
-        return context.getString(R.string.error_shortcut_requires_permission, requiredPermission) + details.toSuffixDetail()
+        val activityInfo = resolved.activityInfo
+        if (!activityInfo.exported) {
+            lastErrorMessage =
+                context.getString(R.string.error_shortcut_activity_not_exported) + details.toSuffixDetail()
+            return@forEach
+        }
+
+        val requiredPermission = activityInfo.permission?.takeIf { it.isNotBlank() }
+        if (requiredPermission != null &&
+            context.checkSelfPermission(requiredPermission) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            lastErrorMessage =
+                context.getString(R.string.error_shortcut_requires_permission, requiredPermission) +
+                    details.toSuffixDetail()
+            return@forEach
+        }
+
+        val error = kotlin.runCatching { context.startActivity(intent) }.exceptionOrNull()
+        if (error == null) {
+            return null
+        }
+        lastErrorMessage =
+            context.getString(
+                R.string.error_shortcut_launch_failed,
+                error.message ?: context.getString(R.string.error_unknown),
+            ) + details.toSuffixDetail()
     }
 
-    val error = kotlin.runCatching { context.startActivity(intent) }.exceptionOrNull()
-    if (error != null) {
-        return context.getString(R.string.error_shortcut_launch_failed, error.message ?: context.getString(R.string.error_unknown)) + details.toSuffixDetail()
+    if (lastErrorMessage != null) {
+        return lastErrorMessage
     }
-
-    return null
+    return context.getString(R.string.error_shortcut_no_activity_resolves) + noActivityIntentDetails.toSuffixDetail()
 }
 
 private fun formatIntentDetails(intent: Intent): String {

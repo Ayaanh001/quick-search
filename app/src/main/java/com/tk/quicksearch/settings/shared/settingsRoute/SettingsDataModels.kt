@@ -143,6 +143,7 @@ data class SettingsScreenCallbacks(
     val onLaunchAppShortcut: (StaticShortcut) -> Unit,
     val onOpenAddAppShortcutDialog: () -> Unit,
     val onAddAppShortcutFromSource: (AppShortcutSource) -> Unit,
+    val onAddAppDeepLinkShortcut: (String, String, String, String?) -> Unit,
     val onAddSearchTargetQueryShortcut: (SearchTarget, String, String) -> Unit,
     val onUpdateCustomAppShortcut: (StaticShortcut, String, String?) -> Unit,
     val onDeleteCustomAppShortcut: (StaticShortcut) -> Unit,

@@ -3,6 +3,7 @@ package com.tk.quicksearch.search.data.AppShortcutRepository
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.data.AppShortcutRepository.AppShortcutCache
 import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
@@ -234,6 +235,73 @@ class AppShortcutRepository(
                     intents = listOf(launchIntent),
                 )
             val validShortcut = filterShortcuts(listOf(shortcut), packageManager, context).firstOrNull() ?: return@withContext null
+
+            val customShortcuts = shortcutCache.loadCustomShortcuts().orEmpty().toMutableList()
+            customShortcuts.add(validShortcut)
+            if (!shortcutCache.saveCustomShortcuts(customShortcuts)) {
+                return@withContext null
+            }
+
+            inMemoryShortcuts =
+                mergeAndSortShortcuts(
+                    staticShortcuts = inMemoryShortcuts.orEmpty().filterNot(::isUserCreatedShortcut),
+                    customShortcuts = customShortcuts,
+                    context = context,
+                    packageManager = packageManager,
+                )
+            validShortcut
+        }
+
+    suspend fun addCustomShortcutForAppDeepLink(
+        packageName: String,
+        shortcutName: String,
+        deepLink: String,
+        iconBase64: String?,
+    ): StaticShortcut? =
+        withContext(Dispatchers.IO) {
+            val normalizedPackageName = packageName.trim()
+            val normalizedShortcutName = shortcutName.trim()
+            val normalizedDeepLink = deepLink.trim()
+            if (normalizedPackageName.isBlank() ||
+                normalizedShortcutName.isBlank() ||
+                normalizedDeepLink.isBlank() ||
+                normalizedDeepLink.any { it.isWhitespace() }
+            ) {
+                return@withContext null
+            }
+
+            val appIntent =
+                runCatching { Intent.parseUri(normalizedDeepLink, Intent.URI_INTENT_SCHEME) }
+                    .getOrElse {
+                        Intent(Intent.ACTION_VIEW, Uri.parse(normalizedDeepLink))
+                    }.apply {
+                        if (component?.packageName?.equals(normalizedPackageName, ignoreCase = true) == false) {
+                            component = null
+                        }
+                        `package` = normalizedPackageName
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+            val fallbackIntent =
+                Intent(Intent.ACTION_VIEW, Uri.parse(normalizedDeepLink)).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+
+            val shortcut =
+                StaticShortcut(
+                    packageName = normalizedPackageName,
+                    appLabel = resolveAppLabel(context, normalizedPackageName, packageManager),
+                    id =
+                        "custom_deeplink_${System.currentTimeMillis()}_${(Math.random() * 100000).toInt()}",
+                    shortLabel = normalizedShortcutName,
+                    longLabel = normalizedShortcutName,
+                    iconResId = null,
+                    iconBase64 = iconBase64?.takeIf { it.isNotBlank() } ?: loadAppIconBase64(context, normalizedPackageName),
+                    enabled = true,
+                    intents = listOf(fallbackIntent, appIntent),
+                )
+            val validShortcut =
+                filterShortcuts(listOf(shortcut), packageManager, context).firstOrNull()
+                    ?: return@withContext null
 
             val customShortcuts = shortcutCache.loadCustomShortcuts().orEmpty().toMutableList()
             customShortcuts.add(validShortcut)

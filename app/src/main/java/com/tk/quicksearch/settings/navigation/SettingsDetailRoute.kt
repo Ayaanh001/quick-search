@@ -351,6 +351,17 @@ fun SettingsDetailRoute(
                     onLaunchAppShortcut = viewModel::launchAppShortcut,
                     onOpenAddAppShortcutDialog = appShortcutSourceFlow.openSourcePicker,
                     onAddAppShortcutFromSource = appShortcutSourceFlow.selectSource,
+                    onAddAppDeepLinkShortcut = { packageName, shortcutName, deepLink, iconBase64 ->
+                        viewModel.addCustomAppDeepLinkShortcut(
+                                packageName = packageName,
+                                shortcutName = shortcutName,
+                                deepLink = deepLink,
+                                iconBase64 = iconBase64,
+                                showDefaultToast = false,
+                                onShortcutAdded = onShortcutAdded,
+                                onAddFailed = onShortcutAddFailed,
+                        )
+                    },
                     onAddSearchTargetQueryShortcut = { target, shortcutName, shortcutQuery ->
                         viewModel.addSearchTargetQueryShortcut(
                                 target = target,

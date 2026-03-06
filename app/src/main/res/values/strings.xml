@@ -512,6 +512,9 @@
     <string name="settings_app_shortcuts_add_url_shortcut">Custom URL</string>
     <string name="settings_app_shortcuts_add_query_dialog_title">Add Custom Search Query Shortcut to %1$s</string>
     <string name="settings_app_shortcuts_add_url_dialog_title">Add URL Shortcut to %1$s</string>
+    <string name="settings_app_shortcuts_add_deep_link">App Deep Link</string>
+    <string name="settings_app_shortcuts_add_deep_link_dialog_title">Add App Deep Link</string>
+    <string name="settings_app_shortcuts_add_deep_link_dialog_message">Add a supported URL or intent link which opens a specific screen in the app. Unsupported links will be opened in your browser.</string>
     <string name="settings_app_shortcuts_activity_dialog_title">Choose App Activity</string>
     <string name="settings_app_shortcuts_activity_empty">No app activities available.</string>
     <string name="settings_app_shortcuts_activity_warning">Some activities may not work as expected</string>
@@ -519,6 +522,7 @@
     <string name="settings_app_shortcuts_edit_dialog_title">Edit Shortcut</string>
     <string name="settings_app_shortcuts_query_label">Query</string>
     <string name="settings_app_shortcuts_url_label">URL</string>
+    <string name="settings_app_shortcuts_deep_link_label">URL or Intent</string>
     <string name="settings_app_shortcuts_delete_action">Delete shortcut</string>
     <string name="settings_app_shortcuts_create_not_supported">No app supports shortcut creation on this device.</string>
     <string name="settings_app_shortcuts_add_success">Shortcut added.</string>

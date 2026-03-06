@@ -72,6 +72,7 @@ fun AppShortcutsSettingsSection(
     onShortcutNameClick: (StaticShortcut) -> Unit,
     shortcutSources: List<AppShortcutSource>,
     onAddShortcutFromSource: (AppShortcutSource) -> Unit,
+    onAddAppDeepLinkShortcut: (String, String, String, String?) -> Unit,
     searchTargets: List<SearchTarget>,
     onAddQueryShortcut: (SearchTarget, String, String) -> Unit,
     onUpdateCustomShortcut: (StaticShortcut, String, String?) -> Unit,
@@ -252,6 +253,7 @@ fun AppShortcutsSettingsSection(
         }
     val expandedCards = remember { mutableStateMapOf<String, Boolean>() }
     var shortcutDialogSource by remember { mutableStateOf<SearchTargetShortcutSource?>(null) }
+    var appDeepLinkDialogSource by remember { mutableStateOf<AppShortcutSource?>(null) }
 
     LaunchedEffect(visibleShortcutGroups) {
         val currentPackages = visibleShortcutGroups.map { it.packageName }.toSet()
@@ -300,6 +302,17 @@ fun AppShortcutsSettingsSection(
             onSave = { shortcutName, shortcutValue ->
                 onAddQueryShortcut(source.target, shortcutName, shortcutValue)
                 shortcutDialogSource = null
+            },
+        )
+    }
+    appDeepLinkDialogSource?.let { source ->
+        AddAppDeepLinkDialog(
+            packageName = source.packageName,
+            appLabel = source.appLabel,
+            onDismiss = { appDeepLinkDialogSource = null },
+            onSave = { shortcutName, deepLink, iconBase64 ->
+                onAddAppDeepLinkShortcut(source.packageName, shortcutName, deepLink, iconBase64)
+                appDeepLinkDialogSource = null
             },
         )
     }
@@ -535,6 +548,18 @@ fun AppShortcutsSettingsSection(
 
                             val appActivitySources =
                                 group.sources.filter { it.sourceType == AppShortcutSourceType.APP_ACTIVITY }
+                            if (appActivitySources.isNotEmpty() &&
+                                !isSearchTargetShortcutPackageName(group.packageName)
+                            ) {
+                                if (hasRenderedSection) {
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                                }
+                                AppDeepLinkSourceRow(
+                                    source = appActivitySources.first(),
+                                    onClick = { appDeepLinkDialogSource = appActivitySources.first() },
+                                )
+                                hasRenderedSection = true
+                            }
                             if (appActivitySources.isNotEmpty()) {
                                 if (hasRenderedSection) {
                                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

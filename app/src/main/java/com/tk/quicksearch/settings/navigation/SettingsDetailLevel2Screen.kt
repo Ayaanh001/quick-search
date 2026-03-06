@@ -124,6 +124,7 @@ internal fun SettingsDetailLevel2Screen(
                     onShortcutNameClick = callbacks.onLaunchAppShortcut,
                     shortcutSources = appShortcutSources,
                     onAddShortcutFromSource = callbacks.onAddAppShortcutFromSource,
+                    onAddAppDeepLinkShortcut = callbacks.onAddAppDeepLinkShortcut,
                     searchTargets = searchTargets,
                     onAddQueryShortcut = callbacks.onAddSearchTargetQueryShortcut,
                     onUpdateCustomShortcut = callbacks.onUpdateCustomAppShortcut,
