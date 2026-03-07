@@ -65,6 +65,7 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -221,6 +222,11 @@ class SearchViewModel(
 
     // Cache searchable apps to avoid re-computing on every query change
     @Volatile private var cachedAllSearchableApps: List<AppInfo> = emptyList()
+
+    // Async app-search job — cancelled whenever the query changes so we never
+    // block the UI thread with fuzzy matching over all installed apps.
+    private var appSearchJob: Job? = null
+    private var appSearchQueryVersion: Long = 0L
 
     // Consolidated startup configuration loaded in single batch operation
     @Volatile private var startupConfig: StartupPreferencesFacade.StartupConfig? = null
@@ -448,13 +454,13 @@ class SearchViewModel(
 
     // Management handlers - lazy initialize non-critical ones
     val appManager by lazy {
-        AppManagementService(userPreferences, viewModelScope, this::refreshDerivedState)
+        AppManagementService(userPreferences, viewModelScope, this::refreshAppSuggestions)
     }
     val contactManager by lazy {
         ContactManagementHandler(
                 userPreferences,
                 viewModelScope,
-                this::refreshDerivedState,
+                this::refreshSecondarySearches,
                 this::updateUiState,
         )
     }
@@ -462,7 +468,7 @@ class SearchViewModel(
         FileManagementHandler(
                 userPreferences,
                 viewModelScope,
-                this::refreshDerivedState,
+                this::refreshSecondarySearches,
                 this::updateUiState,
         )
     }
@@ -470,7 +476,7 @@ class SearchViewModel(
         DeviceSettingsManagementHandler(
                 userPreferences,
                 viewModelScope,
-                this::refreshDerivedState,
+                this::refreshSecondarySearches,
                 this::updateUiState,
         )
     }
@@ -537,7 +543,9 @@ class SearchViewModel(
                 repository = repository,
                 userPreferences = userPreferences,
                 scope = viewModelScope,
-                onAppsUpdated = { this.refreshDerivedState() },
+                onAppsUpdated = {
+                    this.refreshDerivedState()
+                }, // Full refresh: apps changed, recheck messaging + secondary searches
                 onLoadingStateChanged = { isLoading, error ->
                     updateConfigState { it.copy(isLoading = isLoading, errorMessage = error) }
                 },
@@ -1192,7 +1200,7 @@ class SearchViewModel(
                 stateUpdater = {
                     appSuggestionsEnabled = it
                     updateUiState { state -> state.copy(appSuggestionsEnabled = it) }
-                    refreshDerivedState()
+                    refreshAppSuggestions()
                 },
         )
     }
@@ -1739,6 +1747,7 @@ class SearchViewModel(
             if (clearShortcutWhenBlank) {
                 lockedShortcutTarget = null
             }
+            appSearchJob?.cancel()
             appSearchManager.setNoMatchPrefix(null)
             secondarySearchOrchestrator.resetNoResultTracking()
             webSuggestionHandler.cancelSuggestions()
@@ -1814,32 +1823,56 @@ class SearchViewModel(
         appSearchManager.resetNoMatchPrefixIfNeeded(normalizedQuery)
 
         val shouldSkipSearch = appSearchManager.shouldSkipDueToNoMatchPrefix(normalizedQuery)
-        val matches =
-                if (shouldSkipSearch || detectedTarget != null) {
-                    emptyList()
-                } else {
-                    appSearchManager.deriveMatches(
-                                    trimmedQuery,
-                                    cachedAllSearchableApps,
-                                    getGridItemCount(),
-                            )
-                            .also { results ->
-                                if (results.isEmpty()) {
-                                    appSearchManager.setNoMatchPrefix(normalizedQuery)
-                                }
-                            }
-                }
+
+        // Cancel any in-flight app search for the previous query.
+        appSearchJob?.cancel()
 
         // Clear web suggestions when query changes
         webSuggestionHandler.cancelSuggestions()
+
+        // Immediately update query / calculator / shortcut state so the UI is
+        // responsive on every keystroke.  searchResults will be filled in by the
+        // async job below (or cleared right away if we know there are no matches).
         updateUiState { state ->
             state.copy(
                     query = newQuery,
-                    searchResults = matches,
+                    searchResults =
+                            if (shouldSkipSearch || detectedTarget != null) emptyList()
+                            else state.searchResults,
                     calculatorState = calculatorResult,
                     webSuggestions = emptyList(),
                     detectedShortcutTarget = detectedTarget,
             )
+        }
+
+        if (!shouldSkipSearch && detectedTarget == null) {
+            // Snapshot the list reference so the background coroutine isn't racing
+            // with a potential cachedAllSearchableApps reassignment.
+            val appsSnapshot = cachedAllSearchableApps
+            val gridLimit = getGridItemCount()
+            val currentVersion = ++appSearchQueryVersion
+
+            appSearchJob =
+                    viewModelScope.launch(Dispatchers.Default) {
+                        val results =
+                                appSearchManager.deriveMatches(
+                                        trimmedQuery,
+                                        appsSnapshot,
+                                        gridLimit,
+                                )
+
+                        // Drop stale results if a newer query has already started.
+                        if (currentVersion != appSearchQueryVersion) return@launch
+
+                        if (results.isEmpty()) {
+                            appSearchManager.setNoMatchPrefix(normalizedQuery)
+                        }
+
+                        updateResultsState { state -> state.copy(searchResults = results) }
+                    }
+        } else if (shouldSkipSearch) {
+            // Ensure results are cleared when the no-match prefix applies.
+            updateResultsState { state -> state.copy(searchResults = emptyList()) }
         }
 
         // Skip secondary searches if calculator result is shown
@@ -1936,7 +1969,9 @@ class SearchViewModel(
         if (latest) {
             refreshApps()
         } else {
-            refreshDerivedState()
+            // No usage permission — only app suggestions need recomputing (no secondary searches
+            // needed)
+            refreshAppSuggestions()
         }
         handleOptionalPermissionChange()
         pinningHandler.loadPinnedContactsAndFiles()
@@ -2980,7 +3015,15 @@ class SearchViewModel(
     private fun getGridItemCount(): Int =
             SearchScreenConstants.ROW_COUNT * getAppGridColumns(getApplication())
 
-    private fun refreshDerivedState(
+    /**
+     * Recomputes only the app-suggestions / app-search part of derived state: nickname cache,
+     * pinned apps, recents, search results, hidden-app lists, and icon prefetch. Does NOT touch
+     * messaging/calling state and does NOT re-trigger secondary searches.
+     *
+     * Call this when the apps list or app preferences change but contacts/files/settings are
+     * unaffected (e.g. pin/hide an app, toggle suggestions, resume without usage permission).
+     */
+    private fun refreshAppSuggestions(
             lastUpdated: Long? = null,
             isLoading: Boolean? = null,
     ) {
@@ -3028,30 +3071,6 @@ class SearchViewModel(
 
         val query = _resultsState.value.query
         val trimmedQuery = query.trim()
-        val packageNames = apps.map { it.packageName }.toSet()
-        val isWhatsAppInstalled = packageNames.contains(PackageConstants.WHATSAPP_PACKAGE)
-        val isTelegramInstalled = packageNames.contains(PackageConstants.TELEGRAM_PACKAGE)
-        val isSignalInstalled = packageNames.contains(PackageConstants.SIGNAL_PACKAGE)
-        val isGoogleMeetInstalled = packageNames.contains(PackageConstants.GOOGLE_MEET_PACKAGE)
-        val resolvedMessagingApp =
-                messagingHandler.updateMessagingAvailability(
-                        whatsappInstalled = isWhatsAppInstalled,
-                        telegramInstalled = isTelegramInstalled,
-                        signalInstalled = isSignalInstalled,
-                        updateState = false,
-                )
-        val selectedCallingApp = userPreferences.getCallingApp()
-        val resolvedCallingApp =
-                resolveCallingApp(
-                        app = selectedCallingApp,
-                        isWhatsAppInstalled = isWhatsAppInstalled,
-                        isTelegramInstalled = isTelegramInstalled,
-                        isSignalInstalled = isSignalInstalled,
-                        isGoogleMeetInstalled = isGoogleMeetInstalled,
-                )
-        if (resolvedCallingApp != selectedCallingApp) {
-            userPreferences.setCallingApp(resolvedCallingApp)
-        }
 
         // Always update the searchable apps cache regardless of query state
         // Include both pinned and non-pinned apps in search, let ranking determine order
@@ -3092,6 +3111,50 @@ class SearchViewModel(
                     nicknameUpdateVersion = state.nicknameUpdateVersion + 1,
             )
         }
+        if (isLoading != null) {
+            updateConfigState { state -> state.copy(isLoading = isLoading) }
+        }
+
+        iconPackHandler.prefetchVisibleAppIcons(
+                pinnedApps = pinnedAppsForSuggestions,
+                recents = recents,
+                searchResults = searchResults,
+        )
+    }
+
+    /**
+     * Recomputes messaging and calling app availability based on the currently installed app list.
+     * Updates permission state only — does NOT touch app suggestions or secondary searches.
+     *
+     * Call this when the installed-apps list changes and we need to verify that the previously
+     * selected messaging / calling app is still present.
+     */
+    private fun refreshMessagingState() {
+        val apps = appSearchManager.cachedApps
+        val packageNames = apps.map { it.packageName }.toSet()
+        val isWhatsAppInstalled = packageNames.contains(PackageConstants.WHATSAPP_PACKAGE)
+        val isTelegramInstalled = packageNames.contains(PackageConstants.TELEGRAM_PACKAGE)
+        val isSignalInstalled = packageNames.contains(PackageConstants.SIGNAL_PACKAGE)
+        val isGoogleMeetInstalled = packageNames.contains(PackageConstants.GOOGLE_MEET_PACKAGE)
+        val resolvedMessagingApp =
+                messagingHandler.updateMessagingAvailability(
+                        whatsappInstalled = isWhatsAppInstalled,
+                        telegramInstalled = isTelegramInstalled,
+                        signalInstalled = isSignalInstalled,
+                        updateState = false,
+                )
+        val selectedCallingApp = userPreferences.getCallingApp()
+        val resolvedCallingApp =
+                resolveCallingApp(
+                        app = selectedCallingApp,
+                        isWhatsAppInstalled = isWhatsAppInstalled,
+                        isTelegramInstalled = isTelegramInstalled,
+                        isSignalInstalled = isSignalInstalled,
+                        isGoogleMeetInstalled = isGoogleMeetInstalled,
+                )
+        if (resolvedCallingApp != selectedCallingApp) {
+            userPreferences.setCallingApp(resolvedCallingApp)
+        }
         updatePermissionState { state ->
             state.copy(
                     messagingApp = resolvedMessagingApp,
@@ -3102,19 +3165,35 @@ class SearchViewModel(
                     isGoogleMeetInstalled = isGoogleMeetInstalled,
             )
         }
-        if (isLoading != null) {
-            updateConfigState { state -> state.copy(isLoading = isLoading) }
+    }
+
+    /**
+     * Re-triggers secondary searches (contacts, files, settings) for the current query. Used by
+     * management handlers (contact/file/settings pin/exclude operations) so they don't have to
+     * touch app-suggestion state at all.
+     */
+    private fun refreshSecondarySearches() {
+        val query = _resultsState.value.query
+        if (query.isNotBlank()) {
+            secondarySearchOrchestrator.performSecondarySearches(query)
         }
+    }
 
-        iconPackHandler.prefetchVisibleAppIcons(
-                pinnedApps = pinnedAppsForSuggestions,
-                recents = recents,
-                searchResults = searchResults,
-        )
+    /**
+     * Full derived-state refresh: recomputes app suggestions, messaging state, and re-triggers
+     * secondary searches. Use only when the installed app list changes (e.g. app
+     * installed/uninstalled) or during startup, where all three concerns need updating together.
+     */
+    private fun refreshDerivedState(
+            lastUpdated: Long? = null,
+            isLoading: Boolean? = null,
+    ) {
+        refreshAppSuggestions(lastUpdated = lastUpdated, isLoading = isLoading)
+        refreshMessagingState()
 
-        // Re-trigger secondary searches when nicknames change and there's an active query
-        // This ensures contacts/files/settings clear immediately when nicknames are removed
-        if (trimmedQuery.isNotBlank()) {
+        // Re-trigger secondary searches when the app list changes and there's an active query
+        val query = _resultsState.value.query
+        if (query.isNotBlank()) {
             secondarySearchOrchestrator.performSecondarySearches(query)
         }
     }
@@ -3129,7 +3208,9 @@ class SearchViewModel(
             if (latestUsagePermission) {
                 refreshApps()
             } else {
-                refreshDerivedState()
+                // Permission revoked — recompute app suggestions (recents/pinned change without
+                // usage data)
+                refreshAppSuggestions()
             }
         }
 
