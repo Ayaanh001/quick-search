@@ -4,7 +4,8 @@ import com.tk.quicksearch.search.models.DeviceFile
 import com.tk.quicksearch.search.models.FileType
 import com.tk.quicksearch.search.models.FileTypeUtils
 import com.tk.quicksearch.search.utils.FileUtils
-import com.tk.quicksearch.search.utils.SearchRankingUtils
+import com.tk.quicksearch.search.utils.DefaultSearchMatcher
+import com.tk.quicksearch.search.utils.SearchQueryContext
 import com.tk.quicksearch.search.utils.SearchTextNormalizer
 import java.util.Locale
 
@@ -88,22 +89,15 @@ object FileSearchAlgorithm {
     ): List<DeviceFile> {
         if (files.isEmpty()) return emptyList()
 
-        val normalizedQuery = SearchTextNormalizer.normalizeForSearch(query)
-        val queryTokens = normalizedQuery.split("\\s+".toRegex()).filter { it.isNotBlank() }
+        val queryContext = SearchQueryContext.fromRawQuery(query)
 
         return files
             .distinctBy { it.uri.toString() }
             .mapNotNull { file ->
                 val uriString = file.uri.toString()
                 val nickname = fileNicknames[uriString]
-                val priority =
-                    SearchRankingUtils.calculateMatchPriorityWithNickname(
-                        file.displayName,
-                        nickname,
-                        normalizedQuery,
-                        queryTokens,
-                    )
-                if (SearchRankingUtils.isOtherMatch(priority)) {
+                val priority = FileSearchPolicy.matchPriority(file.displayName, nickname, queryContext)
+                if (!DefaultSearchMatcher.isMatch(priority)) {
                     null
                 } else {
                     file to priority

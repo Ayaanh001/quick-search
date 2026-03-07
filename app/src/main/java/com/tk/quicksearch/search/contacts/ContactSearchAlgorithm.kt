@@ -1,8 +1,8 @@
 package com.tk.quicksearch.search.contacts
 
 import com.tk.quicksearch.search.models.ContactInfo
-import com.tk.quicksearch.search.utils.SearchRankingUtils
-import com.tk.quicksearch.search.utils.SearchTextNormalizer
+import com.tk.quicksearch.search.utils.DefaultSearchMatcher
+import com.tk.quicksearch.search.utils.SearchQueryContext
 import java.util.Locale
 
 object ContactSearchAlgorithm {
@@ -12,18 +12,12 @@ object ContactSearchAlgorithm {
     ): List<ContactInfo> {
         if (fullList.isEmpty()) return emptyList()
 
-        val normalizedQuery = SearchTextNormalizer.normalizeForSearch(query.trim())
-        val queryTokens = normalizedQuery.split("\\s+".toRegex()).filter { it.isNotBlank() }
+        val queryContext = SearchQueryContext.fromRawQuery(query)
 
         return fullList
             .mapNotNull { contact ->
-                val priority =
-                    SearchRankingUtils.calculateMatchPriority(
-                        contact.displayName,
-                        normalizedQuery,
-                        queryTokens,
-                    )
-                if (SearchRankingUtils.isOtherMatch(priority)) {
+                val priority = ContactSearchPolicy.matchPriority(contact.displayName, null, queryContext)
+                if (!DefaultSearchMatcher.isMatch(priority)) {
                     null
                 } else {
                     contact to priority

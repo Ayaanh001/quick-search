@@ -1,18 +1,21 @@
 package com.tk.quicksearch.search.core
 
 import com.tk.quicksearch.search.appShortcuts.AppShortcutSearchHandler
+import com.tk.quicksearch.search.contacts.ContactSearchPolicy
 import com.tk.quicksearch.search.data.ContactRepository
 import com.tk.quicksearch.search.data.FileSearchRepository
 import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.search.deviceSettings.DeviceSettingsSearchHandler
 import com.tk.quicksearch.search.files.FileSearchHandler
+import com.tk.quicksearch.search.files.FileSearchPolicy
 import com.tk.quicksearch.search.files.FolderPathPatternMatcher
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.DeviceFile
 import com.tk.quicksearch.search.models.FileType
+import com.tk.quicksearch.search.utils.DefaultSearchMatcher
 import com.tk.quicksearch.search.utils.FileUtils
-import com.tk.quicksearch.search.utils.SearchRankingUtils
+import com.tk.quicksearch.search.utils.SearchQueryContext
 import com.tk.quicksearch.search.utils.SearchTextNormalizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -36,7 +39,6 @@ class UnifiedSearchHandler(
     private val searchOperations: SearchOperations,
 ) {
     companion object {
-        private val WHITESPACE_REGEX = "\\s+".toRegex()
         private val SYSTEM_EXCLUDED_EXTENSIONS =
             setOf(
                 "tmp",
@@ -274,8 +276,7 @@ class UnifiedSearchHandler(
     ): List<ContactInfo> {
         if (contacts.isEmpty()) return emptyList()
 
-        // Pre-tokenize query once for efficient matching
-        val queryTokens = normalizedQuery.split(WHITESPACE_REGEX).filter { it.isNotBlank() }
+        val queryContext = SearchQueryContext.fromNormalizedQuery(normalizedQuery)
 
         // Pre-fetch all contact nicknames in a single call to reduce SharedPreferences
         // reads
@@ -290,13 +291,12 @@ class UnifiedSearchHandler(
             .mapNotNull { contact: ContactInfo ->
                 val nickname = contactNicknames[contact.contactId]
                 val priority =
-                    SearchRankingUtils.calculateMatchPriorityWithNickname(
-                        contact.displayName,
-                        nickname,
-                        normalizedQuery,
-                        queryTokens,
+                    ContactSearchPolicy.matchPriority(
+                        displayName = contact.displayName,
+                        nickname = nickname,
+                        query = queryContext,
                     )
-                if (SearchRankingUtils.isOtherMatch(priority)) {
+                if (!DefaultSearchMatcher.isMatch(priority)) {
                     null
                 } else {
                     Pair(contact, priority)
@@ -314,8 +314,7 @@ class UnifiedSearchHandler(
     ): List<DeviceFile> {
         if (files.isEmpty()) return emptyList()
 
-        // Pre-tokenize query once for efficient matching
-        val queryTokens = normalizedQuery.split(WHITESPACE_REGEX).filter { it.isNotBlank() }
+        val queryContext = SearchQueryContext.fromNormalizedQuery(normalizedQuery)
 
         // Pre-fetch all file nicknames in a single call to reduce SharedPreferences reads
         val distinctFiles = files.distinctBy { it.uri.toString() }
@@ -330,13 +329,12 @@ class UnifiedSearchHandler(
                 val uriString = file.uri.toString()
                 val nickname = fileNicknames[uriString]
                 val priority =
-                    SearchRankingUtils.calculateMatchPriorityWithNickname(
-                        file.displayName,
-                        nickname,
-                        normalizedQuery,
-                        queryTokens,
+                    FileSearchPolicy.matchPriority(
+                        displayName = file.displayName,
+                        nickname = nickname,
+                        query = queryContext,
                     )
-                if (SearchRankingUtils.isOtherMatch(priority)) {
+                if (!DefaultSearchMatcher.isMatch(priority)) {
                     null
                 } else {
                     Pair(file, priority)

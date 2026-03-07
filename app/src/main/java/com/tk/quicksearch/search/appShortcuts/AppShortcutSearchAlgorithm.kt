@@ -3,8 +3,8 @@ package com.tk.quicksearch.search.appShortcuts
 import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutDisplayName
 import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutKey
-import com.tk.quicksearch.search.utils.SearchRankingUtils
-import com.tk.quicksearch.search.utils.SearchTextNormalizer
+import com.tk.quicksearch.search.utils.DefaultSearchMatcher
+import com.tk.quicksearch.search.utils.SearchQueryContext
 import java.util.Locale
 
 object AppShortcutSearchAlgorithm {
@@ -21,8 +21,7 @@ object AppShortcutSearchAlgorithm {
         val trimmed = query.trim()
         if (trimmed.length < minQueryLength) return emptyList()
 
-        val normalizedQuery = SearchTextNormalizer.normalizeForSearch(trimmed)
-        val queryTokens = normalizedQuery.split("\\s+".toRegex()).filter { it.isNotBlank() }
+        val queryContext = SearchQueryContext.fromRawQuery(trimmed)
 
         return fullList
             .asSequence()
@@ -33,21 +32,14 @@ object AppShortcutSearchAlgorithm {
                 val displayName = shortcutDisplayName(shortcut)
                 val nickname = shortcutNicknames[shortcutId]
                 val priority =
-                    minOf(
-                        SearchRankingUtils.calculateMatchPriorityWithNickname(
-                            displayName,
-                            nickname,
-                            normalizedQuery,
-                            queryTokens,
-                        ),
-                        SearchRankingUtils.calculateMatchPriority(
-                            shortcut.appLabel,
-                            normalizedQuery,
-                            queryTokens,
-                        ),
+                    AppShortcutSearchPolicy.matchPriority(
+                        displayName = displayName,
+                        appLabel = shortcut.appLabel,
+                        nickname = nickname,
+                        query = queryContext,
                     )
 
-                if (SearchRankingUtils.isOtherMatch(priority)) {
+                if (!DefaultSearchMatcher.isMatch(priority)) {
                     null
                 } else {
                     shortcut to priority
