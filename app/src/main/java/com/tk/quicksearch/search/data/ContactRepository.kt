@@ -2,6 +2,7 @@ package com.tk.quicksearch.search.data
 
 import android.content.Context
 import android.database.Cursor
+import android.net.Uri
 import android.provider.ContactsContract
 import android.util.Log
 import com.tk.quicksearch.R
@@ -157,8 +158,9 @@ class ContactRepository(
     ): List<ContactInfo> {
         if (query.isBlank() || !hasPermission()) return emptyList()
 
+        val normalizedProviderQuery = SearchTextNormalizer.normalizeQueryWhitespace(query)
         val normalizedQuery = normalizeSearchQuery(query)
-        val contacts = queryContactsBySearch(normalizedQuery, limit)
+        val contacts = queryContactsBySearch(normalizedProviderQuery, limit)
         fetchPhotoUris(contacts)
         fetchContactMethods(contacts)
 
@@ -189,19 +191,20 @@ class ContactRepository(
     }
 
     private fun queryContactsBySearch(
-        normalizedQuery: String,
+        query: String,
         limit: Int,
     ): LinkedHashMap<Long, MutableContact> {
+        val filterUri = Uri.withAppendedPath(ContactsContract.CommonDataKinds.Phone.CONTENT_FILTER_URI, Uri.encode(query))
         val cursor =
             contentResolver.query(
-                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                filterUri,
                 PHONE_PROJECTION,
                 null,
                 null,
                 SORT_ORDER,
             ) ?: return LinkedHashMap()
 
-        return cursor.use { processPhoneCursorForSearch(it, normalizedQuery, limit) }
+        return cursor.use { processPhoneCursor(it, limit) }
     }
 
     private fun processPhoneCursor(
@@ -225,46 +228,6 @@ class ContactRepository(
             if (existing == null) {
                 // Check limit before adding new contact
                 if (limit != null && contacts.size >= limit) {
-                    break
-                }
-                contacts[contactId] =
-                    MutableContact(
-                        contactId = contactId,
-                        lookupKey = lookupKey,
-                        displayName = displayName,
-                        numbers = mutableListOf(phoneNumber),
-                    )
-            } else {
-                addOrUpdatePhoneNumber(existing.numbers, phoneNumber)
-            }
-        }
-
-        return contacts
-    }
-
-    private fun processPhoneCursorForSearch(
-        cursor: Cursor,
-        normalizedQuery: String,
-        limit: Int,
-    ): LinkedHashMap<Long, MutableContact> {
-        val contacts = LinkedHashMap<Long, MutableContact>()
-        val columnIndices = PhoneColumnIndices.fromCursor(cursor)
-
-        while (cursor.moveToNext()) {
-            val contactId = cursor.getLong(columnIndices.idIndex)
-            val lookupKey = cursor.getString(columnIndices.lookupIndex) ?: continue
-            val displayName = cursor.getString(columnIndices.nameIndex) ?: continue
-            val phoneNumber =
-                cursor
-                    .getString(columnIndices.numberIndex)
-                    ?.takeIf { it.isNotBlank() } ?: continue
-
-            val existing = contacts[contactId]
-            if (existing == null) {
-                if (!SearchTextNormalizer.normalizeForSearch(displayName).contains(normalizedQuery)) {
-                    continue
-                }
-                if (contacts.size >= limit) {
                     break
                 }
                 contacts[contactId] =
