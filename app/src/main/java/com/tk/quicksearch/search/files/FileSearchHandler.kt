@@ -52,9 +52,8 @@ class FileSearchHandler(
         val allFiles =
             fileRepository.searchFiles(normalizedQuery, FILE_SEARCH_RESULT_LIMIT)
 
-        val distinctFiles = allFiles.distinctBy { it.uri.toString() }
         val fileNicknames =
-            distinctFiles.associate { file ->
+            allFiles.associate { file ->
                 file.uri.toString() to
                     userPreferences.getFileNickname(file.uri.toString())
             }

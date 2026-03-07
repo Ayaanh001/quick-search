@@ -164,7 +164,7 @@ class ContactRepository(
 
         return contacts.values
             .map { it.toContactInfo() }
-            .let { ContactSearchAlgorithm.search(it, query) }
+            .let { ContactSearchAlgorithm.search(it, normalizedQuery) }
     }
 
     // ==================== Private Helpers ====================

@@ -9,6 +9,24 @@ import com.tk.quicksearch.search.utils.SearchTextNormalizer
 import java.util.Locale
 
 object FileSearchAlgorithm {
+    private val SYSTEM_EXCLUDED_EXTENSIONS =
+        setOf(
+            "tmp",
+            "temp",
+            "cache",
+            "log",
+            "bak",
+            "backup",
+            "old",
+            "orig",
+            "swp",
+            "swo",
+            "part",
+            "crdownload",
+            "download",
+            "tmpfile",
+        )
+
     fun search(
         fullList: List<DeviceFile>,
         query: String,
@@ -114,29 +132,11 @@ object FileSearchAlgorithm {
             FileUtils.getFileExtension(name)?.lowercase(Locale.getDefault())
                 ?: return false
 
-        val systemExcludedExtensions =
-            setOf(
-                "tmp",
-                "temp",
-                "cache",
-                "log",
-                "bak",
-                "backup",
-                "old",
-                "orig",
-                "swp",
-                "swo",
-                "part",
-                "crdownload",
-                "download",
-                "tmpfile",
-            )
-
         if (extension.startsWith("crypt")) {
             return extension == "crypt" || extension.drop(5).all { it.isDigit() }
         }
 
-        return extension in systemExcludedExtensions
+        return extension in SYSTEM_EXCLUDED_EXTENSIONS
     }
 
     private fun isSystemFolder(deviceFile: DeviceFile): Boolean {

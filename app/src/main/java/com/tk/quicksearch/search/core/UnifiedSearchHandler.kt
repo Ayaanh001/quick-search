@@ -37,6 +37,23 @@ class UnifiedSearchHandler(
 ) {
     companion object {
         private val WHITESPACE_REGEX = "\\s+".toRegex()
+        private val SYSTEM_EXCLUDED_EXTENSIONS =
+            setOf(
+                "tmp",
+                "temp",
+                "cache",
+                "log",
+                "bak",
+                "backup",
+                "old",
+                "orig",
+                "swp",
+                "swo",
+                "part",
+                "crdownload",
+                "download",
+                "tmpfile",
+            )
     }
 
     suspend fun performSearch(
@@ -96,6 +113,9 @@ class UnifiedSearchHandler(
                     trimmedQuery,
                     enabledFileTypes,
                     canSearchFiles,
+                    showFolders,
+                    showSystemFiles,
+                    showHiddenFiles,
                 )
 
             // Combine and filter results
@@ -161,6 +181,9 @@ class UnifiedSearchHandler(
         query: String,
         enabledFileTypes: Set<FileType>,
         canSearchFiles: Boolean,
+        showFolders: Boolean,
+        showSystemFiles: Boolean,
+        showHiddenFiles: Boolean,
     ): List<DeviceFile> {
         if (!canSearchFiles) return emptyList()
 
@@ -186,6 +209,17 @@ class UnifiedSearchHandler(
                     com.tk.quicksearch.search.models.FileTypeUtils.getFileType(
                         file,
                     )
+
+                if (file.isDirectory && !showFolders) return@filter false
+
+                val isSystem = isSystemFolder(file) || isSystemFile(file)
+                if (isSystem && !showSystemFiles) return@filter false
+
+                val isHidden = file.displayName.startsWith(".")
+                if (isHidden && !showHiddenFiles) return@filter false
+
+                if (!showHiddenFiles && isInTrashFolder(file)) return@filter false
+
                 fileType in enabledFileTypes &&
                     !userPreferences
                         .getExcludedFileUris()
@@ -200,6 +234,38 @@ class UnifiedSearchHandler(
         } else {
             emptyList()
         }
+    }
+
+    private fun isSystemFile(file: DeviceFile): Boolean {
+        val name = file.displayName
+        if (name.startsWith(".")) return true
+
+        val extension =
+            FileUtils.getFileExtension(name)?.lowercase(Locale.getDefault())
+                ?: return false
+
+        if (extension.startsWith("crypt")) {
+            return extension == "crypt" || extension.drop(5).all { it.isDigit() }
+        }
+
+        return extension in SYSTEM_EXCLUDED_EXTENSIONS
+    }
+
+    private fun isSystemFolder(file: DeviceFile): Boolean {
+        if (!file.isDirectory) return false
+        return file.displayName.lowercase(Locale.getDefault()).startsWith("com.")
+    }
+
+    private fun isInTrashFolder(file: DeviceFile): Boolean {
+        if (file.displayName.equals(".Trash", ignoreCase = true)) return true
+
+        val relativePath = file.relativePath ?: return false
+        return relativePath
+            .split('/')
+            .asSequence()
+            .filter { it.isNotBlank() }
+            .map { it.lowercase(Locale.getDefault()) }
+            .any { segment -> segment == ".trash" || segment.startsWith(".trash-") }
     }
 
     private fun filterAndRankContacts(

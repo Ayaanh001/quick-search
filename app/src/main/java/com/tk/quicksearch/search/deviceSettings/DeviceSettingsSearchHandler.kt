@@ -98,9 +98,8 @@ class DeviceSettingsSearchHandler(
                 .filterNot { excludedIds.contains(it) }
                 .toSet()
 
-        val settingsToSearch = availableSettings.filterNot { excludedIds.contains(it.id) }
         val nicknameCache =
-            settingsToSearch.associate { shortcut ->
+            availableSettings.associate { shortcut ->
                 shortcut.id to userPreferences.getSettingNickname(shortcut.id)
             }
 
