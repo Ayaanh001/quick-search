@@ -49,6 +49,7 @@ import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
 import com.tk.quicksearch.search.searchHistory.RecentSearchItem
 import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
+import com.tk.quicksearch.search.utils.SearchQueryContext
 import com.tk.quicksearch.search.utils.SearchTextNormalizer
 import com.tk.quicksearch.search.webSuggestions.WebSuggestionHandler
 import com.tk.quicksearch.searchEngines.SearchEngineManager
@@ -66,6 +67,7 @@ import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -231,6 +233,26 @@ class SearchViewModel(
     // Consolidated startup configuration loaded in single batch operation
     @Volatile private var startupConfig: StartupPreferencesFacade.StartupConfig? = null
     private val isAppShortcutsLoadInFlight = AtomicBoolean(false)
+
+    // -------------------------------------------------------------------------
+    // Resume dirty-flags — set when something changes while the screen is in
+    // the background, cleared after handleOnResume() services the flag.
+    // -------------------------------------------------------------------------
+
+    /**
+     * Set to true whenever device settings or app-shortcut metadata is mutated
+     * (pin/exclude/disable).  handleOnResume() will call refreshSettingsState()
+     * and refreshAppShortcutsState() and then clear this flag.  Starts as true
+     * so the very first resume after startup does a full refresh.
+     */
+    @Volatile private var resumeNeedsStaticDataRefresh: Boolean = true
+
+    /**
+     * Epoch-ms of the last time we told searchEngineManager to refresh browser
+     * targets.  We throttle this to at most once per BROWSER_REFRESH_INTERVAL_MS
+     * because it hits the PackageManager on every call.
+     */
+    @Volatile private var lastBrowserTargetRefreshMs: Long = 0L
 
     // =========================================================================
     // Targeted sub-state updaters — call these instead of _uiState.update{}
@@ -1820,6 +1842,9 @@ class SearchViewModel(
                 }
 
         val normalizedQuery = SearchTextNormalizer.normalizeForSearch(trimmedQuery)
+        // Build the query context once here so downstream consumers (app search, etc.)
+        // do not re-normalize the same string redundantly.
+        val queryContext = SearchQueryContext.fromNormalizedQuery(normalizedQuery)
         appSearchManager.resetNoMatchPrefixIfNeeded(normalizedQuery)
 
         val shouldSkipSearch = appSearchManager.shouldSkipDueToNoMatchPrefix(normalizedQuery)
@@ -1833,6 +1858,7 @@ class SearchViewModel(
         // Immediately update query / calculator / shortcut state so the UI is
         // responsive on every keystroke.  searchResults will be filled in by the
         // async job below (or cleared right away if we know there are no matches).
+        val showingCalculator = calculatorResult.result != null
         updateUiState { state ->
             state.copy(
                     query = newQuery,
@@ -1842,6 +1868,10 @@ class SearchViewModel(
                     calculatorState = calculatorResult,
                     webSuggestions = emptyList(),
                     detectedShortcutTarget = detectedTarget,
+                    contactResults = if (showingCalculator) emptyList() else state.contactResults,
+                    fileResults = if (showingCalculator) emptyList() else state.fileResults,
+                    settingResults = if (showingCalculator) emptyList() else state.settingResults,
+                    appShortcutResults = if (showingCalculator) emptyList() else state.appShortcutResults,
             )
         }
 
@@ -1854,9 +1884,16 @@ class SearchViewModel(
 
             appSearchJob =
                     viewModelScope.launch(Dispatchers.Default) {
+                        // Debounce: let rapid keystrokes settle before running the
+                        // potentially-expensive deriveMatches() pass.  The version
+                        // guard immediately after ensures stale coroutines exit
+                        // without touching state.
+                        delay(APP_SEARCH_DEBOUNCE_MS)
+                        if (currentVersion != appSearchQueryVersion) return@launch
+
                         val results =
                                 appSearchManager.deriveMatches(
-                                        trimmedQuery,
+                                        queryContext,
                                         appsSnapshot,
                                         gridLimit,
                                 )
@@ -1881,17 +1918,6 @@ class SearchViewModel(
                 secondarySearchOrchestrator.performWebSuggestionsOnly(newQuery)
             } else {
                 secondarySearchOrchestrator.performSecondarySearches(newQuery)
-            }
-        } else {
-            // Clear search results when showing calculator
-            updateResultsState { state ->
-                state.copy(
-                        contactResults = emptyList(),
-                        fileResults = emptyList(),
-                        settingResults = emptyList(),
-                        appShortcutResults = emptyList(),
-                        webSuggestions = emptyList(),
-                )
             }
         }
     }
@@ -1961,26 +1987,58 @@ class SearchViewModel(
     }
 
     fun handleOnResume() {
-        val previous = _permissionState.value.hasUsagePermission
-        val latest = repository.hasUsageAccess()
-        if (previous != latest) {
-            updatePermissionState { it.copy(hasUsagePermission = latest) }
+        // --- 1. Usage-access permission ----------------------------------------
+        // Only refresh the app list when usage-access permission has actually
+        // changed state since last resume.  Rotation and notification-shade
+        // dismissals no longer trigger a full app reload.
+        val previousUsage = _permissionState.value.hasUsagePermission
+        val latestUsage = repository.hasUsageAccess()
+        val usageChanged = previousUsage != latestUsage
+        if (usageChanged) {
+            updatePermissionState { it.copy(hasUsagePermission = latestUsage) }
+            if (latestUsage) {
+                refreshApps()
+            } else {
+                refreshAppSuggestions()
+            }
         }
-        if (latest) {
-            refreshApps()
-        } else {
-            // No usage permission — only app suggestions need recomputing (no secondary searches
-            // needed)
-            refreshAppSuggestions()
+
+        // --- 2. Optional permissions (contacts, files, call, wallpaper) ---------
+        // handleOptionalPermissionChange() already does internal dirty-checking
+        // and returns true only when something actually changed.
+        val optionalPermissionsChanged = run {
+            val before = _permissionState.value
+            handleOptionalPermissionChange()
+            _permissionState.value != before
         }
-        handleOptionalPermissionChange()
-        pinningHandler.loadPinnedContactsAndFiles()
-        pinningHandler.loadExcludedContactsAndFiles()
-        refreshSettingsState()
-        refreshAppShortcutsState()
-        viewModelScope.launch(Dispatchers.IO) {
-            searchEngineManager.ensureInitialized()
-            searchEngineManager.refreshBrowserTargets()
+
+        // --- 3. Pinned / excluded contacts & files ------------------------------
+        // ContentProvider queries are expensive — only reload when a permission
+        // that gates these lists has just changed.  If anything else triggered
+        // this resume (rotation, notification shade) we skip these queries.
+        if (optionalPermissionsChanged) {
+            pinningHandler.loadPinnedContactsAndFiles()
+            pinningHandler.loadExcludedContactsAndFiles()
+        }
+
+        // --- 4. Device settings & app shortcuts ---------------------------------
+        // Only re-read SharedPreferences when something actually mutated them
+        // (flag is set by pin/exclude/disable operations and cleared here).
+        if (resumeNeedsStaticDataRefresh) {
+            resumeNeedsStaticDataRefresh = false
+            refreshSettingsState()
+            refreshAppShortcutsState()
+        }
+
+        // --- 5. Browser targets -------------------------------------------------
+        // PackageManager query — throttle to at most once per 5 minutes.
+        val now = System.currentTimeMillis()
+        if (now - lastBrowserTargetRefreshMs >= BROWSER_REFRESH_INTERVAL_MS) {
+            lastBrowserTargetRefreshMs = now
+            viewModelScope.launch(Dispatchers.IO) {
+                searchEngineManager.ensureInitialized()
+                searchEngineManager.refreshBrowserTargets()
+            }
         }
     }
 
@@ -3010,6 +3068,13 @@ class SearchViewModel(
 
     companion object {
         private const val MAX_RECENT_ITEMS = 10
+        // Debounce for the background app-search job (ms).  Kept intentionally
+        // shorter than the 150 ms secondary-search debounce because app results
+        // are cheap relative to contact/file queries, but still eliminates the
+        // redundant mid-word searches that occur during rapid typing.
+        private const val APP_SEARCH_DEBOUNCE_MS = 60L
+        /** Minimum interval between browser-target refreshes triggered by onResume. */
+        private const val BROWSER_REFRESH_INTERVAL_MS = 5 * 60 * 1_000L // 5 minutes
     }
 
     private fun getGridItemCount(): Int =

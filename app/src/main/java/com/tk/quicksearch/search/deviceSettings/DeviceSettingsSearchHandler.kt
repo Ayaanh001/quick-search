@@ -4,6 +4,7 @@ import android.content.Context
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
+import com.tk.quicksearch.search.utils.SearchQueryContext
 import java.util.Locale
 
 private const val RESULT_LIMIT = 25
@@ -78,7 +79,7 @@ class DeviceSettingsSearchHandler(
 
         val results =
             if (query.isNotBlank() && isSettingsSectionEnabled) {
-                searchSettingsInternal(query, excludedIds)
+                searchSettingsInternal(SearchQueryContext.fromRawQuery(query), excludedIds)
             } else {
                 emptyList()
             }
@@ -86,15 +87,16 @@ class DeviceSettingsSearchHandler(
         return DeviceSettingsSearchResults(pinned, excluded, results)
     }
 
-    fun searchSettings(query: String): List<DeviceSetting> = searchSettingsInternal(query, userPreferences.getExcludedSettingIds())
+    fun searchSettings(queryContext: SearchQueryContext): List<DeviceSetting> =
+        searchSettingsInternal(queryContext, userPreferences.getExcludedSettingIds())
 
     private fun searchSettingsInternal(
-        query: String,
+        queryContext: SearchQueryContext,
         excludedIds: Set<String>,
     ): List<DeviceSetting> {
         val nicknameMatches =
             userPreferences
-                .findSettingsWithMatchingNickname(query.trim())
+                .findSettingsWithMatchingNickname(queryContext.normalizedQuery)
                 .filterNot { excludedIds.contains(it) }
                 .toSet()
 
@@ -105,7 +107,7 @@ class DeviceSettingsSearchHandler(
 
         return DeviceSettingsSearchAlgorithm.search(
             fullList = availableSettings,
-            query = query,
+            queryContext = queryContext,
             excludedIds = excludedIds,
             matchingNicknameIds = nicknameMatches,
             nicknameCache = nicknameCache,

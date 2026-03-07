@@ -4,6 +4,7 @@ import com.tk.quicksearch.search.data.FileSearchRepository
 import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.search.models.DeviceFile
 import com.tk.quicksearch.search.models.FileType
+import com.tk.quicksearch.search.utils.SearchQueryContext
 import com.tk.quicksearch.search.utils.SearchTextNormalizer
 
 class FileSearchHandler(
@@ -16,14 +17,14 @@ class FileSearchHandler(
     }
 
     fun searchFiles(
-            query: String,
+            queryContext: SearchQueryContext,
             enabledFileTypes: Set<FileType>,
             showFolders: Boolean = true,
             showSystemFiles: Boolean = false,
             showHiddenFiles: Boolean = false,
     ): List<DeviceFile> =
             searchFilesInternal(
-                    query,
+                    queryContext,
                     enabledFileTypes,
                     userPreferences.getExcludedFileUris(),
                     userPreferences.getExcludedFileExtensions(),
@@ -39,7 +40,7 @@ class FileSearchHandler(
      * reads.
      */
     fun searchFiles(
-            query: String,
+            queryContext: SearchQueryContext,
             enabledFileTypes: Set<FileType>,
             excludedFileUris: Set<String>,
             excludedFileExtensions: Set<String>,
@@ -50,7 +51,7 @@ class FileSearchHandler(
             showHiddenFiles: Boolean = false,
     ): List<DeviceFile> =
             searchFilesInternal(
-                    query,
+                    queryContext,
                     enabledFileTypes,
                     excludedFileUris,
                     excludedFileExtensions,
@@ -62,7 +63,7 @@ class FileSearchHandler(
             )
 
     private fun searchFilesInternal(
-            query: String,
+            queryContext: SearchQueryContext,
             enabledFileTypes: Set<FileType>,
             excludedFileUris: Set<String>,
             excludedFileExtensions: Set<String>,
@@ -72,15 +73,14 @@ class FileSearchHandler(
             showSystemFiles: Boolean,
             showHiddenFiles: Boolean,
     ): List<DeviceFile> {
-        if (query.isBlank() || !fileRepository.hasPermission()) return emptyList()
-
-        val normalizedQuery = SearchTextNormalizer.normalizeQueryWhitespace(query)
-        if (normalizedQuery.length < 2) return emptyList()
+        val whitespaceNormalized = queryContext.normalizedQuery
+        if (whitespaceNormalized.isBlank() || !fileRepository.hasPermission()) return emptyList()
+        if (whitespaceNormalized.length < 2) return emptyList()
 
         // Fetch more candidates than we need so that items dropped by the scorer
         // don't cause the final list to come up short.
         val prefetchLimit = FILE_SEARCH_RESULT_LIMIT * FILE_SEARCH_PREFETCH_MULTIPLIER
-        val allFiles = fileRepository.searchFiles(normalizedQuery, prefetchLimit)
+        val allFiles = fileRepository.searchFiles(whitespaceNormalized, prefetchLimit)
 
         // Pre-fetch nicknames for all candidates so search() can apply them during
         // ranking — avoids a second pass in UnifiedSearchHandler for display-name matches.
@@ -91,7 +91,7 @@ class FileSearchHandler(
 
         return FileSearchAlgorithm.search(
                 fullList = allFiles,
-                query = normalizedQuery,
+                queryContext = queryContext,
                 enabledFileTypes = enabledFileTypes,
                 excludedFileUris = excludedFileUris,
                 excludedFileExtensions = excludedFileExtensions,

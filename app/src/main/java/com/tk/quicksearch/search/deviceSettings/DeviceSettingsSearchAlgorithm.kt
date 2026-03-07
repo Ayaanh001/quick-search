@@ -15,8 +15,27 @@ object DeviceSettingsSearchAlgorithm {
         if (fullList.isEmpty()) return emptyList()
         val trimmed = query.trim()
         if (trimmed.length < 2) return emptyList()
+        return search(
+            fullList = fullList,
+            queryContext = SearchQueryContext.fromRawQuery(trimmed),
+            excludedIds = excludedIds,
+            matchingNicknameIds = matchingNicknameIds,
+            nicknameCache = nicknameCache,
+            resultLimit = resultLimit,
+        )
+    }
 
-        val queryContext = SearchQueryContext.fromRawQuery(trimmed)
+    fun search(
+        fullList: List<DeviceSetting>,
+        queryContext: SearchQueryContext,
+        excludedIds: Set<String>,
+        matchingNicknameIds: Set<String>,
+        nicknameCache: Map<String, String?>,
+        resultLimit: Int = 25,
+    ): List<DeviceSetting> {
+        if (fullList.isEmpty()) return emptyList()
+        if (queryContext.normalizedQuery.isBlank()) return emptyList()
+
         val settingsToSearch = fullList.filterNot { excludedIds.contains(it.id) }
 
         return settingsToSearch

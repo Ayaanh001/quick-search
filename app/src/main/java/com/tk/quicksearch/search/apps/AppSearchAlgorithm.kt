@@ -14,8 +14,25 @@ object AppSearchAlgorithm {
         sortAppsByUsageEnabled: Boolean,
     ): List<AppInfo> {
         if (query.isBlank()) return emptyList()
+        return findMatches(
+            queryContext = SearchQueryContext.fromRawQuery(query),
+            source = source,
+            limit = limit,
+            fuzzySearchStrategy = fuzzySearchStrategy,
+            appNicknames = appNicknames,
+            sortAppsByUsageEnabled = sortAppsByUsageEnabled,
+        )
+    }
 
-        val queryContext = SearchQueryContext.fromRawQuery(query)
+    fun findMatches(
+        queryContext: SearchQueryContext,
+        source: List<AppInfo>,
+        limit: Int,
+        fuzzySearchStrategy: FuzzyAppSearchStrategy,
+        appNicknames: Map<String, String>,
+        sortAppsByUsageEnabled: Boolean,
+    ): List<AppInfo> {
+        if (queryContext.normalizedQuery.isBlank()) return emptyList()
 
         return source
             .asSequence()

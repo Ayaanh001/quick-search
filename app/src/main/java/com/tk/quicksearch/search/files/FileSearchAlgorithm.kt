@@ -41,7 +41,42 @@ object FileSearchAlgorithm {
                         showHiddenFiles = showHiddenFiles,
                 )
 
-        return rankFiles(filteredFiles, normalizedQuery, fileNicknames).take(resultLimit)
+        return rankFiles(
+                filteredFiles,
+                SearchQueryContext.fromRawQuery(normalizedQuery),
+                fileNicknames,
+        ).take(resultLimit)
+    }
+
+    fun search(
+            fullList: List<DeviceFile>,
+            queryContext: SearchQueryContext,
+            enabledFileTypes: Set<FileType>,
+            excludedFileUris: Set<String>,
+            excludedFileExtensions: Set<String>,
+            folderWhitelistPatterns: Set<String>,
+            folderBlacklistPatterns: Set<String>,
+            showFolders: Boolean,
+            showSystemFiles: Boolean,
+            showHiddenFiles: Boolean,
+            fileNicknames: Map<String, String?>,
+            resultLimit: Int = 25,
+    ): List<DeviceFile> {
+        val filteredFiles =
+                filterCandidates(
+                        fullList = fullList,
+                        query = queryContext.normalizedQuery,
+                        enabledFileTypes = enabledFileTypes,
+                        excludedFileUris = excludedFileUris,
+                        excludedFileExtensions = excludedFileExtensions,
+                        folderWhitelistPatterns = folderWhitelistPatterns,
+                        folderBlacklistPatterns = folderBlacklistPatterns,
+                        showFolders = showFolders,
+                        showSystemFiles = showSystemFiles,
+                        showHiddenFiles = showHiddenFiles,
+                )
+
+        return rankFiles(filteredFiles, queryContext, fileNicknames).take(resultLimit)
     }
 
     fun filterCandidates(
@@ -96,12 +131,10 @@ object FileSearchAlgorithm {
 
     private fun rankFiles(
             files: List<DeviceFile>,
-            query: String,
+            queryContext: SearchQueryContext,
             fileNicknames: Map<String, String?>,
     ): List<DeviceFile> {
         if (files.isEmpty()) return emptyList()
-
-        val queryContext = SearchQueryContext.fromRawQuery(query)
 
         return files
                 .distinctBy { it.uri.toString() }

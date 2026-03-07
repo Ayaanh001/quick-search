@@ -2,6 +2,7 @@ package com.tk.quicksearch.search.core
 
 import com.tk.quicksearch.search.data.ContactRepository
 import com.tk.quicksearch.search.models.ContactInfo
+import com.tk.quicksearch.search.utils.SearchQueryContext
 
 class SearchOperations(
     private val contactRepository: ContactRepository,
@@ -15,12 +16,12 @@ class SearchOperations(
     }
 
     suspend fun searchContacts(
-        query: String,
+        queryContext: SearchQueryContext,
         excludedContactIds: Set<Long>,
         limit: Int = CONTACT_RESULT_LIMIT,
     ): List<ContactInfo> {
         val prefetchMultiplier =
-            if (query.trim().length <= SHORT_QUERY_LENGTH_THRESHOLD) {
+            if (queryContext.normalizedQuery.length <= SHORT_QUERY_LENGTH_THRESHOLD) {
                 SHORT_QUERY_PREFETCH_MULTIPLIER
             } else {
                 DEFAULT_CONTACT_PREFETCH_MULTIPLIER
@@ -35,7 +36,7 @@ class SearchOperations(
 
         val results =
             contactRepository
-                .searchContacts(query, prefetchLimit)
+                .searchContacts(queryContext.normalizedQuery, prefetchLimit)
                 .filterNot { excludedContactIds.contains(it.contactId) }
 
         return results

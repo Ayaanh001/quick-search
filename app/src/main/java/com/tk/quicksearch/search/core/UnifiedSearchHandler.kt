@@ -59,7 +59,8 @@ class UnifiedSearchHandler(
                                 return@withContext UnifiedSearchResults()
                         }
 
-                        val normalizedQuery = SearchTextNormalizer.normalizeForSearch(trimmedQuery)
+                        val queryContext = SearchQueryContext.fromRawQuery(trimmedQuery)
+                        val normalizedQuery = queryContext.normalizedQuery
 
                         // Read all per-query preferences once to avoid repeated SharedPreferences
                         // I/O.
@@ -84,7 +85,7 @@ class UnifiedSearchHandler(
                                         val contactsDeferred = async {
                                                 if (canSearchContacts) {
                                                         searchOperations.searchContacts(
-                                                                trimmedQuery,
+                                                                queryContext,
                                                                 excludedContactIds,
                                                         )
                                                 } else {
@@ -94,7 +95,7 @@ class UnifiedSearchHandler(
                                         val filesDeferred = async {
                                                 if (canSearchFiles) {
                                                         fileSearchHandler.searchFiles(
-                                                                trimmedQuery,
+                                                                queryContext,
                                                                 enabledFileTypes,
                                                                 excludedFileUris,
                                                                 excludedFileExtensions,
@@ -111,7 +112,7 @@ class UnifiedSearchHandler(
                                         val settingsDeferred = async {
                                                 if (canSearchSettings) {
                                                         settingsSearchHandler.searchSettings(
-                                                                trimmedQuery
+                                                                queryContext
                                                         )
                                                 } else {
                                                         emptyList()
@@ -120,7 +121,7 @@ class UnifiedSearchHandler(
                                         val appShortcutsDeferred = async {
                                                 if (canSearchAppShortcuts) {
                                                         appShortcutSearchHandler.searchShortcuts(
-                                                                trimmedQuery
+                                                                queryContext
                                                         )
                                                 } else {
                                                         emptyList()
@@ -139,14 +140,14 @@ class UnifiedSearchHandler(
                         val nicknameContacts =
                                 findNicknameOnlyContacts(
                                         contactResults,
-                                        trimmedQuery,
+                                        queryContext,
                                         canSearchContacts,
                                         excludedContactIds,
                                 )
                         val nicknameFiles =
                                 findNicknameOnlyFiles(
                                         fileResults,
-                                        trimmedQuery,
+                                        queryContext,
                                         enabledFileTypes,
                                         canSearchFiles,
                                         excludedFileUris,
@@ -162,11 +163,11 @@ class UnifiedSearchHandler(
                         val filteredContacts =
                                 filterAndRankContacts(
                                                 contactResults + nicknameContacts,
-                                                normalizedQuery,
+                                                queryContext,
                                         )
                                         .take(SearchOperations.CONTACT_RESULT_LIMIT)
                         val filteredFiles =
-                                filterAndRankFiles(fileResults + nicknameFiles, normalizedQuery)
+                                filterAndRankFiles(fileResults + nicknameFiles, queryContext)
 
                         return@withContext UnifiedSearchResults(
                                 contactResults = filteredContacts,
@@ -187,14 +188,14 @@ class UnifiedSearchHandler(
 
         private suspend fun findNicknameOnlyContacts(
                 displayNameContacts: List<ContactInfo>,
-                query: String,
+                queryContext: SearchQueryContext,
                 canSearchContacts: Boolean,
                 excludedContactIds: Set<Long>,
         ): List<ContactInfo> {
                 if (!canSearchContacts) return emptyList()
 
                 val nicknameMatchingIds =
-                        userPreferences.findContactsWithMatchingNickname(query).filterNot {
+                        userPreferences.findContactsWithMatchingNickname(queryContext.normalizedQuery).filterNot {
                                 excludedContactIds.contains(it)
                         }
 
@@ -213,7 +214,7 @@ class UnifiedSearchHandler(
 
         private suspend fun findNicknameOnlyFiles(
                 displayNameFiles: List<DeviceFile>,
-                query: String,
+                queryContext: SearchQueryContext,
                 enabledFileTypes: Set<FileType>,
                 canSearchFiles: Boolean,
                 excludedFileUris: Set<String>,
@@ -227,7 +228,7 @@ class UnifiedSearchHandler(
                 if (!canSearchFiles) return emptyList()
 
                 val nicknameMatchingUris =
-                        userPreferences.findFilesWithMatchingNickname(query).filterNot {
+                        userPreferences.findFilesWithMatchingNickname(queryContext.normalizedQuery).filterNot {
                                 excludedFileUris.contains(it)
                         }
 
@@ -278,11 +279,9 @@ class UnifiedSearchHandler(
 
         private fun filterAndRankContacts(
                 contacts: List<ContactInfo>,
-                normalizedQuery: String,
+                queryContext: SearchQueryContext,
         ): List<ContactInfo> {
                 if (contacts.isEmpty()) return emptyList()
-
-                val queryContext = SearchQueryContext.fromNormalizedQuery(normalizedQuery)
 
                 // Pre-fetch all contact nicknames in a single call to reduce SharedPreferences
                 // reads
@@ -318,11 +317,9 @@ class UnifiedSearchHandler(
 
         private fun filterAndRankFiles(
                 files: List<DeviceFile>,
-                normalizedQuery: String,
+                queryContext: SearchQueryContext,
         ): List<DeviceFile> {
                 if (files.isEmpty()) return emptyList()
-
-                val queryContext = SearchQueryContext.fromNormalizedQuery(normalizedQuery)
 
                 // Pre-fetch all file nicknames in a single call to reduce SharedPreferences reads
                 val distinctFiles = files.distinctBy { it.uri.toString() }

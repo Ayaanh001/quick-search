@@ -20,8 +20,26 @@ object AppShortcutSearchAlgorithm {
         if (fullList.isEmpty()) return emptyList()
         val trimmed = query.trim()
         if (trimmed.length < minQueryLength) return emptyList()
+        return search(
+            fullList = fullList,
+            queryContext = SearchQueryContext.fromRawQuery(trimmed),
+            excludedIds = excludedIds,
+            disabledIds = disabledIds,
+            shortcutNicknames = shortcutNicknames,
+            resultLimit = resultLimit,
+        )
+    }
 
-        val queryContext = SearchQueryContext.fromRawQuery(trimmed)
+    fun search(
+        fullList: List<StaticShortcut>,
+        queryContext: SearchQueryContext,
+        excludedIds: Set<String>,
+        disabledIds: Set<String>,
+        shortcutNicknames: Map<String, String>,
+        resultLimit: Int = 25,
+    ): List<StaticShortcut> {
+        if (fullList.isEmpty()) return emptyList()
+        if (queryContext.normalizedQuery.isBlank()) return emptyList()
 
         return fullList
             .asSequence()

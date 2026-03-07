@@ -11,8 +11,14 @@ object ContactSearchAlgorithm {
         query: String,
     ): List<ContactInfo> {
         if (fullList.isEmpty()) return emptyList()
+        return search(fullList, SearchQueryContext.fromRawQuery(query))
+    }
 
-        val queryContext = SearchQueryContext.fromRawQuery(query)
+    fun search(
+        fullList: List<ContactInfo>,
+        queryContext: SearchQueryContext,
+    ): List<ContactInfo> {
+        if (fullList.isEmpty()) return emptyList()
 
         return fullList
             .mapNotNull { contact ->
@@ -30,3 +36,4 @@ object ContactSearchAlgorithm {
             ).map { it.first }
     }
 }
+
