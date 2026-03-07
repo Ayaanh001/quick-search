@@ -5,12 +5,12 @@ import android.database.Cursor
 import android.provider.ContactsContract
 import android.util.Log
 import com.tk.quicksearch.R
+import com.tk.quicksearch.search.contacts.ContactSearchAlgorithm
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
 import com.tk.quicksearch.search.models.ContactMethodMimeTypes
 import com.tk.quicksearch.search.utils.PermissionUtils
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
-import com.tk.quicksearch.search.utils.SearchRankingUtils
 import com.tk.quicksearch.search.utils.SearchTextNormalizer
 import java.util.Locale
 
@@ -164,7 +164,7 @@ class ContactRepository(
 
         return contacts.values
             .map { it.toContactInfo() }
-            .filterAndRank(query)
+            .let { ContactSearchAlgorithm.search(it, query) }
     }
 
     // ==================== Private Helpers ====================
@@ -507,36 +507,6 @@ class ContactRepository(
     ): String {
         val idList = ids.joinToString(",")
         return "$columnName IN ($idList)"
-    }
-
-    /**
-     * Filters contacts by match priority and sorts them accordingly.
-     */
-    private fun List<ContactInfo>.filterAndRank(query: String): List<ContactInfo> {
-        if (isEmpty()) return emptyList()
-
-        // Pre-normalize and tokenize query once for efficient matching
-        val normalizedQuery = SearchTextNormalizer.normalizeForSearch(query.trim())
-        val queryTokens = normalizedQuery.split("\\s+".toRegex()).filter { it.isNotBlank() }
-
-        return mapNotNull { contact ->
-            val priority =
-                SearchRankingUtils.calculateMatchPriority(
-                    contact.displayName,
-                    normalizedQuery,
-                    queryTokens,
-                )
-            if (SearchRankingUtils.isOtherMatch(priority)) {
-                null
-            } else {
-                contact to priority
-            }
-        }.sortedWith(
-            compareBy(
-                { it.second },
-                { it.first.displayName.lowercase(Locale.getDefault()) },
-            ),
-        ).map { it.first }
     }
 
     /**

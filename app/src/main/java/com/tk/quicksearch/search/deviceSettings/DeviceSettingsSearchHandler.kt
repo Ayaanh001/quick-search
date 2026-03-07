@@ -4,8 +4,6 @@ import android.content.Context
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
-import com.tk.quicksearch.search.utils.SearchRankingUtils
-import com.tk.quicksearch.search.utils.SearchTextNormalizer
 import java.util.Locale
 
 private const val RESULT_LIMIT = 25
@@ -94,104 +92,26 @@ class DeviceSettingsSearchHandler(
         query: String,
         excludedIds: Set<String>,
     ): List<DeviceSetting> {
-        if (availableSettings.isEmpty()) return emptyList()
-        val trimmed = query.trim()
-        if (trimmed.length < 2) return emptyList()
-
-        val normalizedQuery = SearchTextNormalizer.normalizeForSearch(trimmed)
         val nicknameMatches =
             userPreferences
-                .findSettingsWithMatchingNickname(trimmed)
+                .findSettingsWithMatchingNickname(query.trim())
                 .filterNot { excludedIds.contains(it) }
                 .toSet()
 
-        // Pre-fetch all nicknames to avoid repeated SharedPreferences lookups during iteration
         val settingsToSearch = availableSettings.filterNot { excludedIds.contains(it.id) }
         val nicknameCache =
             settingsToSearch.associate { shortcut ->
                 shortcut.id to userPreferences.getSettingNickname(shortcut.id)
             }
 
-        return settingsToSearch
-            .asSequence()
-            .mapNotNull { shortcut ->
-                val matchResult =
-                    checkShortcutMatchCached(
-                        shortcut,
-                        normalizedQuery,
-                        nicknameMatches,
-                        nicknameCache,
-                    )
-                if (!matchResult.hasMatch) return@mapNotNull null
-
-                val priority = calculatePriority(shortcut, matchResult, trimmed)
-                shortcut to priority
-            }.sortedWith(
-                compareBy({ it.second }, { it.first.title.lowercase(Locale.getDefault()) }),
-            ).take(RESULT_LIMIT)
-            .map { it.first }
-            .toList()
-    }
-
-    private data class MatchResult(
-        val hasMatch: Boolean,
-        val hasNicknameMatch: Boolean,
-    )
-
-    private fun checkShortcutMatchCached(
-        shortcut: DeviceSetting,
-        normalizedQuery: String,
-        nicknameMatches: Set<String>,
-        nicknameCache: Map<String, String?>,
-    ): MatchResult {
-        val nickname = nicknameCache[shortcut.id]
-        val hasNicknameMatch =
-            nickname?.let { SearchTextNormalizer.normalizeForSearch(it) }?.contains(normalizedQuery) == true
-        val keywordText = shortcut.keywords.joinToString(" ")
-        val hasFieldMatch =
-            SearchTextNormalizer.normalizeForSearch(shortcut.title).contains(normalizedQuery) ||
-                (
-                    shortcut.description
-                        ?.let { SearchTextNormalizer.normalizeForSearch(it) }
-                        ?.contains(normalizedQuery) == true
-                ) ||
-                SearchTextNormalizer.normalizeForSearch(keywordText).contains(normalizedQuery) ||
-                nicknameMatches.contains(shortcut.id)
-
-        return MatchResult(
-            hasFieldMatch || hasNicknameMatch,
-            hasNicknameMatch || nicknameMatches.contains(shortcut.id),
+        return DeviceSettingsSearchAlgorithm.search(
+            fullList = availableSettings,
+            query = query,
+            excludedIds = excludedIds,
+            matchingNicknameIds = nicknameMatches,
+            nicknameCache = nicknameCache,
+            resultLimit = RESULT_LIMIT,
         )
-    }
-
-    private fun calculatePriority(
-        shortcut: DeviceSetting,
-        matchResult: MatchResult,
-        trimmedQuery: String,
-    ): Int {
-        if (matchResult.hasNicknameMatch) return 0
-
-        val normalizedQuery = SearchTextNormalizer.normalizeForSearch(trimmedQuery)
-        val normalizedTitle = SearchTextNormalizer.normalizeForSearch(shortcut.title)
-
-        // 1. Exact match
-        if (normalizedTitle == normalizedQuery) return 1
-
-        // 2. Starts with
-        if (normalizedTitle.startsWith(normalizedQuery)) return 2
-
-        // 3. Remaining matches (keywords, description, or contained in title)
-        // We shift the standard Utils priority to ensure they come after title matches
-        val keywordText = shortcut.keywords.joinToString(" ")
-        val utilsPriority =
-            SearchRankingUtils.getBestMatchPriority(
-                trimmedQuery,
-                shortcut.title,
-                shortcut.description ?: "",
-                keywordText,
-            )
-        // Utils returns 1-4. shifting by 2 makes them 3-6.
-        return utilsPriority + 2
     }
 
     fun openSetting(setting: DeviceSetting) {

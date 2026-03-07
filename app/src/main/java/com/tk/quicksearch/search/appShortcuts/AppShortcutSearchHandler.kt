@@ -6,8 +6,6 @@ import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.search.data.AppShortcutRepository.isUserCreatedShortcut
 import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutDisplayName
 import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutKey
-import com.tk.quicksearch.search.utils.SearchRankingUtils
-import com.tk.quicksearch.search.utils.SearchTextNormalizer
 import java.util.Locale
 
 private const val MIN_QUERY_LENGTH = 2
@@ -125,51 +123,16 @@ class AppShortcutSearchHandler(
         query: String,
         excludedIds: Set<String>,
         disabledIds: Set<String>,
-    ): List<StaticShortcut> {
-        if (availableShortcuts.isEmpty()) return emptyList()
-        val trimmed = query.trim()
-        if (trimmed.length < MIN_QUERY_LENGTH) return emptyList()
-
-        val normalizedQuery = SearchTextNormalizer.normalizeForSearch(trimmed)
-        val queryTokens = normalizedQuery.split("\\s+".toRegex()).filter { it.isNotBlank() }
-        val shortcutNicknames = userPreferences.getAllAppShortcutNicknames()
-
-        return availableShortcuts
-            .asSequence()
-            .filterNot { excludedIds.contains(shortcutKey(it)) }
-            .filterNot { disabledIds.contains(shortcutKey(it)) }
-            .mapNotNull { shortcut ->
-                val shortcutId = shortcutKey(shortcut)
-                val displayName = shortcutDisplayName(shortcut)
-                val nickname = shortcutNicknames[shortcutId]
-                val priority =
-                    minOf(
-                        SearchRankingUtils.calculateMatchPriorityWithNickname(
-                            displayName,
-                            nickname,
-                            normalizedQuery,
-                            queryTokens,
-                        ),
-                        SearchRankingUtils.calculateMatchPriority(
-                            shortcut.appLabel,
-                            normalizedQuery,
-                            queryTokens,
-                        ),
-                    )
-
-                if (SearchRankingUtils.isOtherMatch(priority)) {
-                    null
-                } else {
-                    shortcut to priority
-                }
-            }.sortedWith(
-                compareBy<Pair<StaticShortcut, Int>> { it.second }.thenBy {
-                    shortcutDisplayName(it.first).lowercase(Locale.getDefault())
-                },
-            ).take(RESULT_LIMIT)
-            .map { it.first }
-            .toList()
-    }
+    ): List<StaticShortcut> =
+        AppShortcutSearchAlgorithm.search(
+            fullList = availableShortcuts,
+            query = query,
+            excludedIds = excludedIds,
+            disabledIds = disabledIds,
+            shortcutNicknames = userPreferences.getAllAppShortcutNicknames(),
+            minQueryLength = MIN_QUERY_LENGTH,
+            resultLimit = RESULT_LIMIT,
+        )
 
     private fun normalizeShortcuts(shortcuts: List<StaticShortcut>): List<StaticShortcut> =
         shortcuts
