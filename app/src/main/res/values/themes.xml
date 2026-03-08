@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <style name="Theme.QuickSearch.Launch" parent="Theme.QuickSearch">
+        <item name="android:windowBackground">#121212</item>
+    </style>
+
     <!-- Base theme for the app -->
     <style name="Theme.QuickSearch" parent="Theme.Material3.Dark.NoActionBar">
         <item name="android:windowIsTranslucent">false</item>
@@ -13,6 +17,12 @@
 
     <style name="Theme.QuickSearch.OssLicenses" parent="Theme.Material3.Dark">
         <item name="android:windowIsTranslucent">false</item>
+    </style>
+
+    <style name="Theme.QuickSearch.Overlay" parent="Theme.QuickSearch">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
     </style>
 
 

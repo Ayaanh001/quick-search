@@ -59,6 +59,7 @@ import com.tk.quicksearch.searchEngines.ShortcutHandler
 import com.tk.quicksearch.searchEngines.asSearchTargetOrNull
 import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.shared.util.PackageConstants
+import com.tk.quicksearch.shared.util.WallpaperUtils
 import com.tk.quicksearch.shared.util.getAppGridColumns
 import com.tk.quicksearch.tools.calculator.CalculatorHandler
 import com.tk.quicksearch.tools.directSearch.DirectSearchHandler
@@ -700,6 +701,7 @@ class SearchViewModel(
         if (!hasStartedStartupPhases.compareAndSet(false, true)) return
 
         viewModelScope.launch(Dispatchers.Main.immediate) {
+            withContext(Dispatchers.IO) { preloadBackgroundForInitialSearchSurface() }
             updateConfigState { it.copy(startupPhase = StartupPhase.PHASE_1_CACHE_PREFS) }
             Trace.beginSection("QS.Startup.Phase1.CachePrefs")
             try {
@@ -727,6 +729,26 @@ class SearchViewModel(
         }
     }
 
+    /**
+     * Keep phase-0 shell visible until the selected background source is available in memory so
+     * the first SearchScreen frame can render search bar + background together.
+     */
+    private suspend fun preloadBackgroundForInitialSearchSurface() {
+        val context = getApplication<Application>().applicationContext
+        when (userPreferences.getBackgroundSource()) {
+            BackgroundSource.SYSTEM_WALLPAPER -> {
+                WallpaperUtils.getWallpaperBitmapResult(context)
+            }
+            BackgroundSource.CUSTOM_IMAGE -> {
+                WallpaperUtils.getOverlayCustomImageBitmap(
+                    context = context,
+                    uriString = userPreferences.getCustomImageUri(),
+                )
+            }
+            BackgroundSource.THEME -> Unit
+        }
+    }
+
     private fun setupDirectSearchStateListener() {
         viewModelScope.launch {
             directSearchHandler.directSearchState.collect { dsState ->
@@ -741,10 +763,17 @@ class SearchViewModel(
     private suspend fun loadCacheAndMinimalPrefs() {
         // Load consolidated startup config in single batch operation
         val startupConfig = userPreferences.loadStartupConfig()
+        val startupPrefs = startupConfig.startupPreferences
 
         // Extract critical data for immediate use
         oneHandedMode = startupConfig.oneHandedMode
-        bottomSearchBarEnabled = startupConfig.startupPreferences.bottomSearchBarEnabled
+        bottomSearchBarEnabled = startupPrefs.bottomSearchBarEnabled
+        wallpaperBackgroundAlpha = startupPrefs.wallpaperBackgroundAlpha
+        wallpaperBlurRadius = startupPrefs.wallpaperBlurRadius
+        overlayGradientTheme = startupPrefs.overlayGradientTheme
+        overlayThemeIntensity = sanitizeOverlayThemeIntensity(startupPrefs.overlayThemeIntensity)
+        backgroundSource = startupPrefs.backgroundSource
+        customImageUri = startupPrefs.customImageUri
 
         // Load cached data - this is the critical path for content
         // This is just a fast JSON parse
@@ -761,6 +790,13 @@ class SearchViewModel(
                 it.copy(
                         oneHandedMode = oneHandedMode,
                         bottomSearchBarEnabled = bottomSearchBarEnabled,
+                        showWallpaperBackground = backgroundSource != BackgroundSource.THEME,
+                        wallpaperBackgroundAlpha = wallpaperBackgroundAlpha,
+                        wallpaperBlurRadius = wallpaperBlurRadius,
+                        overlayGradientTheme = overlayGradientTheme,
+                        overlayThemeIntensity = overlayThemeIntensity,
+                        backgroundSource = backgroundSource,
+                        customImageUri = customImageUri,
                         // We don't have full prefs yet, so keep initializing flag true
                         // but show the apps we found in cache
                         isInitializing = true,

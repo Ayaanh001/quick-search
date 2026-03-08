@@ -25,7 +25,11 @@ internal fun SearchScreenWallpaperLogic(
         ) {
             value =
                 if (state.backgroundSource == BackgroundSource.SYSTEM_WALLPAPER) {
-                    WallpaperUtils.getCachedWallpaperBitmap()?.asImageBitmap()
+                    WallpaperUtils.getCachedWallpaperBitmap()?.asImageBitmap()?.also {
+                        if (!isOverlayPresentation) {
+                            onWallpaperLoaded?.invoke()
+                        }
+                    }
                         ?: when (val result = WallpaperUtils.getWallpaperBitmapResult(context)) {
                             is WallpaperUtils.WallpaperLoadResult.Success -> {
                                 if (!isOverlayPresentation) {
@@ -65,7 +69,7 @@ internal fun SearchScreenWallpaperLogic(
         state.backgroundSource != BackgroundSource.THEME && imageBitmap != null
     val useMonoThemeFallback =
         !isOverlayPresentation &&
-            state.backgroundSource == BackgroundSource.SYSTEM_WALLPAPER &&
+            state.backgroundSource != BackgroundSource.THEME &&
             imageBitmap == null
 
     return Triple(imageBitmap?.value, useImageBackground, useMonoThemeFallback)

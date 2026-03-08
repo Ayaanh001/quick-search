@@ -119,6 +119,17 @@ object WallpaperUtils {
         }
     }
 
+    fun preloadCustomImage(
+        context: Context,
+        uriString: String?,
+    ) {
+        val normalized = uriString?.trim()?.takeIf { it.isNotEmpty() } ?: return
+        if (cachedOverlayCustomUri == normalized && cachedOverlayCustomBitmap != null) return
+        CoroutineScope(Dispatchers.IO).launch {
+            getOverlayCustomImageBitmap(context, normalized)
+        }
+    }
+
     suspend fun getOverlayCustomImageBitmap(
         context: Context,
         uriString: String?,

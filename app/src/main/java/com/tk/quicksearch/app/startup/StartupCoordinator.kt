@@ -31,10 +31,9 @@ class StartupCoordinator(
     companion object {
         private const val TRACE_FIRST_FRAME_GATE = "QS.Startup.FirstFrameGate"
         private const val TRACE_PERMISSION_SYNC = "QS.Startup.PermissionSync"
-        private const val TRACE_WALLPAPER_PRELOAD = "QS.Startup.WallpaperPreload"
+        private const val TRACE_BACKGROUND_PRELOAD = "QS.Startup.BackgroundPreload"
         private const val TRACE_NON_CRITICAL = "QS.Startup.NonCritical"
         private const val POST_FIRST_FRAME_PERMISSION_SYNC_DELAY_MS = 250L
-        private const val POST_FIRST_FRAME_WALLPAPER_PRELOAD_DELAY_MS = 500L
         private const val NON_CRITICAL_STARTUP_DELAY_MS = 2_500L
     }
 
@@ -66,7 +65,7 @@ class StartupCoordinator(
             }
         }
 
-        scheduleWallpaperPreload()
+        scheduleBackgroundPreload()
 
         lifecycleScope.launch {
             delay(NON_CRITICAL_STARTUP_DELAY_MS)
@@ -91,19 +90,25 @@ class StartupCoordinator(
     }
 
     private fun scheduleOverlayPostFrameWork() {
-        scheduleWallpaperPreload()
+        scheduleBackgroundPreload()
     }
 
-    private fun scheduleWallpaperPreload() {
+    private fun scheduleBackgroundPreload() {
         lifecycleScope.launch(Dispatchers.IO) {
-            delay(POST_FIRST_FRAME_WALLPAPER_PRELOAD_DELAY_MS)
-            if (userPreferences.getBackgroundSource() == BackgroundSource.SYSTEM_WALLPAPER) {
-                Trace.beginSection(TRACE_WALLPAPER_PRELOAD)
-                try {
-                    WallpaperUtils.preloadWallpaper(context)
-                } finally {
-                    Trace.endSection()
+            val backgroundSource = userPreferences.getBackgroundSource()
+            Trace.beginSection(TRACE_BACKGROUND_PRELOAD)
+            try {
+                when (backgroundSource) {
+                    BackgroundSource.SYSTEM_WALLPAPER -> WallpaperUtils.preloadWallpaper(context)
+                    BackgroundSource.CUSTOM_IMAGE ->
+                        WallpaperUtils.preloadCustomImage(
+                            context = context,
+                            uriString = userPreferences.getCustomImageUri(),
+                        )
+                    BackgroundSource.THEME -> Unit
                 }
+            } finally {
+                Trace.endSection()
             }
         }
     }
