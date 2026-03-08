@@ -51,11 +51,7 @@ object DeviceSettingsSearchAlgorithm {
                 if (!matchResult.hasMatch) return@mapNotNull null
 
                 val priority =
-                    DeviceSettingsSearchPolicy.rankingPriority(
-                        setting = shortcut,
-                        matchResult = matchResult,
-                        query = queryContext,
-                    )
+                    DeviceSettingsSearchPolicy.rankingPriority(matchResult)
                 shortcut to priority
             }.sortedWith(
                 compareBy({ it.second }, { it.first.title.lowercase(Locale.getDefault()) }),

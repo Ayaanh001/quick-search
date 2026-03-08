@@ -138,13 +138,8 @@ object SearchRankingUtils {
         }
 
     /**
-     * Calculates match priority while giving an optional nickname the highest boost.
-     * Nickname matches get priority 0 (higher than any text match).
-     */
-
-    /**
-     * Calculates match priority while giving an optional nickname the highest boost.
-     * Nickname matches get priority 0 (higher than any text match).
+     * Calculates match priority with optional nickname support.
+     * Nickname is treated as an additional searchable name using the same priority rules.
      */
     fun calculateMatchPriorityWithNickname(
         primaryText: String,
@@ -171,13 +166,11 @@ object SearchRankingUtils {
     ): Int {
         if (normalizedQuery.isBlank()) return PRIORITY_NO_MATCH
 
-        val normalizedNickname = nickname?.let { SearchTextNormalizer.normalizeForSearch(it) }
-
-        if (normalizedNickname?.contains(normalizedQuery) == true) {
-            return 0
-        }
-
-        return calculateMatchPriority(primaryText, normalizedQuery, queryTokens)
+        val primaryPriority = calculateMatchPriority(primaryText, normalizedQuery, queryTokens)
+        val nicknamePriority =
+            nickname?.let { calculateMatchPriority(it, normalizedQuery, queryTokens) }
+                ?: PRIORITY_NO_MATCH
+        return minOf(primaryPriority, nicknamePriority)
     }
 
     /**
