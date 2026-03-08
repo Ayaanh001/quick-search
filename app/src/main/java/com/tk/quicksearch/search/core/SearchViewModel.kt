@@ -65,6 +65,8 @@ import com.tk.quicksearch.tools.directSearch.GeminiModelCatalog
 import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -253,6 +255,7 @@ class SearchViewModel(
      * because it hits the PackageManager on every call.
      */
     @Volatile private var lastBrowserTargetRefreshMs: Long = 0L
+    private val uiStateMutationLock = ReentrantLock()
 
     // =========================================================================
     // Targeted sub-state updaters — call these instead of _uiState.update{}
@@ -261,22 +264,22 @@ class SearchViewModel(
 
     /** Updates ONLY SearchResultsState. Per-keystroke hot path. */
     private fun updateResultsState(updater: (SearchResultsState) -> SearchResultsState) {
-        _resultsState.update(updater)
+        uiStateMutationLock.withLock { _resultsState.update(updater) }
     }
 
     /** Updates ONLY SearchPermissionState. */
     private fun updatePermissionState(updater: (SearchPermissionState) -> SearchPermissionState) {
-        _permissionState.update(updater)
+        uiStateMutationLock.withLock { _permissionState.update(updater) }
     }
 
     /** Updates ONLY SearchFeatureState. */
     private fun updateFeatureState(updater: (SearchFeatureState) -> SearchFeatureState) {
-        _featureState.update(updater)
+        uiStateMutationLock.withLock { _featureState.update(updater) }
     }
 
     /** Updates ONLY SearchUiConfigState. */
     private fun updateConfigState(updater: (SearchUiConfigState) -> SearchUiConfigState) {
-        _configState.update(updater)
+        uiStateMutationLock.withLock { _configState.update(updater) }
     }
 
     /**
@@ -292,36 +295,38 @@ class SearchViewModel(
      * copy is retained after this function returns.
      */
     private fun updateUiState(updater: (SearchUiState) -> SearchUiState) {
-        // Snapshot current composite state
-        val currentResults = _resultsState.value
-        val currentPermissions = _permissionState.value
-        val currentFeatures = _featureState.value
-        val currentConfig = _configState.value
+        uiStateMutationLock.withLock {
+            // Snapshot current composite state
+            val currentResults = _resultsState.value
+            val currentPermissions = _permissionState.value
+            val currentFeatures = _featureState.value
+            val currentConfig = _configState.value
 
-        // Build a temporary flat state to pass to legacy updater
-        val before =
-                SearchUiState(
-                        results = currentResults,
-                        permissions = currentPermissions,
-                        features = currentFeatures,
-                        config = currentConfig,
-                )
+            // Build a temporary flat state to pass to legacy updater
+            val before =
+                    SearchUiState(
+                            results = currentResults,
+                            permissions = currentPermissions,
+                            features = currentFeatures,
+                            config = currentConfig,
+                    )
 
-        val withHint = applyContactActionHint(before, updater(before))
-        val after = if (isStartupComplete) applyVisibilityStates(withHint) else withHint
+            val withHint = applyContactActionHint(before, updater(before))
+            val after = if (isStartupComplete) applyVisibilityStates(withHint) else withHint
 
-        // Write back each sub-state only if it actually changed
-        val newResults = extractResultsState(after)
-        if (newResults != currentResults) _resultsState.value = newResults
+            // Write back each sub-state only if it actually changed
+            val newResults = extractResultsState(after)
+            if (newResults != currentResults) _resultsState.value = newResults
 
-        val newPermissions = extractPermissionState(after)
-        if (newPermissions != currentPermissions) _permissionState.value = newPermissions
+            val newPermissions = extractPermissionState(after)
+            if (newPermissions != currentPermissions) _permissionState.value = newPermissions
 
-        val newFeatures = extractFeatureState(after)
-        if (newFeatures != currentFeatures) _featureState.value = newFeatures
+            val newFeatures = extractFeatureState(after)
+            if (newFeatures != currentFeatures) _featureState.value = newFeatures
 
-        val newConfig = extractConfigState(after)
-        if (newConfig != currentConfig) _configState.value = newConfig
+            val newConfig = extractConfigState(after)
+            if (newConfig != currentConfig) _configState.value = newConfig
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -768,7 +773,7 @@ class SearchViewModel(
     private fun setupDirectSearchStateListener() {
         viewModelScope.launch {
             directSearchHandler.directSearchState.collect { dsState ->
-                _resultsState.update { it.copy(DirectSearchState = dsState) }
+                updateResultsState { it.copy(DirectSearchState = dsState) }
             }
         }
     }
@@ -791,7 +796,7 @@ class SearchViewModel(
         val disabledAppShortcutIds = userPreferences.getDisabledAppShortcutIds()
 
         withContext(Dispatchers.Main) {
-            _configState.update {
+            updateConfigState {
                 it.copy(
                         oneHandedMode = oneHandedMode,
                         bottomSearchBarEnabled = bottomSearchBarEnabled,
@@ -800,7 +805,7 @@ class SearchViewModel(
                         isInitializing = true,
                 )
             }
-            _featureState.update { it.copy(disabledAppShortcutIds = disabledAppShortcutIds) }
+            updateFeatureState { it.copy(disabledAppShortcutIds = disabledAppShortcutIds) }
 
             if (cachedAppsList != null && cachedAppsList.isNotEmpty()) {
                 initializeWithCacheMinimal(cachedAppsList, hasUsagePermission)
@@ -879,7 +884,7 @@ class SearchViewModel(
         customImageUri = prefs.customImageUri
         amazonDomain = prefs.amazonDomain
 
-        _configState.update {
+        updateConfigState {
             it.copy(
                     enabledFileTypes = enabledFileTypes,
                     oneHandedMode = oneHandedMode,
@@ -904,7 +909,7 @@ class SearchViewModel(
                     hasSeenOverlayAssistantTip = userPreferences.hasSeenOverlayAssistantTip(),
             )
         }
-        _featureState.update {
+        updateFeatureState {
             it.copy(
                     amazonDomain = amazonDomain,
                     directDialEnabled = directDialEnabled,
@@ -938,7 +943,7 @@ class SearchViewModel(
         // Just show the raw list of apps first!
         // Don't filter, don't sort, don't check pinned apps yet
         // This is the fastest possible way to get pixels on screen
-        _resultsState.update { state ->
+        updateResultsState { state ->
             state.copy(
                     cacheLastUpdatedMillis = lastUpdated,
                     recentApps =
@@ -954,7 +959,7 @@ class SearchViewModel(
                     indexedAppCount = cachedAppsList.size,
             )
         }
-        _configState.update { state ->
+        updateConfigState { state ->
             state.copy(
                     oneHandedMode = oneHandedMode,
                     bottomSearchBarEnabled = bottomSearchBarEnabled,
@@ -980,7 +985,7 @@ class SearchViewModel(
             // Update alias map after search targets are initialized.
             val shortcutsState = shortcutHandler.getInitialState()
 
-            _featureState.update { state ->
+            updateFeatureState { state ->
                 state.copy(
                         // Now safely access lazy handlers
                         searchTargetsOrder = searchEngineManager.searchTargetsOrder,
@@ -1002,7 +1007,7 @@ class SearchViewModel(
                         availableGeminiModels = directSearchHandler.getAvailableGeminiModels(),
                 )
             }
-            _configState.update { state ->
+            updateConfigState { state ->
                 state.copy(
                         showSearchEngineOnboarding =
                                 searchEngineManager.isSearchEngineCompactMode &&
@@ -1016,7 +1021,7 @@ class SearchViewModel(
                                         directSearchHandler.getPersonalContext().isBlank(),
                 )
             }
-            _permissionState.update { state ->
+            updatePermissionState { state ->
                 state.copy(
                         messagingApp = messagingInfo.messagingApp,
                         callingApp = messagingInfo.callingApp,
@@ -1026,14 +1031,14 @@ class SearchViewModel(
                         isGoogleMeetInstalled = messagingInfo.isGoogleMeetInstalled,
                 )
             }
-            _featureState.update { state ->
+            updateFeatureState { state ->
                 state.copy(disabledAppShortcutIds = userPreferences.getDisabledAppShortcutIds())
             }
 
             if (!directSearchHandler.getGeminiApiKey().isNullOrBlank()) {
                 launch(Dispatchers.IO) {
                     val models = directSearchHandler.refreshAvailableGeminiModels()
-                    _featureState.update { state -> state.copy(availableGeminiModels = models) }
+                    updateFeatureState { state -> state.copy(availableGeminiModels = models) }
                 }
             }
 
@@ -1647,7 +1652,7 @@ class SearchViewModel(
             state.copy(
                     pinnedSettings = currentState.pinned,
                     excludedSettings = currentState.excluded,
-                    settingResults = currentState.results,
+                    settingResults = if (updateResults) currentState.results else currentResults,
                     allDeviceSettings = settingsSearchHandler.getAvailableSettings(),
             )
         }

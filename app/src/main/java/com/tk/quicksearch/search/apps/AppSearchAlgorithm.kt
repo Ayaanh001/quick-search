@@ -78,13 +78,14 @@ object AppSearchAlgorithm {
             return AppMatch(app, priority, 0, false)
         }
 
-        val fuzzyMatches =
-            fuzzySearchStrategy.findMatchesWithNicknames(
-                queryContext.normalizedQuery,
-                listOf(app),
-            ) { appNicknames[it.packageName] }
+        val match =
+            fuzzySearchStrategy.computeMatch(
+                query = queryContext.normalizedQuery,
+                app = app,
+                nickname = appNicknames[app.packageName],
+            )
 
-        return fuzzyMatches.firstOrNull()?.let { match ->
+        return match?.let {
             if (
                 !AppSearchPolicy.areAllQueryTokensCovered(
                     queryContext,
@@ -95,7 +96,7 @@ object AppSearchAlgorithm {
             ) {
                 return null
             }
-            AppMatch(app, match.priority, match.score, true)
+            AppMatch(app, it.priority, it.score, true)
         }
     }
 

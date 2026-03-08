@@ -12,6 +12,7 @@ import com.tk.quicksearch.search.models.ContactMethodMimeTypes
 import com.tk.quicksearch.search.utils.PermissionUtils
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
 import com.tk.quicksearch.search.utils.SearchTextNormalizer
+import java.util.Collections
 import java.util.Locale
 
 /**
@@ -52,6 +53,13 @@ class ContactRepository(
     private val signalMessageLabel = context.getString(R.string.contact_method_signal_message_label)
     private val signalVoiceCallLabel = context.getString(R.string.contact_method_signal_voice_call_label)
     private val signalVideoCallLabel = context.getString(R.string.contact_method_signal_video_call_label)
+    private val hydratedContactDetailsCache =
+        Collections.synchronizedMap(
+            object : LinkedHashMap<Long, CachedContactDetails>(MAX_HYDRATED_CONTACT_CACHE_SIZE, 0.75f, true) {
+                override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, CachedContactDetails>?): Boolean =
+                    size > MAX_HYDRATED_CONTACT_CACHE_SIZE
+            },
+        )
 
     companion object {
         // Common projection fields for phone number queries
@@ -98,6 +106,7 @@ class ContactRepository(
         private const val PACKAGE_PARTS_MIN_COUNT = 2
         private const val PACKAGE_FIRST_INDEX = 0
         private const val PACKAGE_SECOND_INDEX = 1
+        private const val MAX_HYDRATED_CONTACT_CACHE_SIZE = 600
     }
 
     // ==================== Public API ====================
@@ -112,20 +121,27 @@ class ContactRepository(
         if (!hasPermission()) return false
 
         val projection = arrayOf(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
-        return runCatching {
-            contentResolver.query(
-                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                projection,
-                null,
-                null,
-                SORT_ORDER,
-            )?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    cursor.getLong(0)
+        val refreshed =
+            runCatching {
+                contentResolver.query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    projection,
+                    null,
+                    null,
+                    SORT_ORDER,
+                )?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        cursor.getLong(0)
+                    }
                 }
-            }
-            true
-        }.getOrDefault(false)
+                true
+            }.getOrDefault(false)
+
+        if (refreshed) {
+            hydratedContactDetailsCache.clear()
+        }
+
+        return refreshed
     }
 
     /**
@@ -138,8 +154,7 @@ class ContactRepository(
         }
 
         val contacts = queryContactsByIds(contactIds)
-        fetchPhotoUris(contacts)
-        fetchContactMethods(contacts)
+        hydrateContactDetails(contacts)
 
         return contacts.values
             .map { it.toContactInfo() }
@@ -159,10 +174,35 @@ class ContactRepository(
 
         val normalizedProviderQuery = SearchTextNormalizer.normalizeQueryWhitespace(query)
         val contacts = queryContactsBySearch(normalizedProviderQuery, limit)
-        fetchPhotoUris(contacts)
-        fetchContactMethods(contacts)
+        return contacts.values.map { it.toMinimalContactInfo() }
+    }
 
-        return contacts.values.map { it.toContactInfo() }
+    /**
+     * Hydrates photos + contact methods for already-ranked contacts.
+     * Designed for keystroke search path: hydrate only the visible/top items.
+     */
+    fun hydrateContactsForDisplay(contacts: List<ContactInfo>): List<ContactInfo> {
+        if (contacts.isEmpty() || !hasPermission()) return contacts
+
+        val mutableContacts =
+            LinkedHashMap<Long, MutableContact>(contacts.size).apply {
+                contacts.forEach { contact ->
+                    put(
+                        contact.contactId,
+                        MutableContact(
+                            contactId = contact.contactId,
+                            lookupKey = contact.lookupKey,
+                            displayName = contact.displayName,
+                            numbers = contact.phoneNumbers.toMutableList(),
+                        ),
+                    )
+                }
+            }
+
+        hydrateContactDetails(mutableContacts)
+        return contacts.mapNotNull { original ->
+            mutableContacts[original.contactId]?.toContactInfo()
+        }
     }
 
     // ==================== Private Helpers ====================
@@ -350,6 +390,40 @@ class ContactRepository(
         }
     }
 
+    private fun hydrateContactDetails(contacts: LinkedHashMap<Long, MutableContact>) {
+        if (contacts.isEmpty()) return
+
+        val missingContactIds = mutableListOf<Long>()
+        contacts.forEach { (contactId, contact) ->
+            val cached = hydratedContactDetailsCache[contactId]
+            if (cached != null) {
+                contact.photoUri = cached.photoUri
+                contact.contactMethods.addAll(cached.contactMethods)
+            } else {
+                missingContactIds.add(contactId)
+            }
+        }
+
+        if (missingContactIds.isEmpty()) return
+
+        val missingContacts =
+            LinkedHashMap<Long, MutableContact>(missingContactIds.size).apply {
+                missingContactIds.forEach { contactId ->
+                    contacts[contactId]?.let { put(contactId, it) }
+                }
+            }
+        fetchPhotoUris(missingContacts)
+        fetchContactMethods(missingContacts)
+
+        missingContacts.forEach { (contactId, contact) ->
+            hydratedContactDetailsCache[contactId] =
+                CachedContactDetails(
+                    photoUri = contact.photoUri,
+                    contactMethods = contact.contactMethods.toList(),
+                )
+        }
+    }
+
     private fun parseContactMethod(
         mimeType: String,
         data1: String,
@@ -533,7 +607,20 @@ class ContactRepository(
                 contactMethods = reorderedMethods,
             )
         }
+
+        fun toMinimalContactInfo(): ContactInfo =
+            ContactInfo(
+                contactId = contactId,
+                lookupKey = lookupKey,
+                displayName = displayName,
+                phoneNumbers = numbers.toList(),
+            )
     }
+
+    private data class CachedContactDetails(
+        val photoUri: String?,
+        val contactMethods: List<ContactMethod>,
+    )
 
     private data class PhoneColumnIndices(
         val idIndex: Int,

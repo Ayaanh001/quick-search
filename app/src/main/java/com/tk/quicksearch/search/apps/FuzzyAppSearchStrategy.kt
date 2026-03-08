@@ -36,20 +36,27 @@ class FuzzyAppSearchStrategy(
         if (query.isBlank()) return emptyList()
 
         return candidates
-            .mapNotNull { app ->
-                val nickname = nicknameProvider(app)
-                val score = engine.computeScore(query, app.appName, nickname, config.minQueryLength)
-                if (score >= config.matchThreshold) {
-                    FuzzySearchStrategy.Match(
-                        item = app,
-                        score = score,
-                        priority = config.priority,
-                        isFuzzyMatch = true,
-                    )
-                } else {
-                    null
-                }
-            }.sortedByDescending { it.score }
+            .mapNotNull { app -> computeMatch(query, app, nicknameProvider(app)) }
+            .sortedByDescending { it.score }
+    }
+
+    fun computeMatch(
+        query: String,
+        app: AppInfo,
+        nickname: String?,
+    ): FuzzySearchStrategy.Match<AppInfo>? {
+        if (query.isBlank()) return null
+        val score = engine.computeScore(query, app.appName, nickname, config.minQueryLength)
+        return if (score >= config.matchThreshold) {
+            FuzzySearchStrategy.Match(
+                item = app,
+                score = score,
+                priority = config.priority,
+                isFuzzyMatch = true,
+            )
+        } else {
+            null
+        }
     }
 
     fun isTokenCoveredByApp(token: String, appName: String, nickname: String?): Boolean {

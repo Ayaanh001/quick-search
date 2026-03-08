@@ -40,6 +40,10 @@ class UnifiedSearchHandler(
         private val fileSearchHandler: FileSearchHandler,
         private val searchOperations: SearchOperations,
 ) {
+        companion object {
+                private const val NICKNAME_ONLY_FILE_URI_HYDRATION_LIMIT =
+                        FileSearchHandler.FILE_SEARCH_RESULT_LIMIT * 2
+        }
 
         suspend fun performSearch(
                 query: String,
@@ -179,8 +183,11 @@ class UnifiedSearchHandler(
                                         recencyIndex.fileScores,
                                 )
 
+                        val hydratedContacts =
+                                contactRepository.hydrateContactsForDisplay(filteredContacts)
+
                         return@withContext UnifiedSearchResults(
-                                contactResults = filteredContacts,
+                                contactResults = hydratedContacts,
                                 fileResults = filteredFiles,
                                 settingResults = settingsMatches,
                                 appShortcutResults = appShortcutMatches,
@@ -247,14 +254,16 @@ class UnifiedSearchHandler(
                 val displayNameMatchedUris = displayNameFiles.map { it.uri.toString() }.toSet()
                 val nicknameOnlyUris =
                         nicknameMatchingUris.filterNot { displayNameMatchedUris.contains(it) }
+                val limitedNicknameOnlyUris =
+                        nicknameOnlyUris.take(NICKNAME_ONLY_FILE_URI_HYDRATION_LIMIT)
                 val pathMatcher =
                         FolderPathPatternMatcher.createPathMatcher(
                                 whitelistPatterns = folderWhitelistPatterns,
                                 blacklistPatterns = folderBlacklistPatterns,
                         )
 
-                return if (nicknameOnlyUris.isNotEmpty()) {
-                        fileRepository.getFilesByUris(nicknameOnlyUris.toSet()).filter { file ->
+                return if (limitedNicknameOnlyUris.isNotEmpty()) {
+                        fileRepository.getFilesByUris(limitedNicknameOnlyUris.toSet()).filter { file ->
                                 val fileType =
                                         com.tk.quicksearch.search.models.FileTypeUtils.getFileType(
                                                 file,

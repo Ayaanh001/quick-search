@@ -1,5 +1,6 @@
 package com.tk.quicksearch.searchEngines
 
+import android.os.Looper
 import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.core.SearchUiState
 import com.tk.quicksearch.search.core.SectionManager
@@ -11,6 +12,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicLong
 
 class SecondarySearchOrchestrator(
     private val scope: CoroutineScope,
@@ -21,7 +23,7 @@ class SecondarySearchOrchestrator(
     private val currentStateProvider: () -> SearchUiState,
 ) {
     private var searchJob: Job? = null
-    private var queryVersion: Long = 0L
+    private val queryVersion = AtomicLong(0L)
 
     // Track query prefixes that yielded no results to avoid redundant searches
     private var lastQueryWithNoContacts: String? = null
@@ -35,6 +37,16 @@ class SecondarySearchOrchestrator(
     }
 
     fun performSecondarySearches(query: String) {
+        if (!isOnMainThread()) {
+            scope.launch(Dispatchers.Main.immediate) {
+                performSecondarySearchesInternal(query)
+            }
+            return
+        }
+        performSecondarySearchesInternal(query)
+    }
+
+    private fun performSecondarySearchesInternal(query: String) {
         searchJob?.cancel()
         val trimmedQuery = query.trim()
         if (trimmedQuery.isBlank() || trimmedQuery.length == 1) {
@@ -108,14 +120,14 @@ class SecondarySearchOrchestrator(
                 lastQueryWithNoAppShortcuts != null &&
                 trimmedQuery.startsWith(lastQueryWithNoAppShortcuts!!)
 
-        val currentVersion = ++queryVersion
+        val currentVersion = queryVersion.incrementAndGet()
         lastQueryLength = trimmedQuery.length
 
         searchJob =
             scope.launch(Dispatchers.IO) {
                 // Debounce expensive contact/file queries during rapid typing
                 delay(SECONDARY_SEARCH_DEBOUNCE_MS)
-                if (currentVersion != queryVersion) return@launch
+                if (currentVersion != queryVersion.get()) return@launch
 
                 val unifiedResults =
                     unifiedSearchHandler.performSearch(
@@ -132,7 +144,7 @@ class SecondarySearchOrchestrator(
                     )
 
                 withContext(Dispatchers.Main) {
-                    if (currentVersion == queryVersion) {
+                    if (currentVersion == queryVersion.get()) {
                         // Update no-results tracking based on search results
                         if (unifiedResults.contactResults.isEmpty() && !shouldSkipContacts) {
                             lastQueryWithNoContacts = trimmedQuery
@@ -178,7 +190,7 @@ class SecondarySearchOrchestrator(
                                 trimmedQuery,
                                 currentVersion,
                                 activeQueryVersionProvider = {
-                                    this@SecondarySearchOrchestrator.queryVersion
+                                    this@SecondarySearchOrchestrator.queryVersion.get()
                                 },
                                 activeQueryProvider = { currentStateProvider().query },
                             )
@@ -195,6 +207,16 @@ class SecondarySearchOrchestrator(
     }
 
     fun resetNoResultTracking() {
+        if (!isOnMainThread()) {
+            scope.launch(Dispatchers.Main.immediate) {
+                resetNoResultTrackingInternal()
+            }
+            return
+        }
+        resetNoResultTrackingInternal()
+    }
+
+    private fun resetNoResultTrackingInternal() {
         lastQueryWithNoContacts = null
         lastQueryWithNoFiles = null
         lastQueryWithNoSettings = null
@@ -203,16 +225,26 @@ class SecondarySearchOrchestrator(
     }
 
     fun performWebSuggestionsOnly(query: String) {
+        if (!isOnMainThread()) {
+            scope.launch(Dispatchers.Main.immediate) {
+                performWebSuggestionsOnlyInternal(query)
+            }
+            return
+        }
+        performWebSuggestionsOnlyInternal(query)
+    }
+
+    private fun performWebSuggestionsOnlyInternal(query: String) {
         searchJob?.cancel()
         val trimmedQuery = query.trim()
-        val currentVersion = ++queryVersion
+        val currentVersion = queryVersion.incrementAndGet()
         lastQueryLength = trimmedQuery.length
 
         searchJob =
             scope.launch(Dispatchers.IO) {
                 // Debounce to match regular search behavior
                 delay(SECONDARY_SEARCH_DEBOUNCE_MS)
-                if (currentVersion != queryVersion) return@launch
+                if (currentVersion != queryVersion.get()) return@launch
 
                 withContext(Dispatchers.Main) {
                     // Clear all other results
@@ -233,7 +265,7 @@ class SecondarySearchOrchestrator(
                             trimmedQuery,
                             currentVersion,
                             activeQueryVersionProvider = {
-                                this@SecondarySearchOrchestrator.queryVersion
+                                this@SecondarySearchOrchestrator.queryVersion.get()
                             },
                             activeQueryProvider = { currentStateProvider().query },
                         )
@@ -246,6 +278,14 @@ class SecondarySearchOrchestrator(
     }
 
     fun cancel() {
+        if (!isOnMainThread()) {
+            scope.launch(Dispatchers.Main.immediate) {
+                searchJob?.cancel()
+            }
+            return
+        }
         searchJob?.cancel()
     }
+
+    private fun isOnMainThread(): Boolean = Looper.myLooper() == Looper.getMainLooper()
 }
