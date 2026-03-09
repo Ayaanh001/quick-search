@@ -710,6 +710,7 @@ class SearchViewModel(
             PermissionHelper.checkWallpaperPermission(getApplication())
 
     private var wallpaperAvailable: Boolean = false
+    @Volatile private var shouldRecordPendingDirectSearchQueryInHistory: Boolean = true
 
     fun setWallpaperAvailable(available: Boolean) {
         if (wallpaperAvailable != available) {
@@ -743,7 +744,8 @@ class SearchViewModel(
                         application = app,
                         userPreferences = userPreferences,
                         settingsSearchHandler = settingsSearchHandler,
-                        onRequestDirectSearch = { query ->
+                        onRequestDirectSearch = { query, addToSearchHistory ->
+                            shouldRecordPendingDirectSearchQueryInHistory = addToSearchHistory
                             directSearchHandler.requestDirectSearch(query)
                         },
                         onClearQuery = this::onNavigationTriggered,
@@ -830,6 +832,13 @@ class SearchViewModel(
     private fun setupDirectSearchStateListener() {
         viewModelScope.launch {
             directSearchHandler.directSearchState.collect { dsState ->
+                if (dsState.status == DirectSearchStatus.Loading) {
+                    val activeQuery = dsState.activeQuery?.trim().orEmpty()
+                    if (shouldRecordPendingDirectSearchQueryInHistory && activeQuery.isNotEmpty()) {
+                        userPreferences.addRecentItem(RecentSearchEntry.Query(activeQuery))
+                    }
+                    shouldRecordPendingDirectSearchQueryInHistory = true
+                }
                 updateResultsState { it.copy(DirectSearchState = dsState) }
             }
         }

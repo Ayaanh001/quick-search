@@ -22,7 +22,7 @@ class NavigationHandler(
     private val application: Application,
     private val userPreferences: UserAppPreferences,
     private val settingsSearchHandler: DeviceSettingsSearchHandler,
-    private val onRequestDirectSearch: (String) -> Unit,
+    private val onRequestDirectSearch: (String, Boolean) -> Unit,
     private val onClearQuery: () -> Unit,
     private val showToastCallback: (Int) -> Unit,
 ) {
@@ -93,14 +93,14 @@ class NavigationHandler(
     ) {
         val trimmedQuery = query.trim()
 
+        if (searchEngine == SearchEngine.DIRECT_SEARCH) {
+            onRequestDirectSearch(trimmedQuery, addToSearchHistory)
+            return
+        }
+
         // Save the query to recent queries
         if (addToSearchHistory && trimmedQuery.isNotEmpty()) {
             userPreferences.addRecentItem(RecentSearchEntry.Query(trimmedQuery))
-        }
-
-        if (searchEngine == SearchEngine.DIRECT_SEARCH) {
-            onRequestDirectSearch(trimmedQuery)
-            return
         }
 
         val amazonDomain =
