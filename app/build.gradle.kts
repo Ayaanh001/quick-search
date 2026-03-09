@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.profileinstaller)
     implementation(libs.google.material)
     implementation(libs.androidx.security.crypto)
     implementation(libs.okhttp)

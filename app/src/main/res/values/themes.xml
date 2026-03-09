@@ -4,6 +4,7 @@
     <style name="Theme.QuickSearch" parent="Theme.Material3.Dark.NoActionBar">
         <!-- Keep window translucent throughout -->
         <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
 
         <!-- Disable animations and configure window -->
         <item name="android:windowAnimationStyle">@null</item>
@@ -13,6 +14,7 @@
 
     <style name="Theme.QuickSearch.OssLicenses" parent="Theme.Material3.Dark">
         <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowBackground">@android:color/background_dark</item>
     </style>
 
 </resources>

@@ -213,9 +213,11 @@ object WallpaperUtils {
         }
 
     private fun loadWallpaperBitmap(context: Context): Bitmap? {
-        val wallpaperManager = WallpaperManager.getInstance(context)
-        val wallpaperDrawable = wallpaperManager.drawable
-        return wallpaperDrawable?.toBitmap()
+        return runCatching {
+            val wallpaperManager = WallpaperManager.getInstance(context)
+            val wallpaperDrawable = wallpaperManager.drawable
+            wallpaperDrawable?.toBitmap()
+        }.getOrNull()
     }
 
     private fun decodeBitmapWithOrientation(

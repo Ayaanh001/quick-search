@@ -97,6 +97,7 @@ class MainActivity : ComponentActivity() {
             enableEdgeToEdge(statusBarStyle, navigationBarStyle)
 
             super.onCreate(savedInstanceState)
+            window.setBackgroundDrawable(null)
 
             // Disable activity opening animation for instant appearance
             @Suppress("DEPRECATION")
