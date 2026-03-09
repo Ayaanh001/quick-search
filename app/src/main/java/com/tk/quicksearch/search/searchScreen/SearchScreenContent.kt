@@ -308,7 +308,7 @@ internal fun SearchScreenContent(
                 isCalculatorMode = isCalculatorMode,
                 placeholderText = searchHintText,
                 showWelcomeAnimation = state.showSearchBarWelcomeAnimation,
-                autoFocusOnStart = true,
+                autoFocusOnStart = state.openKeyboardOnLaunch,
                 onClearDetectedShortcut = onClearDetectedShortcut,
                 onWelcomeAnimationCompleted = onWelcomeAnimationCompleted,
                 modifier = searchFieldModifier,

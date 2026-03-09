@@ -27,6 +27,13 @@ class UiPreferences(
         setBooleanPref(UiPreferences.KEY_BOTTOM_SEARCH_BAR_ENABLED, enabled)
     }
 
+    fun isOpenKeyboardOnLaunchEnabled(): Boolean =
+            getBooleanPref(UiPreferences.KEY_OPEN_KEYBOARD_ON_LAUNCH, true)
+
+    fun setOpenKeyboardOnLaunchEnabled(enabled: Boolean) {
+        setBooleanPref(UiPreferences.KEY_OPEN_KEYBOARD_ON_LAUNCH, enabled)
+    }
+
     fun isOverlayModeEnabled(): Boolean =
             getBooleanPref(UiPreferences.KEY_OVERLAY_MODE_ENABLED, false)
 
@@ -561,6 +568,7 @@ class UiPreferences(
         // UI preferences keys
         const val KEY_ONE_HANDED_MODE = "one_handed_mode"
         const val KEY_BOTTOM_SEARCH_BAR_ENABLED = "bottom_search_bar_enabled"
+        const val KEY_OPEN_KEYBOARD_ON_LAUNCH = "open_keyboard_on_launch"
         const val KEY_OVERLAY_MODE_ENABLED = "overlay_mode_enabled"
         const val KEY_USE_WHATSAPP_FOR_MESSAGES =
                 "use_whatsapp_for_messages" // Deprecated, kept for migration

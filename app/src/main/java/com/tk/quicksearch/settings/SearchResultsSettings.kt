@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Contacts
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Keyboard
 import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.ElevatedCard
@@ -122,6 +123,8 @@ private fun SearchOptionsCard(
     onRequestUsagePermission: () -> Unit,
     recentQueriesEnabled: Boolean,
     onRecentQueriesToggle: (Boolean) -> Unit,
+    openKeyboardOnLaunch: Boolean,
+    onOpenKeyboardOnLaunchToggle: (Boolean) -> Unit,
     hasExcludedItems: Boolean,
     excludedItemsTitle: String,
     excludedItemsDescription: String,
@@ -158,6 +161,16 @@ private fun SearchOptionsCard(
                 checked = recentQueriesEnabled,
                 onCheckedChange = onRecentQueriesToggle,
                 leadingIcon = Icons.Rounded.History,
+                isFirstItem = false,
+                isLastItem = false,
+            )
+
+            SettingsToggleRow(
+                title = stringResource(R.string.open_keyboard_toggle_title),
+                subtitle = stringResource(R.string.open_keyboard_toggle_desc),
+                checked = openKeyboardOnLaunch,
+                onCheckedChange = onOpenKeyboardOnLaunchToggle,
+                leadingIcon = Icons.Rounded.Keyboard,
                 isFirstItem = false,
                 isLastItem = !hasExcludedItems,
             )
@@ -344,6 +357,14 @@ fun SearchResultsSettingsSection(
             showTitle = false,
         )
 
+        WebSearchSuggestionsCard(
+            webSuggestionsEnabled = state.webSuggestionsEnabled,
+            onWebSuggestionsToggle = callbacks.onToggleWebSuggestions,
+            webSuggestionsCount = state.webSuggestionsCount,
+            onWebSuggestionsCountChange = callbacks.onWebSuggestionsCountChange,
+            modifier = Modifier.padding(top = DesignTokens.SpacingLarge),
+        )
+
         SearchOptionsCard(
             appSuggestionsEnabled = state.appSuggestionsEnabled,
             hasUsagePermission = hasUsagePermission,
@@ -351,18 +372,12 @@ fun SearchResultsSettingsSection(
             onRequestUsagePermission = callbacks.onRequestUsagePermission,
             recentQueriesEnabled = state.recentQueriesEnabled,
             onRecentQueriesToggle = callbacks.onToggleRecentQueries,
+            openKeyboardOnLaunch = state.openKeyboardOnLaunch,
+            onOpenKeyboardOnLaunchToggle = callbacks.onToggleOpenKeyboardOnLaunch,
             hasExcludedItems = hasExcludedItems,
             excludedItemsTitle = stringResource(R.string.settings_excluded_items_title),
             excludedItemsDescription = stringResource(R.string.settings_excluded_items_desc),
             onNavigateToExcludedItems = onNavigateToExcludedItems,
-            modifier = Modifier.padding(top = DesignTokens.SpacingLarge),
-        )
-
-        WebSearchSuggestionsCard(
-            webSuggestionsEnabled = state.webSuggestionsEnabled,
-            onWebSuggestionsToggle = callbacks.onToggleWebSuggestions,
-            webSuggestionsCount = state.webSuggestionsCount,
-            onWebSuggestionsCountChange = callbacks.onWebSuggestionsCountChange,
             modifier = Modifier.padding(top = DesignTokens.SpacingLarge),
         )
 

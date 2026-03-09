@@ -482,6 +482,11 @@ class UserAppPreferences(
     fun setBottomSearchBarEnabled(enabled: Boolean) =
             uiPreferences.setBottomSearchBarEnabled(enabled)
 
+    fun isOpenKeyboardOnLaunchEnabled(): Boolean = uiPreferences.isOpenKeyboardOnLaunchEnabled()
+
+    fun setOpenKeyboardOnLaunchEnabled(enabled: Boolean) =
+            uiPreferences.setOpenKeyboardOnLaunchEnabled(enabled)
+
     fun isOverlayModeEnabled(): Boolean = uiPreferences.isOverlayModeEnabled()
 
     fun setOverlayModeEnabled(enabled: Boolean) = uiPreferences.setOverlayModeEnabled(enabled)

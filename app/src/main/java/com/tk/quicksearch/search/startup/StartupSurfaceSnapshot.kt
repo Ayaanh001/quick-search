@@ -24,6 +24,7 @@ data class StartupSurfaceSnapshot(
     val startupBackgroundPreviewPath: String?,
     val oneHandedMode: Boolean,
     val bottomSearchBarEnabled: Boolean,
+    val openKeyboardOnLaunch: Boolean,
     val fontScaleMultiplier: Float,
     val showAppLabels: Boolean,
     val appSuggestionsEnabled: Boolean,
@@ -43,6 +44,7 @@ internal object StartupSurfaceSnapshotJson {
     private const val KEY_PREVIEW_PATH = "startupBackgroundPreviewPath"
     private const val KEY_ONE_HANDED = "oneHandedMode"
     private const val KEY_BOTTOM_SEARCH_BAR = "bottomSearchBarEnabled"
+    private const val KEY_OPEN_KEYBOARD_ON_LAUNCH = "openKeyboardOnLaunch"
     private const val KEY_FONT_SCALE = "fontScaleMultiplier"
     private const val KEY_SHOW_APP_LABELS = "showAppLabels"
     private const val KEY_APP_SUGGESTIONS = "appSuggestionsEnabled"
@@ -71,6 +73,7 @@ internal object StartupSurfaceSnapshotJson {
                 put(KEY_THEME_INTENSITY, snapshot.overlayThemeIntensity.toDouble())
                 put(KEY_ONE_HANDED, snapshot.oneHandedMode)
                 put(KEY_BOTTOM_SEARCH_BAR, snapshot.bottomSearchBarEnabled)
+                put(KEY_OPEN_KEYBOARD_ON_LAUNCH, snapshot.openKeyboardOnLaunch)
                 put(KEY_FONT_SCALE, snapshot.fontScaleMultiplier.toDouble())
                 put(KEY_SHOW_APP_LABELS, snapshot.showAppLabels)
                 put(KEY_APP_SUGGESTIONS, snapshot.appSuggestionsEnabled)
@@ -139,6 +142,7 @@ internal object StartupSurfaceSnapshotJson {
                 startupBackgroundPreviewPath = root.optString(KEY_PREVIEW_PATH).takeIf { it.isNotBlank() },
                 oneHandedMode = root.optBoolean(KEY_ONE_HANDED, false),
                 bottomSearchBarEnabled = root.optBoolean(KEY_BOTTOM_SEARCH_BAR, false),
+                openKeyboardOnLaunch = root.optBoolean(KEY_OPEN_KEYBOARD_ON_LAUNCH, true),
                 fontScaleMultiplier = root.optDouble(KEY_FONT_SCALE, 1.0).toFloat(),
                 showAppLabels = root.optBoolean(KEY_SHOW_APP_LABELS, true),
                 appSuggestionsEnabled = root.optBoolean(KEY_APP_SUGGESTIONS, true),

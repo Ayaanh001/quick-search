@@ -347,6 +347,7 @@ fun SettingsDetailRoute(
                     onToggleAppSuggestions = viewModel::setAppSuggestionsEnabled,
                     onToggleWebSuggestions = viewModel::setWebSuggestionsEnabled,
                     onWebSuggestionsCountChange = viewModel::setWebSuggestionsCount,
+                    onToggleOpenKeyboardOnLaunch = viewModel::setOpenKeyboardOnLaunchEnabled,
                     onToggleRecentQueries = viewModel::setRecentQueriesEnabled,
                     onSetGeminiApiKey = viewModel::setGeminiApiKey,
                     onSetPersonalContext = viewModel::setPersonalContext,

@@ -142,6 +142,9 @@ class SearchViewModel(
                     bottomSearchBarEnabled =
                             startupSnapshot?.bottomSearchBarEnabled
                                     ?: startupPreferencesReader.isBottomSearchBarEnabled(),
+                    openKeyboardOnLaunch =
+                            startupSnapshot?.openKeyboardOnLaunch
+                                    ?: startupPreferencesReader.isOpenKeyboardOnLaunchEnabled(),
                     fontScaleMultiplier =
                             sanitizeFontScaleMultiplier(
                                     startupSnapshot?.fontScaleMultiplier
@@ -449,6 +452,7 @@ class SearchViewModel(
                     overlayModeEnabled = s.overlayModeEnabled,
                     oneHandedMode = s.oneHandedMode,
                     bottomSearchBarEnabled = s.bottomSearchBarEnabled,
+                    openKeyboardOnLaunch = s.openKeyboardOnLaunch,
                     fontScaleMultiplier = s.fontScaleMultiplier,
                     showAppLabels = s.showAppLabels,
                     appSuggestionsEnabled = s.appSuggestionsEnabled,
@@ -670,6 +674,7 @@ class SearchViewModel(
     private var excludedFileExtensions: Set<String> = emptySet()
     private var oneHandedMode: Boolean = false
     private var bottomSearchBarEnabled: Boolean = false
+    private var openKeyboardOnLaunch: Boolean = true
     private var overlayModeEnabled: Boolean = false
     private var directDialEnabled: Boolean = false
     private var hasSeenDirectDialChoice: Boolean = false
@@ -856,6 +861,7 @@ class SearchViewModel(
         // Extract critical data for immediate use
         oneHandedMode = startupConfig.oneHandedMode
         bottomSearchBarEnabled = startupPrefs.bottomSearchBarEnabled
+        openKeyboardOnLaunch = startupPrefs.openKeyboardOnLaunch
         wallpaperBackgroundAlpha = startupPrefs.wallpaperBackgroundAlpha
         wallpaperBlurRadius = startupPrefs.wallpaperBlurRadius
         overlayGradientTheme = startupPrefs.overlayGradientTheme
@@ -878,6 +884,7 @@ class SearchViewModel(
                 it.copy(
                         oneHandedMode = oneHandedMode,
                         bottomSearchBarEnabled = bottomSearchBarEnabled,
+                        openKeyboardOnLaunch = openKeyboardOnLaunch,
                         showWallpaperBackground = backgroundSource != BackgroundSource.THEME,
                         wallpaperBackgroundAlpha = wallpaperBackgroundAlpha,
                         wallpaperBlurRadius = wallpaperBlurRadius,
@@ -963,6 +970,7 @@ class SearchViewModel(
         excludedFileExtensions = prefs.excludedFileExtensions
         oneHandedMode = prefs.oneHandedMode
         bottomSearchBarEnabled = prefs.bottomSearchBarEnabled
+        openKeyboardOnLaunch = prefs.openKeyboardOnLaunch
         overlayModeEnabled = prefs.overlayModeEnabled
         directDialEnabled = prefs.directDialEnabled
         hasSeenDirectDialChoice = prefs.hasSeenDirectDialChoice
@@ -982,6 +990,7 @@ class SearchViewModel(
                     enabledFileTypes = enabledFileTypes,
                     oneHandedMode = oneHandedMode,
                     bottomSearchBarEnabled = bottomSearchBarEnabled,
+                    openKeyboardOnLaunch = openKeyboardOnLaunch,
                     overlayModeEnabled = overlayModeEnabled,
                     appSuggestionsEnabled = appSuggestionsEnabled,
                     showAppLabels = showAppLabels,
@@ -1057,6 +1066,7 @@ class SearchViewModel(
             state.copy(
                     oneHandedMode = oneHandedMode,
                     bottomSearchBarEnabled = bottomSearchBarEnabled,
+                    openKeyboardOnLaunch = openKeyboardOnLaunch,
                     appSuggestionsEnabled = suggestionsEnabled,
                     showAppLabels = labelsEnabled,
                     isStartupCoreSurfaceReady = true,
@@ -1112,6 +1122,7 @@ class SearchViewModel(
                         appSuggestionsEnabled = userPreferences.areAppSuggestionsEnabled(),
                         showAppLabels = userPreferences.shouldShowAppLabels(),
                         bottomSearchBarEnabled = userPreferences.isBottomSearchBarEnabled(),
+                        openKeyboardOnLaunch = userPreferences.isOpenKeyboardOnLaunchEnabled(),
                         showPersonalContextHint =
                                 !userPreferences.hasSeenPersonalContextHint() &&
                                         directSearchHandler.getPersonalContext().isBlank(),
@@ -3004,6 +3015,18 @@ class SearchViewModel(
         )
     }
 
+    fun setOpenKeyboardOnLaunchEnabled(enabled: Boolean) {
+        updateBooleanPreference(
+                value = enabled,
+                preferenceSetter = userPreferences::setOpenKeyboardOnLaunchEnabled,
+                stateUpdater = {
+                    openKeyboardOnLaunch = it
+                    updateUiState { state -> state.copy(openKeyboardOnLaunch = it) }
+                    saveStartupSurfaceSnapshotAsync(allowDuringQuery = true)
+                },
+        )
+    }
+
     fun setOverlayModeEnabled(enabled: Boolean) {
         updateBooleanPreference(
                 value = enabled,
@@ -3525,6 +3548,7 @@ class SearchViewModel(
                     startupBackgroundPreviewPath = previewPath,
                     oneHandedMode = config.oneHandedMode,
                     bottomSearchBarEnabled = config.bottomSearchBarEnabled,
+                    openKeyboardOnLaunch = config.openKeyboardOnLaunch,
                     fontScaleMultiplier = config.fontScaleMultiplier,
                     showAppLabels = config.showAppLabels,
                     appSuggestionsEnabled = config.appSuggestionsEnabled,

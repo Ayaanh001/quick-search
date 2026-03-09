@@ -27,6 +27,7 @@ class StartupPreferencesFacade(
             val excludedFileExtensions: Set<String>,
             val oneHandedMode: Boolean,
             val bottomSearchBarEnabled: Boolean,
+            val openKeyboardOnLaunch: Boolean,
             val overlayModeEnabled: Boolean,
             val directDialEnabled: Boolean,
             val hasSeenDirectDialChoice: Boolean,
@@ -150,6 +151,13 @@ class StartupPreferencesFacade(
                         ] as?
                                 Boolean
                                 ?: false,
+                openKeyboardOnLaunch =
+                        allPrefs[
+                                com.tk.quicksearch.search.data.preferences.UiPreferences
+                                        .KEY_OPEN_KEYBOARD_ON_LAUNCH,
+                        ] as?
+                                Boolean
+                                ?: true,
                 overlayModeEnabled =
                         allPrefs[
                                 com.tk.quicksearch.search.data.preferences.UiPreferences
@@ -414,6 +422,13 @@ class StartupPreferencesFacade(
                                 ] as?
                                         Boolean
                                         ?: false,
+                        openKeyboardOnLaunch =
+                                allPrefs[
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences
+                                                .KEY_OPEN_KEYBOARD_ON_LAUNCH,
+                                ] as?
+                                        Boolean
+                                        ?: true,
                         overlayModeEnabled =
                                 allPrefs[
                                         com.tk.quicksearch.search.data.preferences.UiPreferences

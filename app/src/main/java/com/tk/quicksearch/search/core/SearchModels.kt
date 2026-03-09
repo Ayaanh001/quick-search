@@ -341,6 +341,7 @@ data class SearchUiState(
         // Layout preferences
         val oneHandedMode: Boolean = false,
         val bottomSearchBarEnabled: Boolean = false,
+        val openKeyboardOnLaunch: Boolean = true,
         val overlayModeEnabled: Boolean = false,
         // Shortcuts configuration
         val shortcutsEnabled: Boolean = true,
@@ -516,6 +517,7 @@ fun SearchUiState(
                 overlayModeEnabled = config.overlayModeEnabled,
                 oneHandedMode = config.oneHandedMode,
                 bottomSearchBarEnabled = config.bottomSearchBarEnabled,
+                openKeyboardOnLaunch = config.openKeyboardOnLaunch,
                 fontScaleMultiplier = config.fontScaleMultiplier,
                 showAppLabels = config.showAppLabels,
                 appSuggestionsEnabled = config.appSuggestionsEnabled,
