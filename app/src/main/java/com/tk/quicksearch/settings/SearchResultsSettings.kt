@@ -12,19 +12,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Contacts
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Keyboard
+import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.ItemPriorityConfig
@@ -45,111 +45,77 @@ import com.tk.quicksearch.settings.shared.*
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticToggle
 
-/** Card for web search suggestions settings. */
-@Composable
-private fun WebSearchSuggestionsCard(
-    webSuggestionsEnabled: Boolean,
-    onWebSuggestionsToggle: (Boolean) -> Unit,
-    webSuggestionsCount: Int,
-    onWebSuggestionsCountChange: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val view = LocalView.current
-    ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
-        Column(
-            modifier =
-                Modifier.padding(
-                    bottom = if (webSuggestionsEnabled) DesignTokens.SpacingSmall else 0.dp,
-                ),
-        ) {
-            SettingsToggleRow(
-                title = stringResource(R.string.web_search_suggestions_title),
-                checked = webSuggestionsEnabled,
-                onCheckedChange = onWebSuggestionsToggle,
-                isFirstItem = true,
-                isLastItem = !webSuggestionsEnabled,
-                showDivider = false,
-            )
-
-            if (webSuggestionsEnabled) {
-                var lastWebStep by remember { mutableStateOf(webSuggestionsCount) }
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                start = DesignTokens.SpacingXXLarge,
-                                end = DesignTokens.SpacingXXLarge,
-                                top = 0.dp,
-                                bottom = DesignTokens.SpacingXXLarge,
-                            ),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingLarge),
-                ) {
-                    Slider(
-                        value = webSuggestionsCount.toFloat(),
-                        onValueChange = { value ->
-                            val step = value.toInt()
-                            if (step != lastWebStep) {
-                                hapticToggle(view)()
-                                lastWebStep = step
-                            }
-                            onWebSuggestionsCountChange(value.toInt())
-                        },
-                        valueRange = 1f..5f,
-                        steps = 3, // 1, 2, 3, 4, 5
-                        modifier = Modifier.weight(1f),
-                    )
-                    Text(
-                        text = webSuggestionsCount.toString(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.width(DesignTokens.SpacingXXLarge),
-                    )
-                }
-            }
-
-        }
-    }
-}
-
-/**
- * Card for app suggestions, recent queries, calculator and excluded items.
- */
+/** Card for app suggestions, web suggestions, recent queries and excluded items. */
 @Composable
 private fun SearchOptionsCard(
     appSuggestionsEnabled: Boolean,
     hasUsagePermission: Boolean,
     onAppSuggestionsToggle: (Boolean) -> Unit,
     onRequestUsagePermission: () -> Unit,
+    webSuggestionsEnabled: Boolean,
+    onWebSuggestionsToggle: (Boolean) -> Unit,
+    webSuggestionsCount: Int,
+    onWebSuggestionsCountChange: (Int) -> Unit,
     recentQueriesEnabled: Boolean,
     onRecentQueriesToggle: (Boolean) -> Unit,
-    openKeyboardOnLaunch: Boolean,
-    onOpenKeyboardOnLaunchToggle: (Boolean) -> Unit,
-    clearQueryOnLaunch: Boolean,
-    onClearQueryOnLaunchToggle: (Boolean) -> Unit,
     hasExcludedItems: Boolean,
     excludedItemsTitle: String,
     excludedItemsDescription: String,
     onNavigateToExcludedItems: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val view = LocalView.current
     var appSuggestionsTipDismissed by rememberSaveable { mutableStateOf(false) }
+    var lastWebStep by remember { mutableStateOf(webSuggestionsCount) }
+
     LaunchedEffect(appSuggestionsEnabled) {
         if (!appSuggestionsEnabled) {
             appSuggestionsTipDismissed = false
+        }
+    }
+    LaunchedEffect(webSuggestionsEnabled) {
+        if (!webSuggestionsEnabled) {
+            lastWebStep = webSuggestionsCount
         }
     }
 
     ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
         Column {
             SettingsToggleRow(
+                title = stringResource(R.string.web_search_suggestions_title),
+                checked = webSuggestionsEnabled,
+                onCheckedChange = onWebSuggestionsToggle,
+                leadingIcon = Icons.Rounded.Language,
+                sliderDetails =
+                    if (webSuggestionsEnabled) {
+                        SettingsToggleSliderDetails(
+                            value = webSuggestionsCount.toFloat(),
+                            onValueChange = { value ->
+                                val step = value.toInt()
+                                if (step != lastWebStep) {
+                                    hapticToggle(view)()
+                                    lastWebStep = step
+                                }
+                                onWebSuggestionsCountChange(step)
+                            },
+                            valueRange = 1f..5f,
+                            steps = 3,
+                            valueLabel = webSuggestionsCount.toString(),
+                        )
+                    } else {
+                        null
+                    },
+                isFirstItem = true,
+                isLastItem = false,
+            )
+
+            SettingsToggleRow(
                 title = stringResource(R.string.app_suggestions_toggle_title),
                 subtitle = stringResource(R.string.app_suggestions_toggle_desc),
                 checked = appSuggestionsEnabled,
                 onCheckedChange = onAppSuggestionsToggle,
                 leadingIcon = Icons.Rounded.Apps,
-                isFirstItem = true,
+                isFirstItem = false,
                 isLastItem = false,
                 showTipBanner = appSuggestionsEnabled && !hasUsagePermission && !appSuggestionsTipDismissed,
                 tipBannerText = stringResource(R.string.app_suggestions_usage_access_tip),
@@ -164,26 +130,6 @@ private fun SearchOptionsCard(
                 checked = recentQueriesEnabled,
                 onCheckedChange = onRecentQueriesToggle,
                 leadingIcon = Icons.Rounded.History,
-                isFirstItem = false,
-                isLastItem = false,
-            )
-
-            SettingsToggleRow(
-                title = stringResource(R.string.open_keyboard_toggle_title),
-                subtitle = stringResource(R.string.open_keyboard_toggle_desc),
-                checked = openKeyboardOnLaunch,
-                onCheckedChange = onOpenKeyboardOnLaunchToggle,
-                leadingIcon = Icons.Rounded.Keyboard,
-                isFirstItem = false,
-                isLastItem = false,
-            )
-
-            SettingsToggleRow(
-                title = stringResource(R.string.clear_query_toggle_title),
-                subtitle = stringResource(R.string.clear_query_toggle_desc),
-                checked = clearQueryOnLaunch,
-                onCheckedChange = onClearQueryOnLaunchToggle,
-                leadingIcon = Icons.Rounded.SearchOff,
                 isFirstItem = false,
                 isLastItem = !hasExcludedItems,
             )
@@ -209,7 +155,11 @@ private fun SearchOptionsCard(
 }
 
 @Composable
-private fun RefreshDataCard(
+private fun LaunchOptionsCard(
+    openKeyboardOnLaunch: Boolean,
+    onOpenKeyboardOnLaunchToggle: (Boolean) -> Unit,
+    clearQueryOnLaunch: Boolean,
+    onClearQueryOnLaunchToggle: (Boolean) -> Unit,
     onRefreshApps: (Boolean) -> Unit,
     onRefreshContacts: (Boolean) -> Unit,
     onRefreshFiles: (Boolean) -> Unit,
@@ -218,22 +168,27 @@ private fun RefreshDataCard(
     modifier: Modifier = Modifier,
 ) {
     ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(vertical = DesignTokens.SpacingMedium),
-            verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
-        ) {
-            Text(
-                text = stringResource(R.string.settings_refresh_data_title),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier =
-                    Modifier.padding(
-                        start = DesignTokens.SpacingXXLarge,
-                        top = DesignTokens.SpacingSmall,
-                        end = DesignTokens.SpacingLarge,
-                        bottom = DesignTokens.SpacingMedium,
-                    ),
+        Column {
+            SettingsToggleRow(
+                title = stringResource(R.string.open_keyboard_toggle_title),
+                subtitle = stringResource(R.string.open_keyboard_toggle_desc),
+                checked = openKeyboardOnLaunch,
+                onCheckedChange = onOpenKeyboardOnLaunchToggle,
+                leadingIcon = Icons.Rounded.Keyboard,
+                isFirstItem = true,
+                isLastItem = false,
             )
+
+            SettingsToggleRow(
+                title = stringResource(R.string.clear_query_toggle_title),
+                subtitle = stringResource(R.string.clear_query_toggle_desc),
+                checked = clearQueryOnLaunch,
+                onCheckedChange = onClearQueryOnLaunchToggle,
+                leadingIcon = Icons.Rounded.SearchOff,
+                isFirstItem = false,
+                isLastItem = false,
+            )
+
             val itemShape = DesignTokens.ShapeMedium
             val borderColor = MaterialTheme.colorScheme.outlineVariant
             Row(
@@ -241,7 +196,8 @@ private fun RefreshDataCard(
                     Modifier.fillMaxWidth().padding(
                         start = DesignTokens.SpacingLarge,
                         end = DesignTokens.SpacingLarge,
-                        bottom = DesignTokens.SpacingSmall,
+                        top = DesignTokens.SpacingLarge,
+                        bottom = DesignTokens.SpacingLarge,
                     ),
                 horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
                 verticalAlignment = Alignment.CenterVertically,
@@ -264,8 +220,9 @@ private fun RefreshDataCard(
                     )
                     Text(
                         text = stringResource(R.string.settings_refresh_apps_title),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
                     )
                 }
                 if (hasContactPermission) {
@@ -287,8 +244,9 @@ private fun RefreshDataCard(
                         )
                         Text(
                             text = stringResource(R.string.settings_refresh_contacts_title),
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }
@@ -311,8 +269,9 @@ private fun RefreshDataCard(
                         )
                         Text(
                             text = stringResource(R.string.settings_refresh_files_title),
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }
@@ -372,25 +331,17 @@ fun SearchResultsSettingsSection(
             showTitle = false,
         )
 
-        WebSearchSuggestionsCard(
-            webSuggestionsEnabled = state.webSuggestionsEnabled,
-            onWebSuggestionsToggle = callbacks.onToggleWebSuggestions,
-            webSuggestionsCount = state.webSuggestionsCount,
-            onWebSuggestionsCountChange = callbacks.onWebSuggestionsCountChange,
-            modifier = Modifier.padding(top = DesignTokens.SpacingLarge),
-        )
-
         SearchOptionsCard(
             appSuggestionsEnabled = state.appSuggestionsEnabled,
             hasUsagePermission = hasUsagePermission,
             onAppSuggestionsToggle = callbacks.onToggleAppSuggestions,
             onRequestUsagePermission = callbacks.onRequestUsagePermission,
+            webSuggestionsEnabled = state.webSuggestionsEnabled,
+            onWebSuggestionsToggle = callbacks.onToggleWebSuggestions,
+            webSuggestionsCount = state.webSuggestionsCount,
+            onWebSuggestionsCountChange = callbacks.onWebSuggestionsCountChange,
             recentQueriesEnabled = state.recentQueriesEnabled,
             onRecentQueriesToggle = callbacks.onToggleRecentQueries,
-            openKeyboardOnLaunch = state.openKeyboardOnLaunch,
-            onOpenKeyboardOnLaunchToggle = callbacks.onToggleOpenKeyboardOnLaunch,
-            clearQueryOnLaunch = state.clearQueryOnLaunch,
-            onClearQueryOnLaunchToggle = callbacks.onToggleClearQueryOnLaunch,
             hasExcludedItems = hasExcludedItems,
             excludedItemsTitle = stringResource(R.string.settings_excluded_items_title),
             excludedItemsDescription = stringResource(R.string.settings_excluded_items_desc),
@@ -398,7 +349,11 @@ fun SearchResultsSettingsSection(
             modifier = Modifier.padding(top = DesignTokens.SpacingLarge),
         )
 
-        RefreshDataCard(
+        LaunchOptionsCard(
+            openKeyboardOnLaunch = state.openKeyboardOnLaunch,
+            onOpenKeyboardOnLaunchToggle = callbacks.onToggleOpenKeyboardOnLaunch,
+            clearQueryOnLaunch = state.clearQueryOnLaunch,
+            onClearQueryOnLaunchToggle = callbacks.onToggleClearQueryOnLaunch,
             onRefreshApps = callbacks.onRefreshApps,
             onRefreshContacts = callbacks.onRefreshContacts,
             onRefreshFiles = callbacks.onRefreshFiles,

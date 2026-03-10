@@ -176,8 +176,6 @@ private fun ExcludedExtensionChip(
  * @param onSetFolderBlacklistPatterns Callback when blacklist patterns change
  * @param excludedExtensions Set of excluded file extensions
  * @param onRemoveExcludedExtension Callback when an excluded extension should be removed
- * @param filesSectionEnabled Whether the files section is enabled. If false, this section is not
- * displayed.
  * @param modifier Modifier to be applied to the section title
  */
 @Composable
@@ -196,14 +194,9 @@ fun FileTypesSection(
     onSetFolderBlacklistPatterns: (Set<String>) -> Unit,
     excludedExtensions: Set<String>,
     onRemoveExcludedExtension: (String) -> Unit,
-    filesSectionEnabled: Boolean = true,
     showTitle: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
-    if (!filesSectionEnabled) {
-        return
-    }
-
     // Section title
     if (showTitle) {
         Column(modifier = modifier) {

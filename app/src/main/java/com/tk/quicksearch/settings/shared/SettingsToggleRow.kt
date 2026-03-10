@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +34,14 @@ import com.tk.quicksearch.shared.util.hapticToggle
 
 private const val TipBannerLinkTag = "tip_banner_link"
 
+data class SettingsToggleSliderDetails(
+    val value: Float,
+    val onValueChange: (Float) -> Unit,
+    val valueRange: ClosedFloatingPointRange<Float>,
+    val valueLabel: String,
+    val steps: Int = 0,
+)
+
 /**
  * Reusable toggle row component for settings cards.
  * Provides consistent styling and layout across all toggle rows.
@@ -45,6 +55,7 @@ fun SettingsToggleRow(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     subtitleContent: (@Composable () -> Unit)? = null,
+    sliderDetails: SettingsToggleSliderDetails? = null,
     leadingIcon: ImageVector? = null,
     titleTextStyle: TextStyle = MaterialTheme.typography.titleMedium,
     horizontalPadding: Dp = DesignTokens.SpacingXXLarge,
@@ -75,6 +86,8 @@ fun SettingsToggleRow(
                     .then(
                         if (onRowClick != null) {
                             Modifier.clickable(onClick = onRowClick)
+                        } else if (sliderDetails != null) {
+                            Modifier
                         } else {
                             Modifier.toggleable(
                                 value = checked,
@@ -111,15 +124,37 @@ fun SettingsToggleRow(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                if (subtitle != null) {
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                if (sliderDetails != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingLarge),
+                    ) {
+                        Slider(
+                            value = sliderDetails.value,
+                            onValueChange = sliderDetails.onValueChange,
+                            valueRange = sliderDetails.valueRange,
+                            steps = sliderDetails.steps,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Text(
+                            text = sliderDetails.valueLabel,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(DesignTokens.SpacingXXLarge),
+                        )
+                    }
+                } else {
+                    if (subtitle != null) {
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
 
-                subtitleContent?.invoke()
+                    subtitleContent?.invoke()
+                }
             }
 
             Switch(

@@ -101,8 +101,8 @@ fun SectionSettingsSection(
                         when {
                             isAppsRow -> appsSubtitle
                             isAppShortcutsRow -> appShortcutsSubtitle
-                            isContactsRow -> contactsSubtitle?.takeIf { isSectionEnabled }
-                            isFilesRow -> filesSubtitle?.takeIf { isSectionEnabled }
+                            isContactsRow -> contactsSubtitle
+                            isFilesRow -> filesSubtitle
                             isDeviceSettingsRow -> deviceSettingsSubtitle
                             else -> null
                         },
@@ -110,8 +110,8 @@ fun SectionSettingsSection(
                         when {
                             isAppsRow -> onAppsClick
                             isAppShortcutsRow -> onAppShortcutsClick
-                            isContactsRow -> onContactsClick?.takeIf { isSectionEnabled }
-                            isFilesRow -> onFilesClick?.takeIf { isSectionEnabled }
+                            isContactsRow -> onContactsClick
+                            isFilesRow -> onFilesClick
                             isDeviceSettingsRow -> onDeviceSettingsClick
                             else -> null
                         },

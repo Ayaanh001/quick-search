@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -37,6 +38,7 @@ fun AliasPill(
     textColor: Color = AppColors.DialogText,
     showBackground: Boolean = true,
     leadingIcon: ImageVector? = null,
+    iconTextSpacing: Dp = DesignTokens.SpacingXSmall,
     onClearClick: (() -> Unit)? = null,
 ) {
     val shouldUseSurfaceClick = onClick != null && onClearClick == null
@@ -93,7 +95,7 @@ fun AliasPill(
                         Modifier
                     },
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXSmall),
+                horizontalArrangement = Arrangement.spacedBy(iconTextSpacing),
             ) {
                 if (leadingIcon != null) {
                     Icon(

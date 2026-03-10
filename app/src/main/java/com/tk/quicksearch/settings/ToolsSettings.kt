@@ -1,14 +1,22 @@
 package com.tk.quicksearch.settings.settingsDetailScreen
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Calculate
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import com.tk.quicksearch.R
 import com.tk.quicksearch.searchEngines.AliasHandler
 import com.tk.quicksearch.settings.shared.ToolToggleCardModel
 import com.tk.quicksearch.settings.shared.ToolToggleRows
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
 fun ToolsSettingsSection(
@@ -19,20 +27,40 @@ fun ToolsSettingsSection(
     onCalculatorToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ToolToggleRows(
-        tools =
-            listOf(
-                ToolToggleCardModel(
-                    title = stringResource(R.string.calculator_toggle_title),
-                    checked = calculatorEnabled,
-                    onCheckedChange = onCalculatorToggle,
-                    leadingIcon = Icons.Rounded.Calculate,
-                    aliasCode = calculatorAlias,
-                    onAliasCodeChange = onSetCalculatorAlias,
-                    existingShortcuts = existingShortcuts,
-                    aliasFeatureId = AliasHandler.CALCULATOR_ALIAS_FEATURE_ID,
-                ),
-            ),
+    Column(
         modifier = modifier,
-    )
+        verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
+    ) {
+        ToolToggleRows(
+            tools =
+                listOf(
+                    ToolToggleCardModel(
+                        title = stringResource(R.string.calculator_toggle_title),
+                        subtitle = stringResource(R.string.calculator_toggle_desc),
+                        checked = calculatorEnabled,
+                        onCheckedChange = onCalculatorToggle,
+                        leadingIcon = Icons.Rounded.Calculate,
+                        aliasCode = calculatorAlias,
+                        onAliasCodeChange = onSetCalculatorAlias,
+                        existingShortcuts = existingShortcuts,
+                        aliasFeatureId = AliasHandler.CALCULATOR_ALIAS_FEATURE_ID,
+                    ),
+                ),
+        )
+
+        Text(
+            text = stringResource(R.string.settings_tools_more_coming_soon),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = DesignTokens.SpacingMedium,
+                        start = DesignTokens.SpacingSmall,
+                        end = DesignTokens.SpacingSmall,
+                    ),
+        )
+    }
 }

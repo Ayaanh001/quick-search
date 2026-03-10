@@ -30,7 +30,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.shared.permissions.PermissionHelper
@@ -226,7 +225,6 @@ internal fun SettingsDetailLevel2Screen(
                                 onSetFolderBlacklistPatterns = callbacks.onSetFolderBlacklistPatterns,
                                 excludedExtensions = state.excludedFileExtensions,
                                 onRemoveExcludedExtension = callbacks.onRemoveExcludedFileExtension,
-                                filesSectionEnabled = SearchSection.FILES !in state.disabledSections,
                                 showTitle = false,
                                 modifier = Modifier,
                             )

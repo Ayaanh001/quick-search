@@ -364,7 +364,8 @@
     <string name="settings_search_engines_title">Search Engines</string>
     <string name="settings_search_engines_desc">Manage search engines and configure Gemini API key</string>
     <string name="settings_tools_title">Tools</string>
-    <string name="settings_tools_desc">Calculator and other tools</string>
+    <string name="settings_tools_desc">Calculator</string>
+    <string name="settings_tools_more_coming_soon">More tools coming soon</string>
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_desc">Wallpaper, search engine styles, one-handed mode, etc.</string>
     <string name="settings_calls_texts_title">Calls &amp; Texts</string>
@@ -464,9 +465,9 @@
          Settings - More Options
          ============================================================================ -->
     <string name="settings_refresh_data_title">Refresh Data</string>
-    <string name="settings_refresh_apps_title">Apps</string>
-    <string name="settings_refresh_contacts_title">Contacts</string>
-    <string name="settings_refresh_files_title">Files</string>
+    <string name="settings_refresh_apps_title">Reload\nApps</string>
+    <string name="settings_refresh_contacts_title">Reload\nContacts</string>
+    <string name="settings_refresh_files_title">Reload\nFiles</string>
     <string name="settings_refresh_apps_disabled">App search is disabled, cannot refresh apps data</string>
     <string name="settings_refresh_contacts_disabled">Contacts search is disabled, cannot refresh contacts data</string>
     <string name="settings_refresh_files_disabled">Files search is disabled, cannot refresh files data</string>

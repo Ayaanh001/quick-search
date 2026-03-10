@@ -3,6 +3,7 @@ package com.tk.quicksearch.settings.shared
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -55,24 +56,26 @@ fun ToolToggleRow(
         Column {
             SettingsToggleRow(
                 title = tool.title,
-                subtitle = if (tool.aliasCode == null) tool.subtitle else null,
+                subtitle = tool.subtitle,
                 subtitleContent =
                     if (tool.aliasCode != null) {
                         {
-                            AliasCodeDisplay(
-                                shortcutCode = tool.aliasCode,
-                                isEnabled = true,
-                                onCodeChange = tool.onAliasCodeChange,
-                                engineName = tool.title,
-                                existingShortcuts = tool.existingShortcuts,
-                                currentShortcutId = tool.aliasFeatureId,
-                                validateCode = { input -> isValidGeneralAliasCode(input) },
-                                validateConflict = { input, existing ->
-                                    !hasExactAliasConflict(input, existing)
-                                },
-                                conflictErrorMessage = stringResource(R.string.dialog_edit_alias_error_prefix),
-                                aliasDisplayType = AliasDisplayType.TOOL,
-                            )
+                            Column(modifier = Modifier.padding(top = DesignTokens.SpacingSmall)) {
+                                AliasCodeDisplay(
+                                    shortcutCode = tool.aliasCode,
+                                    isEnabled = true,
+                                    onCodeChange = tool.onAliasCodeChange,
+                                    engineName = tool.title,
+                                    existingShortcuts = tool.existingShortcuts,
+                                    currentShortcutId = tool.aliasFeatureId,
+                                    validateCode = { input -> isValidGeneralAliasCode(input) },
+                                    validateConflict = { input, existing ->
+                                        !hasExactAliasConflict(input, existing)
+                                    },
+                                    conflictErrorMessage = stringResource(R.string.dialog_edit_alias_error_prefix),
+                                    aliasDisplayType = AliasDisplayType.TOOL,
+                                )
+                            }
                         }
                     } else {
                         null
