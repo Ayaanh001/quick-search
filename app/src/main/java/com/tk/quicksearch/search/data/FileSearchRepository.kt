@@ -187,6 +187,32 @@ class FileSearchRepository(
         return results
     }
 
+    fun getRecentFiles(limit: Int): List<DeviceFile> {
+        if (limit <= 0 || !hasPermission()) return emptyList()
+
+        val uri = getFilesContentUri()
+        val results = mutableListOf<DeviceFile>()
+        contentResolver
+            .query(
+                uri,
+                FILE_PROJECTION,
+                null,
+                null,
+                DATE_MODIFIED_SORT,
+            )?.use { cursor ->
+                val columnIndices = getColumnIndices(cursor)
+                while (cursor.moveToNext() && results.size < limit) {
+                    val file = createDeviceFileFromCursor(cursor, uri, columnIndices)
+                    if (file != null) {
+                        results.add(file)
+                    }
+                }
+            }
+
+        cacheFiles(results)
+        return results
+    }
+
     private fun normalizeQuery(query: String): String =
         SearchTextNormalizer.normalizeForSearch(
             SearchTextNormalizer.normalizeQueryWhitespace(query),

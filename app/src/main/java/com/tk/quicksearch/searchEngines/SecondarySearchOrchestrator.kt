@@ -220,20 +220,32 @@ class SecondarySearchOrchestrator(
         query: String,
         section: SearchSection,
         useFuzzyMatching: Boolean,
+        ignoreSectionToggle: Boolean = false,
     ) {
         if (!isOnMainThread()) {
             scope.launch(Dispatchers.Main.immediate) {
-                performTargetedSecondarySearchInternal(query, section, useFuzzyMatching)
+                performTargetedSecondarySearchInternal(
+                    query = query,
+                    section = section,
+                    useFuzzyMatching = useFuzzyMatching,
+                    ignoreSectionToggle = ignoreSectionToggle,
+                )
             }
             return
         }
-        performTargetedSecondarySearchInternal(query, section, useFuzzyMatching)
+        performTargetedSecondarySearchInternal(
+            query = query,
+            section = section,
+            useFuzzyMatching = useFuzzyMatching,
+            ignoreSectionToggle = ignoreSectionToggle,
+        )
     }
 
     private fun performTargetedSecondarySearchInternal(
         query: String,
         section: SearchSection,
         useFuzzyMatching: Boolean,
+        ignoreSectionToggle: Boolean,
     ) {
         searchJob?.cancel()
         val trimmedQuery = query.trim()
@@ -252,18 +264,22 @@ class SecondarySearchOrchestrator(
 
         val currentState = currentStateProvider()
         val isSingleCharacterQuery = trimmedQuery.length == 1
+        val isSectionEnabled =
+            { targetSection: SearchSection ->
+                ignoreSectionToggle || targetSection !in sectionManager.disabledSections
+            }
         val isContactsEnabled =
             !isSingleCharacterQuery &&
                 currentState.hasContactPermission &&
-                SearchSection.CONTACTS !in sectionManager.disabledSections
+                isSectionEnabled(SearchSection.CONTACTS)
         val isFilesEnabled =
             !isSingleCharacterQuery &&
                 currentState.hasFilePermission &&
-                SearchSection.FILES !in sectionManager.disabledSections
+                isSectionEnabled(SearchSection.FILES)
         val isSettingsEnabled =
-            !isSingleCharacterQuery && SearchSection.SETTINGS !in sectionManager.disabledSections
+            !isSingleCharacterQuery && isSectionEnabled(SearchSection.SETTINGS)
         val isAppShortcutsEnabled =
-            SearchSection.APP_SHORTCUTS !in sectionManager.disabledSections
+            isSectionEnabled(SearchSection.APP_SHORTCUTS)
 
         val shouldSearchContacts = section == SearchSection.CONTACTS && isContactsEnabled
         val shouldSearchFiles = section == SearchSection.FILES && isFilesEnabled

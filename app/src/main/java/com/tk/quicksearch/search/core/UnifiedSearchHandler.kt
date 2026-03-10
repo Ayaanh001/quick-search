@@ -99,6 +99,8 @@ class UnifiedSearchHandler(
                                                         searchOperations.searchContacts(
                                                                 queryContext,
                                                                 excludedContactIds,
+                                                                enableFuzzyMatching =
+                                                                        enableFuzzyContactSearch,
                                                         )
                                                 } else {
                                                         emptyList()
@@ -117,6 +119,8 @@ class UnifiedSearchHandler(
                                                                 showSystemFiles,
                                                                 showHiddenFiles,
                                                                 recencyIndex.fileScores,
+                                                                includeFuzzyCandidates =
+                                                                        enableFuzzyFileSearch,
                                                         )
                                                 } else {
                                                         emptyList()

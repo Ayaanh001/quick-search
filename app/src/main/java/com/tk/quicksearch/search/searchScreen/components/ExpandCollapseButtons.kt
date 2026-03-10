@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.searchScreen.LocalOverlayActionColor
+import com.tk.quicksearch.shared.ui.theme.AppColors
 
 private const val EXPAND_ICON_SIZE = 18
 
@@ -32,12 +33,7 @@ internal fun ExpandButton(
     textResId: Int = R.string.action_expand_more,
 ) {
     val overlayActionColor = LocalOverlayActionColor.current
-    val moreActionColor =
-        if (overlayActionColor != null) {
-            Color.White
-        } else {
-            MaterialTheme.colorScheme.primary
-        }
+    val moreActionColor = moreButtonContentColor(overlayActionColor)
 
     TextButton(
         onClick = onClick,
@@ -61,13 +57,19 @@ internal fun ExpandButton(
 @Composable
 internal fun CollapseButton(
     onClick: () -> Unit,
+    showWallpaperBackground: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val overlayActionColor = LocalOverlayActionColor.current
     val collapseContainerColor =
-        overlayActionColor ?: MaterialTheme.colorScheme.secondaryContainer
+        when {
+            showWallpaperBackground -> AppColors.OverlayMedium
+            else -> overlayActionColor ?: MaterialTheme.colorScheme.secondaryContainer
+        }
     val collapseContentColor =
-        if (overlayActionColor != null) {
+        if (showWallpaperBackground) {
+            moreButtonContentColor(overlayActionColor)
+        } else if (overlayActionColor != null) {
             if (overlayActionColor.luminance() > 0.5f) Color.Black else Color.White
         } else {
             MaterialTheme.colorScheme.onSecondaryContainer
@@ -101,3 +103,11 @@ internal fun CollapseButton(
         )
     }
 }
+
+@Composable
+private fun moreButtonContentColor(overlayActionColor: Color?): Color =
+    if (overlayActionColor != null) {
+        Color.White
+    } else {
+        MaterialTheme.colorScheme.primary
+    }

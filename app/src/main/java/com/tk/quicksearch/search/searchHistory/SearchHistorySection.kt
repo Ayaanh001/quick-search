@@ -263,6 +263,7 @@ fun SearchHistorySection(
                     onExpandedChange(false)
                     keyboardController?.show()
                 },
+                showWallpaperBackground = showWallpaperBackground,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(vertical = DesignTokens.SpacingXXLarge),

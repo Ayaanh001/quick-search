@@ -13,6 +13,7 @@ class FileSearchHandler(
     companion object {
         const val FILE_SEARCH_RESULT_LIMIT = 25
         private const val FILE_SEARCH_PREFETCH_MULTIPLIER = 4
+        private const val FUZZY_FILE_CANDIDATE_LIMIT = 350
     }
 
     fun searchFiles(
@@ -22,6 +23,7 @@ class FileSearchHandler(
         showSystemFiles: Boolean = false,
         showHiddenFiles: Boolean = false,
         recentFileScores: Map<String, Int> = emptyMap(),
+        includeFuzzyCandidates: Boolean = false,
     ): List<DeviceFile> =
         searchFilesInternal(
             queryContext,
@@ -34,6 +36,7 @@ class FileSearchHandler(
             showSystemFiles,
             showHiddenFiles,
             recentFileScores,
+            includeFuzzyCandidates,
         )
 
     /**
@@ -51,6 +54,7 @@ class FileSearchHandler(
         showSystemFiles: Boolean = false,
         showHiddenFiles: Boolean = false,
         recentFileScores: Map<String, Int> = emptyMap(),
+        includeFuzzyCandidates: Boolean = false,
     ): List<DeviceFile> =
         searchFilesInternal(
             queryContext,
@@ -63,6 +67,7 @@ class FileSearchHandler(
             showSystemFiles,
             showHiddenFiles,
             recentFileScores,
+            includeFuzzyCandidates,
         )
 
     private fun searchFilesInternal(
@@ -76,6 +81,7 @@ class FileSearchHandler(
         showSystemFiles: Boolean,
         showHiddenFiles: Boolean,
         recentFileScores: Map<String, Int>,
+        includeFuzzyCandidates: Boolean,
     ): List<DeviceFile> {
         val whitespaceNormalized = queryContext.normalizedQuery
         if (whitespaceNormalized.isBlank() || !fileRepository.hasPermission()) return emptyList()
@@ -84,7 +90,14 @@ class FileSearchHandler(
         // Fetch more candidates than we need so that items dropped by the scorer
         // don't cause the final list to come up short.
         val prefetchLimit = FILE_SEARCH_RESULT_LIMIT * FILE_SEARCH_PREFETCH_MULTIPLIER
-        val allFiles = fileRepository.searchFiles(whitespaceNormalized, prefetchLimit)
+        val exactCandidates = fileRepository.searchFiles(whitespaceNormalized, prefetchLimit)
+        val allFiles =
+            if (includeFuzzyCandidates) {
+                (exactCandidates + fileRepository.getRecentFiles(FUZZY_FILE_CANDIDATE_LIMIT))
+                    .distinctBy { it.uri.toString() }
+            } else {
+                exactCandidates
+            }
 
         // Pre-fetch nicknames for all candidates so search() can apply them during
         // ranking — avoids a second pass in UnifiedSearchHandler for display-name matches.
@@ -92,6 +105,21 @@ class FileSearchHandler(
             allFiles.associate { file ->
                 file.uri.toString() to userPreferences.getFileNickname(file.uri.toString())
             }
+
+        if (includeFuzzyCandidates) {
+            return FileSearchAlgorithm.filterCandidates(
+                fullList = allFiles,
+                query = whitespaceNormalized,
+                enabledFileTypes = enabledFileTypes,
+                excludedFileUris = excludedFileUris,
+                excludedFileExtensions = excludedFileExtensions,
+                folderWhitelistPatterns = folderWhitelistPatterns,
+                folderBlacklistPatterns = folderBlacklistPatterns,
+                showFolders = showFolders,
+                showSystemFiles = showSystemFiles,
+                showHiddenFiles = showHiddenFiles,
+            )
+        }
 
         return FileSearchAlgorithm.search(
             fullList = allFiles,

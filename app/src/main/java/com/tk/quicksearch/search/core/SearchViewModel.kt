@@ -2229,6 +2229,7 @@ class SearchViewModel(
                             query = newQuery,
                             section = detectedAliasSearchSection,
                             useFuzzyMatching = true,
+                            ignoreSectionToggle = true,
                     )
                 }
             } else {
@@ -3259,7 +3260,7 @@ class SearchViewModel(
 
     /** Computes the apps section visibility state. */
     private fun computeAppsSectionVisibility(state: SearchUiState): AppsSectionVisibility {
-        val sectionEnabled = SearchSection.APPS !in state.disabledSections
+        val sectionEnabled = isSectionEnabledForCurrentQuery(state, SearchSection.APPS)
 
         return when {
             !sectionEnabled -> {
@@ -3291,7 +3292,8 @@ class SearchViewModel(
     private fun computeAppShortcutsSectionVisibility(
             state: SearchUiState
     ): AppShortcutsSectionVisibility {
-        val sectionEnabled = SearchSection.APP_SHORTCUTS !in state.disabledSections
+        val sectionEnabled =
+                isSectionEnabledForCurrentQuery(state, SearchSection.APP_SHORTCUTS)
 
         return when {
             !sectionEnabled -> {
@@ -3311,7 +3313,7 @@ class SearchViewModel(
 
     /** Computes the contacts section visibility state. */
     private fun computeContactsSectionVisibility(state: SearchUiState): ContactsSectionVisibility {
-        val sectionEnabled = SearchSection.CONTACTS !in state.disabledSections
+        val sectionEnabled = isSectionEnabledForCurrentQuery(state, SearchSection.CONTACTS)
 
         return when {
             !sectionEnabled -> {
@@ -3334,7 +3336,7 @@ class SearchViewModel(
 
     /** Computes the files section visibility state. */
     private fun computeFilesSectionVisibility(state: SearchUiState): FilesSectionVisibility {
-        val sectionEnabled = SearchSection.FILES !in state.disabledSections
+        val sectionEnabled = isSectionEnabledForCurrentQuery(state, SearchSection.FILES)
 
         return when {
             !sectionEnabled -> {
@@ -3357,7 +3359,7 @@ class SearchViewModel(
 
     /** Computes the settings section visibility state. */
     private fun computeSettingsSectionVisibility(state: SearchUiState): SettingsSectionVisibility {
-        val sectionEnabled = SearchSection.SETTINGS !in state.disabledSections
+        val sectionEnabled = isSectionEnabledForCurrentQuery(state, SearchSection.SETTINGS)
 
         return when {
             !sectionEnabled -> {
@@ -3394,6 +3396,12 @@ class SearchViewModel(
                     SearchEnginesVisibility.Hidden
                 }
             }
+
+    private fun isSectionEnabledForCurrentQuery(
+        state: SearchUiState,
+        section: SearchSection,
+    ): Boolean =
+            section !in state.disabledSections || state.detectedAliasSearchSection == section
 
     /**
      * Computes and applies all visibility states to the given state. This is a pure function that

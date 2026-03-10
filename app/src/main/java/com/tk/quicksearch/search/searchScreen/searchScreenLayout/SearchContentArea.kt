@@ -430,6 +430,7 @@ fun SearchContentArea(
                             else -> {}
                         }
                     },
+                    showWallpaperBackground = effectiveShowWallpaperBackground,
                     modifier =
                         Modifier
                             .align(Alignment.BottomCenter)

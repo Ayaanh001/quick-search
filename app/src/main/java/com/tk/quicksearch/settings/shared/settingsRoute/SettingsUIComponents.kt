@@ -81,7 +81,7 @@ fun SectionSettingsSection(
                 val isContactsRow = section == SearchSection.CONTACTS
                 val isFilesRow = section == SearchSection.FILES
                 val isDeviceSettingsRow = section == SearchSection.SETTINGS
-                val showAliasForSection = section != SearchSection.APPS
+                val showAliasForSection = true
                 val aliasTargetId = section.getAliasTargetId()
                 SectionRowWithoutDrag(
                     section = section,

@@ -178,6 +178,25 @@ class ContactRepository(
     }
 
     /**
+     * Returns recent contacts without provider-side query filtering.
+     * Used by alias-triggered fuzzy search to broaden candidate coverage.
+     */
+    fun getRecentContacts(limit: Int): List<ContactInfo> {
+        if (limit <= 0 || !hasPermission()) return emptyList()
+
+        val cursor =
+            contentResolver.query(
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                PHONE_PROJECTION,
+                null,
+                null,
+                SORT_ORDER,
+            ) ?: return emptyList()
+
+        return cursor.use { processPhoneCursor(it, limit) }.values.map { it.toMinimalContactInfo() }
+    }
+
+    /**
      * Hydrates photos + contact methods for already-ranked contacts.
      * Designed for keystroke search path: hydrate only the visible/top items.
      */

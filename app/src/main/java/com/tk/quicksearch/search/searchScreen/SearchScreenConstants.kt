@@ -128,22 +128,40 @@ internal fun rememberDerivedState(state: SearchUiState): DerivedState {
             .count { it } > 1
 
     val orderedSections =
-        remember(state.disabledSections) {
-            ItemPriorityConfig.getSearchResultsPriority().filter { it !in state.disabledSections }
+        remember(state.disabledSections, state.detectedAliasSearchSection) {
+            ItemPriorityConfig.getSearchResultsPriority().filter { section ->
+                section !in state.disabledSections || state.detectedAliasSearchSection == section
+            }
         }
 
-    val shouldShowApps = SearchSection.APPS !in state.disabledSections && hasAppResults
+    val shouldShowApps =
+        (
+            SearchSection.APPS !in state.disabledSections ||
+                state.detectedAliasSearchSection == SearchSection.APPS
+        ) && hasAppResults
     val shouldShowAppShortcuts =
-        SearchSection.APP_SHORTCUTS !in state.disabledSections &&
+        (
+            SearchSection.APP_SHORTCUTS !in state.disabledSections ||
+                state.detectedAliasSearchSection == SearchSection.APP_SHORTCUTS
+        ) &&
             (hasAppShortcutResults || hasPinnedAppShortcuts)
     val shouldShowContacts =
-        SearchSection.CONTACTS !in state.disabledSections &&
+        (
+            SearchSection.CONTACTS !in state.disabledSections ||
+                state.detectedAliasSearchSection == SearchSection.CONTACTS
+        ) &&
             (!state.hasContactPermission || hasContactResults || hasPinnedContacts)
     val shouldShowFiles =
-        SearchSection.FILES !in state.disabledSections &&
+        (
+            SearchSection.FILES !in state.disabledSections ||
+                state.detectedAliasSearchSection == SearchSection.FILES
+        ) &&
             (!state.hasFilePermission || hasFileResults || hasPinnedFiles)
     val shouldShowSettings =
-        SearchSection.SETTINGS !in state.disabledSections &&
+        (
+            SearchSection.SETTINGS !in state.disabledSections ||
+                state.detectedAliasSearchSection == SearchSection.SETTINGS
+        ) &&
             (hasSettingResults || hasPinnedSettings)
 
     return DerivedState(

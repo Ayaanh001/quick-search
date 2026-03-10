@@ -85,6 +85,7 @@ import kotlinx.coroutines.async
 
 private const val FILE_ICON_SIZE = 24
 private const val PDF_ICON_SIZE = 20
+private const val PDF_ICON_HORIZONTAL_PADDING = 2
 private const val THUMBNAIL_SIZE_DP = 60
 private const val THUMBNAIL_LOAD_SIZE_PX = 160
 private const val THUMBNAIL_CACHE_MAX_SIZE = 60
@@ -545,7 +546,10 @@ private fun FileResultThumbnailOrIcon(
                 imageVector = iconOverride ?: fileResultIcon(deviceFile),
                 contentDescription = null,
                 tint = if (isPdf) Color.Unspecified else iconTint,
-                modifier = modifier.size(iconSize),
+                modifier =
+                        modifier
+                                .padding(horizontal = if (isPdf) PDF_ICON_HORIZONTAL_PADDING.dp else 0.dp)
+                                .size(iconSize),
         )
     }
 }
