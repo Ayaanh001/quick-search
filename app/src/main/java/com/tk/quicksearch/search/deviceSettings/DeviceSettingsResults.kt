@@ -45,7 +45,7 @@ import com.tk.quicksearch.search.searchScreen.LocalOverlayDividerColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
-import com.tk.quicksearch.search.searchScreen.predictedSubmitCardBorder
+import com.tk.quicksearch.search.searchScreen.predictedSubmitHighlight
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticConfirm
@@ -114,9 +114,6 @@ fun DeviceSettingsResultsSection(
         val shouldShowExpandButton = !isExpanded && !showAllResults && canShowExpandControls
         val shouldShowCollapseButton = isExpanded && showExpandControls
         val predictedSettingId = (predictedTarget as? PredictedSubmitTarget.Setting)?.id
-        val isSectionPredicted =
-                predictedSettingId != null &&
-                        settings.any { setting -> setting.id == predictedSettingId }
 
         val scrollState = rememberScrollState()
 
@@ -141,12 +138,7 @@ fun DeviceSettingsResultsSection(
                         cardColors = cardColors,
                         cardShape = cardShape,
                         cardElevation = cardElevation,
-                        modifier =
-                                Modifier.fillMaxWidth()
-                                        .predictedSubmitCardBorder(
-                                                isPredicted = isSectionPredicted,
-                                                shape = MaterialTheme.shapes.extraLarge,
-                                        ),
+                        modifier = Modifier.fillMaxWidth(),
                 ) {
                         Column(
                                 modifier =
@@ -170,8 +162,11 @@ fun DeviceSettingsResultsSection(
                                                         end = DesignTokens.SpacingMedium,
                                                         bottom = 4.dp,
                                                 ),
-                                ) {
+                                        ) {
                                         displaySettings.forEachIndexed { index, shortcut ->
+                                                val isPredictedSetting =
+                                                        predictedSettingId != null &&
+                                                                shortcut.id == predictedSettingId
                                                 SettingResultRow(
                                                         shortcut = shortcut,
                                                         isPinned =
@@ -185,8 +180,10 @@ fun DeviceSettingsResultsSection(
                                                         hasNickname =
                                                                 !getSettingNickname(shortcut.id)
                                                                         .isNullOrBlank(),
+                                                        isPredicted = isPredictedSetting,
                                                 )
-                                                if (index != displaySettings.lastIndex) {
+                                                if (index != displaySettings.lastIndex &&
+                                                        !isPredictedSetting) {
                                                         HorizontalDivider(
                                                                 modifier = Modifier.fillMaxWidth(),
                                                                 color = overlayDividerColor
@@ -229,6 +226,7 @@ internal fun SettingResultRow(
         onLongPressOverride: (() -> Unit)? = null,
         icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
         iconTint: Color = Color.White,
+        isPredicted: Boolean = false,
 ) {
         val context = LocalContext.current
         val addToHomeHandler =
@@ -240,6 +238,10 @@ internal fun SettingResultRow(
                 modifier =
                         Modifier.fillMaxWidth()
                                 .heightIn(min = ROW_MIN_HEIGHT.dp)
+                                .predictedSubmitHighlight(
+                                        isPredicted = isPredicted,
+                                        shape = DesignTokens.CardShape,
+                                )
                                 .clip(DesignTokens.CardShape)
                                 .combinedClickable(
                                         onClick = {

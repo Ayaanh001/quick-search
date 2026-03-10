@@ -46,7 +46,6 @@ import com.tk.quicksearch.search.searchScreen.LocalOverlayDividerColor
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
 import com.tk.quicksearch.search.searchScreen.components.ExpandButton
-import com.tk.quicksearch.search.searchScreen.predictedSubmitCardBorder
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
@@ -191,8 +190,6 @@ private fun ContactsResultCard(
     val shouldShowExpandButton = !displayAsExpanded && canShowExpand
     val shouldShowCollapseButton = isExpanded && showExpandControls
     val predictedContactId = (predictedTarget as? PredictedSubmitTarget.Contact)?.contactId
-    val isSectionPredicted =
-        predictedContactId != null && contacts.any { it.contactId == predictedContactId }
 
     val displayContacts =
         if (displayAsExpanded) {
@@ -208,10 +205,7 @@ private fun ContactsResultCard(
         verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
     ) {
         val cardModifier =
-            Modifier.fillMaxWidth().predictedSubmitCardBorder(
-                isPredicted = isSectionPredicted,
-                shape = MaterialTheme.shapes.extraLarge,
-            )
+            Modifier.fillMaxWidth()
 
         val cardContent =
             @Composable
@@ -261,6 +255,7 @@ private fun ContactsResultCard(
                         showContactActionHint = showContactActionHint,
                         onContactActionHintDismissed =
                         onContactActionHintDismissed,
+                        predictedContactId = predictedContactId,
                     )
                 }
             }
@@ -321,6 +316,7 @@ private fun ContactList(
     onExpandClick: () -> Unit,
     showContactActionHint: Boolean,
     onContactActionHintDismissed: () -> Unit,
+    predictedContactId: Long?,
 ) {
     Column(
         modifier =
@@ -330,6 +326,9 @@ private fun ContactList(
             ),
     ) {
         displayContacts.forEachIndexed { index, contactInfo ->
+            val isPredictedContact =
+                predictedContactId != null &&
+                    contactInfo.contactId == predictedContactId
             key(contactInfo.contactId) {
                 ContactResultRow(
                     contactInfo = contactInfo,
@@ -368,6 +367,7 @@ private fun ContactList(
                     onPrimaryActionLongPress = onPrimaryActionLongPress,
                     onSecondaryActionLongPress = onSecondaryActionLongPress,
                     onCustomAction = onCustomAction,
+                    isPredicted = isPredictedContact,
                 )
             }
             if (index == 0 && showContactActionHint) {
@@ -376,7 +376,7 @@ private fun ContactList(
                     modifier = Modifier.padding(top = DesignTokens.SpacingSmall),
                 )
             }
-            if (index != displayContacts.lastIndex) {
+            if (index != displayContacts.lastIndex && !isPredictedContact) {
                 HorizontalDivider(
                     modifier = Modifier.fillMaxWidth(),
                     color = overlayDividerColor ?: MaterialTheme.colorScheme.outlineVariant,

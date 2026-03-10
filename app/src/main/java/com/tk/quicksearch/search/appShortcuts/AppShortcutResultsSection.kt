@@ -54,7 +54,7 @@ import com.tk.quicksearch.search.searchScreen.LocalOverlayDividerColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
-import com.tk.quicksearch.search.searchScreen.predictedSubmitCardBorder
+import com.tk.quicksearch.search.searchScreen.predictedSubmitHighlight
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticConfirm
@@ -100,9 +100,6 @@ fun AppShortcutResultsSection(
         val shouldShowExpandButton = !isExpanded && !showAllResults && canShowExpandControls
         val shouldShowCollapseButton = isExpanded && showExpandControls
         val predictedShortcutId = (predictedTarget as? PredictedSubmitTarget.AppShortcut)?.id
-        val isSectionPredicted =
-                predictedShortcutId != null &&
-                        shortcuts.any { shortcut -> shortcutKey(shortcut) == predictedShortcutId }
 
         val scrollState = rememberScrollState()
 
@@ -112,10 +109,6 @@ fun AppShortcutResultsSection(
         ) {
                 val cardModifier =
                         Modifier.fillMaxWidth()
-                                .predictedSubmitCardBorder(
-                                        isPredicted = isSectionPredicted,
-                                        shape = MaterialTheme.shapes.extraLarge,
-                                )
                 val cardColors =
                         if (overlayCardColor != null) {
                                 CardDefaults.cardColors(containerColor = overlayCardColor)
@@ -163,6 +156,7 @@ fun AppShortcutResultsSection(
                                                 iconPackPackage = iconPackPackage,
                                                 shouldShowExpandButton = shouldShowExpandButton,
                                                 onExpandClick = onExpandClick,
+                                                predictedShortcutId = predictedShortcutId,
                                         )
                                 }
                         }
@@ -201,6 +195,7 @@ private fun AppShortcutsCardContent(
         iconPackPackage: String?,
         shouldShowExpandButton: Boolean,
         onExpandClick: () -> Unit,
+        predictedShortcutId: String?,
 ) {
         Column(
                 modifier =
@@ -208,6 +203,8 @@ private fun AppShortcutsCardContent(
         ) {
                 displayShortcuts.forEachIndexed { index, shortcut ->
                         val shortcutId = shortcutKey(shortcut)
+                        val isPredictedShortcut =
+                                predictedShortcutId != null && shortcutId == predictedShortcutId
                         AppShortcutRow(
                                 shortcut = shortcut,
                                 isPinned = pinnedShortcutIds.contains(shortcutId),
@@ -220,8 +217,9 @@ private fun AppShortcutsCardContent(
                                 onAppInfoClick = onAppInfoClick,
                                 onNicknameClick = onNicknameClick,
                                 iconPackPackage = iconPackPackage,
+                                isPredicted = isPredictedShortcut,
                         )
-                        if (index < displayShortcuts.lastIndex) {
+                        if (index < displayShortcuts.lastIndex && !isPredictedShortcut) {
                                 HorizontalDivider(
                                         modifier = Modifier.fillMaxWidth(),
                                         color = overlayDividerColor
@@ -258,6 +256,7 @@ internal fun AppShortcutRow(
         onLongPressOverride: (() -> Unit)? = null,
         icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
         iconTint: Color = MaterialTheme.colorScheme.secondary,
+        isPredicted: Boolean = false,
 ) {
         val context = androidx.compose.ui.platform.LocalContext.current
         val addToHomeHandler =
@@ -278,6 +277,10 @@ internal fun AppShortcutRow(
                 modifier =
                         Modifier.fillMaxWidth()
                                 .heightIn(min = ROW_MIN_HEIGHT.dp)
+                                .predictedSubmitHighlight(
+                                        isPredicted = isPredicted,
+                                        shape = DesignTokens.CardShape,
+                                )
                                 .clip(DesignTokens.CardShape)
                                 .combinedClickable(
                                         onClick = {

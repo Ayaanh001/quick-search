@@ -58,7 +58,7 @@ import com.tk.quicksearch.search.webSuggestions.WebSuggestionHandler
 import com.tk.quicksearch.searchEngines.SearchEngineManager
 import com.tk.quicksearch.searchEngines.SecondarySearchOrchestrator
 import com.tk.quicksearch.searchEngines.AliasHandler
-import com.tk.quicksearch.searchEngines.asSearchTargetOrNull
+import com.tk.quicksearch.searchEngines.AliasTarget
 import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.shared.util.PackageConstants
 import com.tk.quicksearch.shared.util.WallpaperUtils
@@ -1890,6 +1890,97 @@ class SearchViewModel(
         onQueryChangeInternal(newQuery, clearShortcutWhenBlank = false)
     }
 
+    private sealed interface AliasQueryResolution {
+        data object None : AliasQueryResolution
+
+        data class ReprocessQuery(
+            val queryWithoutAlias: String,
+        ) : AliasQueryResolution
+
+        data class ExecuteSearchTarget(
+            val queryWithoutAlias: String,
+            val target: SearchTarget,
+        ) : AliasQueryResolution
+    }
+
+    private fun setDetectedAliasMode(
+        shortcutTarget: SearchTarget?,
+        section: SearchSection?,
+        calculatorMode: Boolean,
+    ) {
+        lockedShortcutTarget = shortcutTarget
+        lockedAliasSearchSection = section
+        lockedCalculatorMode = calculatorMode
+    }
+
+    private fun clearDetectedAliasMode() {
+        setDetectedAliasMode(
+            shortcutTarget = null,
+            section = null,
+            calculatorMode = false,
+        )
+    }
+
+    private fun resolveAliasQueryResolution(
+        newQuery: String,
+        trimmedQuery: String,
+    ): AliasQueryResolution {
+        val leadingAliasMatch = aliasHandler.detectAliasAtStart(newQuery)
+        if (leadingAliasMatch != null) {
+            val (queryWithoutAlias, aliasTarget) = leadingAliasMatch
+            when (aliasTarget) {
+                is AliasTarget.Search -> {
+                    setDetectedAliasMode(
+                        shortcutTarget = aliasTarget.target,
+                        section = null,
+                        calculatorMode = false,
+                    )
+                }
+
+                is AliasTarget.Section -> {
+                    setDetectedAliasMode(
+                        shortcutTarget = null,
+                        section = aliasTarget.section,
+                        calculatorMode = false,
+                    )
+                }
+
+                is AliasTarget.Feature -> {
+                    applyFeatureAliasMode(aliasTarget.featureId)
+                }
+            }
+            return AliasQueryResolution.ReprocessQuery(queryWithoutAlias)
+        }
+
+        if (lockedCalculatorMode || lockedAliasSearchSection != null) {
+            return AliasQueryResolution.None
+        }
+
+        val trailingSearchEngineAlias = aliasHandler.detectSearchEngineAliasAtEnd(trimmedQuery)
+            ?: return AliasQueryResolution.None
+        val (queryWithoutAlias, target) = trailingSearchEngineAlias
+        return AliasQueryResolution.ExecuteSearchTarget(
+            queryWithoutAlias = queryWithoutAlias,
+            target = target,
+        )
+    }
+
+    private fun applyFeatureAliasMode(featureId: String) {
+        when (featureId) {
+            AliasHandler.CALCULATOR_ALIAS_FEATURE_ID -> {
+                setDetectedAliasMode(
+                    shortcutTarget = null,
+                    section = null,
+                    calculatorMode = true,
+                )
+            }
+
+            else -> {
+                clearDetectedAliasMode()
+            }
+        }
+    }
+
     private fun onQueryChangeInternal(
             newQuery: String,
             clearShortcutWhenBlank: Boolean,
@@ -1941,9 +2032,7 @@ class SearchViewModel(
                 return
             }
             if (clearShortcutWhenBlank) {
-                lockedShortcutTarget = null
-                lockedAliasSearchSection = null
-                lockedCalculatorMode = false
+                clearDetectedAliasMode()
             }
             appSearchJob?.cancel()
             appSearchManager.setNoMatchPrefix(null)
@@ -1977,92 +2066,35 @@ class SearchViewModel(
             return
         }
 
-        // Check for shortcuts at the start of query (show UI button) BEFORE calculator processing.
-        // Keep evaluating this even when a shortcut is already locked so typed aliases are always
-        // stripped from the query and can retarget the locked engine.
-        var detectedTarget: SearchTarget? = lockedShortcutTarget
-        var detectedAliasSearchSection: SearchSection? = lockedAliasSearchSection
-        val sectionAliasMatchAtStart = aliasHandler.detectSectionAliasAtStart(newQuery)
-        if (sectionAliasMatchAtStart != null) {
-            val (queryWithoutAlias, section) = sectionAliasMatchAtStart
-            lockedShortcutTarget = null
-            lockedAliasSearchSection = section
-            lockedCalculatorMode = false
-            onQueryChangeInternal(
-                    queryWithoutAlias,
-                    clearShortcutWhenBlank = false,
-            )
-            return
-        }
-
-        val shortcutMatchAtStart = aliasHandler.detectAliasAtStart(newQuery)
-        if (shortcutMatchAtStart != null) {
-            val detectedAliasTarget = shortcutMatchAtStart.second
-            detectedTarget = detectedAliasTarget.asSearchTargetOrNull()
-            detectedAliasSearchSection = null
-            val isCalculatorAlias =
-                    (detectedAliasTarget as? com.tk.quicksearch.searchEngines.AliasTarget.Feature)
-                            ?.featureId == AliasHandler.CALCULATOR_ALIAS_FEATURE_ID
-            if (isCalculatorAlias) {
-                lockedShortcutTarget = null
-                lockedAliasSearchSection = null
-                lockedCalculatorMode = true
-            } else {
-                lockedShortcutTarget = detectedTarget
-                lockedAliasSearchSection = null
-                lockedCalculatorMode = false
-            }
-
-            // Strip the shortcut from the query and update recursively.
-            val queryWithoutShortcut = shortcutMatchAtStart.first
-            onQueryChangeInternal(
-                    queryWithoutShortcut,
-                    clearShortcutWhenBlank = false,
-            )
-            return
-        }
-
-        // Check for shortcuts at the end of query (auto-execute)
-        val sectionAliasMatchAtEnd =
-                if (lockedCalculatorMode) {
-                    null
-                } else {
-                    aliasHandler.detectSectionAlias(trimmedQuery)
-                }
-        if (sectionAliasMatchAtEnd != null) {
-            val (queryWithoutAlias, section) = sectionAliasMatchAtEnd
-            lockedShortcutTarget = null
-            lockedAliasSearchSection = section
-            lockedCalculatorMode = false
-            onQueryChangeInternal(
-                    queryWithoutAlias,
-                    clearShortcutWhenBlank = false,
-            )
-            return
-        }
-
-        val shortcutMatchAtEnd =
-                if (lockedCalculatorMode || lockedAliasSearchSection != null) {
-                    null
-                } else {
-                    aliasHandler.detectAlias(trimmedQuery)
-                }
-        if (shortcutMatchAtEnd != null) {
-            val (queryWithoutShortcut, aliasTarget) = shortcutMatchAtEnd
-            val target = aliasTarget.asSearchTargetOrNull()
-            if (target == null) {
+        // Keep evaluating aliases while typing so aliases are always stripped and can retarget
+        // the currently locked mode.
+        when (val aliasResolution = resolveAliasQueryResolution(newQuery, trimmedQuery)) {
+            is AliasQueryResolution.ReprocessQuery -> {
+                onQueryChangeInternal(
+                        aliasResolution.queryWithoutAlias,
+                        clearShortcutWhenBlank = false,
+                )
                 return
             }
-            // Automatically perform search with the detected target
-            navigationHandler.openSearchTarget(queryWithoutShortcut.trim(), target)
-            // Update query to remove shortcut but keep the remaining query
-            if (queryWithoutShortcut.isBlank()) {
-                clearQuery()
-            } else {
-                onQueryChange(queryWithoutShortcut)
+
+            is AliasQueryResolution.ExecuteSearchTarget -> {
+                navigationHandler.openSearchTarget(
+                        aliasResolution.queryWithoutAlias.trim(),
+                        aliasResolution.target,
+                )
+                if (aliasResolution.queryWithoutAlias.isBlank()) {
+                    clearQuery()
+                } else {
+                    onQueryChange(aliasResolution.queryWithoutAlias)
+                }
+                return
             }
-            return
+
+            AliasQueryResolution.None -> Unit
         }
+
+        val detectedTarget: SearchTarget? = lockedShortcutTarget
+        val detectedAliasSearchSection: SearchSection? = lockedAliasSearchSection
 
         // Check if query is a math expression (only if calculator is enabled)
         // Only process calculator if no shortcut was detected at start
@@ -2206,9 +2238,7 @@ class SearchViewModel(
     }
 
     fun clearDetectedShortcut() {
-        lockedShortcutTarget = null
-        lockedAliasSearchSection = null
-        lockedCalculatorMode = false
+        clearDetectedAliasMode()
         updateUiState {
             it.copy(
                     detectedShortcutTarget = null,
@@ -2219,9 +2249,7 @@ class SearchViewModel(
     }
 
     fun clearQuery() {
-        lockedShortcutTarget = null
-        lockedAliasSearchSection = null
-        lockedCalculatorMode = false
+        clearDetectedAliasMode()
         onQueryChangeInternal("", clearShortcutWhenBlank = true)
     }
 

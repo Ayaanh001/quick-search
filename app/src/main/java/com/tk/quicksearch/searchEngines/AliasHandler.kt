@@ -310,48 +310,51 @@ class AliasHandler(
             }
     }
 
-    fun detectAlias(query: String): Pair<String, AliasTarget>? {
-        ensureInitialized()
-        val trimmedQuery = query.trim()
-        if (trimmedQuery.isEmpty()) return null
-
-        val targets =
-            searchTargetsProvider().ifEmpty {
-                SearchEngine.values().map { SearchTarget.Engine(it) }
-            }
-        val aliases = mutableMapOf<String, AliasTarget>()
-        for (target in targets) {
-            if (target is SearchTarget.Engine &&
-                target.engine == SearchEngine.DIRECT_SEARCH &&
-                directSearchHandler.getGeminiApiKey().isNullOrBlank()
-            ) {
-                continue
-            }
-            if (!isAliasEnabled(target)) continue
-
-            val aliasCode = getAlias(target).lowercase(Locale.getDefault())
-            if (aliasCode.isEmpty()) continue
-            aliases[aliasCode] = AliasTarget.Search(target)
-        }
-        val match = AliasParser.detectSuffixAlias(trimmedQuery, aliases) ?: return null
-        return Pair(match.queryWithoutAlias, match.target)
-    }
-
-    fun detectShortcut(query: String): Pair<String, SearchTarget>? {
-        val aliasMatch = detectAlias(query) ?: return null
-        val searchTarget = aliasMatch.second.asSearchTargetOrNull() ?: return null
-        return Pair(aliasMatch.first, searchTarget)
-    }
-
     fun detectAliasAtStart(query: String): Pair<String, AliasTarget>? {
         ensureInitialized()
         if (query.isBlank()) return null
 
+        val aliases = mutableMapOf<String, AliasTarget>()
+        collectLeadingSearchTargetAliases(aliases)
+        collectLeadingFeatureAliases(aliases)
+        collectLeadingSectionAliases(aliases)
+        val match = AliasParser.detectPrefixAlias(query, aliases) ?: return null
+        return Pair(match.queryWithoutAlias, match.target)
+    }
+
+    fun detectSearchEngineAliasAtEnd(query: String): Pair<String, SearchTarget>? {
+        ensureInitialized()
+        val trimmedQuery = query.trim()
+        if (trimmedQuery.isEmpty()) return null
+
+        val aliases = mutableMapOf<String, SearchTarget>()
         val targets =
             searchTargetsProvider().ifEmpty {
                 SearchEngine.values().map { SearchTarget.Engine(it) }
             }
-        val aliases = mutableMapOf<String, AliasTarget>()
+        for (target in targets) {
+            // End-of-query aliases are intentionally limited to search engines.
+            if (target !is SearchTarget.Engine) continue
+            if (target.engine == SearchEngine.DIRECT_SEARCH &&
+                directSearchHandler.getGeminiApiKey().isNullOrBlank()
+            ) {
+                continue
+            }
+            if (!isAliasEnabled(target)) continue
+
+            val aliasCode = getAlias(target).lowercase(Locale.getDefault())
+            if (aliasCode.isEmpty()) continue
+            aliases[aliasCode] = target
+        }
+        val match = AliasParser.detectSuffixAlias(trimmedQuery, aliases) ?: return null
+        return Pair(match.queryWithoutAlias, match.target)
+    }
+
+    private fun collectLeadingSearchTargetAliases(aliases: MutableMap<String, AliasTarget>) {
+        val targets =
+            searchTargetsProvider().ifEmpty {
+                SearchEngine.values().map { SearchTarget.Engine(it) }
+            }
         for (target in targets) {
             if (target is SearchTarget.Engine &&
                 target.engine == SearchEngine.DIRECT_SEARCH &&
@@ -365,62 +368,32 @@ class AliasHandler(
             if (aliasCode.isEmpty()) continue
             aliases[aliasCode] = AliasTarget.Search(target)
         }
-        val calculatorAliasCode = getAlias(CALCULATOR_ALIAS_FEATURE_ID)
-            .lowercase(Locale.getDefault())
+    }
+
+    private fun collectLeadingFeatureAliases(aliases: MutableMap<String, AliasTarget>) {
+        val calculatorAliasCode = getAlias(CALCULATOR_ALIAS_FEATURE_ID).lowercase(Locale.getDefault())
         if (calculatorAliasCode.isNotEmpty()) {
             aliases[calculatorAliasCode] = AliasTarget.Feature(CALCULATOR_ALIAS_FEATURE_ID)
         }
-        val match = AliasParser.detectPrefixAlias(query, aliases) ?: return null
-        return Pair(match.queryWithoutAlias, match.target)
     }
 
-    fun detectShortcutAtStart(query: String): Pair<String, SearchTarget>? {
-        val aliasMatch = detectAliasAtStart(query) ?: return null
-        val searchTarget = aliasMatch.second.asSearchTargetOrNull() ?: return null
-        return Pair(aliasMatch.first, searchTarget)
+    private fun collectLeadingSectionAliases(aliases: MutableMap<String, AliasTarget>) {
+        putSectionAlias(aliases, SEARCH_SECTION_APPS_ALIAS_ID, SearchSection.APPS)
+        putSectionAlias(aliases, SEARCH_SECTION_APP_SHORTCUTS_ALIAS_ID, SearchSection.APP_SHORTCUTS)
+        putSectionAlias(aliases, SEARCH_SECTION_CONTACTS_ALIAS_ID, SearchSection.CONTACTS)
+        putSectionAlias(aliases, SEARCH_SECTION_FILES_ALIAS_ID, SearchSection.FILES)
+        putSectionAlias(aliases, SEARCH_SECTION_SETTINGS_ALIAS_ID, SearchSection.SETTINGS)
     }
 
-    fun detectSectionAliasAtStart(query: String): Pair<String, SearchSection>? {
-        ensureInitialized()
-        if (query.isBlank()) return null
-
-        val aliases = buildMap<String, SearchSection> {
-            putSectionAlias(SEARCH_SECTION_APPS_ALIAS_ID, SearchSection.APPS)
-            putSectionAlias(SEARCH_SECTION_APP_SHORTCUTS_ALIAS_ID, SearchSection.APP_SHORTCUTS)
-            putSectionAlias(SEARCH_SECTION_CONTACTS_ALIAS_ID, SearchSection.CONTACTS)
-            putSectionAlias(SEARCH_SECTION_FILES_ALIAS_ID, SearchSection.FILES)
-            putSectionAlias(SEARCH_SECTION_SETTINGS_ALIAS_ID, SearchSection.SETTINGS)
-        }
-
-        val match = AliasParser.detectPrefixAlias(query, aliases) ?: return null
-        return Pair(match.queryWithoutAlias, match.target)
-    }
-
-    fun detectSectionAlias(query: String): Pair<String, SearchSection>? {
-        ensureInitialized()
-        val trimmedQuery = query.trim()
-        if (trimmedQuery.isEmpty()) return null
-
-        val aliases = buildMap<String, SearchSection> {
-            putSectionAlias(SEARCH_SECTION_APPS_ALIAS_ID, SearchSection.APPS)
-            putSectionAlias(SEARCH_SECTION_APP_SHORTCUTS_ALIAS_ID, SearchSection.APP_SHORTCUTS)
-            putSectionAlias(SEARCH_SECTION_CONTACTS_ALIAS_ID, SearchSection.CONTACTS)
-            putSectionAlias(SEARCH_SECTION_FILES_ALIAS_ID, SearchSection.FILES)
-            putSectionAlias(SEARCH_SECTION_SETTINGS_ALIAS_ID, SearchSection.SETTINGS)
-        }
-
-        val match = AliasParser.detectSuffixAlias(trimmedQuery, aliases) ?: return null
-        return Pair(match.queryWithoutAlias, match.target)
-    }
-
-    private fun MutableMap<String, SearchSection>.putSectionAlias(
+    private fun putSectionAlias(
+        aliases: MutableMap<String, AliasTarget>,
         aliasId: String,
         section: SearchSection,
     ) {
         if (aliasEnabled[aliasId] != true) return
         val aliasCode = aliasCodes[aliasId].orEmpty().lowercase(Locale.getDefault())
         if (aliasCode.isEmpty()) return
-        put(aliasCode, section)
+        aliases[aliasCode] = AliasTarget.Section(section)
     }
 
     data class AliasesState(

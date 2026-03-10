@@ -48,6 +48,7 @@ import com.tk.quicksearch.search.core.CallingApp
 import com.tk.quicksearch.search.core.MessagingApp
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
+import com.tk.quicksearch.search.searchScreen.predictedSubmitHighlight
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticConfirm
 import kotlinx.coroutines.Dispatchers
@@ -85,6 +86,7 @@ internal fun ContactResultRow(
         onLongPressOverride: (() -> Unit)? = null,
         icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
         iconTint: Color = MaterialTheme.colorScheme.secondary,
+        isPredicted: Boolean = false,
 ) {
         val context = LocalContext.current
         val addToHomeHandler =
@@ -103,6 +105,10 @@ internal fun ContactResultRow(
                                                                 ContactUiConstants
                                                                         .CONTACT_ROW_MIN_HEIGHT
                                                                         .dp,
+                                                )
+                                                .predictedSubmitHighlight(
+                                                        isPredicted = isPredicted,
+                                                        shape = DesignTokens.CardShape,
                                                 )
                                                 .clip(DesignTokens.CardShape)
                                                 .combinedClickable(

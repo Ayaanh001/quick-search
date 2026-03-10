@@ -68,7 +68,7 @@ import com.tk.quicksearch.search.searchScreen.LocalOverlayDividerColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
-import com.tk.quicksearch.search.searchScreen.predictedSubmitCardBorder
+import com.tk.quicksearch.search.searchScreen.predictedSubmitHighlight
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticConfirm
@@ -267,8 +267,6 @@ private fun FilesResultCard(
     val shouldShowExpandButton = !displayAsExpanded && canShowExpand
     val shouldUseLazyList = isExpanded && files.size > SearchScreenConstants.INITIAL_RESULT_COUNT
     val predictedFileUri = (predictedTarget as? PredictedSubmitTarget.File)?.uri
-    val isSectionPredicted =
-            predictedFileUri != null && files.any { file -> file.uri.toString() == predictedFileUri }
 
     val displayFiles =
             if (displayAsExpanded) {
@@ -283,10 +281,6 @@ private fun FilesResultCard(
     ) {
         val cardModifier =
                 Modifier.fillMaxWidth()
-                        .predictedSubmitCardBorder(
-                                isPredicted = isSectionPredicted,
-                                shape = MaterialTheme.shapes.extraLarge,
-                        )
         val contentModifier =
                 if (isExpanded) {
                     Modifier.fillMaxWidth()
@@ -315,6 +309,7 @@ private fun FilesResultCard(
                             onExpandClick = onExpandClick,
                             modifier = contentModifier,
                             useLazyList = shouldUseLazyList,
+                            predictedFileUri = predictedFileUri,
                     )
                 }
 
@@ -363,6 +358,7 @@ private fun FileCardContent(
         getFileNickname: (String) -> String?,
         onExpandClick: () -> Unit,
         useLazyList: Boolean = false,
+        predictedFileUri: String?,
 ) {
     if (useLazyList) {
         LazyColumn(
@@ -373,6 +369,9 @@ private fun FileCardContent(
                     items = displayFiles,
                     key = { _, file -> file.uri.toString() },
             ) { index, file ->
+                val isPredictedFile =
+                        predictedFileUri != null &&
+                                file.uri.toString() == predictedFileUri
                 FileResultRow(
                         deviceFile = file,
                         onClick = onFileClick,
@@ -383,8 +382,9 @@ private fun FileCardContent(
                         onExcludeExtension = onExcludeExtension,
                         onNicknameClick = onNicknameClick,
                         hasNickname = !getFileNickname(file.uri.toString()).isNullOrBlank(),
+                        isPredicted = isPredictedFile,
                 )
-                if (index != displayFiles.lastIndex) {
+                if (index != displayFiles.lastIndex && !isPredictedFile) {
                     HorizontalDivider(
                             modifier = Modifier.fillMaxWidth(),
                             color = overlayDividerColor ?: MaterialTheme.colorScheme.outlineVariant,
@@ -413,6 +413,9 @@ private fun FileCardContent(
     } else {
         Column(modifier = modifier.padding(horizontal = DesignTokens.SpacingMedium)) {
             displayFiles.forEachIndexed { index, file ->
+                val isPredictedFile =
+                        predictedFileUri != null &&
+                                file.uri.toString() == predictedFileUri
                 FileResultRow(
                         deviceFile = file,
                         onClick = onFileClick,
@@ -423,8 +426,9 @@ private fun FileCardContent(
                         onExcludeExtension = onExcludeExtension,
                         onNicknameClick = onNicknameClick,
                         hasNickname = !getFileNickname(file.uri.toString()).isNullOrBlank(),
+                        isPredicted = isPredictedFile,
                 )
-                if (index != displayFiles.lastIndex) {
+                if (index != displayFiles.lastIndex && !isPredictedFile) {
                     HorizontalDivider(
                             modifier = Modifier.fillMaxWidth(),
                             color = overlayDividerColor ?: MaterialTheme.colorScheme.outlineVariant,
@@ -565,6 +569,7 @@ internal fun FileResultRow(
         onLongPressOverride: (() -> Unit)? = null,
         icon: ImageVector? = null,
         iconTint: Color = MaterialTheme.colorScheme.secondary,
+        isPredicted: Boolean = false,
 ) {
     val context = LocalContext.current
     val addToHomeHandler =
@@ -577,6 +582,10 @@ internal fun FileResultRow(
         Column(
                 modifier =
                         Modifier.fillMaxWidth()
+                                .predictedSubmitHighlight(
+                                        isPredicted = isPredicted,
+                                        shape = DesignTokens.CardShape,
+                                )
                                 .clip(DesignTokens.CardShape)
                                 .combinedClickable(
                                         onClick = {
