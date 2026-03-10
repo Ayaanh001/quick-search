@@ -31,6 +31,7 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.search.utils.PermissionUtils
 import com.tk.quicksearch.searchEngines.getId
 import com.tk.quicksearch.shared.permissions.PermissionHelper
+import com.tk.quicksearch.settings.FeaturesList
 import com.tk.quicksearch.settings.searchEnginesScreen.SearchEngines
 import com.tk.quicksearch.settings.shared.SettingsScreenCallbacks
 import com.tk.quicksearch.settings.shared.SettingsScreenState
@@ -241,6 +242,15 @@ internal fun SettingsDetailLevel1Screen(
                         )
                     }
 
+                    SettingsDetailType.FEATURES_LIST -> {
+                        FeaturesList(
+                            modifier =
+                                Modifier.padding(
+                                    bottom = DesignTokens.SectionTopPadding,
+                                ),
+                        )
+                    }
+
                     SettingsDetailType.EXCLUDED_ITEMS,
                     SettingsDetailType.APP_MANAGEMENT,
                     SettingsDetailType.APP_SHORTCUTS,
@@ -308,6 +318,7 @@ internal fun SettingsDetailType.titleResId(): Int =
         SettingsDetailType.PERMISSIONS -> R.string.settings_permissions_title
         SettingsDetailType.DIRECT_SEARCH_CONFIGURE -> R.string.settings_direct_search_configure_title
         SettingsDetailType.TOOLS -> R.string.settings_tools_title
+        SettingsDetailType.FEATURES_LIST -> R.string.settings_all_quick_search_features
     }
 
 internal fun SettingsDetailType.isLevel2(): Boolean =
@@ -339,4 +350,5 @@ enum class SettingsDetailType {
     PERMISSIONS,
     DIRECT_SEARCH_CONFIGURE,
     TOOLS,
+    FEATURES_LIST,
 }

@@ -103,6 +103,7 @@ fun SearchScreen(
     onDirectDialChoiceSelected: (DirectDialOption, Boolean) -> Unit,
     onDismissDirectDialChoice: () -> Unit,
     onReleaseNotesAcknowledged: () -> Unit,
+    onReleaseNotesViewAllFeatures: () -> Unit = {},
     onWebSuggestionClick: (String) -> Unit = {},
     onSearchEngineOnboardingDismissed: () -> Unit = {},
     onContactActionHintDismissed: () -> Unit = {},
@@ -330,6 +331,7 @@ fun SearchScreen(
         onContactMethodClick = onContactMethodClick,
         onDismissContactMethods = onDismissContactMethods,
         onReleaseNotesAcknowledged = onReleaseNotesAcknowledged,
+        onReleaseNotesViewAllFeatures = onReleaseNotesViewAllFeatures,
         onDismissNicknameDialog = { stateResult.setNicknameDialogState(null) },
         onSaveAppNickname = { app, nickname ->
             onSaveAppNickname(app, nickname)

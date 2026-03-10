@@ -73,7 +73,6 @@ import com.tk.quicksearch.settings.shared.*
 import com.tk.quicksearch.shared.ui.components.TipBanner
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.FeedbackUtils
-import com.tk.quicksearch.shared.util.InAppBrowserUtils
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -389,7 +388,9 @@ fun SettingsScreen(
             }
 
             // More Options Section
-            SettingsMoreOptions()
+            SettingsMoreOptions(
+                onOpenFeaturesList = { onNavigateToDetail(SettingsDetailType.FEATURES_LIST) },
+            )
 
             // App Version
             SettingsVersionDisplay(modifier = Modifier.padding(top = DesignTokens.Spacing40, bottom = 60.dp))
@@ -476,6 +477,7 @@ fun SettingsScreen(
 @Composable
 fun SettingsMoreOptions(
     modifier: Modifier = Modifier,
+    onOpenFeaturesList: () -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -518,8 +520,7 @@ fun SettingsMoreOptions(
     }
 
     val onOpenFeatures = {
-        val url = "https://github.com/teja2495/quick-search/blob/main/FEATURES.md"
-        InAppBrowserUtils.openUrl(context, url)
+        onOpenFeaturesList()
     }
 
     val onOpenOssLicenses = {

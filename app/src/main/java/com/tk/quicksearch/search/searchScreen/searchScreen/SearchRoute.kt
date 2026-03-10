@@ -52,6 +52,7 @@ fun SearchRoute(
     onSearchEngineLongPress: () -> Unit = {},
     onCustomizeSearchEnginesClick: () -> Unit = {},
     onOpenDirectSearchConfigure: () -> Unit = {},
+    onOpenReleaseNotesFeatures: () -> Unit = {},
     onOverlayDismissRequest: (() -> Unit)? = null,
     onShowToast: (Int) -> Unit = {},
     viewModel: SearchViewModel = viewModel(),
@@ -356,6 +357,7 @@ fun SearchRoute(
             onDirectDialChoiceSelected = viewModel::onDirectDialChoiceSelected,
             onDismissDirectDialChoice = viewModel::dismissDirectDialChoice,
             onReleaseNotesAcknowledged = viewModel::acknowledgeReleaseNotes,
+            onReleaseNotesViewAllFeatures = onOpenReleaseNotesFeatures,
             onWebSuggestionClick = { suggestion: String ->
                 viewModel.onWebSuggestionTap(suggestion)
             },

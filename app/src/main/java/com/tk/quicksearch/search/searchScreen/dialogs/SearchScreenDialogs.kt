@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
@@ -40,12 +39,12 @@ import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.DeviceFile
-import com.tk.quicksearch.shared.util.InAppBrowserUtils
 
 @Composable
 internal fun ReleaseNotesDialog(
     versionName: String?,
     onAcknowledge: () -> Unit,
+    onViewAllFeatures: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     val title =
@@ -57,7 +56,6 @@ internal fun ReleaseNotesDialog(
     val bulletPoints =
         stringArrayResource(R.array.release_notes_points)
             .filter { it.isNotBlank() }
-    val context = LocalContext.current
 
     AlertDialog(
         onDismissRequest = onAcknowledge,
@@ -106,9 +104,8 @@ internal fun ReleaseNotesDialog(
                                 LinkAnnotation.Clickable(
                                     tag = "features_link",
                                     linkInteractionListener = {
-                                        val url = "https://github.com/teja2495/quick-search/blob/main/FEATURES.md"
-                                        InAppBrowserUtils.openUrl(context, url)
-                                    }
+                                        onViewAllFeatures()
+                                    },
                                 )
                             ) {
                                 withStyle(

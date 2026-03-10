@@ -428,6 +428,9 @@ private fun NavigationContent(
                     onOpenDirectSearchConfigure = {
                         navigateToSettings(SettingsDetailType.DIRECT_SEARCH_CONFIGURE)
                     },
+                    onOpenReleaseNotesFeatures = {
+                        navigateToSettings(SettingsDetailType.FEATURES_LIST)
+                    },
                     onWelcomeAnimationCompleted = {
                         viewModel.onSearchBarWelcomeAnimationCompleted()
                     },

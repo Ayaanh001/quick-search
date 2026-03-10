@@ -29,6 +29,7 @@ internal fun SearchScreenDialogs(
     onContactMethodClick: (ContactInfo, com.tk.quicksearch.search.models.ContactMethod) -> Unit,
     onDismissContactMethods: () -> Unit,
     onReleaseNotesAcknowledged: () -> Unit,
+    onReleaseNotesViewAllFeatures: () -> Unit,
     onDismissNicknameDialog: () -> Unit,
     onSaveAppNickname: (AppInfo, String?) -> Unit,
     onSaveAppShortcutNickname: (StaticShortcut, String?) -> Unit,
@@ -79,6 +80,7 @@ internal fun SearchScreenDialogs(
         ReleaseNotesDialog(
             versionName = state.releaseNotesVersionName,
             onAcknowledge = onReleaseNotesAcknowledged,
+            onViewAllFeatures = onReleaseNotesViewAllFeatures,
         )
     }
 
