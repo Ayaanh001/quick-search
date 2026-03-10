@@ -3,6 +3,7 @@ package com.tk.quicksearch.search.searchScreen.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -10,10 +11,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
 import com.tk.quicksearch.shared.ui.theme.AppColors
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 internal data class ExpandableResultsCardState(
     val displayAsExpanded: Boolean,
@@ -90,3 +94,43 @@ internal fun ExpandableResultsCard(
         }
     }
 }
+
+internal fun topPredictedRowShape(isTopPredicted: Boolean): Shape =
+    if (isTopPredicted) {
+        DesignTokens.ShapeXXLarge
+    } else {
+        DesignTokens.CardShape
+    }
+
+internal fun Modifier.topPredictedRowContainer(
+    isTopPredicted: Boolean,
+    shape: Shape = topPredictedRowShape(isTopPredicted),
+): Modifier =
+    this
+        .then(
+            if (isTopPredicted) {
+                Modifier.padding(top = DesignTokens.SpacingXSmall)
+            } else {
+                Modifier
+            },
+        )
+        .predictedSubmitHighlight(
+            isPredicted = isTopPredicted,
+            shape = shape,
+        )
+        .clip(shape)
+
+internal fun Modifier.topPredictedRowContentPadding(
+    isTopPredicted: Boolean,
+): Modifier =
+    this.then(
+        if (isTopPredicted) {
+            Modifier.padding(
+                start = DesignTokens.SpacingXSmall,
+                end = DesignTokens.SpacingXSmall,
+                bottom = DesignTokens.SpacingXSmall,
+            )
+        } else {
+            Modifier
+        },
+    )

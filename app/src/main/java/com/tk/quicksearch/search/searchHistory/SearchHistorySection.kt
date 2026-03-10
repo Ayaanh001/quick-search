@@ -59,6 +59,7 @@ import com.tk.quicksearch.search.models.ContactMethod
 import com.tk.quicksearch.search.models.DeviceFile
 import com.tk.quicksearch.search.searchScreen.LocalOverlayDividerColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
+import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
 import com.tk.quicksearch.search.searchScreen.components.CollapseButton
 import com.tk.quicksearch.search.searchScreen.components.ExpandableResultsCard
 import com.tk.quicksearch.search.searchScreen.components.ExpandButton
@@ -66,7 +67,6 @@ import com.tk.quicksearch.shared.ui.components.TipBanner
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
-private val EXPANDED_HISTORY_MAX_HEIGHT = 420.dp
 private val EXPANDED_HISTORY_MAX_HEIGHT_OVERLAY = 300.dp
 
 private const val QUERY_ROW_ICON_SIZE = 40
@@ -103,7 +103,7 @@ fun SearchHistorySection(
     onOpenSearchHistorySettings: () -> Unit = {},
     onDismissSearchHistoryTip: () -> Unit = {},
     onExpandedChange: (Boolean) -> Unit = {},
-    expandedCardMaxHeight: Dp = EXPANDED_HISTORY_MAX_HEIGHT,
+    expandedCardMaxHeight: Dp = SearchScreenConstants.EXPANDED_CARD_MAX_HEIGHT,
     showWallpaperBackground: Boolean = false,
     isOverlayPresentation: Boolean = false,
 ) {
@@ -118,7 +118,7 @@ fun SearchHistorySection(
         if (isOverlayPresentation) {
             minOf(expandedCardMaxHeight, EXPANDED_HISTORY_MAX_HEIGHT_OVERLAY)
         } else {
-            minOf(expandedCardMaxHeight, EXPANDED_HISTORY_MAX_HEIGHT)
+            expandedCardMaxHeight
         }
 
     BackHandler(enabled = isExpanded) {

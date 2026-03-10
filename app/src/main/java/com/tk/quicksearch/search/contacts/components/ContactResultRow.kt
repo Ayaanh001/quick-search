@@ -48,7 +48,8 @@ import com.tk.quicksearch.search.core.CallingApp
 import com.tk.quicksearch.search.core.MessagingApp
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
-import com.tk.quicksearch.search.searchScreen.predictedSubmitHighlight
+import com.tk.quicksearch.search.searchScreen.components.topPredictedRowContainer
+import com.tk.quicksearch.search.searchScreen.components.topPredictedRowContentPadding
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticConfirm
 import kotlinx.coroutines.Dispatchers
@@ -94,13 +95,6 @@ internal fun ContactResultRow(
         var showOptions by remember { mutableStateOf(false) }
         val view = LocalView.current
         val hasNumber = contactInfo.primaryNumber != null
-        val predictedRowShape =
-                if (isPredicted) {
-                        DesignTokens.ShapeXXLarge
-                } else {
-                        DesignTokens.CardShape
-                }
-
         Box(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
@@ -112,20 +106,9 @@ internal fun ContactResultRow(
                                                                         .CONTACT_ROW_MIN_HEIGHT
                                                                         .dp,
                                                 )
-                                                .then(
-                                                        if (isPredicted) {
-                                                                Modifier.padding(
-                                                                        top = DesignTokens.SpacingXSmall,
-                                                                )
-                                                        } else {
-                                                                Modifier
-                                                        },
+                                                .topPredictedRowContainer(
+                                                        isTopPredicted = isPredicted,
                                                 )
-                                                .predictedSubmitHighlight(
-                                                        isPredicted = isPredicted,
-                                                        shape = predictedRowShape,
-                                                )
-                                                .clip(predictedRowShape)
                                                 .combinedClickable(
                                                         onClick = {
                                                                 if (contactInfo.hasContactMethods) {
@@ -146,16 +129,8 @@ internal fun ContactResultRow(
                                                                                 null
                                                                         },
                                                 )
-                                                .then(
-                                                        if (isPredicted) {
-                                                                Modifier.padding(
-                                                                        bottom = DesignTokens.SpacingXSmall,
-                                                                        start = DesignTokens.SpacingXSmall,
-                                                                        end = DesignTokens.SpacingXSmall,
-                                                                )
-                                                        } else {
-                                                                Modifier
-                                                        },
+                                                .topPredictedRowContentPadding(
+                                                        isTopPredicted = isPredicted,
                                                 )
                                                 .padding(vertical = DesignTokens.SpacingSmall),
                                 horizontalArrangement =

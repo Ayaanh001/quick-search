@@ -67,7 +67,8 @@ import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
 import com.tk.quicksearch.search.searchScreen.components.ExpandableResultsCard
-import com.tk.quicksearch.search.searchScreen.predictedSubmitHighlight
+import com.tk.quicksearch.search.searchScreen.components.topPredictedRowContainer
+import com.tk.quicksearch.search.searchScreen.components.topPredictedRowContentPadding
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticConfirm
 import kotlinx.coroutines.CancellationException
@@ -90,6 +91,7 @@ private const val THUMBNAIL_CACHE_MAX_SIZE = 60
 private const val THUMBNAIL_FAILURE_RETRY_DELAY_MS = 30_000L
 private const val EXPAND_BUTTON_TOP_PADDING = 2
 private const val EXPAND_BUTTON_HORIZONTAL_PADDING = 12
+private val FILE_CARD_CONTENT_VERTICAL_PADDING = 4.dp
 
 private object FileThumbnailCache {
     private val loadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -347,7 +349,7 @@ private fun FileCardContent(
                 contentPadding =
                         PaddingValues(
                                 start = DesignTokens.SpacingMedium,
-                                top = 0.dp,
+                                top = FILE_CARD_CONTENT_VERTICAL_PADDING,
                                 end = DesignTokens.SpacingMedium,
                                 bottom = bottomContentPadding,
                         ),
@@ -401,7 +403,10 @@ private fun FileCardContent(
         Column(
                 modifier =
                         modifier
-                                .padding(horizontal = DesignTokens.SpacingMedium)
+                                .padding(
+                                        horizontal = DesignTokens.SpacingMedium,
+                                        vertical = FILE_CARD_CONTENT_VERTICAL_PADDING,
+                                )
                                 .padding(bottom = bottomContentPadding)
         ) {
             displayFiles.forEachIndexed { index, file ->
@@ -569,29 +574,11 @@ internal fun FileResultRow(
     var showOptions by remember { mutableStateOf(false) }
     var showFileInfoDialog by remember { mutableStateOf(false) }
     val view = LocalView.current
-    val predictedRowShape =
-            if (isPredicted) {
-                DesignTokens.ShapeXXLarge
-            } else {
-                DesignTokens.CardShape
-            }
-
     Box(modifier = Modifier.fillMaxWidth()) {
         Column(
                 modifier =
                         Modifier.fillMaxWidth()
-                                .then(
-                                        if (isPredicted) {
-                                                Modifier.padding(top = DesignTokens.SpacingXSmall)
-                                        } else {
-                                                Modifier
-                                        },
-                                )
-                                .predictedSubmitHighlight(
-                                        isPredicted = isPredicted,
-                                        shape = predictedRowShape,
-                                )
-                                .clip(predictedRowShape)
+                                .topPredictedRowContainer(isTopPredicted = isPredicted)
                                 .combinedClickable(
                                         onClick = {
                                             hapticConfirm(view)()
@@ -604,17 +591,7 @@ internal fun FileResultRow(
                                                             null
                                                         },
                                 )
-                                .then(
-                                        if (isPredicted) {
-                                                Modifier.padding(
-                                                        start = DesignTokens.SpacingXSmall,
-                                                        end = DesignTokens.SpacingXSmall,
-                                                        bottom = DesignTokens.SpacingXSmall,
-                                                )
-                                        } else {
-                                                Modifier
-                                        },
-                                )
+                                .topPredictedRowContentPadding(isTopPredicted = isPredicted)
                                 .padding(vertical = DesignTokens.SpacingLarge),
         ) {
             Row(
