@@ -19,6 +19,7 @@ object PackageConstants {
     const val GEMINI_PACKAGE_NAME = "com.google.android.apps.bard"
     const val GOOGLE_PHOTOS_PACKAGE_NAME = "com.google.android.apps.photos"
     const val YOU_COM_PACKAGE_NAME = "com.you.browser"
+    const val WIKIPEDIA_PACKAGE_NAME = "org.wikipedia"
     const val STARTPAGE_PACKAGE_NAME = "com.startpage.app"
     const val WAZE_PACKAGE = "com.waze"
     const val CHATGPT_PACKAGE = "com.openai.chatgpt"

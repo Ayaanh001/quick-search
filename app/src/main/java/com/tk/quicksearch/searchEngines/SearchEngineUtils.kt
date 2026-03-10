@@ -151,6 +151,13 @@ private val SEARCH_ENGINE_METADATA: Map<SearchEngine, SearchEngineMetadata> =
                 urlTemplate = "https://you.com/search?q=%s",
                 defaultShortcutCode = "yu",
             ),
+        SearchEngine.WIKIPEDIA to
+            SearchEngineMetadata(
+                drawableResId = R.drawable.wikipedia,
+                contentDescriptionResId = R.string.search_engine_wikipedia,
+                urlTemplate = "https://en.wikipedia.org/wiki/%s",
+                defaultShortcutCode = "wki",
+            ),
         SearchEngine.DUCKDUCKGO to
             SearchEngineMetadata(
                 drawableResId = R.drawable.duckduckgo,
@@ -220,6 +227,7 @@ fun SearchEngine.getAppPackageCandidates(): List<String> =
         SearchEngine.FACEBOOK_MARKETPLACE -> listOf(PackageConstants.FACEBOOK_PACKAGE)
         SearchEngine.AMAZON -> listOf(PackageConstants.AMAZON_PACKAGE)
         SearchEngine.YOU_COM -> listOf(PackageConstants.YOU_COM_PACKAGE_NAME)
+        SearchEngine.WIKIPEDIA -> listOf(PackageConstants.WIKIPEDIA_PACKAGE_NAME)
         SearchEngine.X -> listOf(PackageConstants.X_PACKAGE)
         SearchEngine.STARTPAGE -> listOf(PackageConstants.STARTPAGE_PACKAGE_NAME)
         else -> emptyList()
@@ -299,6 +307,10 @@ fun buildSearchUrl(
 
                 SearchEngine.YOU_COM -> {
                     "https://you.com"
+                }
+
+                SearchEngine.WIKIPEDIA -> {
+                    "https://en.wikipedia.org/wiki/Main_Page"
                 }
 
                 SearchEngine.STARTPAGE -> {
@@ -388,6 +400,7 @@ fun SearchEngine.getDisplayNameResId(): Int =
         SearchEngine.FACEBOOK_MARKETPLACE -> R.string.search_engine_facebook_marketplace
         SearchEngine.AMAZON -> R.string.search_engine_amazon
         SearchEngine.YOU_COM -> R.string.search_engine_you_com
+        SearchEngine.WIKIPEDIA -> R.string.search_engine_wikipedia
         SearchEngine.DUCKDUCKGO -> R.string.search_engine_duckduckgo
         SearchEngine.BRAVE -> R.string.search_engine_brave
         SearchEngine.BING -> R.string.search_engine_bing

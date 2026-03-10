@@ -720,6 +720,7 @@
     <string name="search_engine_facebook_marketplace">Facebook Marketplace</string>
     <string name="search_engine_amazon">Amazon</string>
     <string name="search_engine_you_com">You.com</string>
+    <string name="search_engine_wikipedia">Wikipedia</string>
     <string name="search_engine_duckduckgo">DuckDuckGo</string>
     <string name="search_engine_brave">Brave Search</string>
     <string name="search_engine_bing">Bing</string>

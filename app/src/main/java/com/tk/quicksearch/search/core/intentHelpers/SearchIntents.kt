@@ -38,6 +38,11 @@ internal object SearchIntents {
                 return
             }
 
+            SearchEngine.WIKIPEDIA -> {
+                SearchEngineIntents.openWikipedia(context, query)
+                return
+            }
+
             SearchEngine.STARTPAGE -> {
                 SearchEngineIntents.openStartpage(context, query)
                 return

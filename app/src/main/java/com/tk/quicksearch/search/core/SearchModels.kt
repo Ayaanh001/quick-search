@@ -41,6 +41,7 @@ enum class SearchEngine {
         BRAVE,
         FACEBOOK_MARKETPLACE,
         YOU_COM,
+        WIKIPEDIA,
         BING,
         STARTPAGE,
 }

@@ -449,6 +449,9 @@ class SearchEngineManager(
             if (!isPackageInstalled(packageManager, PackageConstants.YOU_COM_PACKAGE_NAME)) {
                 defaultDisabled.add(SearchEngine.YOU_COM)
             }
+            if (!isPackageInstalled(packageManager, PackageConstants.WIKIPEDIA_PACKAGE_NAME)) {
+                defaultDisabled.add(SearchEngine.WIKIPEDIA)
+            }
             if (!isPackageInstalled(packageManager, PackageConstants.STARTPAGE_PACKAGE_NAME)) {
                 defaultDisabled.add(SearchEngine.STARTPAGE)
             }
@@ -466,7 +469,13 @@ class SearchEngineManager(
             return disabledIds
         }
         if (!hasBrowserTargetsInOrder) {
-            val updated = savedDisabled + browserIds
+            val updated =
+                savedDisabled.toMutableSet().apply {
+                    addAll(browserIds)
+                    if (!isPackageInstalled(packageManager, PackageConstants.WIKIPEDIA_PACKAGE_NAME)) {
+                        add(SearchEngine.WIKIPEDIA.name)
+                    }
+                }
             if (updated != savedDisabled) {
                 userPreferences.setDisabledSearchEngines(updated)
             }
@@ -474,7 +483,13 @@ class SearchEngineManager(
         }
 
         val newBrowserIds = browserIds - browserIdsInSavedOrder
-        val updatedDisabled = savedDisabled + newBrowserIds
+        val updatedDisabled =
+            savedDisabled.toMutableSet().apply {
+                addAll(newBrowserIds)
+                if (!isPackageInstalled(packageManager, PackageConstants.WIKIPEDIA_PACKAGE_NAME)) {
+                    add(SearchEngine.WIKIPEDIA.name)
+                }
+            }
         if (updatedDisabled != savedDisabled) {
             userPreferences.setDisabledSearchEngines(updatedDisabled)
         }
@@ -509,7 +524,15 @@ class SearchEngineManager(
             order.filterIsInstance<SearchTarget.Engine>().map { it.engine }.toSet()
         val missingEngines =
             availableEngines.filter { it !in existingEngines }.map { SearchTarget.Engine(it) }
-        return order + missingEngines
+        if (missingEngines.isEmpty()) return order
+
+        // Keep browser targets at the end: insert newly introduced engines before browsers.
+        val firstBrowserIndex = order.indexOfFirst { it is SearchTarget.Browser }
+        return if (firstBrowserIndex >= 0) {
+            order.toMutableList().apply { addAll(firstBrowserIndex, missingEngines) }
+        } else {
+            order + missingEngines
+        }
     }
 
     private fun mergeMissingCustomTargets(
@@ -561,21 +584,14 @@ class SearchEngineManager(
         order: List<SearchTarget>,
         browsersToInsert: List<SearchTarget>,
     ): List<SearchTarget> {
-        if (browsersToInsert.isEmpty()) return order
+        val nonBrowserTargets = order.filterNot { it is SearchTarget.Browser }
+        val existingBrowsers = order.filterIsInstance<SearchTarget.Browser>()
+        val newBrowsers = browsersToInsert.filterIsInstance<SearchTarget.Browser>()
+        if (existingBrowsers.isEmpty() && newBrowsers.isEmpty()) return order
 
-        val lastBrowserIndex = order.indexOfLast { it is SearchTarget.Browser }
-        val startpageIndex =
-            order.indexOfFirst {
-                it is SearchTarget.Engine && it.engine == SearchEngine.STARTPAGE
-            }
-        val insertIndex =
-            when {
-                lastBrowserIndex >= 0 -> lastBrowserIndex + 1
-                startpageIndex >= 0 -> startpageIndex + 1
-                else -> order.size
-            }
-
-        return order.toMutableList().apply { addAll(insertIndex, browsersToInsert) }
+        // Browsers must always remain at the end of the ordered list.
+        val mergedBrowsers = (existingBrowsers + newBrowsers).distinctBy { it.app.packageName }
+        return nonBrowserTargets + mergedBrowsers
     }
 
     private fun buildBrowserId(packageName: String): String = "$BROWSER_ID_PREFIX$packageName"

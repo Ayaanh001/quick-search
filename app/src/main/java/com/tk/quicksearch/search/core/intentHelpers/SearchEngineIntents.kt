@@ -177,6 +177,20 @@ internal object SearchEngineIntents {
         )
     }
 
+    /** Opens Wikipedia app if installed, otherwise opens web URL. */
+    fun openWikipedia(
+        context: Application,
+        query: String,
+    ) {
+        openWebBackedEngine(
+            context = context,
+            query = query,
+            searchEngine = SearchEngine.WIKIPEDIA,
+            packageName = PackageConstants.WIKIPEDIA_PACKAGE_NAME,
+            logTag = "WikipediaLaunch",
+        )
+    }
+
     /** Opens Startpage app if installed, otherwise opens web URL. */
     fun openStartpage(
         context: Application,
