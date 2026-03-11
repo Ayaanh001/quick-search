@@ -1,6 +1,12 @@
 package com.tk.quicksearch.search.searchScreen.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -11,9 +17,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -28,7 +32,6 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -62,12 +65,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.runtime.withFrameNanos
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -82,16 +85,31 @@ import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticStrong
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
+
+private const val AliasIconMorphDurationMs = 260
+private const val AliasIconMorphEndScale = 0.5f
+private const val LeadingIconEnterDurationMs = 180
+private const val LeadingIconExitDurationMs = 120
+private const val LeadingIconEnterDelayMs = 40
+private const val LeadingIconEnterInitialScale = 0.88f
+private const val LeadingIconExitTargetScale = 0.88f
+private val AliasMorphTextStartPadding = DesignTokens.Spacing48 + DesignTokens.SpacingXSmall
+private val AliasMorphHorizontalTravel = DesignTokens.Spacing28
+private val AliasMorphVerticalTravel = DesignTokens.SpacingXXSmall
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-internal fun PersistentSearchField(
+internal fun PersistentSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     onClearQuery: () -> Unit,
     onSettingsClick: () -> Unit,
     dismissKeyboardBeforeSettingsClick: Boolean = false,
     enabledTargets: List<SearchTarget>,
+    shortcutCodes: Map<String, String> = emptyMap(),
+    shortcutEnabled: Map<String, Boolean> = emptyMap(),
+    isSearchEngineAliasSuffixEnabled: Boolean = true,
     onSearchAction: () -> Unit,
     shouldUseNumberKeyboard: Boolean,
     detectedShortcutTarget: SearchTarget? = null,
@@ -118,6 +136,30 @@ internal fun PersistentSearchField(
         }
     // Light color for icons and text on dark grey background
     val iconAndTextColor = DesignTokens.ColorSearchText
+    val aliasVisualTransformation =
+        rememberAliasHighlightVisualTransformation(
+            enabledTargets = enabledTargets,
+            shortcutCodes = shortcutCodes,
+            shortcutEnabled = shortcutEnabled,
+            isSearchEngineAliasSuffixEnabled = isSearchEngineAliasSuffixEnabled,
+            highlightColor = MaterialTheme.colorScheme.primary,
+        )
+    val leadingIconState =
+        when {
+            isCalculatorMode -> LeadingIconState.Calculator
+            detectedShortcutTarget != null -> LeadingIconState.Shortcut(detectedShortcutTarget)
+            detectedAliasSearchSection != null -> LeadingIconState.Section(detectedAliasSearchSection)
+            else -> LeadingIconState.Search
+        }
+    val activePrefixAliases =
+        remember(shortcutCodes, shortcutEnabled) {
+            shortcutCodes.entries
+                .asSequence()
+                .filter { (id, code) -> code.isNotBlank() && (shortcutEnabled[id] != false) }
+                .map { (_, code) -> code.trim().lowercase(Locale.getDefault()) }
+                .filter { it.isNotEmpty() }
+                .toSet()
+        }
 
     // Local text field value maintains cursor position even when state query changes from voice
     // input.
@@ -125,15 +167,42 @@ internal fun PersistentSearchField(
         mutableStateOf(TextFieldValue(query, TextRange(query.length)))
     }
     var hasLaidOutSearchField by remember { mutableStateOf(false) }
+    val aliasMorphProgress = remember { Animatable(1f) }
+    var aliasMorphText by remember { mutableStateOf<String?>(null) }
+    var previousLeadingIconState by remember { mutableStateOf(leadingIconState) }
 
-    LaunchedEffect(query) {
-        if (query != textFieldValue.text) {
+    LaunchedEffect(query, leadingIconState) {
+        val previousText = textFieldValue.text
+        if (query != previousText) {
+            val shouldAnimateAliasMorph =
+                leadingIconState !is LeadingIconState.Search &&
+                    previousLeadingIconState != leadingIconState
+            if (shouldAnimateAliasMorph) {
+                detectConsumedPrefixAlias(
+                    previousText = previousText,
+                    currentQuery = query,
+                    activePrefixAliases = activePrefixAliases,
+                )?.let { consumedAlias ->
+                    aliasMorphText = consumedAlias
+                }
+            }
             textFieldValue =
                 textFieldValue.copy(
                     text = query,
                     selection = TextRange(query.length),
                 )
         }
+        previousLeadingIconState = leadingIconState
+    }
+
+    LaunchedEffect(aliasMorphText) {
+        if (aliasMorphText == null) return@LaunchedEffect
+        aliasMorphProgress.snapTo(0f)
+        aliasMorphProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = AliasIconMorphDurationMs, easing = LinearOutSlowInEasing),
+        )
+        aliasMorphText = null
     }
 
     LaunchedEffect(autoFocusOnStart, hasLaidOutSearchField) {
@@ -216,6 +285,9 @@ internal fun PersistentSearchField(
     }
     // Palettes are centralized in AppColors to keep color tokens out of feature files.
     val activeColors = AppColors.SearchFieldGooglePalette
+    val density = LocalDensity.current
+    val aliasMorphHorizontalTravelPx = with(density) { AliasMorphHorizontalTravel.toPx() }
+    val aliasMorphVerticalTravelPx = with(density) { AliasMorphVerticalTravel.toPx() }
 
     Box(
         modifier =
@@ -352,51 +424,43 @@ internal fun PersistentSearchField(
             singleLine = false,
             maxLines = 3,
             leadingIcon = {
-                if (isCalculatorMode) {
-                    Icon(
-                        imageVector = Icons.Rounded.Calculate,
-                        contentDescription = stringResource(R.string.calculator_toggle_title),
-                        tint = iconAndTextColor,
-                        modifier =
-                            Modifier.padding(
-                                start = DesignTokens.SpacingXSmall,
-                            ),
-                    )
-                } else if (detectedShortcutTarget != null) {
-                    SearchTargetIcon(
-                        target = detectedShortcutTarget,
-                        iconSize = DesignTokens.IconSize,
-                        style = IconRenderStyle.ADVANCED,
-                        modifier = Modifier.padding(start = DesignTokens.SpacingSmall),
-                    )
-                } else if (detectedAliasSearchSection != null) {
-                    Icon(
-                        imageVector =
-                            when (detectedAliasSearchSection) {
-                                SearchSection.APPS -> Icons.Rounded.Apps
-                                SearchSection.APP_SHORTCUTS -> Icons.AutoMirrored.Rounded.Shortcut
-                                SearchSection.CONTACTS -> Icons.Rounded.Person
-                                SearchSection.FILES -> Icons.AutoMirrored.Rounded.InsertDriveFile
-                                SearchSection.SETTINGS -> Icons.Rounded.Settings
-                            },
-                        contentDescription =
-                            stringResource(R.string.desc_search_icon),
-                        tint = iconAndTextColor,
-                        modifier =
-                            Modifier.padding(
-                                start = DesignTokens.SpacingXSmall,
-                            ),
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Rounded.Search,
-                        contentDescription =
-                            stringResource(R.string.desc_search_icon),
-                        tint = iconAndTextColor,
-                        modifier =
-                            Modifier.padding(
-                                start = DesignTokens.SpacingXSmall,
-                            ),
+                AnimatedContent(
+                    targetState = leadingIconState,
+                    transitionSpec = {
+                        (
+                            fadeIn(
+                                animationSpec =
+                                    tween(
+                                        durationMillis = LeadingIconEnterDurationMs,
+                                        delayMillis = LeadingIconEnterDelayMs,
+                                        easing = LinearOutSlowInEasing,
+                                    ),
+                            ) +
+                                scaleIn(
+                                    animationSpec =
+                                        tween(
+                                            durationMillis = LeadingIconEnterDurationMs,
+                                            delayMillis = LeadingIconEnterDelayMs,
+                                            easing = LinearOutSlowInEasing,
+                                        ),
+                                    initialScale = LeadingIconEnterInitialScale,
+                                )
+                            )
+                            .togetherWith(
+                                fadeOut(
+                                    animationSpec = tween(durationMillis = LeadingIconExitDurationMs),
+                                ) +
+                                    scaleOut(
+                                        animationSpec = tween(durationMillis = LeadingIconExitDurationMs),
+                                        targetScale = LeadingIconExitTargetScale,
+                                    ),
+                            )
+                    },
+                    label = "search_bar_leading_icon",
+                ) { currentIconState ->
+                    SearchBarLeadingIcon(
+                        iconState = currentIconState,
+                        iconTint = iconAndTextColor,
                     )
                 }
             },
@@ -491,6 +555,114 @@ internal fun PersistentSearchField(
                     focusedTextColor = iconAndTextColor,
                     unfocusedTextColor = iconAndTextColor,
                 ),
+            visualTransformation = aliasVisualTransformation,
         )
+
+        val animatedAliasText = aliasMorphText
+        if (animatedAliasText != null) {
+            val progress = aliasMorphProgress.value.coerceIn(0f, 1f)
+            val scale = 1f - ((1f - AliasIconMorphEndScale) * progress)
+            Text(
+                text = animatedAliasText,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier =
+                    Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = AliasMorphTextStartPadding)
+                        .graphicsLayer {
+                            translationX = -aliasMorphHorizontalTravelPx * progress
+                            translationY = -aliasMorphVerticalTravelPx * progress
+                            scaleX = scale
+                            scaleY = scale
+                            alpha = 1f - progress
+                        },
+            )
+        }
     }
+}
+
+@Composable
+private fun SearchBarLeadingIcon(
+    iconState: LeadingIconState,
+    iconTint: Color,
+) {
+    when (iconState) {
+        LeadingIconState.Calculator -> {
+            Icon(
+                imageVector = Icons.Rounded.Calculate,
+                contentDescription = stringResource(R.string.calculator_toggle_title),
+                tint = iconTint,
+                modifier = Modifier.padding(start = DesignTokens.SpacingXSmall),
+            )
+        }
+
+        is LeadingIconState.Shortcut -> {
+            SearchTargetIcon(
+                target = iconState.target,
+                iconSize = DesignTokens.IconSize,
+                style = IconRenderStyle.ADVANCED,
+                modifier = Modifier.padding(start = DesignTokens.SpacingSmall),
+            )
+        }
+
+        is LeadingIconState.Section -> {
+            Icon(
+                imageVector =
+                    when (iconState.section) {
+                        SearchSection.APPS -> Icons.Rounded.Apps
+                        SearchSection.APP_SHORTCUTS -> Icons.AutoMirrored.Rounded.Shortcut
+                        SearchSection.CONTACTS -> Icons.Rounded.Person
+                        SearchSection.FILES -> Icons.AutoMirrored.Rounded.InsertDriveFile
+                        SearchSection.SETTINGS -> Icons.Rounded.Settings
+                    },
+                contentDescription = stringResource(R.string.desc_search_icon),
+                tint = iconTint,
+                modifier = Modifier.padding(start = DesignTokens.SpacingXSmall),
+            )
+        }
+
+        LeadingIconState.Search -> {
+            Icon(
+                imageVector = Icons.Rounded.Search,
+                contentDescription = stringResource(R.string.desc_search_icon),
+                tint = iconTint,
+                modifier = Modifier.padding(start = DesignTokens.SpacingXSmall),
+            )
+        }
+    }
+}
+
+private sealed interface LeadingIconState {
+    data object Search : LeadingIconState
+
+    data object Calculator : LeadingIconState
+
+    data class Shortcut(
+        val target: SearchTarget,
+    ) : LeadingIconState
+
+    data class Section(
+        val section: SearchSection,
+    ) : LeadingIconState
+}
+
+private fun detectConsumedPrefixAlias(
+    previousText: String,
+    currentQuery: String,
+    activePrefixAliases: Set<String>,
+): String? {
+    if (activePrefixAliases.isEmpty()) return null
+    val queryWithNoLeadingWhitespace = previousText.trimStart()
+    if (queryWithNoLeadingWhitespace.isEmpty()) return null
+    val separatorIndex = queryWithNoLeadingWhitespace.indexOfFirst { it.isWhitespace() }
+    if (separatorIndex <= 0) return null
+
+    val aliasToken = queryWithNoLeadingWhitespace.substring(0, separatorIndex)
+    val aliasRemainder = queryWithNoLeadingWhitespace.substring(separatorIndex).trimStart()
+    if (aliasRemainder != currentQuery) return null
+
+    val normalizedAlias = aliasToken.lowercase(Locale.getDefault())
+    if (normalizedAlias !in activePrefixAliases) return null
+    return aliasToken
 }

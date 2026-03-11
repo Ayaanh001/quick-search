@@ -295,13 +295,16 @@ internal fun SearchScreenContent(
             }
 
     val searchFieldContent: @Composable () -> Unit = {
-        PersistentSearchField(
+        PersistentSearchBar(
                 query = state.query,
                 onQueryChange = onQueryChanged,
                 onClearQuery = onClearQuery,
                 onSettingsClick = onSettingsClick,
                 dismissKeyboardBeforeSettingsClick = isOverlayPresentation,
                 enabledTargets = enabledTargets,
+                shortcutCodes = state.shortcutCodes,
+                shortcutEnabled = state.shortcutEnabled,
+                isSearchEngineAliasSuffixEnabled = state.isSearchEngineAliasSuffixEnabled,
                 shouldUseNumberKeyboard = manuallySwitchedToNumberKeyboard || isCalculatorMode,
                 detectedShortcutTarget = state.detectedShortcutTarget,
                 detectedAliasSearchSection = state.detectedAliasSearchSection,
@@ -327,7 +330,7 @@ internal fun SearchScreenContent(
                                 defaultBrowserTarget(state.searchTargetsOrder, defaultBrowserPackage)
                         if (browserTarget != null) {
                             onSearchTargetClick(trimmedQuery, browserTarget)
-                            return@PersistentSearchField
+                            return@PersistentSearchBar
                         }
                     }
 
@@ -357,7 +360,7 @@ internal fun SearchScreenContent(
                                     } else {
                                         // Check if a shortcut is detected
                                         if (isCalculatorMode) {
-                                            return@PersistentSearchField
+                                            return@PersistentSearchBar
                                         } else if (state.detectedShortcutTarget != null) {
                                             // Query already has shortcut stripped by ViewModel when
                                             // shortcut-at-start is detected

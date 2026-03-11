@@ -50,6 +50,7 @@ internal fun AliasCodeDisplay(
     addAliasLabel: String? = null,
     allowClearAction: Boolean = true,
     aliasDisplayType: AliasDisplayType = AliasDisplayType.SEARCH_ENGINE,
+    isSearchEngineAliasSuffixEnabled: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -68,6 +69,7 @@ internal fun AliasCodeDisplay(
                     AliasDisplayType.SEARCH_ENGINE -> AliasInfoType.SEARCH_ENGINE
                     AliasDisplayType.TOOL -> AliasInfoType.TOOL
                 },
+            isSearchEngineAliasSuffixEnabled = isSearchEngineAliasSuffixEnabled,
             aliasTargetName = engineName,
             dialogTitle =
                 if (shortcutCode.isBlank()) {

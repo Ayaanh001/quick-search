@@ -130,6 +130,7 @@ fun SearchEngines(
         shortcutEnabled = shortcutEnabled,
         setAliasEnabled = setAliasEnabled,
         isSearchEngineCompactMode = isSearchEngineCompactMode,
+        isSearchEngineAliasSuffixEnabled = isSearchEngineAliasSuffixEnabled,
         amazonDomain = amazonDomain,
         onSetAmazonDomain = onSetAmazonDomain,
         showAddSearchEngineButton = showAddSearchEngineButton,

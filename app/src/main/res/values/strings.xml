@@ -245,9 +245,10 @@
     <string name="dialog_edit_alias_error_prefix">This alias is already taken.</string>
     <string name="dialog_add_alias_for_search_type_title">Add Alias for "%1$s"</string>
     <string name="dialog_edit_alias_for_search_type_title">Edit Alias for "%1$s"</string>
-    <string name="dialog_alias_info_search_type">Type alias at the start of your query to trigger the %1$s search.</string>
-    <string name="dialog_alias_info_search_engine">Type alias at the start or end of your query to quickly initiate search with %1$s.</string>
-    <string name="dialog_alias_info_tool">Type alias at the start of your query to enter into %1$s mode.</string>
+    <string name="dialog_alias_info_search_type">Type this alias at the start of your query to trigger the %1$s search.</string>
+    <string name="dialog_alias_info_search_engine">Type this alias at the start or end of your query to quickly initiate search with %1$s.</string>
+    <string name="dialog_alias_info_search_engine_start_only">Type this alias at the start of your query to quickly initiate search with %1$s.</string>
+    <string name="dialog_alias_info_tool">Type this alias at the start of your query to enter into %1$s mode.</string>
     <string name="dialog_edit_amazon_domain_title">Edit Amazon Domain</string>
     <string name="dialog_edit_amazon_domain_message">Update Amazon domain for your country.</string>
     <string name="dialog_edit_amazon_domain_hint">Examples: amazon.com, amazon.in, amazon.ca, etc.</string>

@@ -67,13 +67,16 @@ internal fun PersonalContextHintBanner(
 
 // Search Field
 @Composable
-internal fun PersistentSearchField(
+internal fun PersistentSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     onClearQuery: () -> Unit,
     onSettingsClick: () -> Unit,
     dismissKeyboardBeforeSettingsClick: Boolean = false,
     enabledTargets: List<com.tk.quicksearch.search.core.SearchTarget>,
+    shortcutCodes: Map<String, String> = emptyMap(),
+    shortcutEnabled: Map<String, Boolean> = emptyMap(),
+    isSearchEngineAliasSuffixEnabled: Boolean = true,
     onSearchAction: () -> Unit,
     shouldUseNumberKeyboard: Boolean,
     detectedShortcutTarget: com.tk.quicksearch.search.core.SearchTarget? = null,
@@ -86,13 +89,16 @@ internal fun PersistentSearchField(
     onClearDetectedShortcut: () -> Unit = {},
     onWelcomeAnimationCompleted: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
-) = com.tk.quicksearch.search.searchScreen.components.PersistentSearchField(
+) = com.tk.quicksearch.search.searchScreen.components.PersistentSearchBar(
     query = query,
     onQueryChange = onQueryChange,
     onClearQuery = onClearQuery,
     onSettingsClick = onSettingsClick,
     dismissKeyboardBeforeSettingsClick = dismissKeyboardBeforeSettingsClick,
     enabledTargets = enabledTargets,
+    shortcutCodes = shortcutCodes,
+    shortcutEnabled = shortcutEnabled,
+    isSearchEngineAliasSuffixEnabled = isSearchEngineAliasSuffixEnabled,
     onSearchAction = onSearchAction,
     shouldUseNumberKeyboard = shouldUseNumberKeyboard,
     detectedShortcutTarget = detectedShortcutTarget,

@@ -58,6 +58,7 @@ fun AddEditAliasDialog(
     currentShortcutId: String? = null,
     onSave: (String) -> Unit,
     aliasInfoType: AliasInfoType = AliasInfoType.SEARCH_ENGINE,
+    isSearchEngineAliasSuffixEnabled: Boolean = true,
     aliasTargetName: String = "",
     dialogTitle: String? = null,
     validateCode: (String) -> Boolean = ::isValidGeneralAliasCode,
@@ -97,7 +98,11 @@ fun AddEditAliasDialog(
                 )
             AliasInfoType.SEARCH_ENGINE ->
                 stringResource(
-                    R.string.dialog_alias_info_search_engine,
+                    if (isSearchEngineAliasSuffixEnabled) {
+                        R.string.dialog_alias_info_search_engine
+                    } else {
+                        R.string.dialog_alias_info_search_engine_start_only
+                    },
                     aliasTargetName,
                 )
             AliasInfoType.TOOL ->
@@ -211,6 +216,7 @@ fun EditAliasDialog(
     currentShortcutId: String? = null,
     onSave: (String) -> Unit,
     aliasInfoType: AliasInfoType = AliasInfoType.SEARCH_ENGINE,
+    isSearchEngineAliasSuffixEnabled: Boolean = true,
     aliasTargetName: String = "",
     dialogTitle: String? = null,
     validateCode: (String) -> Boolean = ::isValidGeneralAliasCode,
@@ -225,6 +231,7 @@ fun EditAliasDialog(
     currentShortcutId = currentShortcutId,
     onSave = onSave,
     aliasInfoType = aliasInfoType,
+    isSearchEngineAliasSuffixEnabled = isSearchEngineAliasSuffixEnabled,
     aliasTargetName = aliasTargetName,
     dialogTitle = dialogTitle,
     validateCode = validateCode,
