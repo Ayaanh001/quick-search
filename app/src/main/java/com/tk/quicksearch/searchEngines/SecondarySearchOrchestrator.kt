@@ -151,6 +151,7 @@ class SecondarySearchOrchestrator(
                         showFolders = currentState.showFolders,
                         showSystemFiles = currentState.showSystemFiles,
                         showHiddenFiles = currentState.showHiddenFiles,
+                        aliasSection = null,
                     )
 
                 withContext(Dispatchers.Main) {
@@ -307,6 +308,7 @@ class SecondarySearchOrchestrator(
                         showFolders = currentState.showFolders,
                         showSystemFiles = currentState.showSystemFiles,
                         showHiddenFiles = currentState.showHiddenFiles,
+                        aliasSection = section,
                     )
 
                 withContext(Dispatchers.Main) {

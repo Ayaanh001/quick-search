@@ -663,6 +663,7 @@ class SearchViewModel(
 
     private val unifiedSearchHandler by lazy {
         UnifiedSearchHandler(
+                context = appContext,
                 contactRepository = contactRepository,
                 fileRepository = fileRepository,
                 userPreferences = userPreferences,

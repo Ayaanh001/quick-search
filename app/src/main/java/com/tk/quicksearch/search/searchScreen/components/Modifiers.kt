@@ -2,6 +2,9 @@ package com.tk.quicksearch.search.searchScreen.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -14,17 +17,24 @@ internal fun Modifier.predictedSubmitHighlight(
     shape: Shape = DesignTokens.CardShape,
 ): Modifier =
     composed {
-        if (!isPredicted) {
+        val indicatorAlpha =
+            animateFloatAsState(
+                targetValue = if (isPredicted) 1f else 0f,
+                animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+                label = "predictedSubmitIndicatorAlpha",
+            ).value
+
+        if (indicatorAlpha <= 0f) {
             this
         } else {
             this
                 .background(
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f * indicatorAlpha),
                     shape = shape,
                 )
                 .border(
                     width = DesignTokens.BorderWidth,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f * indicatorAlpha),
                     shape = shape,
                 )
         }

@@ -95,21 +95,21 @@ internal fun ExpandableResultsCard(
     }
 }
 
-internal fun topPredictedRowShape(isTopPredicted: Boolean): Shape =
+internal fun topResultIndicator(isTopPredicted: Boolean): Shape =
     if (isTopPredicted) {
-        DesignTokens.ShapeXXLarge
+        DesignTokens.ShapeLarge
     } else {
         DesignTokens.CardShape
     }
 
 internal fun Modifier.topPredictedRowContainer(
     isTopPredicted: Boolean,
-    shape: Shape = topPredictedRowShape(isTopPredicted),
+    shape: Shape = topResultIndicator(isTopPredicted),
 ): Modifier =
     this
         .then(
             if (isTopPredicted) {
-                Modifier.padding(top = DesignTokens.SpacingXSmall)
+                Modifier.padding(vertical = DesignTokens.SpacingXSmall)
             } else {
                 Modifier
             },
@@ -121,16 +121,6 @@ internal fun Modifier.topPredictedRowContainer(
         .clip(shape)
 
 internal fun Modifier.topPredictedRowContentPadding(
-    isTopPredicted: Boolean,
+    @Suppress("UNUSED_PARAMETER") isTopPredicted: Boolean,
 ): Modifier =
-    this.then(
-        if (isTopPredicted) {
-            Modifier.padding(
-                start = DesignTokens.SpacingXSmall,
-                end = DesignTokens.SpacingXSmall,
-                bottom = DesignTokens.SpacingXSmall,
-            )
-        } else {
-            Modifier
-        },
-    )
+    this

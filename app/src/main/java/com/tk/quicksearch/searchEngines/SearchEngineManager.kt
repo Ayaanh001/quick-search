@@ -367,8 +367,8 @@ class SearchEngineManager(
             val defaultEngines = availableEngines.map { SearchTarget.Engine(it) }
             val defaultCustomTargets = customEngines.map { SearchTarget.Custom(it) }
             val defaultBrowsers = availableBrowsers.map { SearchTarget.Browser(it) }
-            val defaultOrder =
-                insertBrowsersAfterAnchor(defaultEngines + defaultCustomTargets, defaultBrowsers)
+            // Default placement keeps browser targets at the end.
+            val defaultOrder = defaultEngines + defaultCustomTargets + defaultBrowsers
             userPreferences.setSearchEngineOrder(defaultOrder.map { it.getId() })
             return defaultOrder
         }
@@ -576,21 +576,25 @@ class SearchEngineManager(
                 .filter { it.packageName !in existingPackages }
                 .map { SearchTarget.Browser(it) }
 
-        return insertBrowsersAfterAnchor(cleanedOrder, missingBrowsers)
+        return appendMissingBrowsers(cleanedOrder, missingBrowsers)
     }
 
-    private fun insertBrowsersAfterAnchor(
+    private fun appendMissingBrowsers(
         order: List<SearchTarget>,
         browsersToInsert: List<SearchTarget>,
     ): List<SearchTarget> {
-        val nonBrowserTargets = order.filterNot { it is SearchTarget.Browser }
-        val existingBrowsers = order.filterIsInstance<SearchTarget.Browser>()
         val newBrowsers = browsersToInsert.filterIsInstance<SearchTarget.Browser>()
-        if (existingBrowsers.isEmpty() && newBrowsers.isEmpty()) return order
+        if (newBrowsers.isEmpty()) return order
 
-        // Browsers must always remain at the end of the ordered list.
-        val mergedBrowsers = (existingBrowsers + newBrowsers).distinctBy { it.app.packageName }
-        return nonBrowserTargets + mergedBrowsers
+        // Preserve user-configured placement of existing browser targets and only append new ones.
+        val insertIndex = order.indexOfLast { it is SearchTarget.Browser }.let { index ->
+            if (index >= 0) {
+                index + 1
+            } else {
+                order.size
+            }
+        }
+        return order.toMutableList().apply { addAll(insertIndex, newBrowsers) }
     }
 
     private fun buildBrowserId(packageName: String): String = "$BROWSER_ID_PREFIX$packageName"

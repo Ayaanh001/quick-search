@@ -1,5 +1,6 @@
 package com.tk.quicksearch.shared.util
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
@@ -68,3 +69,12 @@ fun getAppGridColumns(context: Context): Int =
     } else {
         5
     }
+
+/**
+ * Checks whether the device is classified by Android as low-RAM.
+ * Useful for reducing expensive search workloads on constrained devices.
+ */
+fun isLowRamDevice(context: Context): Boolean {
+    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+    return activityManager?.isLowRamDevice == true
+}

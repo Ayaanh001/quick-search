@@ -21,6 +21,7 @@ class SearchOperations(
         excludedContactIds: Set<Long>,
         limit: Int = CONTACT_RESULT_LIMIT,
         enableFuzzyMatching: Boolean = false,
+        fuzzyCandidateLimit: Int = FUZZY_CONTACT_CANDIDATE_LIMIT,
     ): List<ContactInfo> {
         val prefetchMultiplier =
             if (queryContext.normalizedQuery.length <= SHORT_QUERY_LENGTH_THRESHOLD) {
@@ -45,7 +46,7 @@ class SearchOperations(
 
         val fuzzyCandidates =
             contactRepository
-                .getRecentContacts(FUZZY_CONTACT_CANDIDATE_LIMIT)
+                .getRecentContacts(fuzzyCandidateLimit)
                 .filterNot { excludedContactIds.contains(it.contactId) }
 
         return (exactResults + fuzzyCandidates).distinctBy { it.contactId }
