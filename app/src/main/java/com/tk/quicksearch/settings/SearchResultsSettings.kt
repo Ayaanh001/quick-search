@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Contacts
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Keyboard
@@ -156,6 +157,8 @@ private fun SearchOptionsCard(
 
 @Composable
 private fun LaunchOptionsCard(
+    topResultIndicatorEnabled: Boolean,
+    onTopResultIndicatorToggle: (Boolean) -> Unit,
     openKeyboardOnLaunch: Boolean,
     onOpenKeyboardOnLaunchToggle: (Boolean) -> Unit,
     clearQueryOnLaunch: Boolean,
@@ -170,12 +173,22 @@ private fun LaunchOptionsCard(
     ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
         Column {
             SettingsToggleRow(
+                title = stringResource(R.string.top_result_indicator_toggle_title),
+                subtitle = stringResource(R.string.top_result_indicator_toggle_desc),
+                checked = topResultIndicatorEnabled,
+                onCheckedChange = onTopResultIndicatorToggle,
+                leadingIcon = Icons.Rounded.CheckCircle,
+                isFirstItem = true,
+                isLastItem = false,
+            )
+
+            SettingsToggleRow(
                 title = stringResource(R.string.open_keyboard_toggle_title),
                 subtitle = stringResource(R.string.open_keyboard_toggle_desc),
                 checked = openKeyboardOnLaunch,
                 onCheckedChange = onOpenKeyboardOnLaunchToggle,
                 leadingIcon = Icons.Rounded.Keyboard,
-                isFirstItem = true,
+                isFirstItem = false,
                 isLastItem = false,
             )
 
@@ -350,6 +363,8 @@ fun SearchResultsSettingsSection(
         )
 
         LaunchOptionsCard(
+            topResultIndicatorEnabled = state.topResultIndicatorEnabled,
+            onTopResultIndicatorToggle = callbacks.onToggleTopResultIndicator,
             openKeyboardOnLaunch = state.openKeyboardOnLaunch,
             onOpenKeyboardOnLaunchToggle = callbacks.onToggleOpenKeyboardOnLaunch,
             clearQueryOnLaunch = state.clearQueryOnLaunch,

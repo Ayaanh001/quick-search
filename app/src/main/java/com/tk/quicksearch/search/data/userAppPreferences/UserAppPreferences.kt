@@ -513,6 +513,11 @@ class UserAppPreferences(
     fun setOpenKeyboardOnLaunchEnabled(enabled: Boolean) =
             uiPreferences.setOpenKeyboardOnLaunchEnabled(enabled)
 
+    fun isTopResultIndicatorEnabled(): Boolean = uiPreferences.isTopResultIndicatorEnabled()
+
+    fun setTopResultIndicatorEnabled(enabled: Boolean) =
+            uiPreferences.setTopResultIndicatorEnabled(enabled)
+
     fun isClearQueryOnLaunchEnabled(): Boolean = uiPreferences.isClearQueryOnLaunchEnabled()
 
     fun setClearQueryOnLaunchEnabled(enabled: Boolean) =

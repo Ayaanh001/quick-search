@@ -343,6 +343,7 @@ data class SearchUiState(
         // Layout preferences
         val oneHandedMode: Boolean = false,
         val bottomSearchBarEnabled: Boolean = false,
+        val topResultIndicatorEnabled: Boolean = true,
         val openKeyboardOnLaunch: Boolean = true,
         val clearQueryOnLaunch: Boolean = true,
         val overlayModeEnabled: Boolean = false,
@@ -523,6 +524,7 @@ fun SearchUiState(
                 overlayModeEnabled = config.overlayModeEnabled,
                 oneHandedMode = config.oneHandedMode,
                 bottomSearchBarEnabled = config.bottomSearchBarEnabled,
+                topResultIndicatorEnabled = config.topResultIndicatorEnabled,
                 openKeyboardOnLaunch = config.openKeyboardOnLaunch,
                 clearQueryOnLaunch = config.clearQueryOnLaunch,
                 fontScaleMultiplier = config.fontScaleMultiplier,

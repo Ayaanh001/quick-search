@@ -193,6 +193,8 @@ internal fun SearchScreenContent(
                     )
                 }
             }
+    val predictedTargetForIndicator =
+            if (state.topResultIndicatorEnabled) predictedTarget else null
 
     // Search engine scroll state for auto-scroll during onboarding
     val searchEngineScrollState = rememberLazyListState()
@@ -410,7 +412,7 @@ internal fun SearchScreenContent(
                 appShortcutsParams = appShortcutsParams,
                 settingsParams = settingsParams,
                 appsParams = appsParams,
-                predictedTarget = predictedTarget,
+                predictedTarget = predictedTargetForIndicator,
                 onRequestUsagePermission = onRequestUsagePermission,
                 scrollState = scrollState,
                 onPhoneNumberClick = onPhoneNumberClick,
@@ -507,7 +509,7 @@ internal fun SearchScreenContent(
                                         isOverlayPresentation = isOverlayPresentation,
                                         hasBottomSearchBar = showBottomSearchBar,
                                         compactRowCount = state.searchEngineCompactRowCount,
-                                        predictedTarget = predictedTarget,
+                                        predictedTarget = predictedTargetForIndicator,
                                 )
                             },
                             fullContent = {
@@ -524,7 +526,7 @@ internal fun SearchScreenContent(
                                         isOverlayPresentation = isOverlayPresentation,
                                         hasBottomSearchBar = showBottomSearchBar,
                                         compactRowCount = 1,
-                                        predictedTarget = predictedTarget,
+                                        predictedTarget = predictedTargetForIndicator,
                                 )
                             },
                             shortcutContent = { target ->
@@ -541,7 +543,7 @@ internal fun SearchScreenContent(
                                         isOverlayPresentation = isOverlayPresentation,
                                         hasBottomSearchBar = showBottomSearchBar,
                                         compactRowCount = 1,
-                                        predictedTarget = predictedTarget,
+                                        predictedTarget = predictedTargetForIndicator,
                                 )
                             },
                             hiddenContent = {

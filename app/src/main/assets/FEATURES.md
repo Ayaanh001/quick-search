@@ -89,6 +89,7 @@ Long-press on most results to open a context menu with quick actions.
 - **Web Search Suggestions** - Turn web suggestions on or off and control how many suggestions (1–5) appear under the search bar.
 - **Search History** - Enable or disable search history. Your search queries and recently opened items (files, contacts, etc.) appear in your search history.
 - **Excluded Items** - When you exclude any item on the search results page, you can find them here and clear them if you want to.
+- **Top Result Indicator Toggle** - Option to hide the top result indicator for top results that can be opened with the keyboard.
 - **Open Keyboard Toggle** - Choose to disable automatic keyboard opening during app launch. This is useful if you want to use this app just to quickly access pinned items.
 - **Clear Query** - The app clears your query by default when you reopen the app; you can choose to keep the query by disabling this toggle.
 - **Refresh Data** - The app automatically refreshes your data from time to time, but if you want to manually refresh the data, you can do it here.
@@ -102,7 +103,7 @@ Long-press on most results to open a context menu with quick actions.
 - **Alias after Query** - You can choose to disable search engine alias triggers at the end of your query.
 - **Amazon Domain** - Select the Amazon region/domain used when searching via the Amazon engine. Updating this will open your Amazon queries within the installed app instead of the website.
 - **Custom Search Engines** - Add your own search engines by specifying a URL template with the {{query}} placeholder. The app automatically fetches the name and icon for the website, but you can choose to edit them if needed. Tapping on {{query}} in the error hint will add this string to your URL so that you don't have to type it.
-- **Direct Search (AI)** - Connect a Gemini API key to enable AI answers directly in Quick Search, view if a key is configured, and open the dedicated Direct Search configuration screen.
+- **Direct Search (AI)** - Connect a Gemini API key to enable AI answers directly in Quick Search, view if a key is configured, and open the dedicated Direct Search configuration screen. Gemini Flash Latest is the model which is chosen by default.
 
 ---
 

@@ -336,6 +336,7 @@ fun SettingsRoute(
             onToggleAppSuggestions = viewModel::setAppSuggestionsEnabled,
             onToggleWebSuggestions = viewModel::setWebSuggestionsEnabled,
             onWebSuggestionsCountChange = viewModel::setWebSuggestionsCount,
+            onToggleTopResultIndicator = viewModel::setTopResultIndicatorEnabled,
             onToggleOpenKeyboardOnLaunch = viewModel::setOpenKeyboardOnLaunchEnabled,
             onToggleClearQueryOnLaunch = viewModel::setClearQueryOnLaunchEnabled,
             onToggleRecentQueries = viewModel::setRecentQueriesEnabled,

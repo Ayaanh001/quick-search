@@ -57,6 +57,7 @@ internal fun SearchUiState.toSettingsScreenState(): SettingsScreenState =
         appSuggestionsEnabled = appSuggestionsEnabled,
         webSuggestionsEnabled = webSuggestionsEnabled,
         webSuggestionsCount = webSuggestionsCount,
+        topResultIndicatorEnabled = topResultIndicatorEnabled,
         openKeyboardOnLaunch = openKeyboardOnLaunch,
         clearQueryOnLaunch = clearQueryOnLaunch,
         recentQueriesEnabled = recentQueriesEnabled,

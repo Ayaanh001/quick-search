@@ -145,6 +145,9 @@ class SearchViewModel(
                     bottomSearchBarEnabled =
                             startupSnapshot?.bottomSearchBarEnabled
                                     ?: startupPreferencesReader.isBottomSearchBarEnabled(),
+                    topResultIndicatorEnabled =
+                            startupSnapshot?.topResultIndicatorEnabled
+                                    ?: startupPreferencesReader.isTopResultIndicatorEnabled(),
                     openKeyboardOnLaunch =
                             startupSnapshot?.openKeyboardOnLaunch
                                     ?: startupPreferencesReader.isOpenKeyboardOnLaunchEnabled(),
@@ -470,6 +473,7 @@ class SearchViewModel(
                     overlayModeEnabled = s.overlayModeEnabled,
                     oneHandedMode = s.oneHandedMode,
                     bottomSearchBarEnabled = s.bottomSearchBarEnabled,
+                    topResultIndicatorEnabled = s.topResultIndicatorEnabled,
                     openKeyboardOnLaunch = s.openKeyboardOnLaunch,
                     clearQueryOnLaunch = s.clearQueryOnLaunch,
                     fontScaleMultiplier = s.fontScaleMultiplier,
@@ -694,6 +698,7 @@ class SearchViewModel(
     private var excludedFileExtensions: Set<String> = emptySet()
     private var oneHandedMode: Boolean = false
     private var bottomSearchBarEnabled: Boolean = false
+    private var topResultIndicatorEnabled: Boolean = true
     private var openKeyboardOnLaunch: Boolean = true
     private var overlayModeEnabled: Boolean = false
     private var directDialEnabled: Boolean = false
@@ -885,6 +890,7 @@ class SearchViewModel(
         // Extract critical data for immediate use
         oneHandedMode = startupConfig.oneHandedMode
         bottomSearchBarEnabled = startupPrefs.bottomSearchBarEnabled
+        topResultIndicatorEnabled = startupPrefs.topResultIndicatorEnabled
         openKeyboardOnLaunch = startupPrefs.openKeyboardOnLaunch
         clearQueryOnLaunch = startupPrefs.clearQueryOnLaunch
         wallpaperBackgroundAlpha = startupPrefs.wallpaperBackgroundAlpha
@@ -909,6 +915,7 @@ class SearchViewModel(
                 it.copy(
                         oneHandedMode = oneHandedMode,
                         bottomSearchBarEnabled = bottomSearchBarEnabled,
+                        topResultIndicatorEnabled = topResultIndicatorEnabled,
                         openKeyboardOnLaunch = openKeyboardOnLaunch,
                         clearQueryOnLaunch = clearQueryOnLaunch,
                         showWallpaperBackground = backgroundSource != BackgroundSource.THEME,
@@ -996,6 +1003,7 @@ class SearchViewModel(
         excludedFileExtensions = prefs.excludedFileExtensions
         oneHandedMode = prefs.oneHandedMode
         bottomSearchBarEnabled = prefs.bottomSearchBarEnabled
+        topResultIndicatorEnabled = prefs.topResultIndicatorEnabled
         openKeyboardOnLaunch = prefs.openKeyboardOnLaunch
         clearQueryOnLaunch = prefs.clearQueryOnLaunch
         overlayModeEnabled = prefs.overlayModeEnabled
@@ -1017,6 +1025,7 @@ class SearchViewModel(
                     enabledFileTypes = enabledFileTypes,
                     oneHandedMode = oneHandedMode,
                     bottomSearchBarEnabled = bottomSearchBarEnabled,
+                    topResultIndicatorEnabled = topResultIndicatorEnabled,
                     openKeyboardOnLaunch = openKeyboardOnLaunch,
                     clearQueryOnLaunch = clearQueryOnLaunch,
                     overlayModeEnabled = overlayModeEnabled,
@@ -1152,6 +1161,7 @@ class SearchViewModel(
                         appSuggestionsEnabled = userPreferences.areAppSuggestionsEnabled(),
                         showAppLabels = userPreferences.shouldShowAppLabels(),
                         bottomSearchBarEnabled = userPreferences.isBottomSearchBarEnabled(),
+                        topResultIndicatorEnabled = userPreferences.isTopResultIndicatorEnabled(),
                         openKeyboardOnLaunch = userPreferences.isOpenKeyboardOnLaunchEnabled(),
                         clearQueryOnLaunch = userPreferences.isClearQueryOnLaunchEnabled(),
                         showPersonalContextHint =
@@ -3169,6 +3179,18 @@ class SearchViewModel(
         )
     }
 
+    fun setTopResultIndicatorEnabled(enabled: Boolean) {
+        updateBooleanPreference(
+                value = enabled,
+                preferenceSetter = userPreferences::setTopResultIndicatorEnabled,
+                stateUpdater = {
+                    topResultIndicatorEnabled = it
+                    updateUiState { state -> state.copy(topResultIndicatorEnabled = it) }
+                    saveStartupSurfaceSnapshotAsync(allowDuringQuery = true)
+                },
+        )
+    }
+
     fun setClearQueryOnLaunchEnabled(enabled: Boolean) {
         updateBooleanPreference(
                 value = enabled,
@@ -3711,6 +3733,7 @@ class SearchViewModel(
                     startupBackgroundPreviewPath = previewPath,
                     oneHandedMode = config.oneHandedMode,
                     bottomSearchBarEnabled = config.bottomSearchBarEnabled,
+                    topResultIndicatorEnabled = config.topResultIndicatorEnabled,
                     openKeyboardOnLaunch = config.openKeyboardOnLaunch,
                     fontScaleMultiplier = config.fontScaleMultiplier,
                     showAppLabels = config.showAppLabels,

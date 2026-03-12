@@ -160,6 +160,7 @@ fun SearchHistorySection(
                 ) {
                     displayItems.forEachIndexed { index, item ->
                         val showTipBelowFirstItem = showSearchHistoryTip && index == 0
+                        val baseShowDivider = index < displayItems.lastIndex
                         RecentSearchItemRow(
                             item = item,
                             textColor = textColor,
@@ -181,7 +182,7 @@ fun SearchHistorySection(
                             onSettingClick = onSettingClick,
                             onAppShortcutClick = onAppShortcutClick,
                             onDeleteRecentItem = onDeleteRecentItem,
-                            showDivider = !showTipBelowFirstItem,
+                            showDivider = if (showTipBelowFirstItem) false else baseShowDivider,
                             showWallpaperBackground = showWallpaperBackground,
                             overlayDividerColor = overlayDividerColor,
                         )
@@ -190,10 +191,12 @@ fun SearchHistorySection(
                                 onOpenSearchHistorySettings = onOpenSearchHistorySettings,
                                 onDismiss = onDismissSearchHistoryTip,
                             )
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = dividerPadding(item)),
-                                color = dividerColor(showWallpaperBackground, overlayDividerColor),
-                            )
+                            if (baseShowDivider) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = dividerPadding(item)),
+                                    color = dividerColor(showWallpaperBackground, overlayDividerColor),
+                                )
+                            }
                         }
                     }
                 }
