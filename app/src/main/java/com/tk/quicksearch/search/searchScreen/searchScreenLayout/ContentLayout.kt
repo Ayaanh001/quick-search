@@ -1,9 +1,6 @@
 package com.tk.quicksearch.search.searchScreen.searchScreenLayout
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -367,26 +364,15 @@ fun ContentLayout(
                 ItemPriorityConfig.ItemType.WEB_SUGGESTIONS -> {
                     val allowWebSuggestions =
                         !hideResults || state.detectedShortcutTarget != null
-                    if (allowWebSuggestions && hasQuery) {
-                        // Only show if logic approves
-                        AnimatedVisibility(
-                            visible = showWebSuggestions,
-                            enter = fadeIn(),
-                            exit = shrinkVertically(),
-                        ) {
-                            WebSuggestionsSection(
-                                suggestions = state.webSuggestions,
-                                onSuggestionClick =
-                                onWebSuggestionClick,
-                                showWallpaperBackground =
-                                    effectiveShowWallpaperBackground,
-                                reverseOrder = isReversed,
-                                isShortcutDetected =
-                                    state.detectedShortcutTarget !=
-                                            null,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
+                    if (allowWebSuggestions && hasQuery && showWebSuggestions) {
+                        WebSuggestionsSection(
+                            suggestions = state.webSuggestions,
+                            onSuggestionClick = onWebSuggestionClick,
+                            showWallpaperBackground = effectiveShowWallpaperBackground,
+                            reverseOrder = isReversed,
+                            isShortcutDetected = state.detectedShortcutTarget != null,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
                 }
 

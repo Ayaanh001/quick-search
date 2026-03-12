@@ -136,12 +136,14 @@ internal fun PersistentSearchBar(
         }
     // Light color for icons and text on dark grey background
     val iconAndTextColor = DesignTokens.ColorSearchText
+    val isAliasDetected =
+        detectedShortcutTarget != null || detectedAliasSearchSection != null || isCalculatorMode
     val aliasVisualTransformation =
         rememberAliasHighlightVisualTransformation(
             enabledTargets = enabledTargets,
             shortcutCodes = shortcutCodes,
             shortcutEnabled = shortcutEnabled,
-            isSearchEngineAliasSuffixEnabled = isSearchEngineAliasSuffixEnabled,
+            isSearchEngineAliasSuffixEnabled = isSearchEngineAliasSuffixEnabled && !isAliasDetected,
             highlightColor = MaterialTheme.colorScheme.primary,
         )
     val leadingIconState =

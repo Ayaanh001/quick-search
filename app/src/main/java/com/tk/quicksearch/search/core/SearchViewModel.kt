@@ -1970,7 +1970,7 @@ class SearchViewModel(
             return AliasQueryResolution.ReprocessQuery(queryWithoutAlias)
         }
 
-        if (lockedCalculatorMode || lockedAliasSearchSection != null) {
+        if (lockedCalculatorMode || lockedAliasSearchSection != null || lockedShortcutTarget != null) {
             return AliasQueryResolution.None
         }
 
