@@ -139,21 +139,50 @@ private fun renderAppsSection(
     context: SectionRenderContext,
 ) {
     val appsParams = params.appsParams ?: return
-    AnimatedVisibility(
-        visible = context.shouldRenderApps,
-        enter =
-            fadeIn(animationSpec = tween(durationMillis = 110)) +
-                expandVertically(
-                    animationSpec = tween(durationMillis = 170),
-                    expandFrom = Alignment.Top,
-                ),
-        exit =
-            fadeOut(animationSpec = tween(durationMillis = 90)) +
-                shrinkVertically(
-                    animationSpec = tween(durationMillis = 170),
-                    shrinkTowards = Alignment.Top,
-                ),
-    ) {
+    val shouldAnimate = !appsParams.isSearching
+
+    if (shouldAnimate) {
+        AnimatedVisibility(
+            visible = context.shouldRenderApps,
+            enter =
+                fadeIn(animationSpec = tween(durationMillis = 110)) +
+                    expandVertically(
+                        animationSpec = tween(durationMillis = 170),
+                        expandFrom = Alignment.Top,
+                    ),
+            exit =
+                fadeOut(animationSpec = tween(durationMillis = 90)) +
+                    shrinkVertically(
+                        animationSpec = tween(durationMillis = 170),
+                        shrinkTowards = Alignment.Top,
+                    ),
+        ) {
+            AppGridView(
+                apps = appsParams.apps,
+                appShortcuts = appsParams.appShortcuts,
+                isSearching = appsParams.isSearching,
+                hasAppResults = appsParams.hasAppResults,
+                onAppClick = appsParams.onAppClick,
+                onAppInfoClick = appsParams.onAppInfoClick,
+                onUninstallClick = appsParams.onUninstallClick,
+                onHideApp = appsParams.onHideApp,
+                onPinApp = appsParams.onPinApp,
+                onUnpinApp = appsParams.onUnpinApp,
+                onNicknameClick = appsParams.onNicknameClick,
+                getAppNickname = appsParams.getAppNickname,
+                pinnedPackageNames = appsParams.pinnedPackageNames,
+                disabledShortcutIds = appsParams.disabledAppShortcutIds,
+                rowCount = appsParams.rowCount,
+                iconPackPackage = appsParams.iconPackPackage,
+                showAppLabels = appsParams.showAppLabels,
+                oneHandedMode = appsParams.oneHandedMode,
+                isInitializing = appsParams.isInitializing,
+                startupPhase = appsParams.startupPhase,
+                isOverlayPresentation = appsParams.isOverlayPresentation,
+                predictedTarget = appsParams.predictedTarget,
+            )
+        }
+    } else if (context.shouldRenderApps) {
         AppGridView(
             apps = appsParams.apps,
             appShortcuts = appsParams.appShortcuts,

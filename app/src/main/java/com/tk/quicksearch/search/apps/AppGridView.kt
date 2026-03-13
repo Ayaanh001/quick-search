@@ -145,43 +145,68 @@ fun AppGridView(
             verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
     ) {
         val showAppGrid = apps.isNotEmpty() && areAppIconsLoaded
-        val appGridVisibilityState = remember { MutableTransitionState(false) }
-        appGridVisibilityState.targetState = showAppGrid
-        AnimatedVisibility(
-                visibleState = appGridVisibilityState,
-                enter =
-                        fadeIn(animationSpec = tween(durationMillis = 200)) +
-                                slideInVertically(
-                                        animationSpec =
-                                                tween(durationMillis = 260),
-                                        initialOffsetY = { it / 10 },
-                                ) +
-                                scaleIn(
-                                        animationSpec = tween(durationMillis = 220),
-                                        initialScale = 0.98f,
-                                ),
-                exit = fadeOut(animationSpec = tween(durationMillis = 120)),
-        ) {
-            AppGrid(
-                    apps = apps,
-                    isSearching = isSearching,
-                    onAppClick = onAppClick,
-                    onAppInfoClick = onAppInfoClick,
-                    onUninstallClick = onUninstallClick,
-                    onHideApp = onHideApp,
-                    onPinApp = onPinApp,
-                    onUnpinApp = onUnpinApp,
-                    onNicknameClick = onNicknameClick,
-                    getAppNickname = getAppNickname,
-                    pinnedPackageNames = pinnedPackageNames,
-                    shortcutsByPackage = shortcutsByPackage,
-                    rowCount = rowCount,
-                    iconPackPackage = iconPackPackage,
-                    showAppLabels = showAppLabels,
-                    oneHandedMode = oneHandedMode,
-                    isOverlayPresentation = isOverlayPresentation,
-                    predictedTarget = predictedTarget,
-            )
+        if (isSearching) {
+            if (showAppGrid) {
+                AppGrid(
+                        apps = apps,
+                        isSearching = isSearching,
+                        onAppClick = onAppClick,
+                        onAppInfoClick = onAppInfoClick,
+                        onUninstallClick = onUninstallClick,
+                        onHideApp = onHideApp,
+                        onPinApp = onPinApp,
+                        onUnpinApp = onUnpinApp,
+                        onNicknameClick = onNicknameClick,
+                        getAppNickname = getAppNickname,
+                        pinnedPackageNames = pinnedPackageNames,
+                        shortcutsByPackage = shortcutsByPackage,
+                        rowCount = rowCount,
+                        iconPackPackage = iconPackPackage,
+                        showAppLabels = showAppLabels,
+                        oneHandedMode = oneHandedMode,
+                        isOverlayPresentation = isOverlayPresentation,
+                        predictedTarget = predictedTarget,
+                )
+            }
+        } else {
+            val appGridVisibilityState = remember { MutableTransitionState(false) }
+            appGridVisibilityState.targetState = showAppGrid
+            AnimatedVisibility(
+                    visibleState = appGridVisibilityState,
+                    enter =
+                            fadeIn(animationSpec = tween(durationMillis = 200)) +
+                                    slideInVertically(
+                                            animationSpec =
+                                                    tween(durationMillis = 260),
+                                            initialOffsetY = { it / 10 },
+                                    ) +
+                                    scaleIn(
+                                            animationSpec = tween(durationMillis = 220),
+                                            initialScale = 0.98f,
+                                    ),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 120)),
+            ) {
+                AppGrid(
+                        apps = apps,
+                        isSearching = isSearching,
+                        onAppClick = onAppClick,
+                        onAppInfoClick = onAppInfoClick,
+                        onUninstallClick = onUninstallClick,
+                        onHideApp = onHideApp,
+                        onPinApp = onPinApp,
+                        onUnpinApp = onUnpinApp,
+                        onNicknameClick = onNicknameClick,
+                        getAppNickname = getAppNickname,
+                        pinnedPackageNames = pinnedPackageNames,
+                        shortcutsByPackage = shortcutsByPackage,
+                        rowCount = rowCount,
+                        iconPackPackage = iconPackPackage,
+                        showAppLabels = showAppLabels,
+                        oneHandedMode = oneHandedMode,
+                        isOverlayPresentation = isOverlayPresentation,
+                        predictedTarget = predictedTarget,
+                )
+            }
         }
     }
 }
