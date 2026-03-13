@@ -110,6 +110,20 @@ fun DeviceSettingsResultsSection(
 
         val predictedSettingId = (predictedTarget as? PredictedSubmitTarget.Setting)?.id
         val predictedAppSettingId = (predictedTarget as? PredictedSubmitTarget.AppSetting)?.id
+        val hasPredictedRow =
+                allRows.any { row ->
+                        when (row) {
+                                is DeviceSettingRowModel ->
+                                        predictedSettingId != null &&
+                                                row.setting.id == predictedSettingId
+                                is AppSettingRowModel ->
+                                        predictedAppSettingId != null &&
+                                                row.setting.id == predictedAppSettingId
+                        }
+                }
+        val displayAsExpanded = isExpanded || showAllResults
+        val useCardLevelPrediction =
+                hasPredictedRow && (!displayAsExpanded || allRows.size == 1)
 
         val scrollState = rememberScrollState()
 
@@ -121,6 +135,7 @@ fun DeviceSettingsResultsSection(
                         resultCount = allRows.size,
                         isExpanded = isExpanded,
                         showAllResults = showAllResults,
+                        isTopPredicted = useCardLevelPrediction,
                         showExpandControls = showExpandControls,
                         expandedCardMaxHeight = expandedCardMaxHeight,
                         hasScrollableContent = scrollState.maxValue > 0,
@@ -176,7 +191,9 @@ fun DeviceSettingsResultsSection(
                                                                                 row.setting.id ==
                                                                                         predictedAppSettingId
                                                                 }
-                                                        }
+                                                }
+                                                val showPredictedOnRow =
+                                                        isPredictedRow && !useCardLevelPrediction
 
                                                 when (row) {
                                                         is DeviceSettingRowModel -> {
@@ -199,7 +216,7 @@ fun DeviceSettingsResultsSection(
                                                                                         )
                                                                                         .isNullOrBlank(),
                                                                         isPredicted =
-                                                                                isPredictedRow,
+                                                                                showPredictedOnRow,
                                                                 )
                                                         }
                                                         is AppSettingRowModel -> {
@@ -214,13 +231,13 @@ fun DeviceSettingsResultsSection(
                                                                         onClick =
                                                                                 onAppSettingClick,
                                                                         isPredicted =
-                                                                                isPredictedRow,
+                                                                                showPredictedOnRow,
                                                                 )
                                                         }
                                                 }
 
                                                 if (index != displayRows.lastIndex &&
-                                                        !isPredictedRow) {
+                                                        !showPredictedOnRow) {
                                                         HorizontalDivider(
                                                                 modifier = Modifier.fillMaxWidth(),
                                                                 color = overlayDividerColor

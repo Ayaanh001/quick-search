@@ -189,6 +189,11 @@ private fun ContactsResultCard(
     val overlayCardColor = LocalOverlayResultCardColor.current
     val overlayDividerColor = LocalOverlayDividerColor.current
     val predictedContactId = (predictedTarget as? PredictedSubmitTarget.Contact)?.contactId
+    val hasPredictedContact =
+        predictedContactId != null && contacts.any { it.contactId == predictedContactId }
+    val displayAsExpanded = isExpanded || showAllResults
+    val useCardLevelPrediction =
+        hasPredictedContact && (!displayAsExpanded || contacts.size == 1)
 
     val scrollState = androidx.compose.foundation.rememberScrollState()
 
@@ -200,6 +205,7 @@ private fun ContactsResultCard(
             resultCount = contacts.size,
             isExpanded = isExpanded,
             showAllResults = showAllResults,
+            isTopPredicted = useCardLevelPrediction,
             showExpandControls = showExpandControls,
             expandedCardMaxHeight = expandedCardMaxHeight,
             hasScrollableContent = scrollState.maxValue > 0,
@@ -253,6 +259,7 @@ private fun ContactsResultCard(
                     onContactActionHintDismissed =
                     onContactActionHintDismissed,
                     predictedContactId = predictedContactId,
+                    useCardLevelPrediction = useCardLevelPrediction,
                     bottomContentPadding =
                         if (cardState.shouldFillExpandedHeight) {
                             DesignTokens.SpacingSmall
@@ -295,6 +302,7 @@ private fun ContactList(
     showContactActionHint: Boolean,
     onContactActionHintDismissed: () -> Unit,
     predictedContactId: Long?,
+    useCardLevelPrediction: Boolean,
     bottomContentPadding: Dp,
 ) {
     Column(
@@ -308,6 +316,7 @@ private fun ContactList(
             val isPredictedContact =
                 predictedContactId != null &&
                     contactInfo.contactId == predictedContactId
+            val showPredictedOnRow = isPredictedContact && !useCardLevelPrediction
             key(contactInfo.contactId) {
                 ContactResultRow(
                     contactInfo = contactInfo,
@@ -346,7 +355,7 @@ private fun ContactList(
                     onPrimaryActionLongPress = onPrimaryActionLongPress,
                     onSecondaryActionLongPress = onSecondaryActionLongPress,
                     onCustomAction = onCustomAction,
-                    isPredicted = isPredictedContact,
+                    isPredicted = showPredictedOnRow,
                 )
             }
             if (index == 0 && showContactActionHint) {
@@ -355,7 +364,7 @@ private fun ContactList(
                     modifier = Modifier.padding(top = DesignTokens.SpacingSmall),
                 )
             }
-            if (index != displayContacts.lastIndex && !isPredictedContact) {
+            if (index != displayContacts.lastIndex && !showPredictedOnRow) {
                 HorizontalDivider(
                     modifier = Modifier.fillMaxWidth(),
                     color = overlayDividerColor ?: MaterialTheme.colorScheme.outlineVariant,

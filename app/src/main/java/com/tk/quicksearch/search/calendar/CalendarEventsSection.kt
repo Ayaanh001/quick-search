@@ -97,6 +97,9 @@ fun CalendarEventsSection(
     if (events.isEmpty()) return
 
     val predictedEventId = (predictedTarget as? PredictedSubmitTarget.Calendar)?.eventId
+    val hasPredictedEvent = predictedEventId != null && events.any { it.eventId == predictedEventId }
+    val displayAsExpanded = isExpanded || showAllResults
+    val useCardLevelPrediction = hasPredictedEvent && (!displayAsExpanded || events.size == 1)
     val overlayDividerColor = LocalOverlayDividerColor.current
     val overlayCardColor = LocalOverlayResultCardColor.current
     val scrollState = rememberScrollState()
@@ -105,6 +108,7 @@ fun CalendarEventsSection(
         resultCount = events.size,
         isExpanded = isExpanded,
         showAllResults = showAllResults,
+        isTopPredicted = useCardLevelPrediction,
         showExpandControls = showExpandControls,
         expandedCardMaxHeight = expandedCardMaxHeight,
         hasScrollableContent = scrollState.maxValue > 0,
@@ -143,6 +147,7 @@ fun CalendarEventsSection(
                 displayEvents.forEachIndexed { index, event ->
                     key(event.eventId) {
                         val isPredicted = predictedEventId != null && event.eventId == predictedEventId
+                        val showPredictedOnRow = isPredicted && !useCardLevelPrediction
                         CalendarEventRow(
                             event = event,
                             isPinned = pinnedEventIds.contains(event.eventId),
@@ -153,9 +158,9 @@ fun CalendarEventsSection(
                             onExclude = onExclude,
                             onInclude = onInclude,
                             onNicknameClick = onNicknameClick,
-                            isPredicted = isPredicted,
+                            isPredicted = showPredictedOnRow,
                         )
-                        if (index < displayEvents.lastIndex && !isPredicted) {
+                        if (index < displayEvents.lastIndex && !showPredictedOnRow) {
                             HorizontalDivider(
                                 modifier = Modifier.fillMaxWidth(),
                                 color = overlayDividerColor ?: MaterialTheme.colorScheme.outlineVariant,

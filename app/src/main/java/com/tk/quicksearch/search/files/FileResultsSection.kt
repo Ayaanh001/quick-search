@@ -268,6 +268,11 @@ private fun FilesResultCard(
     val lazyListState = rememberLazyListState()
     val hasLazyListOverflow = lazyListState.canScrollForward || lazyListState.canScrollBackward
     val predictedFileUri = (predictedTarget as? PredictedSubmitTarget.File)?.uri
+    val hasPredictedFile =
+            predictedFileUri != null && files.any { it.uri.toString() == predictedFileUri }
+    val displayAsExpanded = isExpanded || showAllResults
+    val useCardLevelPrediction =
+            hasPredictedFile && (!displayAsExpanded || files.size == 1)
     val shouldUseLazyList = isExpanded && files.size > SearchScreenConstants.INITIAL_RESULT_COUNT
 
     Column(
@@ -278,6 +283,7 @@ private fun FilesResultCard(
                 resultCount = files.size,
                 isExpanded = isExpanded,
                 showAllResults = showAllResults,
+                isTopPredicted = useCardLevelPrediction,
                 showExpandControls = showExpandControls,
                 expandedCardMaxHeight = expandedCardMaxHeight,
                 hasScrollableContent = shouldUseLazyList && hasLazyListOverflow,
@@ -308,6 +314,7 @@ private fun FilesResultCard(
                     useLazyList = shouldUseLazyList,
                     lazyListState = lazyListState,
                     predictedFileUri = predictedFileUri,
+                    useCardLevelPrediction = useCardLevelPrediction,
                     bottomContentPadding =
                             if (cardState.shouldFillExpandedHeight) {
                                     DesignTokens.SpacingSmall
@@ -341,6 +348,7 @@ private fun FileCardContent(
         useLazyList: Boolean = false,
         lazyListState: androidx.compose.foundation.lazy.LazyListState,
         predictedFileUri: String?,
+        useCardLevelPrediction: Boolean,
         bottomContentPadding: Dp,
 ) {
     if (useLazyList) {
@@ -362,6 +370,7 @@ private fun FileCardContent(
                 val isPredictedFile =
                         predictedFileUri != null &&
                                 file.uri.toString() == predictedFileUri
+                val showPredictedOnRow = isPredictedFile && !useCardLevelPrediction
                 FileResultRow(
                         deviceFile = file,
                         onClick = onFileClick,
@@ -372,9 +381,9 @@ private fun FileCardContent(
                         onExcludeExtension = onExcludeExtension,
                         onNicknameClick = onNicknameClick,
                         hasNickname = !getFileNickname(file.uri.toString()).isNullOrBlank(),
-                        isPredicted = isPredictedFile,
+                        isPredicted = showPredictedOnRow,
                 )
-                if (index != displayFiles.lastIndex && !isPredictedFile) {
+                if (index != displayFiles.lastIndex && !showPredictedOnRow) {
                     HorizontalDivider(
                             modifier = Modifier.fillMaxWidth(),
                             color = overlayDividerColor ?: MaterialTheme.colorScheme.outlineVariant,
@@ -414,6 +423,7 @@ private fun FileCardContent(
                 val isPredictedFile =
                         predictedFileUri != null &&
                                 file.uri.toString() == predictedFileUri
+                val showPredictedOnRow = isPredictedFile && !useCardLevelPrediction
                 FileResultRow(
                         deviceFile = file,
                         onClick = onFileClick,
@@ -424,9 +434,9 @@ private fun FileCardContent(
                         onExcludeExtension = onExcludeExtension,
                         onNicknameClick = onNicknameClick,
                         hasNickname = !getFileNickname(file.uri.toString()).isNullOrBlank(),
-                        isPredicted = isPredictedFile,
+                        isPredicted = showPredictedOnRow,
                 )
-                if (index != displayFiles.lastIndex && !isPredictedFile) {
+                if (index != displayFiles.lastIndex && !showPredictedOnRow) {
                     HorizontalDivider(
                             modifier = Modifier.fillMaxWidth(),
                             color = overlayDividerColor ?: MaterialTheme.colorScheme.outlineVariant,

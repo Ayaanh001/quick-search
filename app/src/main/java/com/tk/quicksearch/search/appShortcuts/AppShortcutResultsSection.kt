@@ -89,6 +89,12 @@ fun AppShortcutResultsSection(
         if (shortcuts.isEmpty()) return
 
         val predictedShortcutId = (predictedTarget as? PredictedSubmitTarget.AppShortcut)?.id
+        val hasPredictedShortcut =
+                predictedShortcutId != null &&
+                        shortcuts.any { shortcut -> shortcutKey(shortcut) == predictedShortcutId }
+        val displayAsExpanded = isExpanded || showAllResults
+        val useCardLevelPrediction =
+                hasPredictedShortcut && (!displayAsExpanded || shortcuts.size == 1)
 
         val scrollState = rememberScrollState()
 
@@ -100,6 +106,7 @@ fun AppShortcutResultsSection(
                         resultCount = shortcuts.size,
                         isExpanded = isExpanded,
                         showAllResults = showAllResults,
+                        isTopPredicted = useCardLevelPrediction,
                         showExpandControls = showExpandControls,
                         expandedCardMaxHeight = expandedCardMaxHeight,
                         hasScrollableContent = scrollState.maxValue > 0,
@@ -139,6 +146,7 @@ fun AppShortcutResultsSection(
                                         shouldShowExpandButton = cardState.shouldShowExpandButton,
                                         onExpandClick = onExpandClick,
                                         predictedShortcutId = predictedShortcutId,
+                                        useCardLevelPrediction = useCardLevelPrediction,
                                         bottomContentPadding =
                                                 if (cardState.shouldFillExpandedHeight) {
                                                         DesignTokens.SpacingSmall
@@ -168,6 +176,7 @@ private fun AppShortcutsCardContent(
         shouldShowExpandButton: Boolean,
         onExpandClick: () -> Unit,
         predictedShortcutId: String?,
+        useCardLevelPrediction: Boolean,
         bottomContentPadding: Dp,
 ) {
         Column(
@@ -180,6 +189,8 @@ private fun AppShortcutsCardContent(
                                 val shortcutId = shortcutKey(shortcut)
                                 val isPredictedShortcut =
                                         predictedShortcutId != null && shortcutId == predictedShortcutId
+                                val showPredictedOnRow =
+                                        isPredictedShortcut && !useCardLevelPrediction
                                 AppShortcutRow(
                                         shortcut = shortcut,
                                         isPinned = pinnedShortcutIds.contains(shortcutId),
@@ -192,9 +203,9 @@ private fun AppShortcutsCardContent(
                                         onAppInfoClick = onAppInfoClick,
                                         onNicknameClick = onNicknameClick,
                                         iconPackPackage = iconPackPackage,
-                                        isPredicted = isPredictedShortcut,
+                                        isPredicted = showPredictedOnRow,
                                 )
-                                if (index < displayShortcuts.lastIndex && !isPredictedShortcut) {
+                                if (index < displayShortcuts.lastIndex && !showPredictedOnRow) {
                                         HorizontalDivider(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 color = overlayDividerColor

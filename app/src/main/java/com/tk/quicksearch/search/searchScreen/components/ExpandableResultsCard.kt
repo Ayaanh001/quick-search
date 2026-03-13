@@ -32,6 +32,7 @@ internal fun ExpandableResultsCard(
     resultCount: Int,
     isExpanded: Boolean,
     showAllResults: Boolean,
+    isTopPredicted: Boolean = false,
     showExpandControls: Boolean,
     expandedCardMaxHeight: Dp,
     hasScrollableContent: Boolean,
@@ -69,10 +70,17 @@ internal fun ExpandableResultsCard(
             AppColors.getCardColors(showWallpaperBackground = showWallpaperBackground)
         }
     val cardElevation = AppColors.getCardElevation(showWallpaperBackground = showWallpaperBackground)
+    val cardModifier =
+        modifier
+            .fillMaxWidth()
+            .predictedSubmitHighlight(
+                isPredicted = isTopPredicted,
+                shape = MaterialTheme.shapes.extraLarge,
+            )
 
     if (showWallpaperBackground) {
         Card(
-            modifier = modifier.fillMaxWidth(),
+            modifier = cardModifier,
             colors = cardColors,
             shape = MaterialTheme.shapes.extraLarge,
             elevation = cardElevation,
@@ -83,7 +91,7 @@ internal fun ExpandableResultsCard(
         }
     } else {
         ElevatedCard(
-            modifier = modifier.fillMaxWidth(),
+            modifier = cardModifier,
             colors = cardColors,
             shape = MaterialTheme.shapes.extraLarge,
             elevation = cardElevation,
