@@ -805,6 +805,8 @@ class SearchViewModel(
     fun handleOnStop() {
         if (clearQueryOnLaunch) {
             clearQuery()
+        } else if (pendingNavigationClear && _resultsState.value.query.isNotEmpty()) {
+            updateConfigState { it.copy(selectRetainedQuery = true) }
         }
         if (pendingNavigationClear) {
             pendingNavigationClear = false
@@ -2431,6 +2433,12 @@ class SearchViewModel(
     fun clearQuery() {
         clearDetectedAliasMode()
         onQueryChangeInternal("", clearShortcutWhenBlank = true)
+    }
+
+    fun consumeRetainedQuerySelectionRequest() {
+        if (_configState.value.selectRetainedQuery) {
+            updateConfigState { it.copy(selectRetainedQuery = false) }
+        }
     }
 
     fun onSettingsImported() {

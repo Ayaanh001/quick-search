@@ -181,6 +181,7 @@ data class SearchUiConfigState(
         val topResultIndicatorEnabled: Boolean = true,
         val openKeyboardOnLaunch: Boolean = true,
         val clearQueryOnLaunch: Boolean = true,
+        val selectRetainedQuery: Boolean = false,
         val fontScaleMultiplier: Float = UiPreferences.DEFAULT_FONT_SCALE_MULTIPLIER,
         // App display preferences
         val showAppLabels: Boolean = true,

@@ -389,6 +389,7 @@ fun SearchRoute(
                 },
             state = uiState,
             onQueryChanged = viewModel::onQueryChange,
+            onSelectRetainedQueryHandled = viewModel::consumeRetainedQuerySelectionRequest,
             onClearQuery = viewModel::clearQuery,
             onRequestUsagePermission = { viewModel.openUsageAccessSettings() },
             onSettingsClick = onSettingsClick,

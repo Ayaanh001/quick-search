@@ -105,6 +105,8 @@ private val AliasMorphVerticalTravel = DesignTokens.SpacingXXSmall
 @Composable
 internal fun PersistentSearchBar(
     query: String,
+    selectRetainedQuery: Boolean,
+    onSelectRetainedQueryHandled: () -> Unit,
     onQueryChange: (String) -> Unit,
     onClearQuery: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -200,6 +202,18 @@ internal fun PersistentSearchBar(
                 )
         }
         previousLeadingIconState = leadingIconState
+    }
+
+    LaunchedEffect(selectRetainedQuery, query) {
+        if (!selectRetainedQuery) return@LaunchedEffect
+        if (query.isNotEmpty()) {
+            textFieldValue =
+                textFieldValue.copy(
+                    text = query,
+                    selection = TextRange(0, query.length),
+                )
+        }
+        onSelectRetainedQueryHandled()
     }
 
     LaunchedEffect(aliasMorphText) {

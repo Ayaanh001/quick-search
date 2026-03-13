@@ -67,6 +67,7 @@ internal fun SearchScreenContent(
         calendarParams: CalendarSectionParams,
         appsParams: AppsSectionParams,
         onQueryChanged: (String) -> Unit,
+        onSelectRetainedQueryHandled: () -> Unit,
         onClearQuery: () -> Unit,
         onSettingsClick: () -> Unit,
         onAppClick: (com.tk.quicksearch.search.models.AppInfo) -> Unit,
@@ -305,6 +306,8 @@ internal fun SearchScreenContent(
     val searchFieldContent: @Composable () -> Unit = {
         PersistentSearchBar(
                 query = state.query,
+                selectRetainedQuery = state.selectRetainedQuery,
+                onSelectRetainedQueryHandled = onSelectRetainedQueryHandled,
                 onQueryChange = onQueryChanged,
                 onClearQuery = onClearQuery,
                 onSettingsClick = onSettingsClick,

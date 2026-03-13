@@ -70,6 +70,8 @@ internal fun PersonalContextHintBanner(
 @Composable
 internal fun PersistentSearchBar(
     query: String,
+    selectRetainedQuery: Boolean,
+    onSelectRetainedQueryHandled: () -> Unit,
     onQueryChange: (String) -> Unit,
     onClearQuery: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -93,6 +95,8 @@ internal fun PersistentSearchBar(
     modifier: Modifier = Modifier,
 ) = com.tk.quicksearch.search.searchScreen.components.PersistentSearchBar(
     query = query,
+    selectRetainedQuery = selectRetainedQuery,
+    onSelectRetainedQueryHandled = onSelectRetainedQueryHandled,
     onQueryChange = onQueryChange,
     onClearQuery = onClearQuery,
     onSettingsClick = onSettingsClick,
