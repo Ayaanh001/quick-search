@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.graphics.drawable.toBitmap
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.managers.IconPackManager
+import com.tk.quicksearch.shared.ui.theme.AppColors
 
 data class WidgetButtonIcon(
     val bitmap: Bitmap? = null,
@@ -168,11 +169,11 @@ private fun loadContactBitmap(
 
     val (backgroundColor, textColor) =
         if (isDarkTheme) {
-            // Dark theme: primaryContainer #4F378B, onPrimaryContainer #EADDFF
-            android.graphics.Color.parseColor("#4F378B") to android.graphics.Color.parseColor("#EADDFF")
+            AppColors.WidgetContactAvatarDarkBackground.toArgb() to
+                AppColors.WidgetContactAvatarDarkOnBackground.toArgb()
         } else {
-            // Light theme: primaryContainer #EADDFF, onPrimaryContainer #21005D
-            android.graphics.Color.parseColor("#EADDFF") to android.graphics.Color.parseColor("#21005D")
+            AppColors.WidgetContactAvatarLightBackground.toArgb() to
+                AppColors.WidgetContactAvatarLightOnBackground.toArgb()
         }
 
     return createInitialsBitmap(initials, iconSizePx, backgroundColor, textColor)
@@ -247,7 +248,7 @@ private fun createVectorBitmap(
     // For a simple fallback, create a basic person icon representation
     val paint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.Gray.toArgb()
+            color = AppColors.WidgetTextDarkGrey.toArgb()
             style = Paint.Style.FILL
         }
 

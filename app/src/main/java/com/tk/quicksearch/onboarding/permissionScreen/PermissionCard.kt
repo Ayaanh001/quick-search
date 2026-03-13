@@ -21,13 +21,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
+import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticToggle
-
-/**
- * Color for granted checkmark - Material Green (same as phone action color)
- */
-private val GrantedCheckmarkColor = DesignTokens.ColorPhone
 
 data class PermissionCardItem(
     val title: String,
@@ -121,7 +117,7 @@ fun PermissionItem(
             Icon(
                 imageVector = Icons.Rounded.CheckCircle,
                 contentDescription = stringResource(R.string.permissions_granted),
-                tint = GrantedCheckmarkColor,
+                tint = AppColors.ActionPhone,
                 modifier =
                     Modifier
                         .padding(start = DesignTokens.SpacingLarge)

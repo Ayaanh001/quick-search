@@ -80,7 +80,7 @@ internal fun SearchEngineOnboardingOverlay(
                                                                     AppColors.OnboardingScrimTop,
                                                                     AppColors.OnboardingScrimMiddle,
                                                                     AppColors.OnboardingScrimBottom,
-                                                                    Color.Transparent,
+                                                                    AppColors.AppBackgroundTransparent,
                                                             ),
                                                     startY = 0f,
                                                     endY = Float.POSITIVE_INFINITY,
@@ -108,6 +108,9 @@ private fun OnboardingContent(
         showStartSearchingButton: Boolean = false,
         modifier: Modifier = Modifier,
 ) {
+    val bubbleBackgroundColor = AppColors.DialogBackground
+    val bubbleBorderColor = AppColors.OnboardingBubbleBorder
+
     Box(
             modifier = modifier.fillMaxWidth(),
     ) {
@@ -230,13 +233,13 @@ private fun OnboardingContent(
                                     // Fill
                                     drawPath(
                                             path = path,
-                                            color = Color.Black,
+                                            color = bubbleBackgroundColor,
                                     )
 
                                     // Border
                                     drawPath(
                                             path = path,
-                                            color = AppColors.OnboardingBubbleBorder,
+                                            color = bubbleBorderColor,
                                             style = Stroke(width = borderWidth),
                                     )
                                 }
@@ -258,7 +261,7 @@ private fun OnboardingContent(
                         text = stringResource(R.string.search_engine_onboarding_title),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = AppColors.DialogText,
                         textAlign = TextAlign.Center,
                 )
 
@@ -305,7 +308,7 @@ private fun OnboardingContent(
             Icon(
                     imageVector = Icons.Rounded.Close,
                     contentDescription = stringResource(R.string.desc_close),
-                    tint = Color.White,
+                    tint = AppColors.DialogText,
                     modifier = Modifier.size(DesignTokens.IconSizeSmall),
             )
         }

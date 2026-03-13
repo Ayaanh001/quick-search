@@ -140,8 +140,7 @@ internal fun PersistentSearchBar(
         } else {
             AppColors.SearchBarBackground
         }
-    // Light color for icons and text on dark grey background
-    val iconAndTextColor = DesignTokens.ColorSearchText
+    val iconAndTextColor = AppColors.SearchBarTextAndIcon
     val isAliasDetected =
         detectedShortcutTarget != null || detectedAliasSearchSection != null || activeToolType != null
     val aliasVisualTransformation =
@@ -583,12 +582,12 @@ internal fun PersistentSearchBar(
                 ),
             colors =
                 TextFieldDefaults.colors(
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
+                    unfocusedIndicatorColor = AppColors.AppBackgroundTransparent,
+                    focusedIndicatorColor = AppColors.AppBackgroundTransparent,
+                    disabledIndicatorColor = AppColors.AppBackgroundTransparent,
+                    focusedContainerColor = AppColors.AppBackgroundTransparent,
+                    unfocusedContainerColor = AppColors.AppBackgroundTransparent,
+                    disabledContainerColor = AppColors.AppBackgroundTransparent,
                     focusedTextColor = iconAndTextColor,
                     unfocusedTextColor = iconAndTextColor,
                 ),

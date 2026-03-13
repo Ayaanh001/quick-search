@@ -2,6 +2,7 @@ package com.tk.quicksearch.widgets.utils
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import com.tk.quicksearch.shared.ui.theme.AppColors
 
 /**
  * Utility functions for widget color calculations.
@@ -13,16 +14,16 @@ object WidgetColorUtils {
      */
     private const val ALPHA_THRESHOLD = 0.6f
 
-    /**
-     * Dark grey color used for text/icons on white backgrounds with high alpha.
-     */
-    private val DARK_GREY = Color(0xFF424242)
-
     fun getBackgroundColor(
         backgroundColorIsWhite: Boolean,
         backgroundAlpha: Float,
     ): Color {
-        val baseColor = if (backgroundColorIsWhite) Color.White else Color.Black
+        val baseColor =
+            if (backgroundColorIsWhite) {
+                AppColors.WidgetBackgroundLight
+            } else {
+                AppColors.WidgetBackgroundDark
+            }
         return baseColor.copy(alpha = backgroundAlpha)
     }
 
@@ -53,7 +54,7 @@ object WidgetColorUtils {
     ): Color {
         // Keep some transparency even if the user picks a fully opaque border.
         val appliedAlpha = borderAlpha.coerceAtMost(0.4f)
-        return Color.White.copy(alpha = appliedAlpha)
+        return AppColors.WidgetBorder.copy(alpha = appliedAlpha)
     }
 
     /**
@@ -65,9 +66,13 @@ object WidgetColorUtils {
     ): Color {
         val base =
             if (textIconColorIsWhite) {
-                Color.White
+                AppColors.WidgetTextLight
             } else {
-                if (backgroundAlpha > ALPHA_THRESHOLD) DARK_GREY else Color.Black
+                if (backgroundAlpha > ALPHA_THRESHOLD) {
+                    AppColors.WidgetTextDarkGrey
+                } else {
+                    AppColors.WidgetTextDark
+                }
             }
         return base
     }

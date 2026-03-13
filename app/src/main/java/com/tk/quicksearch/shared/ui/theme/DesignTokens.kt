@@ -2,7 +2,6 @@ package com.tk.quicksearch.shared.ui.theme
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
@@ -200,49 +199,6 @@ object DesignTokens {
     val ElevationLevel3 = 6.dp
     val ElevationLevel4 = 8.dp
     val ElevationLevel5 = 12.dp
-
-    // ============================================================================
-    // SEMANTIC COLORS
-    // Note: In Material 3, prefer extracting colors from MaterialTheme.colorScheme
-    // ============================================================================
-
-    /**
-     * Success/Phone action color - Material Green Use for: Phone call actions, success states,
-     * positive indicators
-     */
-    val ColorPhone = Color(0xFF4CAF50)
-
-    /** Info/SMS action color - Material Blue Use for: SMS actions, information states, links */
-    val ColorSms = Color(0xFF2196F3)
-
-    /** WhatsApp brand color Use for: WhatsApp-related actions and icons */
-    val ColorWhatsApp = Color(0xFF25D366)
-
-    /** Telegram brand color Use for: Telegram-related actions and icons */
-    val ColorTelegram = Color(0xFF0088CC)
-
-    /** Signal brand color Use for: Signal-related actions and icons */
-    val ColorSignal = Color(0xFF3B45FD)
-
-    /** Email action color - Material Orange Use for: Email actions, warnings */
-    val ColorEmail = Color(0xFFFF9800)
-
-    /**
-     * Video call action color - Material Purple Use for: Video call actions, premium features
-     */
-    val ColorVideoCall = Color(0xFF9C27B0)
-
-    /** Custom/neutral action color - Blue Gray Use for: Custom apps, neutral actions */
-    val ColorCustom = Color(0xFF607D8B)
-
-    /** Secondary/view action color - Gray Use for: View actions, secondary buttons */
-    val ColorView = Color(0xFF9E9E9E)
-
-    /**
-     * Search bar text and icon color Use for: Search input text, search icons on dark
-     * backgrounds
-     */
-    val ColorSearchText = Color(0xFFE0E0E0)
 
     // ============================================================================
     // DRAG AND DROP

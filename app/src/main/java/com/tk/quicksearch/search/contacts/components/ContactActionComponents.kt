@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.models.ContactMethod
+import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 // ============================================================================
@@ -46,35 +47,38 @@ internal fun ContactActionButton(
 ) {
     val iconColor =
         when (method) {
-            is ContactMethod.Phone -> DesignTokens.ColorPhone
+            is ContactMethod.Phone -> AppColors.ActionPhone
 
-            is ContactMethod.Sms -> DesignTokens.ColorSms
+            is ContactMethod.Sms -> AppColors.ActionSms
 
             is ContactMethod.WhatsAppCall,
             is ContactMethod.WhatsAppMessage,
             is ContactMethod.WhatsAppVideoCall,
-            -> DesignTokens.ColorWhatsApp
+            -> AppColors.ActionWhatsApp
 
             is ContactMethod.TelegramMessage,
             is ContactMethod.TelegramCall,
             is ContactMethod.TelegramVideoCall,
-            -> DesignTokens.ColorTelegram
+            -> AppColors.ActionTelegram
 
             is ContactMethod.SignalMessage,
             is ContactMethod.SignalCall,
             is ContactMethod.SignalVideoCall,
-            -> DesignTokens.ColorSignal
+            -> AppColors.ActionSignal
 
             is ContactMethod.GoogleMeet -> Color.Unspecified
 
-            is ContactMethod.Email -> DesignTokens.ColorEmail
+            is ContactMethod.Email -> AppColors.ActionEmail
 
-            is ContactMethod.VideoCall -> DesignTokens.ColorVideoCall
+            is ContactMethod.VideoCall -> AppColors.ActionVideoCall
 
-            is ContactMethod.CustomApp -> DesignTokens.ColorCustom
+            is ContactMethod.CustomApp -> AppColors.ActionCustom
 
-            is ContactMethod.ViewInContactsApp -> DesignTokens.ColorView
+            is ContactMethod.ViewInContactsApp -> AppColors.ActionView
         }
+    val actionButtonBorderColor = AppColors.OnboardingBubbleBorder
+    val actionButtonContainerColor = AppColors.OverlayLow
+    val actionButtonTextColor = AppColors.DialogText
 
     Surface(
         modifier =
@@ -84,11 +88,11 @@ internal fun ContactActionButton(
                 .combinedClickable(onClick = onClick, onLongClick = onLongClick)
                 .border(
                     width = DesignTokens.BorderWidth,
-                    color = Color.White.copy(alpha = 0.3f),
+                    color = actionButtonBorderColor,
                     shape = DesignTokens.ShapeSmall,
                 ),
         shape = DesignTokens.ShapeSmall,
-        color = Color.White.copy(alpha = 0.1f),
+        color = actionButtonContainerColor,
     ) {
         Column(
             modifier =
@@ -106,7 +110,7 @@ internal fun ContactActionButton(
             Text(
                 text = getActionButtonLabel(method),
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.White,
+                color = actionButtonTextColor,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 lineHeight = MaterialTheme.typography.bodySmall.lineHeight * 0.9f,

@@ -5,102 +5,239 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
- * Centralized color definitions for the QuickSearch app.
- * Contains all colors used throughout the application including backgrounds, text, overlays, and theme colors.
+ * Theme-aware app-specific color tokens.
+ *
+ * Material colors remain in [MaterialTheme.colorScheme]. This file centralizes custom semantic
+ * colors and non-Material palettes used across feature modules.
  */
+@Immutable
+internal data class QuickSearchAppColorPalette(
+    val searchBarBackground: Color,
+    val searchBarBorder: Color,
+    val searchBarTextAndIcon: Color,
+    val settingsCardBackground: Color,
+    val settingsText: Color,
+    val overlayLow: Color,
+    val overlayMedium: Color,
+    val overlayHigh: Color,
+    val overlayVeryHigh: Color,
+    val dialogBackground: Color,
+    val dialogText: Color,
+    val onboardingScrimTop: Color,
+    val onboardingScrimMiddle: Color,
+    val onboardingScrimBottom: Color,
+    val onboardingBubbleBorder: Color,
+    val onboardingBubbleBodyText: Color,
+    val actionPhone: Color,
+    val actionSms: Color,
+    val actionWhatsApp: Color,
+    val actionTelegram: Color,
+    val actionSignal: Color,
+    val actionEmail: Color,
+    val actionVideoCall: Color,
+    val actionCustom: Color,
+    val actionView: Color,
+)
+
+internal val DarkQuickSearchAppColorPalette =
+    QuickSearchAppColorPalette(
+        searchBarBackground = Color.Black.copy(alpha = 0.5f),
+        searchBarBorder = Color.White.copy(alpha = 0.3f),
+        searchBarTextAndIcon = Color(0xFFE0E0E0),
+        settingsCardBackground = Color.Black.copy(alpha = 0.4f),
+        settingsText = Color.White,
+        overlayLow = Color.Black.copy(alpha = 0.2f),
+        overlayMedium = Color.Black.copy(alpha = 0.4f),
+        overlayHigh = Color.Black.copy(alpha = 0.5f),
+        overlayVeryHigh = Color.Black.copy(alpha = 0.75f),
+        dialogBackground = Color.Black,
+        dialogText = Color.White,
+        onboardingScrimTop = Color.Black.copy(alpha = 0.7f),
+        onboardingScrimMiddle = Color.Black.copy(alpha = 0.5f),
+        onboardingScrimBottom = Color.Black.copy(alpha = 0.2f),
+        onboardingBubbleBorder = Color.White.copy(alpha = 0.3f),
+        onboardingBubbleBodyText = Color.White.copy(alpha = 0.9f),
+        actionPhone = Color(0xFF4CAF50),
+        actionSms = Color(0xFF2196F3),
+        actionWhatsApp = Color(0xFF25D366),
+        actionTelegram = Color(0xFF0088CC),
+        actionSignal = Color(0xFF3B45FD),
+        actionEmail = Color(0xFFFF9800),
+        actionVideoCall = Color(0xFF9C27B0),
+        actionCustom = Color(0xFF607D8B),
+        actionView = Color(0xFF9E9E9E),
+    )
+
+internal val LightQuickSearchAppColorPalette =
+    QuickSearchAppColorPalette(
+        searchBarBackground = Color.Black.copy(alpha = 0.08f),
+        searchBarBorder = Color.Black.copy(alpha = 0.24f),
+        searchBarTextAndIcon = Color(0xFF1F1B24),
+        settingsCardBackground = Color.Black.copy(alpha = 0.06f),
+        settingsText = Color(0xFF1F1B24),
+        overlayLow = Color.Black.copy(alpha = 0.08f),
+        overlayMedium = Color.Black.copy(alpha = 0.16f),
+        overlayHigh = Color.Black.copy(alpha = 0.24f),
+        overlayVeryHigh = Color.Black.copy(alpha = 0.6f),
+        dialogBackground = Color(0xFFF8F7FB),
+        dialogText = Color(0xFF1F1B24),
+        onboardingScrimTop = Color.Black.copy(alpha = 0.62f),
+        onboardingScrimMiddle = Color.Black.copy(alpha = 0.4f),
+        onboardingScrimBottom = Color.Black.copy(alpha = 0.14f),
+        onboardingBubbleBorder = Color.Black.copy(alpha = 0.2f),
+        onboardingBubbleBodyText = Color.White.copy(alpha = 0.92f),
+        actionPhone = Color(0xFF4CAF50),
+        actionSms = Color(0xFF2196F3),
+        actionWhatsApp = Color(0xFF25D366),
+        actionTelegram = Color(0xFF0088CC),
+        actionSignal = Color(0xFF3B45FD),
+        actionEmail = Color(0xFFFF9800),
+        actionVideoCall = Color(0xFF9C27B0),
+        actionCustom = Color(0xFF607D8B),
+        actionView = Color(0xFF9E9E9E),
+    )
+
+internal val LocalQuickSearchAppColorPalette =
+    staticCompositionLocalOf<QuickSearchAppColorPalette> {
+        DarkQuickSearchAppColorPalette
+    }
+
 object AppColors {
-    // ============================================================================
-    // THEME COLORS (PURPLE THEME)
-    // ============================================================================
+    // Theme-aware semantic colors ------------------------------------------------------------
 
-    /** Primary purple theme color - Deep Purple */
-    val ThemeDeepPurple = Color(0xFF651FFF)
+    private val current: QuickSearchAppColorPalette
+        @Composable
+        get() = LocalQuickSearchAppColorPalette.current
 
-    /** Secondary purple theme color - Neon Purple */
-    val ThemeNeonPurple = Color(0xFFD500F9)
+    val SearchBarBackground: Color
+        @Composable
+        get() = current.searchBarBackground
 
-    /** Tertiary purple theme color - Indigo (bridge to purple) */
-    val ThemeIndigo = Color(0xFF5E35B1)
+    val SearchBarBorder: Color
+        @Composable
+        get() = current.searchBarBorder
 
-    /** Quaternary purple theme color - Purple (bridge to red) */
-    val ThemePurple = Color(0xFF9C27B0)
+    val SearchBarTextAndIcon: Color
+        @Composable
+        get() = current.searchBarTextAndIcon
 
-    // ============================================================================
-    // APP BACKGROUND COLORS
-    // ============================================================================
+    val SettingsBackground: Color = Color.Transparent
 
-    /** Main app background color (transparent for wallpaper mode) */
-    val AppBackgroundTransparent = Color.Transparent
+    val SettingsCardBackground: Color
+        @Composable
+        get() = current.settingsCardBackground
 
-    /** Dark app background color */
-    val AppBackgroundDark = Color(0xFF121212)
+    val SettingsText: Color
+        @Composable
+        get() = current.settingsText
 
-    // ============================================================================
-    // SEARCH BAR COLORS
-    // ============================================================================
+    val OverlayLow: Color
+        @Composable
+        get() = current.overlayLow
 
-    /** Search bar background color with transparency */
-    val SearchBarBackground = Color.Black.copy(alpha = 0.5f)
+    val OverlayMedium: Color
+        @Composable
+        get() = current.overlayMedium
 
-    /** Search bar border color with transparency */
-    val SearchBarBorder = Color.White.copy(alpha = 0.3f)
+    val OverlayHigh: Color
+        @Composable
+        get() = current.overlayHigh
 
-    /** Search bar text and icon color for dark backgrounds */
-    val SearchBarTextAndIcon = Color(0xFFE0E0E0)
+    val OverlayVeryHigh: Color
+        @Composable
+        get() = current.overlayVeryHigh
 
-    // ============================================================================
-    // SETTINGS COLORS
-    // ============================================================================
+    val DialogBackground: Color
+        @Composable
+        get() = current.dialogBackground
 
-    /** Settings background color */
-    val SettingsBackground = Color.Transparent
+    val DialogText: Color
+        @Composable
+        get() = current.dialogText
 
-    /** Settings option card background color */
-    val SettingsCardBackground = Color.Black.copy(alpha = 0.4f)
+    val OnboardingScrimTop: Color
+        @Composable
+        get() = current.onboardingScrimTop
 
-    /** Settings text color */
-    val SettingsText = Color.White
+    val OnboardingScrimMiddle: Color
+        @Composable
+        get() = current.onboardingScrimMiddle
 
-    // ============================================================================
-    // OVERLAY AND TRANSPARENCY COLORS
-    // ============================================================================
+    val OnboardingScrimBottom: Color
+        @Composable
+        get() = current.onboardingScrimBottom
 
-    /** Standard overlay color with low transparency */
-    val OverlayLow = Color.Black.copy(alpha = 0.2f)
+    val OnboardingBubbleBorder: Color
+        @Composable
+        get() = current.onboardingBubbleBorder
 
-    /** Medium overlay color */
-    val OverlayMedium = Color.Black.copy(alpha = 0.4f)
+    val OnboardingBubbleBodyText: Color
+        @Composable
+        get() = current.onboardingBubbleBodyText
 
-    /** High overlay color */
-    val OverlayHigh = Color.Black.copy(alpha = 0.5f)
+    val ActionPhone: Color
+        @Composable
+        get() = current.actionPhone
 
-    /** Very high overlay color for dialogs */
-    val OverlayVeryHigh = Color.Black.copy(alpha = 0.75f)
+    val ActionSms: Color
+        @Composable
+        get() = current.actionSms
 
-    /** Dialog background color */
-    val DialogBackground = Color.Black
+    val ActionWhatsApp: Color
+        @Composable
+        get() = current.actionWhatsApp
 
-    /** Dialog text color */
-    val DialogText = Color.White
+    val ActionTelegram: Color
+        @Composable
+        get() = current.actionTelegram
 
-    /** Search onboarding scrim gradient start */
-    val OnboardingScrimTop = Color.Black.copy(alpha = 0.7f)
+    val ActionSignal: Color
+        @Composable
+        get() = current.actionSignal
 
-    /** Search onboarding scrim gradient middle */
-    val OnboardingScrimMiddle = Color.Black.copy(alpha = 0.5f)
+    val ActionEmail: Color
+        @Composable
+        get() = current.actionEmail
 
-    /** Search onboarding scrim gradient lower stop */
-    val OnboardingScrimBottom = Color.Black.copy(alpha = 0.2f)
+    val ActionVideoCall: Color
+        @Composable
+        get() = current.actionVideoCall
 
-    /** Speech bubble border color used in search onboarding overlays */
-    val OnboardingBubbleBorder = Color.White.copy(alpha = 0.3f)
+    val ActionCustom: Color
+        @Composable
+        get() = current.actionCustom
 
-    /** Secondary text color used inside search onboarding bubble */
-    val OnboardingBubbleBodyText = Color.White.copy(alpha = 0.9f)
+    val ActionView: Color
+        @Composable
+        get() = current.actionView
+
+    // Shared/static tokens -----------------------------------------------------------------
+
+    val AppBackgroundTransparent: Color = Color.Transparent
+    val AppBackgroundDark: Color = Color(0xFF121212)
+
+    val ThemeDeepPurple: Color = Color(0xFF651FFF)
+    val ThemeNeonPurple: Color = Color(0xFFD500F9)
+    val ThemeIndigo: Color = Color(0xFF5E35B1)
+    val ThemePurple: Color = Color(0xFF9C27B0)
+
+    val WidgetTextDarkGrey: Color = Color(0xFF424242)
+    val WidgetBorderDefault: Color = Color.Black
+    val WidgetBorder: Color = Color.White
+    val WidgetBackgroundLight: Color = Color.White
+    val WidgetBackgroundDark: Color = Color.Black
+    val WidgetTextLight: Color = Color.White
+    val WidgetTextDark: Color = Color.Black
+    val WidgetContactAvatarDarkBackground: Color = md_theme_dark_primaryContainer
+    val WidgetContactAvatarDarkOnBackground: Color = md_theme_dark_onPrimaryContainer
+    val WidgetContactAvatarLightBackground: Color = md_theme_light_primaryContainer
+    val WidgetContactAvatarLightOnBackground: Color = md_theme_light_onPrimaryContainer
 
     // ============================================================================
     // SEARCH FIELD WELCOME PALETTES

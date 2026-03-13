@@ -50,6 +50,7 @@ import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
 import com.tk.quicksearch.search.searchScreen.components.topPredictedRowContainer
 import com.tk.quicksearch.search.searchScreen.components.topPredictedRowContentPadding
+import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticConfirm
 import kotlinx.coroutines.Dispatchers
@@ -360,7 +361,7 @@ private fun ContactActionButtons(
                                                                 ),
                                                         tint =
                                                                 if (hasNumber) {
-                                                                        Color.White
+                                                                        AppColors.DialogText
                                                                 } else {
                                                                         MaterialTheme.colorScheme
                                                                                 .onSurfaceVariant
@@ -450,7 +451,7 @@ private fun ContactActionButtons(
                                                                 ),
                                                         tint =
                                                                 if (hasNumber) {
-                                                                        Color.White
+                                                                        AppColors.DialogText
                                                                 } else {
                                                                         MaterialTheme.colorScheme
                                                                                 .onSurfaceVariant
@@ -529,7 +530,7 @@ private fun ContactActionButtons(
                                                                 ),
                                                         tint =
                                                                 if (hasNumber) {
-                                                                        DesignTokens.ColorSignal
+                                                                        AppColors.ActionSignal
                                                                 } else {
                                                                         MaterialTheme.colorScheme
                                                                                 .onSurfaceVariant
@@ -563,7 +564,7 @@ private fun ContactActionIconForButton(
         enabled: Boolean,
 ) {
         val tint = if (enabled) Color.Unspecified else MaterialTheme.colorScheme.onSurfaceVariant
-        val whiteTint = if (enabled) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+        val whiteTint = if (enabled) AppColors.DialogText else MaterialTheme.colorScheme.onSurfaceVariant
         val modifier = Modifier.size(ContactUiConstants.ACTION_ICON_SIZE.dp)
         val smsModifier = Modifier.size((ContactUiConstants.ACTION_ICON_SIZE * 0.9f).dp)
 

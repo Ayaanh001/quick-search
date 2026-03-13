@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.widgets.customButtonsWidget.CustomWidgetButtonAction
 import com.tk.quicksearch.widgets.searchWidget.MicAction
 import com.tk.quicksearch.widgets.searchWidget.MicAction.OFF
@@ -53,7 +54,7 @@ internal object WidgetButtonSlotConfig {
 }
 
 internal object WidgetDefaults {
-    val BORDER_COLOR = Color.Black
+    val BORDER_COLOR = AppColors.WidgetBorderDefault
     val BORDER_COLOR_ARGB = BORDER_COLOR.toArgb()
     const val BORDER_RADIUS_DP = 29f
     const val BORDER_WIDTH_DP = 1.5f

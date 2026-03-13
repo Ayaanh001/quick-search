@@ -35,12 +35,18 @@ fun AliasPill(
     onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = MaterialTheme.typography.bodySmall,
-    textColor: Color = AppColors.DialogText,
+    textColor: Color = Color.Unspecified,
     showBackground: Boolean = true,
     leadingIcon: ImageVector? = null,
     iconTextSpacing: Dp = DesignTokens.SpacingXSmall,
     onClearClick: (() -> Unit)? = null,
 ) {
+    val resolvedTextColor =
+        if (textColor == Color.Unspecified) {
+            AppColors.DialogText
+        } else {
+            textColor
+        }
     val shouldUseSurfaceClick = onClick != null && onClearClick == null
     Surface(
         modifier =
@@ -59,7 +65,7 @@ fun AliasPill(
             if (showBackground) {
                 AppColors.DialogBackground.copy(alpha = PILL_BACKGROUND_ALPHA)
             } else {
-                Color.Transparent
+                AppColors.AppBackgroundTransparent
             },
         tonalElevation = DesignTokens.ElevationLevel0,
     ) {
@@ -101,7 +107,7 @@ fun AliasPill(
                     Icon(
                         imageVector = leadingIcon,
                         contentDescription = null,
-                        tint = textColor,
+                        tint = resolvedTextColor,
                         modifier = Modifier.size(ALIAS_ICON_SIZE),
                     )
                 }
@@ -109,7 +115,7 @@ fun AliasPill(
                 Text(
                     text = text,
                     style = textStyle,
-                    color = textColor,
+                    color = resolvedTextColor,
                 )
             }
 
@@ -117,7 +123,7 @@ fun AliasPill(
                 Icon(
                     imageVector = Icons.Rounded.Close,
                     contentDescription = null,
-                    tint = textColor,
+                    tint = resolvedTextColor,
                     modifier =
                         Modifier
                             .padding(start = DesignTokens.SpacingSmall)
