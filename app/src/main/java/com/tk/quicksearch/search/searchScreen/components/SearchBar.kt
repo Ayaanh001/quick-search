@@ -261,7 +261,7 @@ internal fun PersistentSearchBar(
             )
         }
 
-    LaunchedEffect(showWelcomeAnimation) {
+    LaunchedEffect(showWelcomeAnimation, query.isEmpty()) {
         if (showWelcomeAnimation) {
             // Setup Start State
             glowAlpha.snapTo(1f)
@@ -294,7 +294,7 @@ internal fun PersistentSearchBar(
             }
             launch {
                 borderAlpha.animateTo(
-                    targetValue = DesignTokens.SearchFieldBorderAlphaDefault,
+                    targetValue = if (query.isEmpty()) 1f else DesignTokens.SearchFieldBorderAlphaDefault,
                     animationSpec = tween(DesignTokens.AnimationDurationFast, easing = LinearOutSlowInEasing),
                 )
             }
@@ -302,6 +302,22 @@ internal fun PersistentSearchBar(
             // Wait for fade out to complete, then reset the animation flag
             delay(DesignTokens.AnimationDurationFast.toLong())
             onWelcomeAnimationCompleted?.invoke()
+        } else if (query.isEmpty()) {
+            while (true) {
+                borderAlpha.animateTo(
+                    targetValue = 0.60f,
+                    animationSpec = tween(durationMillis = 4000, easing = LinearOutSlowInEasing)
+                )
+                borderAlpha.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(durationMillis = 2000, easing = LinearOutSlowInEasing)
+                )
+            }
+        } else {
+            borderAlpha.animateTo(
+                targetValue = DesignTokens.SearchFieldBorderAlphaDefault,
+                animationSpec = tween(durationMillis = DesignTokens.AnimationDurationFast, easing = LinearOutSlowInEasing)
+            )
         }
     }
     // Palettes are centralized in AppColors to keep color tokens out of feature files.
