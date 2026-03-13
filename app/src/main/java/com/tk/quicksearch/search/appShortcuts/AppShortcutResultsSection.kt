@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -175,29 +176,31 @@ private fun AppShortcutsCardContent(
                                 .padding(bottom = bottomContentPadding),
         ) {
                 displayShortcuts.forEachIndexed { index, shortcut ->
-                        val shortcutId = shortcutKey(shortcut)
-                        val isPredictedShortcut =
-                                predictedShortcutId != null && shortcutId == predictedShortcutId
-                        AppShortcutRow(
-                                shortcut = shortcut,
-                                isPinned = pinnedShortcutIds.contains(shortcutId),
-                                isExcluded = excludedShortcutIds.contains(shortcutId),
-                                hasNickname = !getShortcutNickname(shortcutId).isNullOrBlank(),
-                                onShortcutClick = onShortcutClick,
-                                onTogglePin = onTogglePin,
-                                onExclude = onExclude,
-                                onInclude = onInclude,
-                                onAppInfoClick = onAppInfoClick,
-                                onNicknameClick = onNicknameClick,
-                                iconPackPackage = iconPackPackage,
-                                isPredicted = isPredictedShortcut,
-                        )
-                        if (index < displayShortcuts.lastIndex && !isPredictedShortcut) {
-                                HorizontalDivider(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        color = overlayDividerColor
-                                                        ?: MaterialTheme.colorScheme.outlineVariant,
+                        key(shortcutKey(shortcut)) {
+                                val shortcutId = shortcutKey(shortcut)
+                                val isPredictedShortcut =
+                                        predictedShortcutId != null && shortcutId == predictedShortcutId
+                                AppShortcutRow(
+                                        shortcut = shortcut,
+                                        isPinned = pinnedShortcutIds.contains(shortcutId),
+                                        isExcluded = excludedShortcutIds.contains(shortcutId),
+                                        hasNickname = !getShortcutNickname(shortcutId).isNullOrBlank(),
+                                        onShortcutClick = onShortcutClick,
+                                        onTogglePin = onTogglePin,
+                                        onExclude = onExclude,
+                                        onInclude = onInclude,
+                                        onAppInfoClick = onAppInfoClick,
+                                        onNicknameClick = onNicknameClick,
+                                        iconPackPackage = iconPackPackage,
+                                        isPredicted = isPredictedShortcut,
                                 )
+                                if (index < displayShortcuts.lastIndex && !isPredictedShortcut) {
+                                        HorizontalDivider(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                color = overlayDividerColor
+                                                                ?: MaterialTheme.colorScheme.outlineVariant,
+                                        )
+                                }
                         }
                 }
 
@@ -245,6 +248,7 @@ internal fun AppShortcutRow(
                         iconPackPackage = iconPackPackage
                 )
         val displayIcon = iconBitmap ?: appIconResult.bitmap
+        if (displayIcon == null && icon == null) return
 
         Row(
                 modifier =

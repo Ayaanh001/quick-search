@@ -14,7 +14,7 @@ android {
         applicationId = "com.tk.quicksearch"
         minSdk = 24
         targetSdk = 36
-        versionCode = 36
+        versionCode = 37
         versionName = "2.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

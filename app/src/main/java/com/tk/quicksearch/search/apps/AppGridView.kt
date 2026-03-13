@@ -9,7 +9,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -121,9 +121,9 @@ fun AppGridView(
                         }
                         .groupBy { it.packageName }
             }
-    val waitForSuggestionIcons = !isSearching && apps.isNotEmpty()
-    val areSuggestionIconsLoaded =
-            if (waitForSuggestionIcons) {
+    val waitForAppIcons = apps.isNotEmpty()
+    val areAppIconsLoaded =
+            if (waitForAppIcons) {
                 apps.all { app ->
                     val iconResult =
                             rememberAppIcon(
@@ -144,16 +144,9 @@ fun AppGridView(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
     ) {
-        val showAppGrid = apps.isNotEmpty() && areSuggestionIconsLoaded
-        val showLoadingPlaceholder = waitForSuggestionIcons && !areSuggestionIconsLoaded
+        val showAppGrid = apps.isNotEmpty() && areAppIconsLoaded
         val appGridVisibilityState = remember { MutableTransitionState(false) }
         appGridVisibilityState.targetState = showAppGrid
-        if (showLoadingPlaceholder) {
-            AppGridPlaceholder(
-                    rowCount = rowCount,
-                    showAppLabels = showAppLabels,
-            )
-        }
         AnimatedVisibility(
                 visibleState = appGridVisibilityState,
                 enter =
@@ -189,59 +182,6 @@ fun AppGridView(
                     isOverlayPresentation = isOverlayPresentation,
                     predictedTarget = predictedTarget,
             )
-        }
-    }
-}
-
-@Composable
-private fun AppGridPlaceholder(
-        rowCount: Int,
-        showAppLabels: Boolean,
-) {
-    val columns = getAppGridColumns().coerceAtLeast(1)
-    repeat(rowCount.coerceAtLeast(1)) {
-        Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingMedium),
-        ) {
-            repeat(columns) {
-                Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                ) {
-                    Surface(
-                            modifier = Modifier.size(DesignTokens.AppIconSize),
-                            color = Color.Transparent,
-                            tonalElevation = 0.dp,
-                            shape = DesignTokens.ShapeLarge,
-                    ) {
-                        Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center,
-                        ) {
-                            Box(
-                                    modifier =
-                                            Modifier.size(DesignTokens.IconSizeXLarge - 4.dp)
-                                                    .clip(DesignTokens.ShapeLarge)
-                                                    .background(
-                                                            MaterialTheme.colorScheme.surfaceVariant,
-                                                    ),
-                            )
-                        }
-                    }
-                    if (showAppLabels) {
-                        Spacer(modifier = Modifier.height(DesignTokens.SpacingXSmall))
-                        Box(
-                                modifier =
-                                        Modifier.width(36.dp)
-                                                .height(10.dp)
-                                                .clip(DesignTokens.ShapeSmall)
-                                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                        )
-                    }
-                }
-            }
         }
     }
 }
@@ -371,20 +311,22 @@ private fun AppGridRow(
             horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingMedium),
     ) {
         apps.forEach { app ->
-            val appShortcuts = shortcutsByPackage[app.packageName].orEmpty()
-            AppGridItem(
-                    modifier = Modifier.width(rowItemWidth),
-                    appInfo = app,
-                    shortcuts = appShortcuts,
-                    appActions = createAppActions(app),
-                    appState = createAppState(app),
-                    iconPackPackage = iconPackPackage,
-                    isPredicted =
-                            (predictedTarget as? PredictedSubmitTarget.App)?.let {
-                                it.packageName == app.packageName &&
-                                        it.userHandleId == app.userHandleId
-                            } == true,
-            )
+            key(app.launchCountKey()) {
+                val appShortcuts = shortcutsByPackage[app.packageName].orEmpty()
+                AppGridItem(
+                        modifier = Modifier.width(rowItemWidth),
+                        appInfo = app,
+                        shortcuts = appShortcuts,
+                        appActions = createAppActions(app),
+                        appState = createAppState(app),
+                        iconPackPackage = iconPackPackage,
+                        isPredicted =
+                                (predictedTarget as? PredictedSubmitTarget.App)?.let {
+                                    it.packageName == app.packageName &&
+                                            it.userHandleId == app.userHandleId
+                                } == true,
+                )
+            }
         }
     }
 }
@@ -408,10 +350,6 @@ private fun AppGridItem(
                     userHandleId = appInfo.userHandleId,
             )
     var showOptions by remember { mutableStateOf(false) }
-    val placeholderLabel =
-            remember(appInfo.appName) {
-                appInfo.appName.firstOrNull()?.uppercaseChar()?.toString().orEmpty()
-            }
     val appIconSize =
             remember(appState.isOverlayPresentation) {
                 when (
@@ -437,7 +375,6 @@ private fun AppGridItem(
             AppIconSurface(
                     iconBitmap = iconResult.bitmap,
                     iconIsLegacy = iconResult.isLegacy,
-                    placeholderLabel = placeholderLabel,
                     appName = appInfo.appName,
                     onClick = appActions.onClick,
                     onLongClick = { showOptions = true },
@@ -476,7 +413,6 @@ private fun AppGridItem(
 private fun AppIconSurface(
         iconBitmap: androidx.compose.ui.graphics.ImageBitmap?,
         iconIsLegacy: Boolean,
-        placeholderLabel: String,
         appName: String,
         onClick: () -> Unit,
         onLongClick: () -> Unit,
@@ -550,12 +486,6 @@ private fun AppIconSurface(
                                                         Modifier
                                                     },
                                             ),
-                    )
-                } else {
-                    Text(
-                            text = placeholderLabel,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

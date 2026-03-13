@@ -1,5 +1,12 @@
 package com.tk.quicksearch.search.searchScreen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import com.tk.quicksearch.search.appShortcuts.AppShortcutResultsSection
 import com.tk.quicksearch.search.apps.AppGridView
@@ -129,30 +136,45 @@ private fun renderAppsSection(
     params: SectionRenderParams,
     context: SectionRenderContext,
 ) {
-    if (context.shouldRenderApps && params.appsParams != null) {
+    val appsParams = params.appsParams ?: return
+    AnimatedVisibility(
+        visible = context.shouldRenderApps,
+        enter =
+            fadeIn(animationSpec = tween(durationMillis = 110)) +
+                expandVertically(
+                    animationSpec = tween(durationMillis = 170),
+                    expandFrom = Alignment.Top,
+                ),
+        exit =
+            fadeOut(animationSpec = tween(durationMillis = 90)) +
+                shrinkVertically(
+                    animationSpec = tween(durationMillis = 170),
+                    shrinkTowards = Alignment.Top,
+                ),
+    ) {
         AppGridView(
-            apps = params.appsParams.apps,
-            appShortcuts = params.appsParams.appShortcuts,
-            isSearching = params.appsParams.isSearching,
-            hasAppResults = params.appsParams.hasAppResults,
-            onAppClick = params.appsParams.onAppClick,
-            onAppInfoClick = params.appsParams.onAppInfoClick,
-            onUninstallClick = params.appsParams.onUninstallClick,
-            onHideApp = params.appsParams.onHideApp,
-            onPinApp = params.appsParams.onPinApp,
-            onUnpinApp = params.appsParams.onUnpinApp,
-            onNicknameClick = params.appsParams.onNicknameClick,
-            getAppNickname = params.appsParams.getAppNickname,
-            pinnedPackageNames = params.appsParams.pinnedPackageNames,
-            disabledShortcutIds = params.appsParams.disabledAppShortcutIds,
-            rowCount = params.appsParams.rowCount,
-            iconPackPackage = params.appsParams.iconPackPackage,
-            showAppLabels = params.appsParams.showAppLabels,
-            oneHandedMode = params.appsParams.oneHandedMode,
-            isInitializing = params.appsParams.isInitializing,
-            startupPhase = params.appsParams.startupPhase,
-            isOverlayPresentation = params.appsParams.isOverlayPresentation,
-            predictedTarget = params.appsParams.predictedTarget,
+            apps = appsParams.apps,
+            appShortcuts = appsParams.appShortcuts,
+            isSearching = appsParams.isSearching,
+            hasAppResults = appsParams.hasAppResults,
+            onAppClick = appsParams.onAppClick,
+            onAppInfoClick = appsParams.onAppInfoClick,
+            onUninstallClick = appsParams.onUninstallClick,
+            onHideApp = appsParams.onHideApp,
+            onPinApp = appsParams.onPinApp,
+            onUnpinApp = appsParams.onUnpinApp,
+            onNicknameClick = appsParams.onNicknameClick,
+            getAppNickname = appsParams.getAppNickname,
+            pinnedPackageNames = appsParams.pinnedPackageNames,
+            disabledShortcutIds = appsParams.disabledAppShortcutIds,
+            rowCount = appsParams.rowCount,
+            iconPackPackage = appsParams.iconPackPackage,
+            showAppLabels = appsParams.showAppLabels,
+            oneHandedMode = appsParams.oneHandedMode,
+            isInitializing = appsParams.isInitializing,
+            startupPhase = appsParams.startupPhase,
+            isOverlayPresentation = appsParams.isOverlayPresentation,
+            predictedTarget = appsParams.predictedTarget,
         )
     }
 }

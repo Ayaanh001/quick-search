@@ -5,7 +5,7 @@ package com.tk.quicksearch.search.fuzzy
  * Centralized configuration to avoid scattering across multiple files.
  */
 data class FuzzySearchConfig(
-    val matchThreshold: Int = 70,
+    val matchThreshold: Int = 75,
     val minQueryLength: Int = 3,
     val priority: Int = 5,
 ) {
@@ -15,7 +15,7 @@ data class FuzzySearchConfig(
          */
         val DEFAULT_APP_CONFIG =
             FuzzySearchConfig(
-                matchThreshold = 70,
+                matchThreshold = 75,
                 minQueryLength = 3,
                 priority = 5,
             )
