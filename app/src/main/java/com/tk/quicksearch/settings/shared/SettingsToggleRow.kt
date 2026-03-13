@@ -54,6 +54,7 @@ fun SettingsToggleRow(
     onRowClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
+    titleContent: (@Composable () -> Unit)? = null,
     subtitleContent: (@Composable () -> Unit)? = null,
     sliderDetails: SettingsToggleSliderDetails? = null,
     leadingIcon: ImageVector? = null,
@@ -118,11 +119,15 @@ fun SettingsToggleRow(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(DesignTokens.TextColumnSpacing),
             ) {
-                Text(
-                    text = title,
-                    style = titleTextStyle,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+                if (titleContent != null) {
+                    titleContent()
+                } else {
+                    Text(
+                        text = title,
+                        style = titleTextStyle,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
 
                 if (sliderDetails != null) {
                     Row(

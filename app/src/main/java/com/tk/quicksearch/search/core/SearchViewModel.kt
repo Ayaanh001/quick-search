@@ -66,6 +66,7 @@ import com.tk.quicksearch.searchEngines.SearchEngineManager
 import com.tk.quicksearch.searchEngines.SecondarySearchOrchestrator
 import com.tk.quicksearch.searchEngines.AliasHandler
 import com.tk.quicksearch.searchEngines.AliasTarget
+import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import com.tk.quicksearch.shared.permissions.PermissionHelper
 import com.tk.quicksearch.shared.util.PackageConstants
 import com.tk.quicksearch.shared.util.WallpaperUtils
@@ -847,6 +848,7 @@ class SearchViewModel(
     }
 
     init {
+        FeatureFlags.initialize(appContext)
         userPreferences.ensureCalendarSectionDefaultDisabledMigration()
         // Initialize services after all handlers are available
         initializeServices()
@@ -1190,7 +1192,9 @@ class SearchViewModel(
                                 userPreferences.isSearchEngineAliasSuffixEnabled(),
                         webSuggestionsEnabled = webSuggestionHandler.isEnabled,
                         calculatorEnabled = userPreferences.isCalculatorEnabled(),
-                        unitConverterEnabled = userPreferences.isUnitConverterEnabled(),
+                        unitConverterEnabled =
+                                FeatureFlags.isUnitConverterEnabled() &&
+                                        userPreferences.isUnitConverterEnabled(),
                         hasGeminiApiKey = !directSearchHandler.getGeminiApiKey().isNullOrBlank(),
                         geminiApiKeyLast4 = directSearchHandler.getGeminiApiKey()?.takeLast(4),
                         personalContext = directSearchHandler.getPersonalContext(),
@@ -1427,8 +1431,9 @@ class SearchViewModel(
 
     fun setUnitConverterEnabled(enabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            userPreferences.setUnitConverterEnabled(enabled)
-            updateFeatureState { it.copy(unitConverterEnabled = enabled) }
+            val effectiveEnabled = FeatureFlags.isUnitConverterEnabled() && enabled
+            userPreferences.setUnitConverterEnabled(effectiveEnabled)
+            updateFeatureState { it.copy(unitConverterEnabled = effectiveEnabled) }
         }
     }
 
@@ -2093,7 +2098,9 @@ class SearchViewModel(
     private fun isToolEnabled(toolMode: SearchToolType): Boolean =
             when (toolMode) {
                 SearchToolType.CALCULATOR -> userPreferences.isCalculatorEnabled()
-                SearchToolType.UNIT_CONVERTER -> userPreferences.isUnitConverterEnabled()
+                SearchToolType.UNIT_CONVERTER ->
+                        FeatureFlags.isUnitConverterEnabled() &&
+                                userPreferences.isUnitConverterEnabled()
             }
 
     private fun createToolModeState(toolMode: SearchToolType): CalculatorState =
@@ -2142,6 +2149,10 @@ class SearchViewModel(
                 )
         if (calculatorResult.result != null) {
             return calculatorResult
+        }
+
+        if (!FeatureFlags.isUnitConverterEnabled()) {
+            return CalculatorState()
         }
 
         return unitConverterHandler.processQuery(
@@ -2455,7 +2466,9 @@ class SearchViewModel(
                             shortcutEnabled = shortcutsState.shortcutEnabled,
                             webSuggestionsEnabled = webSuggestionsEnabled,
                             calculatorEnabled = userPreferences.isCalculatorEnabled(),
-                            unitConverterEnabled = userPreferences.isUnitConverterEnabled(),
+                            unitConverterEnabled =
+                                    FeatureFlags.isUnitConverterEnabled() &&
+                                            userPreferences.isUnitConverterEnabled(),
                             hasGeminiApiKey = hasGeminiApiKey,
                             geminiApiKeyLast4 = geminiApiKey?.takeLast(4),
                             personalContext = personalContext,

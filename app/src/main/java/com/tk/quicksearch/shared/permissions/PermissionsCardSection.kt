@@ -51,6 +51,7 @@ fun PermissionsCardSection(
     texts: PermissionCardTexts,
     cardContainer: @Composable (modifier: Modifier, content: @Composable () -> Unit) -> Unit,
     modifier: Modifier = Modifier,
+    showCalendarPermission: Boolean = true,
     onRequestUsagePermission: () -> Unit = {},
     onRequestContactPermission: () -> Unit = {},
     onRequestFilePermission: () -> Unit = {},
@@ -182,16 +183,16 @@ fun PermissionsCardSection(
             usage = usagePermissionState,
             contacts = contactsPermissionState,
             files = filesPermissionState,
-            calendar = calendarPermissionState,
+            calendar = if (showCalendarPermission) calendarPermissionState else PermissionState.granted(),
             calling = callingPermissionState,
         )
     LaunchedEffect(states) {
         onStatesChanged(states)
     }
 
-    PermissionCard(
-        items =
-            listOf(
+    val items =
+        buildList {
+            add(
                 PermissionCardItem(
                     title = texts.usageTitle,
                     description = texts.usageDescription,
@@ -205,6 +206,8 @@ fun PermissionsCardSection(
                         }
                     },
                 ),
+            )
+            add(
                 PermissionCardItem(
                     title = texts.contactsTitle,
                     description = texts.contactsDescription,
@@ -223,6 +226,8 @@ fun PermissionsCardSection(
                         }
                     },
                 ),
+            )
+            add(
                 PermissionCardItem(
                     title = texts.filesTitle,
                     description = texts.filesDescription,
@@ -241,24 +246,30 @@ fun PermissionsCardSection(
                         }
                     },
                 ),
-                PermissionCardItem(
-                    title = texts.calendarTitle,
-                    description = texts.calendarDescription,
-                    permissionState = calendarPermissionState,
-                    isMandatory = false,
-                    onToggleChange = { enabled ->
-                        calendarPermissionState = calendarPermissionState.copy(isEnabled = enabled)
-                        if (enabled && !calendarPermissionState.isGranted) {
-                            PermissionHelper.requestRuntimePermissionOrOpenSettings(
-                                context = context,
-                                permission = Manifest.permission.READ_CALENDAR,
-                                wasPreviouslyDenied = calendarPermissionState.wasDenied,
-                                runtimeLauncher = multiplePermissionsLauncher,
-                            )
-                            onRequestCalendarPermission()
-                        }
-                    },
-                ),
+            )
+            if (showCalendarPermission) {
+                add(
+                    PermissionCardItem(
+                        title = texts.calendarTitle,
+                        description = texts.calendarDescription,
+                        permissionState = calendarPermissionState,
+                        isMandatory = false,
+                        onToggleChange = { enabled ->
+                            calendarPermissionState = calendarPermissionState.copy(isEnabled = enabled)
+                            if (enabled && !calendarPermissionState.isGranted) {
+                                PermissionHelper.requestRuntimePermissionOrOpenSettings(
+                                    context = context,
+                                    permission = Manifest.permission.READ_CALENDAR,
+                                    wasPreviouslyDenied = calendarPermissionState.wasDenied,
+                                    runtimeLauncher = multiplePermissionsLauncher,
+                                )
+                                onRequestCalendarPermission()
+                            }
+                        },
+                    ),
+                )
+            }
+            add(
                 PermissionCardItem(
                     title = texts.callingTitle,
                     description = texts.callingDescription,
@@ -277,7 +288,11 @@ fun PermissionsCardSection(
                         }
                     },
                 ),
-            ),
+            )
+        }
+
+    PermissionCard(
+        items = items,
         modifier = modifier,
         cardContainer = cardContainer,
     )

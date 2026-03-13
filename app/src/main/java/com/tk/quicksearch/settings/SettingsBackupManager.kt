@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import com.tk.quicksearch.search.data.preferences.BasePreferences
 import com.tk.quicksearch.search.data.preferences.GeminiPreferences
+import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import java.io.File
 import java.io.IOException
 import org.json.JSONArray
@@ -206,7 +207,12 @@ object SettingsBackupManager {
     private fun shouldExcludeKey(
         prefName: String,
         key: String,
-    ): Boolean = prefName == BasePreferences.PREFS_NAME && key in excludedUserPreferenceKeys
+    ): Boolean {
+        if (prefName != BasePreferences.PREFS_NAME) return false
+        return key in excludedUserPreferenceKeys ||
+            key.startsWith(FeatureFlags.PREFERENCE_KEY_PREFIX) ||
+            FeatureFlags.shouldExcludePreferenceFromExport(key)
+    }
 
     private fun serializePreferenceValue(value: Any?): JSONObject? =
         when (value) {
@@ -231,7 +237,10 @@ object SettingsBackupManager {
                     .put(FIELD_TYPE, TYPE_FLOAT)
                     .put(FIELD_VALUE, value.toDouble())
             is Set<*> -> {
-                val stringValues = value.mapNotNull { it as? String }
+                val stringValues =
+                    value
+                        .mapNotNull { it as? String }
+                        .let(::sanitizeStringSetForExport)
                 JSONObject()
                     .put(FIELD_TYPE, TYPE_STRING_SET)
                     .put(FIELD_VALUE, JSONArray(stringValues))
@@ -240,4 +249,12 @@ object SettingsBackupManager {
                 null
             }
         }
+
+    private fun sanitizeStringSetForExport(values: List<String>): List<String> {
+        if (FeatureFlags.isCalendarSearchEnabled()) return values
+
+        return values.filterNot { entry ->
+            entry.equals("CALENDAR", ignoreCase = true)
+        }
+    }
 }

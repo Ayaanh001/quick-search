@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.ItemPriorityConfig
 import com.tk.quicksearch.settings.shared.*
+import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticToggle
 
@@ -321,7 +322,10 @@ fun SearchResultsSettingsSection(
     Column(modifier = modifier) {
         // Search Sections Section
         SectionSettingsSection(
-            sectionOrder = ItemPriorityConfig.getSearchResultsPriority(),
+            sectionOrder =
+                ItemPriorityConfig
+                    .getSearchResultsPriority()
+                    .filter { section -> FeatureFlags.isSearchSectionEnabled(section) },
             disabledSections = state.disabledSections,
             onToggleSection = callbacks.onToggleSection,
             sectionAliasCodes = state.shortcutCodes,

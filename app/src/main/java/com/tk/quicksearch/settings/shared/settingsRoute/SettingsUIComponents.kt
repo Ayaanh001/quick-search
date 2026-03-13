@@ -36,6 +36,7 @@ import com.tk.quicksearch.searchEngines.AliasHandler
 import com.tk.quicksearch.searchEngines.AliasValidator.hasExactAliasConflict
 import com.tk.quicksearch.settings.searchEnginesScreen.AliasDisplayType
 import com.tk.quicksearch.settings.searchEnginesScreen.AliasCodeDisplay
+import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticToggle
 
@@ -150,6 +151,8 @@ private fun SectionRowWithoutDrag(
 ) {
     val view = LocalView.current
     val metadata = getSectionMetadata(section)
+    val showBetaTag =
+        section == SearchSection.CALENDAR && FeatureFlags.isCalendarSearchEnabled()
     val rowInteractionSource = remember { MutableInteractionSource() }
     val rowIndication = LocalIndication.current
 
@@ -190,11 +193,19 @@ private fun SectionRowWithoutDrag(
             )
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = metadata.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = metadata.name,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    if (showBetaTag) {
+                        BetaTagChip()
+                    }
+                }
 
                 if (!subtitle.isNullOrBlank()) {
                     Text(

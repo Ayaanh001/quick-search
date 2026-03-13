@@ -6,6 +6,7 @@ import com.tk.quicksearch.search.core.SearchUiState
 import com.tk.quicksearch.search.core.SectionManager
 import com.tk.quicksearch.search.core.UnifiedSearchHandler
 import com.tk.quicksearch.search.webSuggestions.WebSuggestionHandler
+import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -122,9 +123,11 @@ class SecondarySearchOrchestrator(
             !isSingleCharacterQuery && SearchSection.SETTINGS !in sectionManager.disabledSections
         val canSearchCalendar =
             !isSingleCharacterQuery &&
+                FeatureFlags.isCalendarSearchEnabled() &&
                 currentState.hasCalendarPermission &&
                 SearchSection.CALENDAR !in sectionManager.disabledSections
-        val canSearchAppSettings = !isSingleCharacterQuery
+        val canSearchAppSettings =
+            !isSingleCharacterQuery && FeatureFlags.isAppSettingsSearchEnabled()
         val canSearchAppShortcuts = SearchSection.APP_SHORTCUTS !in sectionManager.disabledSections
 
         // Skip searches if current query extends a previous no-results query
@@ -331,9 +334,11 @@ class SecondarySearchOrchestrator(
             !isSingleCharacterQuery && isSectionEnabled(SearchSection.SETTINGS)
         val isCalendarEnabled =
             !isSingleCharacterQuery &&
+                FeatureFlags.isCalendarSearchEnabled() &&
                 currentState.hasCalendarPermission &&
                 isSectionEnabled(SearchSection.CALENDAR)
-        val isAppSettingsEnabled = !isSingleCharacterQuery
+        val isAppSettingsEnabled =
+            !isSingleCharacterQuery && FeatureFlags.isAppSettingsSearchEnabled()
         val isAppShortcutsEnabled =
             isSectionEnabled(SearchSection.APP_SHORTCUTS)
 

@@ -39,6 +39,7 @@ import com.tk.quicksearch.onboarding.OnboardingHeader
 import com.tk.quicksearch.shared.permissions.PermissionCardStates
 import com.tk.quicksearch.shared.permissions.PermissionCardTexts
 import com.tk.quicksearch.shared.permissions.PermissionsCardSection
+import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
@@ -106,6 +107,7 @@ fun PermissionsScreen(
                         callingDescription = stringResource(R.string.permissions_calling_desc),
                     ),
                 modifier = Modifier.fillMaxWidth(),
+                showCalendarPermission = FeatureFlags.isCalendarSearchEnabled(),
                 cardContainer = { cardModifier, content ->
                     Card(
                         modifier = cardModifier,

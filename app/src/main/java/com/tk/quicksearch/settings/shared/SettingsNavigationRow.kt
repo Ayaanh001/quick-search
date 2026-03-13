@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
@@ -28,6 +29,7 @@ import com.tk.quicksearch.shared.ui.theme.DesignTokens
 data class SettingsCardItem(
     val title: String,
     val description: String,
+    val isBeta: Boolean = false,
     val icon: ImageVector? = null,
     val iconResId: Int? = null,
     val iconTint: Color? = null,
@@ -82,11 +84,19 @@ fun SettingsNavigationRow(
             Column(
                 verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXSmall),
             ) {
-                androidx.compose.material3.Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    androidx.compose.material3.Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    if (item.isBeta) {
+                        BetaTagChip()
+                    }
+                }
                 androidx.compose.material3.Text(
                     text = item.description,
                     style = MaterialTheme.typography.bodySmall,

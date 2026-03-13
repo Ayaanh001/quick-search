@@ -11,6 +11,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,6 +51,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,6 +71,7 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.search.data.preferences.GeminiPreferences
 import com.tk.quicksearch.settings.settingsDetailScreen.SettingsDetailType
 import com.tk.quicksearch.settings.shared.*
+import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import com.tk.quicksearch.shared.ui.components.TipBanner
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.FeedbackUtils
@@ -120,6 +123,7 @@ fun SettingsScreen(
     val geminiPreferences = remember(context) { GeminiPreferences(context) }
     var includeGeminiApiKeyInNextExport by remember { mutableStateOf(false) }
     var showApiKeyExportWarningDialog by remember { mutableStateOf(false) }
+    FeatureFlags.initialize(context)
 
     val exportLauncher =
         rememberLauncherForActivityResult(
@@ -283,7 +287,12 @@ fun SettingsScreen(
                     add(
                         SettingsCardItem(
                             title = stringResource(R.string.settings_tools_title),
-                            description = stringResource(R.string.settings_tools_desc),
+                            description =
+                                if (FeatureFlags.isUnitConverterEnabled()) {
+                                    stringResource(R.string.settings_tools_desc)
+                                } else {
+                                    stringResource(R.string.settings_tools_desc_calculator_only)
+                                },
                             icon = Icons.Rounded.Build,
                             actionOnPress = {
                                 onNavigateToDetail(SettingsDetailType.TOOLS)
@@ -394,7 +403,10 @@ fun SettingsScreen(
             )
 
             // App Version
-            SettingsVersionDisplay(modifier = Modifier.padding(top = DesignTokens.Spacing40, bottom = 60.dp))
+            SettingsVersionDisplay(
+                modifier = Modifier.padding(top = DesignTokens.Spacing40, bottom = 60.dp),
+                onFeatureFlagsChanged = onSettingsImported,
+            )
         }
     }
 
@@ -701,7 +713,10 @@ fun SettingsHeader(onBack: () -> Unit) {
  * Displays the app version and developer info in a card at the bottom of the settings screen.
  */
 @Composable
-fun SettingsVersionDisplay(modifier: Modifier = Modifier) {
+fun SettingsVersionDisplay(
+    modifier: Modifier = Modifier,
+    onFeatureFlagsChanged: () -> Unit = {},
+) {
     val context = LocalContext.current
     val versionName = getAppVersionName() ?: "1.2.2"
     val developerName = stringResource(R.string.settings_feedback_developer_name)
@@ -728,6 +743,7 @@ fun SettingsVersionDisplay(modifier: Modifier = Modifier) {
             }
         }
 
+    var versionTapCount by remember { mutableIntStateOf(0) }
     Column(
         modifier =
             modifier
@@ -743,6 +759,38 @@ fun SettingsVersionDisplay(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
+            modifier =
+                Modifier.combinedClickable(
+                    onClick = {
+                        versionTapCount += 1
+                        if (versionTapCount >= 5) {
+                            FeatureFlags.setAll(context, enabled = true)
+                            Toast
+                                .makeText(
+                                    context,
+                                    context.getString(R.string.settings_beta_features_enabled),
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            versionTapCount = 0
+                            onFeatureFlagsChanged()
+                        }
+                    },
+                    onLongClick = {
+                        if (!FeatureFlags.isAnyEnabled()) {
+                            versionTapCount = 0
+                            return@combinedClickable
+                        }
+                        FeatureFlags.setAll(context, enabled = false)
+                        Toast
+                            .makeText(
+                                context,
+                                context.getString(R.string.settings_beta_features_disabled),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        versionTapCount = 0
+                        onFeatureFlagsChanged()
+                    },
+                ),
         )
 
         androidx.compose.foundation.layout

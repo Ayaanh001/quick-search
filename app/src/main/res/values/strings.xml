@@ -364,6 +364,7 @@
     <string name="settings_search_engines_desc">Manage search engines and configure Gemini API key</string>
     <string name="settings_tools_title">Tools</string>
     <string name="settings_tools_desc">Calculator and unit converter</string>
+    <string name="settings_tools_desc_calculator_only">Calculator</string>
     <string name="settings_tools_more_coming_soon">More tools coming soon</string>
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_desc">Wallpaper, search engine styles, one-handed mode, etc.</string>
@@ -671,7 +672,7 @@
     <string name="permissions_files_title">Files Access</string>
     <string name="permissions_files_desc">Required to search through your documents and other files.</string>
     <string name="permissions_calendar_title">Calendar</string>
-    <string name="permissions_calendar_desc">Required to search your upcoming calendar events.</string>
+    <string name="permissions_calendar_desc">Required to search your calendar events.</string>
     <string name="permissions_calling_title">Phone</string>
     <string name="permissions_calling_desc">Required to call your contacts directly without opening the dialer.</string>
     <string name="permissions_granted">Granted</string>
@@ -711,6 +712,9 @@
     <string name="release_notes_view_all_features">View all features</string>
     <string name="settings_all_quick_search_features">Features List</string>
     <string name="settings_all_quick_search_features_desc">View the complete list of features and capabilities</string>
+    <string name="settings_beta_tag">Beta</string>
+    <string name="settings_beta_features_enabled">New beta features are enabled</string>
+    <string name="settings_beta_features_disabled">Beta features are disabled</string>
     <string name="settings_features_load_failed">Unable to load feature documentation.</string>
     <string name="settings_features_sections_title">Contents</string>
     <string name="settings_scroll_to_top">Scroll to top</string>

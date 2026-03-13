@@ -2,14 +2,18 @@ package com.tk.quicksearch.settings.shared
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.searchEngines.AliasValidator.hasExactAliasConflict
 import com.tk.quicksearch.searchEngines.AliasValidator.isValidGeneralAliasCode
@@ -20,6 +24,7 @@ import com.tk.quicksearch.shared.ui.theme.DesignTokens
 data class ToolToggleCardModel(
     val title: String,
     val subtitle: String? = null,
+    val isBeta: Boolean = false,
     val checked: Boolean,
     val onCheckedChange: (Boolean) -> Unit,
     val leadingIcon: ImageVector? = null,
@@ -56,6 +61,21 @@ fun ToolToggleRow(
         Column {
             SettingsToggleRow(
                 title = tool.title,
+                titleContent = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = tool.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        if (tool.isBeta) {
+                            BetaTagChip()
+                        }
+                    }
+                },
                 subtitle = tool.subtitle,
                 subtitleContent =
                     if (tool.aliasCode != null) {

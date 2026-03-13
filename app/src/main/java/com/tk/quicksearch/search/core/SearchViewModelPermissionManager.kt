@@ -4,6 +4,7 @@ import com.tk.quicksearch.search.data.ContactRepository
 import com.tk.quicksearch.search.data.CalendarRepository
 import com.tk.quicksearch.search.data.FileSearchRepository
 import com.tk.quicksearch.search.data.UserAppPreferences
+import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 
 class PermissionManager(
     private val contactRepository: ContactRepository,
@@ -34,6 +35,9 @@ class PermissionManager(
         if (!hasCalendarPermission()) {
             permissionBasedDisabledSections.add(SearchSection.CALENDAR)
         }
+        if (!FeatureFlags.isCalendarSearchEnabled()) {
+            permissionBasedDisabledSections.add(SearchSection.CALENDAR)
+        }
 
         return userDisabledSections + permissionBasedDisabledSections
     }
@@ -42,7 +46,8 @@ class PermissionManager(
         when (section) {
             SearchSection.CONTACTS -> hasContactPermission()
             SearchSection.FILES -> hasFilePermission()
-            SearchSection.CALENDAR -> hasCalendarPermission()
+            SearchSection.CALENDAR ->
+                FeatureFlags.isCalendarSearchEnabled() && hasCalendarPermission()
             SearchSection.APPS -> true
             SearchSection.APP_SHORTCUTS -> true
             SearchSection.SETTINGS -> true
