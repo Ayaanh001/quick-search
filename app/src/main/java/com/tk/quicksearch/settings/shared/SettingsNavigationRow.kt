@@ -30,6 +30,7 @@ data class SettingsCardItem(
     val title: String,
     val description: String,
     val isBeta: Boolean = false,
+    val tagLabel: String? = null,
     val icon: ImageVector? = null,
     val iconResId: Int? = null,
     val iconTint: Color? = null,
@@ -93,8 +94,8 @@ fun SettingsNavigationRow(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
-                    if (item.isBeta) {
-                        BetaTagChip()
+                    if (item.isBeta || item.tagLabel != null) {
+                        BetaTagChip(tagText = item.tagLabel)
                     }
                 }
                 androidx.compose.material3.Text(

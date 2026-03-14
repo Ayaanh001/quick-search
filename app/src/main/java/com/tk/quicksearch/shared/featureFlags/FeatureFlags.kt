@@ -8,7 +8,6 @@ import java.util.EnumMap
 
 enum class FeatureFlag {
     CALENDAR_SEARCH,
-    UNIT_CONVERTER,
     APP_SETTINGS_SEARCH,
     APP_THEME_SELECTION,
 }
@@ -47,21 +46,6 @@ object FeatureFlags {
                                 AliasHandler.SEARCH_SECTION_CALENDAR_ALIAS_ID,
                             BasePreferences.KEY_ALIAS_ENABLED_PREFIX +
                                 AliasHandler.SEARCH_SECTION_CALENDAR_ALIAS_ID,
-                        ),
-                ),
-            FeatureFlag.UNIT_CONVERTER to
-                FeatureFlagDefinition(
-                    enabledByDefault = false,
-                    exportExcludedKeys =
-                        setOf(
-                            BasePreferences.KEY_UNIT_CONVERTER_ENABLED,
-                        ),
-                    exportExcludedPrefixes =
-                        setOf(
-                            BasePreferences.KEY_ALIAS_CODE_PREFIX +
-                                AliasHandler.UNIT_CONVERTER_ALIAS_FEATURE_ID,
-                            BasePreferences.KEY_ALIAS_ENABLED_PREFIX +
-                                AliasHandler.UNIT_CONVERTER_ALIAS_FEATURE_ID,
                         ),
                 ),
             FeatureFlag.APP_SETTINGS_SEARCH to
@@ -108,8 +92,6 @@ object FeatureFlags {
     }
 
     fun isCalendarSearchEnabled(): Boolean = isEnabled(FeatureFlag.CALENDAR_SEARCH)
-
-    fun isUnitConverterEnabled(): Boolean = isEnabled(FeatureFlag.UNIT_CONVERTER)
 
     fun isAppSettingsSearchEnabled(): Boolean = isEnabled(FeatureFlag.APP_SETTINGS_SEARCH)
 

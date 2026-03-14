@@ -17,7 +17,6 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.searchEngines.AliasHandler
 import com.tk.quicksearch.settings.shared.ToolToggleCardModel
 import com.tk.quicksearch.settings.shared.ToolToggleRows
-import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
@@ -41,34 +40,32 @@ fun ToolsSettingsSection(
             tools =
                 buildList {
                     add(
-                    ToolToggleCardModel(
-                        title = stringResource(R.string.calculator_toggle_title),
-                        subtitle = stringResource(R.string.calculator_toggle_desc),
-                        checked = calculatorEnabled,
-                        onCheckedChange = onCalculatorToggle,
-                        leadingIcon = Icons.Rounded.Calculate,
-                        aliasCode = calculatorAlias,
-                        onAliasCodeChange = onSetCalculatorAlias,
-                        existingShortcuts = existingShortcuts,
-                        aliasFeatureId = AliasHandler.CALCULATOR_ALIAS_FEATURE_ID,
-                    ),
+                        ToolToggleCardModel(
+                            title = stringResource(R.string.calculator_toggle_title),
+                            subtitle = stringResource(R.string.calculator_toggle_desc),
+                            checked = calculatorEnabled,
+                            onCheckedChange = onCalculatorToggle,
+                            leadingIcon = Icons.Rounded.Calculate,
+                            aliasCode = calculatorAlias,
+                            onAliasCodeChange = onSetCalculatorAlias,
+                            existingShortcuts = existingShortcuts,
+                            aliasFeatureId = AliasHandler.CALCULATOR_ALIAS_FEATURE_ID,
+                        ),
                     )
-                    if (FeatureFlags.isUnitConverterEnabled()) {
-                        add(
-                            ToolToggleCardModel(
-                                title = stringResource(R.string.unit_converter_toggle_title),
-                                subtitle = stringResource(R.string.unit_converter_toggle_desc),
-                                isBeta = true,
-                                checked = unitConverterEnabled,
-                                onCheckedChange = onUnitConverterToggle,
-                                leadingIcon = Icons.Rounded.Straighten,
-                                aliasCode = unitConverterAlias,
-                                onAliasCodeChange = onSetUnitConverterAlias,
-                                existingShortcuts = existingShortcuts,
-                                aliasFeatureId = AliasHandler.UNIT_CONVERTER_ALIAS_FEATURE_ID,
-                            ),
+                    add(
+                        ToolToggleCardModel(
+                            title = stringResource(R.string.unit_converter_toggle_title),
+                            subtitle = stringResource(R.string.unit_converter_toggle_desc),
+                            tagLabel = stringResource(R.string.settings_new_tag),
+                            checked = unitConverterEnabled,
+                            onCheckedChange = onUnitConverterToggle,
+                            leadingIcon = Icons.Rounded.Straighten,
+                            aliasCode = unitConverterAlias,
+                            onAliasCodeChange = onSetUnitConverterAlias,
+                            existingShortcuts = existingShortcuts,
+                            aliasFeatureId = AliasHandler.UNIT_CONVERTER_ALIAS_FEATURE_ID,
                         )
-                    }
+                    )
                 },
         )
 

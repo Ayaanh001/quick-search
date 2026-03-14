@@ -288,12 +288,8 @@ fun SettingsScreen(
                     add(
                         SettingsCardItem(
                             title = stringResource(R.string.settings_tools_title),
-                            description =
-                                if (FeatureFlags.isUnitConverterEnabled()) {
-                                    stringResource(R.string.settings_tools_desc)
-                                } else {
-                                    stringResource(R.string.settings_tools_desc_calculator_only)
-                                },
+                            description = stringResource(R.string.settings_tools_desc),
+                            tagLabel = stringResource(R.string.settings_new_tag),
                             icon = Icons.Rounded.Build,
                             actionOnPress = {
                                 onNavigateToDetail(SettingsDetailType.TOOLS)

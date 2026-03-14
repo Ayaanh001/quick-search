@@ -330,12 +330,6 @@ class AliasHandler(
 
     private fun collectLeadingFeatureAliases(aliases: MutableMap<String, AliasTarget>) {
         TOOL_ALIAS_IDS.forEach { featureAliasId ->
-            if (
-                featureAliasId == UNIT_CONVERTER_ALIAS_FEATURE_ID &&
-                    !FeatureFlags.isUnitConverterEnabled()
-            ) {
-                return@forEach
-            }
             val aliasCode = getAlias(featureAliasId).lowercase(Locale.getDefault())
             if (aliasCode.isNotEmpty()) {
                 aliases[aliasCode] = AliasTarget.Feature(featureAliasId)

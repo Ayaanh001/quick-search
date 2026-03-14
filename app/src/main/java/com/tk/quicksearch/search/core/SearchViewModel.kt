@@ -1203,9 +1203,7 @@ class SearchViewModel(
                                 userPreferences.isSearchEngineAliasSuffixEnabled(),
                         webSuggestionsEnabled = webSuggestionHandler.isEnabled,
                         calculatorEnabled = userPreferences.isCalculatorEnabled(),
-                        unitConverterEnabled =
-                                FeatureFlags.isUnitConverterEnabled() &&
-                                        userPreferences.isUnitConverterEnabled(),
+                        unitConverterEnabled = userPreferences.isUnitConverterEnabled(),
                         hasGeminiApiKey = !directSearchHandler.getGeminiApiKey().isNullOrBlank(),
                         geminiApiKeyLast4 = directSearchHandler.getGeminiApiKey()?.takeLast(4),
                         personalContext = directSearchHandler.getPersonalContext(),
@@ -1442,9 +1440,8 @@ class SearchViewModel(
 
     fun setUnitConverterEnabled(enabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            val effectiveEnabled = FeatureFlags.isUnitConverterEnabled() && enabled
-            userPreferences.setUnitConverterEnabled(effectiveEnabled)
-            updateFeatureState { it.copy(unitConverterEnabled = effectiveEnabled) }
+            userPreferences.setUnitConverterEnabled(enabled)
+            updateFeatureState { it.copy(unitConverterEnabled = enabled) }
         }
     }
 
@@ -2109,9 +2106,7 @@ class SearchViewModel(
     private fun isToolEnabled(toolMode: SearchToolType): Boolean =
             when (toolMode) {
                 SearchToolType.CALCULATOR -> userPreferences.isCalculatorEnabled()
-                SearchToolType.UNIT_CONVERTER ->
-                        FeatureFlags.isUnitConverterEnabled() &&
-                                userPreferences.isUnitConverterEnabled()
+                SearchToolType.UNIT_CONVERTER -> userPreferences.isUnitConverterEnabled()
             }
 
     private fun createToolModeState(toolMode: SearchToolType): CalculatorState =
@@ -2160,10 +2155,6 @@ class SearchViewModel(
                 )
         if (calculatorResult.result != null) {
             return calculatorResult
-        }
-
-        if (!FeatureFlags.isUnitConverterEnabled()) {
-            return CalculatorState()
         }
 
         return unitConverterHandler.processQuery(
@@ -2483,9 +2474,7 @@ class SearchViewModel(
                             shortcutEnabled = shortcutsState.shortcutEnabled,
                             webSuggestionsEnabled = webSuggestionsEnabled,
                             calculatorEnabled = userPreferences.isCalculatorEnabled(),
-                            unitConverterEnabled =
-                                    FeatureFlags.isUnitConverterEnabled() &&
-                                            userPreferences.isUnitConverterEnabled(),
+                            unitConverterEnabled = userPreferences.isUnitConverterEnabled(),
                             hasGeminiApiKey = hasGeminiApiKey,
                             geminiApiKeyLast4 = geminiApiKey?.takeLast(4),
                             personalContext = personalContext,

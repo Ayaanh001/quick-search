@@ -15,7 +15,12 @@ import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 
 @Composable
-internal fun BetaTagChip(modifier: Modifier = Modifier) {
+internal fun BetaTagChip(
+    modifier: Modifier = Modifier,
+    tagText: String? = null,
+) {
+    val resolvedTagText = tagText ?: stringResource(R.string.settings_beta_tag)
+
     Row(
         modifier =
             modifier
@@ -26,7 +31,7 @@ internal fun BetaTagChip(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = stringResource(R.string.settings_beta_tag),
+            text = resolvedTagText,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onTertiaryContainer,

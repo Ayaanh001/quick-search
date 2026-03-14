@@ -3,7 +3,6 @@ package com.tk.quicksearch.tools.unitConverter
 import com.tk.quicksearch.search.core.CalculatorState
 import com.tk.quicksearch.search.core.SearchToolType
 import com.tk.quicksearch.search.data.UserAppPreferences
-import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 
 class UnitConverterHandler(
     private val userPreferences: UserAppPreferences,
@@ -12,7 +11,6 @@ class UnitConverterHandler(
         query: String,
         forceUnitConverterMode: Boolean = false,
     ): CalculatorState {
-        if (!FeatureFlags.isUnitConverterEnabled()) return CalculatorState()
         if (!userPreferences.isUnitConverterEnabled()) return CalculatorState()
 
         val trimmedQuery = query.trim()

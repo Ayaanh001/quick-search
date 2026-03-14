@@ -721,6 +721,7 @@
     <string name="settings_all_quick_search_features">Features List</string>
     <string name="settings_all_quick_search_features_desc">View the complete list of features and capabilities</string>
     <string name="settings_beta_tag">Beta</string>
+    <string name="settings_new_tag">New</string>
     <string name="settings_beta_features_enabled">New beta features are enabled</string>
     <string name="settings_beta_features_disabled">Beta features are disabled</string>
     <string name="settings_features_load_failed">Unable to load feature documentation.</string>

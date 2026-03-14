@@ -25,6 +25,7 @@ data class ToolToggleCardModel(
     val title: String,
     val subtitle: String? = null,
     val isBeta: Boolean = false,
+    val tagLabel: String? = null,
     val checked: Boolean,
     val onCheckedChange: (Boolean) -> Unit,
     val leadingIcon: ImageVector? = null,
@@ -71,8 +72,8 @@ fun ToolToggleRow(
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
-                        if (tool.isBeta) {
-                            BetaTagChip()
+                        if (tool.isBeta || tool.tagLabel != null) {
+                            BetaTagChip(tagText = tool.tagLabel)
                         }
                     }
                 },
