@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import android.content.ClipData
@@ -49,6 +50,8 @@ import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
+
+private val unitResultRegex = Regex("^([+-]?(?:\\d+(?:\\.\\d+)?|\\.\\d+))(?:\\s+(.+))?$")
 
 /** Composable that displays direct search results with loading, success, and error states. */
 @Composable
@@ -198,11 +201,15 @@ fun CalculatorResult(
         ) {
             when {
                 result != null -> {
-                    Text(
-                            text = "= $result",
-                            style = MaterialTheme.typography.displayMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                    )
+                    if (calculatorState.toolType == SearchToolType.UNIT_CONVERTER) {
+                        UnitConverterResultText(result = result)
+                    } else {
+                        Text(
+                                text = "= $result",
+                                style = MaterialTheme.typography.displayMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 }
 
                 showInvalidExpression -> {
@@ -271,6 +278,33 @@ fun CalculatorResult(
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 toolType = calculatorState.toolType,
         )
+    }
+}
+
+@Composable
+private fun UnitConverterResultText(result: String) {
+    val match = unitResultRegex.matchEntire(result)
+    val value = match?.groupValues?.getOrNull(1) ?: result
+    val unit = match?.groupValues?.getOrNull(2).orEmpty()
+
+    Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
+    ) {
+        Text(
+                text = value,
+                style = MaterialTheme.typography.displayMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+        )
+        if (unit.isNotBlank()) {
+            Text(
+                    text = unit,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.offset(y = 10.dp),
+            )
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 package com.tk.quicksearch.tools.unitConverter
 
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.abs
@@ -68,20 +68,222 @@ object UnitConverterUtils {
     private val separatorRegex = Regex("\\b(?:in|to)\\b", RegexOption.IGNORE_CASE)
     private val leftQueryRegex =
         Regex(
-            pattern = "^([+-]?(?:\\d{1,3}(?:,\\d{3})*|\\d+)(?:\\.\\d+)?|[+-]?\\.\\d+)\\s*([\\p{L}0-9\\s./^°-]+)$",
+            pattern = "^([+-]?(?:(?:\\d{1,3}(?:,\\d{3})+)|\\d+)(?:\\.\\d+)?|[+-]?\\.\\d+)\\s*([\\p{L}0-9\\s./^°-]+)$",
             options = setOf(RegexOption.IGNORE_CASE),
         )
 
-    private val normalDecimalFormat by lazy {
-        DecimalFormat("0.############", DecimalFormatSymbols(Locale.US)).apply {
-            isGroupingUsed = false
-        }
-    }
-    private val scientificDecimalFormat by lazy {
-        DecimalFormat("0.######E0", DecimalFormatSymbols(Locale.US)).apply {
-            isGroupingUsed = false
-        }
-    }
+    private val unitDisplayNames =
+        mapOf(
+            "m" to "metres",
+            "km" to "kilometres",
+            "cm" to "centimetres",
+            "mm" to "millimetres",
+            "um" to "micrometres",
+            "nm" to "nanometres",
+            "mi" to "miles",
+            "yd" to "yards",
+            "ft" to "feet",
+            "in" to "inches",
+            "nmi" to "nautical miles",
+            "kg" to "kilograms",
+            "g" to "grams",
+            "mg" to "milligrams",
+            "ug" to "micrograms",
+            "lb" to "pounds",
+            "oz" to "ounces",
+            "st" to "stones",
+            "tonne" to "metric tonnes",
+            "us ton" to "US tons",
+            "m2" to "square metres",
+            "km2" to "square kilometres",
+            "cm2" to "square centimetres",
+            "mm2" to "square millimetres",
+            "ft2" to "square feet",
+            "in2" to "square inches",
+            "yd2" to "square yards",
+            "mi2" to "square miles",
+            "acre" to "acres",
+            "ha" to "hectares",
+            "l" to "litres",
+            "ml" to "millilitres",
+            "m3" to "cubic metres",
+            "cm3" to "cubic centimetres",
+            "mm3" to "cubic millimetres",
+            "ft3" to "cubic feet",
+            "in3" to "cubic inches",
+            "gal" to "gallons",
+            "qt" to "quarts",
+            "pt" to "pints",
+            "cup" to "cups",
+            "fl oz" to "fluid ounces",
+            "tbsp" to "tablespoons",
+            "tsp" to "teaspoons",
+            "s" to "seconds",
+            "ms" to "milliseconds",
+            "us" to "microseconds",
+            "ns" to "nanoseconds",
+            "min" to "minutes",
+            "h" to "hours",
+            "day" to "days",
+            "week" to "weeks",
+            "month" to "months",
+            "year" to "years",
+            "m/s" to "metres per second",
+            "km/h" to "kilometres per hour",
+            "mph" to "miles per hour",
+            "kt" to "knots",
+            "ft/s" to "feet per second",
+            "in/s" to "inches per second",
+            "byte" to "bytes",
+            "bit" to "bits",
+            "KB" to "kilobytes",
+            "MB" to "megabytes",
+            "GB" to "gigabytes",
+            "TB" to "terabytes",
+            "KiB" to "kibibytes",
+            "MiB" to "mebibytes",
+            "GiB" to "gibibytes",
+            "TiB" to "tebibytes",
+            "J" to "joules",
+            "kJ" to "kilojoules",
+            "cal" to "calories",
+            "kcal" to "kilocalories",
+            "Wh" to "watt-hours",
+            "kWh" to "kilowatt-hours",
+            "eV" to "electronvolts",
+            "BTU" to "BTUs",
+            "W" to "watts",
+            "kW" to "kilowatts",
+            "mW" to "milliwatts",
+            "hp" to "horsepower",
+            "Pa" to "pascals",
+            "kPa" to "kilopascals",
+            "MPa" to "megapascals",
+            "bar" to "bar",
+            "mbar" to "millibars",
+            "psi" to "psi",
+            "atm" to "atmospheres",
+            "torr" to "torr",
+            "mmHg" to "millimetres of mercury",
+            "rad" to "radians",
+            "deg" to "degrees",
+            "grad" to "gradians",
+            "rev" to "revolutions",
+            "Hz" to "hertz",
+            "kHz" to "kilohertz",
+            "MHz" to "megahertz",
+            "GHz" to "gigahertz",
+            "rpm" to "revolutions per minute",
+            "C" to "degrees Celsius",
+            "F" to "degrees Fahrenheit",
+            "K" to "kelvin",
+        )
+    private val unitShortLabels =
+        mapOf(
+            "m" to "m",
+            "km" to "km",
+            "cm" to "cm",
+            "mm" to "mm",
+            "um" to "um",
+            "nm" to "nm",
+            "mi" to "mi",
+            "yd" to "yd",
+            "ft" to "ft",
+            "in" to "in",
+            "nmi" to "nmi",
+            "kg" to "kg",
+            "g" to "g",
+            "mg" to "mg",
+            "ug" to "ug",
+            "lb" to "lbs",
+            "oz" to "oz",
+            "st" to "st",
+            "tonne" to "t",
+            "us ton" to "ton",
+            "m2" to "m2",
+            "km2" to "km2",
+            "cm2" to "cm2",
+            "mm2" to "mm2",
+            "ft2" to "ft2",
+            "in2" to "in2",
+            "yd2" to "yd2",
+            "mi2" to "mi2",
+            "acre" to "ac",
+            "ha" to "ha",
+            "l" to "L",
+            "ml" to "mL",
+            "m3" to "m3",
+            "cm3" to "cm3",
+            "mm3" to "mm3",
+            "ft3" to "ft3",
+            "in3" to "in3",
+            "gal" to "gal",
+            "qt" to "qt",
+            "pt" to "pt",
+            "cup" to "cup",
+            "fl oz" to "fl oz",
+            "tbsp" to "tbsp",
+            "tsp" to "tsp",
+            "s" to "s",
+            "ms" to "ms",
+            "us" to "us",
+            "ns" to "ns",
+            "min" to "min",
+            "h" to "h",
+            "day" to "day",
+            "week" to "wk",
+            "month" to "mo",
+            "year" to "yr",
+            "m/s" to "m/s",
+            "km/h" to "km/h",
+            "mph" to "mph",
+            "kt" to "kt",
+            "ft/s" to "ft/s",
+            "in/s" to "in/s",
+            "byte" to "B",
+            "bit" to "bit",
+            "KB" to "KB",
+            "MB" to "MB",
+            "GB" to "GB",
+            "TB" to "TB",
+            "KiB" to "KiB",
+            "MiB" to "MiB",
+            "GiB" to "GiB",
+            "TiB" to "TiB",
+            "J" to "J",
+            "kJ" to "kJ",
+            "cal" to "cal",
+            "kcal" to "kcal",
+            "Wh" to "Wh",
+            "kWh" to "kWh",
+            "eV" to "eV",
+            "BTU" to "BTU",
+            "W" to "W",
+            "kW" to "kW",
+            "mW" to "mW",
+            "hp" to "hp",
+            "Pa" to "Pa",
+            "kPa" to "kPa",
+            "MPa" to "MPa",
+            "bar" to "bar",
+            "mbar" to "mbar",
+            "psi" to "psi",
+            "atm" to "atm",
+            "torr" to "torr",
+            "mmHg" to "mmHg",
+            "rad" to "rad",
+            "deg" to "deg",
+            "grad" to "grad",
+            "rev" to "rev",
+            "Hz" to "Hz",
+            "kHz" to "kHz",
+            "MHz" to "MHz",
+            "GHz" to "GHz",
+            "rpm" to "rpm",
+            "C" to "C",
+            "F" to "F",
+            "K" to "K",
+        )
 
     private val unitsByAlias: Map<String, List<UnitDefinition>> by lazy {
         val entries = mutableListOf<UnitEntry>()
@@ -249,19 +451,19 @@ object UnitConverterUtils {
         // Temperature (base: celsius)
         registerTemperature(
             symbol = "C",
-            aliases = setOf("c", "deg c", "celsius"),
+            aliases = setOf("c", "deg c", "degree c", "degrees c", "celsius", "centigrade", "celcius"),
             toCelsius = { value -> value },
             fromCelsius = { value -> value },
         )
         registerTemperature(
             symbol = "F",
-            aliases = setOf("f", "deg f", "fahrenheit"),
+            aliases = setOf("f", "deg f", "degree f", "degrees f", "fahrenheit"),
             toCelsius = { value -> (value - 32.0) * (5.0 / 9.0) },
             fromCelsius = { value -> (value * (9.0 / 5.0)) + 32.0 },
         )
         registerTemperature(
             symbol = "K",
-            aliases = setOf("k", "kelvin"),
+            aliases = setOf("k", "kelvin", "kelvins"),
             toCelsius = { value -> value - 273.15 },
             fromCelsius = { value -> value + 273.15 },
         )
@@ -294,7 +496,8 @@ object UnitConverterUtils {
         if (!converted.isFinite()) return null
 
         val formattedValue = formatValue(converted)
-        return "$formattedValue ${toUnit.displaySymbol}"
+        val unitLabel = formatDisplayUnit(toUnit)
+        return "$formattedValue $unitLabel"
     }
 
     private fun parseQuery(query: String): ParsedQuery? {
@@ -331,14 +534,25 @@ object UnitConverterUtils {
 
     private fun formatValue(value: Double): String {
         val normalizedValue = if (abs(value) < 1e-12) 0.0 else value
-        val absolute = abs(normalizedValue)
-        val formatter =
-            if (absolute != 0.0 && (absolute < 1e-6 || absolute >= 1e9)) {
-                scientificDecimalFormat
-            } else {
-                normalDecimalFormat
+        val rounded =
+            BigDecimal.valueOf(normalizedValue)
+                .setScale(2, RoundingMode.HALF_UP)
+                .stripTrailingZeros()
+                .toPlainString()
+        return if (rounded == "-0") "0" else rounded
+    }
+
+    private fun formatDisplayUnit(unit: UnitDefinition): String {
+        if (unit.category == UnitCategory.TEMPERATURE) {
+            return when (unit.displaySymbol) {
+                "C" -> "\u00B0C"
+                "F" -> "\u00B0F"
+                else -> "K"
             }
-        return formatter.format(normalizedValue)
+        }
+        val unitLabel = unitDisplayNames[unit.displaySymbol] ?: unit.displaySymbol
+        val unitShort = unitShortLabels[unit.displaySymbol] ?: unit.displaySymbol
+        return "$unitLabel ($unitShort)"
     }
 
     private fun normalizeUnit(rawUnit: String): String {
