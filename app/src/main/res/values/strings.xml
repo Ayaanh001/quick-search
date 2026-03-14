@@ -814,7 +814,7 @@
     <string name="calculator_enter_math_expression_hint">Enter a math expression</string>
     <string name="calculator_invalid_or_unsupported_expression">Invalid or unsupported expression</string>
     <string name="unit_converter_toggle_title">Unit Converter</string>
-    <string name="unit_converter_toggle_desc">Convert between units like 5lbs to kgs</string>
+    <string name="unit_converter_toggle_desc">Convert units for length, weight, temperature, time, etc.</string>
     <string name="unit_converter_enter_conversion_hint">Enter a conversion (e.g., 5lbs in kgs)</string>
     <string name="unit_converter_invalid_or_unsupported_query">Invalid or unsupported conversion</string>
 

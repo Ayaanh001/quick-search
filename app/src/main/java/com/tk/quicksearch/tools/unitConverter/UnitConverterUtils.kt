@@ -390,7 +390,7 @@ object UnitConverterUtils {
 
         // Speed (base: meter per second)
         registerLinear(UnitCategory.SPEED, "m/s", 1.0, setOf("m/s", "meter per second", "meters per second", "metre per second", "metres per second", "mps"))
-        registerLinear(UnitCategory.SPEED, "km/h", 0.2777777777777778, setOf("km/h", "kph", "kmh", "kilometer per hour", "kilometers per hour", "kilometre per hour", "kilometres per hour"))
+        registerLinear(UnitCategory.SPEED, "km/h", 0.2777777777777778, setOf("km/h", "kph", "kmh", "kmph", "kilometer per hour", "kilometers per hour", "kilometre per hour", "kilometres per hour"))
         registerLinear(UnitCategory.SPEED, "mph", 0.44704, setOf("mph", "mile per hour", "miles per hour"))
         registerLinear(UnitCategory.SPEED, "kt", 0.5144444444444445, setOf("kt", "kts", "knot", "knots"))
         registerLinear(UnitCategory.SPEED, "ft/s", 0.3048, setOf("ft/s", "fps", "foot per second", "feet per second"))

@@ -438,6 +438,7 @@ internal fun PersistentSearchBar(
                                 textFieldValue.text.isEmpty() &&
                                 (detectedShortcutTarget != null ||
                                     detectedAliasSearchSection != null ||
+                                    activeToolType != null ||
                                     isCalculatorMode)
                         ) {
                             onClearDetectedShortcut()
@@ -508,11 +509,16 @@ internal fun PersistentSearchBar(
                     modifier =
                         Modifier.padding(end = DesignTokens.SpacingXSmall),
                 ) {
-                    // Show X icon when query is not empty, otherwise show
-                    // settings icon
-                    // (whether shortcut is detected or not when query is empty)
-                    if (query.isNotEmpty()) {
-                        IconButton(onClick = onClearQuery) {
+                    if (isAliasDetected || query.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                if (query.isNotEmpty()) {
+                                    onClearQuery()
+                                } else if (isAliasDetected) {
+                                    onClearDetectedShortcut()
+                                }
+                            },
+                        ) {
                             Icon(
                                 imageVector = Icons.Rounded.Close,
                                 contentDescription =

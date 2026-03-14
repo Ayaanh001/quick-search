@@ -52,6 +52,7 @@ import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 private val unitResultRegex = Regex("^([+-]?(?:\\d+(?:\\.\\d+)?|\\.\\d+))(?:\\s+(.+))?$")
+private const val unitResultMultiLineThreshold = 10
 
 /** Composable that displays direct search results with loading, success, and error states. */
 @Composable
@@ -286,24 +287,43 @@ private fun UnitConverterResultText(result: String) {
     val match = unitResultRegex.matchEntire(result)
     val value = match?.groupValues?.getOrNull(1) ?: result
     val unit = match?.groupValues?.getOrNull(2).orEmpty()
+    val shouldShowUnitOnNextLine = unit.isNotBlank() && value.length >= unitResultMultiLineThreshold
 
-    Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
-    ) {
-        Text(
-                text = value,
-                style = MaterialTheme.typography.displayMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-        )
-        if (unit.isNotBlank()) {
+    if (shouldShowUnitOnNextLine) {
+        Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXSmall),
+        ) {
+            Text(
+                    text = value,
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+            )
             Text(
                     text = unit,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.offset(y = 10.dp),
             )
+        }
+    } else {
+        Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
+        ) {
+            Text(
+                    text = value,
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+            )
+            if (unit.isNotBlank()) {
+                Text(
+                        text = unit,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.offset(y = 10.dp),
+                )
+            }
         }
     }
 }

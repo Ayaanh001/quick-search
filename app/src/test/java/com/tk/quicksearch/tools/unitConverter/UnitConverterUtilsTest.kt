@@ -36,4 +36,10 @@ class UnitConverterUtilsTest {
         assertNotNull(result)
         assertEquals("212 \u00B0F", result)
     }
+
+    @Test
+    fun supportsKmphAlias() {
+        val result = UnitConverterUtils.convertQuery("60 kmph to m/s")
+        assertEquals("16.67 metres per second (m/s)", result)
+    }
 }
