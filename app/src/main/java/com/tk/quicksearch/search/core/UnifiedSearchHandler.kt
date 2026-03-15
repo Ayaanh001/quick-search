@@ -636,6 +636,7 @@ class UnifiedSearchHandler(
                 if (events.isEmpty()) return emptyList()
 
                 val distinctEvents = events.distinctBy { it.eventId }
+                val now = System.currentTimeMillis()
                 return distinctEvents
                         .mapNotNull { event ->
                                 val nickname = userPreferences.getCalendarEventNickname(event.eventId)
@@ -655,10 +656,31 @@ class UnifiedSearchHandler(
                         }
                         .sortedWith(
                                 compareBy<Pair<CalendarEventInfo, Int>> { it.second }
-                                        .thenBy { it.first.startMillis }
+                                        .thenBy {
+                                                calendarFutureFirstGroup(
+                                                        startMillis = it.first.startMillis,
+                                                        now = now,
+                                                )
+                                        }
+                                        .thenBy {
+                                                calendarFutureFirstOrderKey(
+                                                        startMillis = it.first.startMillis,
+                                                        now = now,
+                                                )
+                                        }
                                         .thenBy { it.first.title.lowercase() },
                         )
                         .map { it.first }
                         .take(resultLimit)
         }
+
+        private fun calendarFutureFirstGroup(
+                startMillis: Long,
+                now: Long,
+        ): Int = if (startMillis >= now) 0 else 1
+
+        private fun calendarFutureFirstOrderKey(
+                startMillis: Long,
+                now: Long,
+        ): Long = if (startMillis >= now) startMillis else Long.MAX_VALUE - startMillis
 }

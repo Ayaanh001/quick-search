@@ -251,10 +251,6 @@ object SettingsBackupManager {
         }
 
     private fun sanitizeStringSetForExport(values: List<String>): List<String> {
-        if (FeatureFlags.isCalendarSearchEnabled()) return values
-
-        return values.filterNot { entry ->
-            entry.equals("CALENDAR", ignoreCase = true)
-        }
+        return values
     }
 }

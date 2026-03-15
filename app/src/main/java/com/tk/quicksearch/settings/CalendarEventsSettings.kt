@@ -1,46 +1,34 @@
 package com.tk.quicksearch.settings.settingsDetailScreen
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowDownward
-import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.CalendarMonth
-import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Repeat
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +36,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -61,16 +48,10 @@ import com.tk.quicksearch.search.models.CalendarEventInfo
 import com.tk.quicksearch.settings.AppShortcutsSettings.shortcutMatchPriority
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import java.util.Calendar
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
-private enum class CalendarEventSortOption(
-    @StringRes val labelResId: Int,
-) {
-    NAME(R.string.settings_app_sort_name),
-    DATE(R.string.settings_calendar_sort_date),
-}
 
 private data class CalendarEventGroup(
     val eventId: Long,
@@ -90,14 +71,12 @@ fun CalendarEventsSettingsSection(
     val normalizedSearchQuery =
         remember(searchQuery, locale) { searchQuery.trim().lowercase(locale) }
     val nowMillis = System.currentTimeMillis()
+    val todayStartMillis = startOfTodayMillis()
     val listState = rememberLazyListState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val calendarRepository = remember(context) { CalendarRepository(context) }
     var hasPermission by remember { mutableStateOf(calendarRepository.hasPermission()) }
-    var selectedSortOption by rememberSaveable { mutableStateOf(CalendarEventSortOption.NAME) }
-    var isSortAscending by rememberSaveable { mutableStateOf(true) }
-    var isSortMenuExpanded by remember { mutableStateOf(false) }
     var selectedEventGroupForSheet by remember { mutableStateOf<CalendarEventGroup?>(null) }
 
     DisposableEffect(lifecycleOwner, calendarRepository) {
@@ -139,124 +118,38 @@ fun CalendarEventsSettingsSection(
         }
 
     val filteredEventGroups =
-        remember(eventGroups, normalizedSearchQuery, locale) {
+        remember(eventGroups, normalizedSearchQuery, locale, todayStartMillis) {
             if (normalizedSearchQuery.isBlank()) {
-                eventGroups
+                eventGroups.mapNotNull { eventGroup ->
+                    val nextInstance =
+                        firstInstanceOnOrAfter(
+                            instances = eventGroup.instances,
+                            thresholdMillis = todayStartMillis,
+                        ) ?: return@mapNotNull null
+                    eventGroup.copy(nearestInstance = nextInstance)
+                }
             } else {
                 eventGroups
                     .mapNotNull { eventGroup ->
-                        val priority =
-                            shortcutMatchPriority(
-                                name = eventGroup.title,
-                                query = normalizedSearchQuery,
-                                locale = locale,
-                            ) ?: return@mapNotNull null
-                        eventGroup to priority
-                    }.sortedWith(
-                        compareBy<Pair<CalendarEventGroup, com.tk.quicksearch.settings.AppShortcutsSettings.ShortcutSearchMatchPriority>> { it.second.ordinal }
-                            .thenBy { it.first.title.lowercase(locale) }
-                            .thenBy { it.first.nearestInstance.startMillis },
-                    )
-                    .map { it.first }
+                        shortcutMatchPriority(
+                            name = eventGroup.title,
+                            query = normalizedSearchQuery,
+                            locale = locale,
+                        ) ?: return@mapNotNull null
+                        eventGroup
+                    }
             }
         }
 
     val sortedEventGroups =
-        remember(filteredEventGroups, selectedSortOption, isSortAscending, locale) {
-            val baseComparator =
-                when (selectedSortOption) {
-                    CalendarEventSortOption.NAME -> {
-                        compareBy<CalendarEventGroup> { it.title.lowercase(locale) }
-                            .thenBy { it.nearestInstance.startMillis }
-                    }
-
-                    CalendarEventSortOption.DATE -> {
-                        compareBy<CalendarEventGroup> { it.nearestInstance.startMillis }
-                            .thenBy { it.title.lowercase(locale) }
-                    }
-                }
-
-            val comparator = if (isSortAscending) baseComparator else baseComparator.reversed()
-            filteredEventGroups.sortedWith(comparator)
+        remember(filteredEventGroups, locale) {
+            filteredEventGroups.sortedWith(
+                compareBy<CalendarEventGroup> { it.nearestInstance.startMillis }
+                    .thenBy { it.title.lowercase(locale) },
+            )
         }
-
-    LaunchedEffect(selectedSortOption, isSortAscending) {
-        listState.scrollToItem(0)
-    }
 
     Column(modifier = modifier) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box {
-                Row(
-                    modifier =
-                        Modifier
-                            .clickable { isSortMenuExpanded = true }
-                            .padding(start = 4.dp, end = 4.dp, bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    Text(
-                        text =
-                            stringResource(
-                                R.string.settings_app_sort_by_format,
-                                stringResource(selectedSortOption.labelResId),
-                            ),
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Icon(
-                        imageVector = Icons.Rounded.ExpandMore,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
-                DropdownMenu(
-                    expanded = isSortMenuExpanded,
-                    onDismissRequest = { isSortMenuExpanded = false },
-                    shape = RoundedCornerShape(24.dp),
-                    properties = PopupProperties(focusable = false),
-                    containerColor = AppColors.DialogBackground,
-                ) {
-                    CalendarEventSortOption.entries.forEachIndexed { index, option ->
-                        if (index > 0) {
-                            HorizontalDivider()
-                        }
-                        DropdownMenuItem(
-                            text = { Text(text = stringResource(option.labelResId)) },
-                            onClick = {
-                                selectedSortOption = option
-                                isSortMenuExpanded = false
-                            },
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(
-                modifier = Modifier.offset(y = (-3).dp),
-                onClick = { isSortAscending = !isSortAscending },
-            ) {
-                Icon(
-                    imageVector =
-                        if (isSortAscending) {
-                            Icons.Rounded.ArrowUpward
-                        } else {
-                            Icons.Rounded.ArrowDownward
-                        },
-                    contentDescription =
-                        if (isSortAscending) {
-                            stringResource(R.string.settings_app_sort_ascending)
-                        } else {
-                            stringResource(R.string.settings_app_sort_descending)
-                        },
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-            }
-        }
-
         ElevatedCard(
             modifier = Modifier.fillMaxSize(),
             shape = MaterialTheme.shapes.extraLarge,
@@ -304,7 +197,11 @@ fun CalendarEventsSettingsSection(
                             relativeLabel = calendarRelativeDateLabel(eventGroup.nearestInstance.startMillis),
                             recurrenceLabel = recurrenceLabel,
                             onClick = {
-                                selectedEventGroupForSheet = eventGroup
+                                if (eventGroup.isRecurring()) {
+                                    selectedEventGroupForSheet = eventGroup
+                                } else {
+                                    onEventClick(eventGroup.nearestInstance)
+                                }
                             },
                         )
                         if (index < sortedEventGroups.lastIndex) {
@@ -320,6 +217,7 @@ fun CalendarEventsSettingsSection(
         ModalBottomSheet(
             onDismissRequest = { selectedEventGroupForSheet = null },
             containerColor = AppColors.DialogBackground,
+            tonalElevation = 0.dp,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ) {
             Column(
@@ -516,3 +414,20 @@ private fun eventDistanceToNow(
     startMillis: Long,
     nowMillis: Long,
 ): Long = if (startMillis >= nowMillis) startMillis - nowMillis else nowMillis - startMillis
+
+private fun firstInstanceOnOrAfter(
+    instances: List<CalendarEventInfo>,
+    thresholdMillis: Long,
+): CalendarEventInfo? = instances.firstOrNull { it.startMillis >= thresholdMillis }
+
+private fun startOfTodayMillis(): Long =
+    Calendar.getInstance()
+        .apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
+private fun CalendarEventGroup.isRecurring(): Boolean =
+    instances.size > 1 || !nearestInstance.recurrenceRule.isNullOrBlank()

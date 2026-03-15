@@ -3,11 +3,9 @@ package com.tk.quicksearch.shared.featureFlags
 import android.content.Context
 import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.data.preferences.BasePreferences
-import com.tk.quicksearch.searchEngines.AliasHandler
 import java.util.EnumMap
 
 enum class FeatureFlag {
-    CALENDAR_SEARCH,
     APP_SETTINGS_SEARCH,
     APP_THEME_SELECTION,
 }
@@ -31,23 +29,6 @@ object FeatureFlags {
 
     private val definitions: Map<FeatureFlag, FeatureFlagDefinition> =
         mapOf(
-            FeatureFlag.CALENDAR_SEARCH to
-                FeatureFlagDefinition(
-                    enabledByDefault = false,
-                    exportExcludedKeys =
-                        setOf(
-                            BasePreferences.KEY_PINNED_CALENDAR_EVENT_IDS,
-                            BasePreferences.KEY_EXCLUDED_CALENDAR_EVENT_IDS,
-                        ),
-                    exportExcludedPrefixes =
-                        setOf(
-                            BasePreferences.KEY_NICKNAME_CALENDAR_EVENT_PREFIX,
-                            BasePreferences.KEY_ALIAS_CODE_PREFIX +
-                                AliasHandler.SEARCH_SECTION_CALENDAR_ALIAS_ID,
-                            BasePreferences.KEY_ALIAS_ENABLED_PREFIX +
-                                AliasHandler.SEARCH_SECTION_CALENDAR_ALIAS_ID,
-                        ),
-                ),
             FeatureFlag.APP_SETTINGS_SEARCH to
                 FeatureFlagDefinition(
                     enabledByDefault = false,
@@ -91,17 +72,13 @@ object FeatureFlags {
         return definitions[flag]?.enabledByDefault == true
     }
 
-    fun isCalendarSearchEnabled(): Boolean = isEnabled(FeatureFlag.CALENDAR_SEARCH)
-
     fun isAppSettingsSearchEnabled(): Boolean = isEnabled(FeatureFlag.APP_SETTINGS_SEARCH)
 
     fun isAppThemeSelectionEnabled(): Boolean = isEnabled(FeatureFlag.APP_THEME_SELECTION)
 
-    fun isSearchSectionEnabled(section: SearchSection): Boolean =
-        when (section) {
-            SearchSection.CALENDAR -> isCalendarSearchEnabled()
-            else -> true
-        }
+    fun isSearchSectionEnabled(@Suppress("UNUSED_PARAMETER") section: SearchSection): Boolean {
+        return true
+    }
 
     fun isAnyEnabled(): Boolean = FeatureFlag.entries.any { flag -> isEnabled(flag) }
 

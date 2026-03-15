@@ -431,6 +431,10 @@ fun SearchContentArea(
                                 settingsParams.onExpandClick()
                             }
 
+                            ExpandedSection.CALENDAR -> {
+                                calendarParams.onExpandClick()
+                            }
+
                             else -> {}
                         }
                     },

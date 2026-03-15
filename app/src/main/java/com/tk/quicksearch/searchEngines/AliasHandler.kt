@@ -9,7 +9,6 @@ import com.tk.quicksearch.tools.directSearch.DirectSearchHandler
 import com.tk.quicksearch.searchEngines.AliasValidator.hasExactAliasConflict
 import com.tk.quicksearch.searchEngines.AliasValidator.isValidGeneralAliasCode
 import com.tk.quicksearch.searchEngines.AliasValidator.normalizeShortcutCodeInput
-import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -343,9 +342,7 @@ class AliasHandler(
         putSectionAlias(aliases, SEARCH_SECTION_CONTACTS_ALIAS_ID, SearchSection.CONTACTS)
         putSectionAlias(aliases, SEARCH_SECTION_FILES_ALIAS_ID, SearchSection.FILES)
         putSectionAlias(aliases, SEARCH_SECTION_SETTINGS_ALIAS_ID, SearchSection.SETTINGS)
-        if (FeatureFlags.isCalendarSearchEnabled()) {
-            putSectionAlias(aliases, SEARCH_SECTION_CALENDAR_ALIAS_ID, SearchSection.CALENDAR)
-        }
+        putSectionAlias(aliases, SEARCH_SECTION_CALENDAR_ALIAS_ID, SearchSection.CALENDAR)
     }
 
     private fun putSectionAlias(

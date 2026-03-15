@@ -36,7 +36,6 @@ import com.tk.quicksearch.searchEngines.AliasHandler
 import com.tk.quicksearch.searchEngines.AliasValidator.hasExactAliasConflict
 import com.tk.quicksearch.settings.searchEnginesScreen.AliasDisplayType
 import com.tk.quicksearch.settings.searchEnginesScreen.AliasCodeDisplay
-import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticToggle
 
@@ -63,6 +62,7 @@ fun SectionSettingsSection(
     onDeviceSettingsClick: (() -> Unit)? = null,
     onDeviceSettingsClickNoRipple: Boolean = false,
     calendarSubtitle: String? = null,
+    calendarTagLabel: String? = null,
     onCalendarClick: (() -> Unit)? = null,
     onCalendarClickNoRipple: Boolean = false,
     modifier: Modifier = Modifier,
@@ -132,6 +132,7 @@ fun SectionSettingsSection(
                             isCalendarRow -> onCalendarClickNoRipple
                             else -> false
                         },
+                    tagLabel = if (isCalendarRow) calendarTagLabel else null,
                 )
 
                 if (index != sectionOrder.lastIndex) {
@@ -154,12 +155,11 @@ private fun SectionRowWithoutDrag(
     subtitle: String? = null,
     onRowClick: (() -> Unit)? = null,
     noRippleOnRowClick: Boolean = false,
+    tagLabel: String? = null,
     bottomPadding: Dp = DragConstants.rowVerticalPadding,
 ) {
     val view = LocalView.current
     val metadata = getSectionMetadata(section)
-    val showBetaTag =
-        section == SearchSection.CALENDAR && FeatureFlags.isCalendarSearchEnabled()
     val rowInteractionSource = remember { MutableInteractionSource() }
     val rowIndication = LocalIndication.current
 
@@ -209,8 +209,8 @@ private fun SectionRowWithoutDrag(
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
-                    if (showBetaTag) {
-                        BetaTagChip()
+                    if (tagLabel != null) {
+                        BetaTagChip(tagText = tagLabel)
                     }
                 }
 

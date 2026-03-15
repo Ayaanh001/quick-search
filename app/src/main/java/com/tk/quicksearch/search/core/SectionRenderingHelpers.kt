@@ -212,7 +212,8 @@ fun rememberSectionRenderContext(
                     !isFilesExpanded &&
                         !isContactsExpanded &&
                         !isSettingsExpanded &&
-                        !isAppShortcutsExpanded
+                        !isAppShortcutsExpanded &&
+                        !isCalendarExpanded
                 }
 
                 else -> {
@@ -224,7 +225,8 @@ fun rememberSectionRenderContext(
                 is FilesSectionVisibility.ShowingResults -> {
                     !isContactsExpanded &&
                         !isSettingsExpanded &&
-                        !isAppShortcutsExpanded
+                        !isAppShortcutsExpanded &&
+                        !isCalendarExpanded
                 }
 
                 else -> {
@@ -236,7 +238,8 @@ fun rememberSectionRenderContext(
                 is ContactsSectionVisibility.ShowingResults -> {
                     !isFilesExpanded &&
                         !isSettingsExpanded &&
-                        !isAppShortcutsExpanded
+                        !isAppShortcutsExpanded &&
+                        !isCalendarExpanded
                 }
 
                 else -> {

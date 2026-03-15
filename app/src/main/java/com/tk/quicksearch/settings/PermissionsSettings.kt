@@ -12,7 +12,6 @@ import androidx.compose.ui.res.stringResource
 import com.tk.quicksearch.R
 import com.tk.quicksearch.shared.permissions.PermissionCardTexts
 import com.tk.quicksearch.shared.permissions.PermissionsCardSection
-import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import com.tk.quicksearch.settings.shared.*
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
@@ -51,7 +50,7 @@ fun PermissionsSettings(
                     callingDescription = stringResource(R.string.permissions_calling_desc),
                 ),
             modifier = Modifier.fillMaxWidth(),
-            showCalendarPermission = FeatureFlags.isCalendarSearchEnabled(),
+            showCalendarPermission = true,
             onRequestUsagePermission = onRequestUsagePermission,
             onRequestContactPermission = onRequestContactPermission,
             onRequestFilePermission = onRequestFilePermission,

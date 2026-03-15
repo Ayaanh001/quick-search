@@ -123,7 +123,6 @@ class SecondarySearchOrchestrator(
             !isSingleCharacterQuery && SearchSection.SETTINGS !in sectionManager.disabledSections
         val canSearchCalendar =
             !isSingleCharacterQuery &&
-                FeatureFlags.isCalendarSearchEnabled() &&
                 currentState.hasCalendarPermission &&
                 SearchSection.CALENDAR !in sectionManager.disabledSections
         val canSearchAppSettings =
@@ -334,7 +333,6 @@ class SecondarySearchOrchestrator(
             !isSingleCharacterQuery && isSectionEnabled(SearchSection.SETTINGS)
         val isCalendarEnabled =
             !isSingleCharacterQuery &&
-                FeatureFlags.isCalendarSearchEnabled() &&
                 currentState.hasCalendarPermission &&
                 isSectionEnabled(SearchSection.CALENDAR)
         val isAppSettingsEnabled =

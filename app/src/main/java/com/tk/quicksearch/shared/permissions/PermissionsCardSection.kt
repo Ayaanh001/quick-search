@@ -52,6 +52,7 @@ fun PermissionsCardSection(
     cardContainer: @Composable (modifier: Modifier, content: @Composable () -> Unit) -> Unit,
     modifier: Modifier = Modifier,
     showCalendarPermission: Boolean = true,
+    showCallingPermission: Boolean = true,
     onRequestUsagePermission: () -> Unit = {},
     onRequestContactPermission: () -> Unit = {},
     onRequestFilePermission: () -> Unit = {},
@@ -184,7 +185,7 @@ fun PermissionsCardSection(
             contacts = contactsPermissionState,
             files = filesPermissionState,
             calendar = if (showCalendarPermission) calendarPermissionState else PermissionState.granted(),
-            calling = callingPermissionState,
+            calling = if (showCallingPermission) callingPermissionState else PermissionState.granted(),
         )
     LaunchedEffect(states) {
         onStatesChanged(states)
@@ -269,26 +270,28 @@ fun PermissionsCardSection(
                     ),
                 )
             }
-            add(
-                PermissionCardItem(
-                    title = texts.callingTitle,
-                    description = texts.callingDescription,
-                    permissionState = callingPermissionState,
-                    isMandatory = false,
-                    onToggleChange = { enabled ->
-                        callingPermissionState = callingPermissionState.copy(isEnabled = enabled)
-                        if (enabled && !callingPermissionState.isGranted) {
-                            PermissionHelper.requestRuntimePermissionOrOpenSettings(
-                                context = context,
-                                permission = Manifest.permission.CALL_PHONE,
-                                wasPreviouslyDenied = callingPermissionState.wasDenied,
-                                runtimeLauncher = multiplePermissionsLauncher,
-                            )
-                            onRequestCallPermission()
-                        }
-                    },
-                ),
-            )
+            if (showCallingPermission) {
+                add(
+                    PermissionCardItem(
+                        title = texts.callingTitle,
+                        description = texts.callingDescription,
+                        permissionState = callingPermissionState,
+                        isMandatory = false,
+                        onToggleChange = { enabled ->
+                            callingPermissionState = callingPermissionState.copy(isEnabled = enabled)
+                            if (enabled && !callingPermissionState.isGranted) {
+                                PermissionHelper.requestRuntimePermissionOrOpenSettings(
+                                    context = context,
+                                    permission = Manifest.permission.CALL_PHONE,
+                                    wasPreviouslyDenied = callingPermissionState.wasDenied,
+                                    runtimeLauncher = multiplePermissionsLauncher,
+                                )
+                                onRequestCallPermission()
+                            }
+                        },
+                    ),
+                )
+            }
         }
 
     PermissionCard(

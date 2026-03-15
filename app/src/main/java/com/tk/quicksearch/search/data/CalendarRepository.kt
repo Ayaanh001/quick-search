@@ -67,9 +67,8 @@ class CalendarRepository(
             }
             .sortedWith(
                 compareBy<Pair<CalendarEventInfo, Int>> { it.second }
-                    .thenBy { eventDistanceToNow(it.first.startMillis, now) }
-                    .thenByDescending { it.first.startMillis >= now }
-                    .thenBy { it.first.startMillis }
+                    .thenBy { calendarFutureFirstGroup(it.first.startMillis, now) }
+                    .thenBy { calendarFutureFirstOrderKey(it.first.startMillis, now) }
                     .thenBy { it.first.title.lowercase(Locale.getDefault()) },
             )
             .map { it.first }
@@ -239,15 +238,22 @@ class CalendarRepository(
     ): Map<Long, CalendarEventInfo> =
         instances.groupBy { it.eventId }
             .mapValues { (_, candidates) ->
-                candidates.minWithOrNull(
-                    compareBy<CalendarEventInfo> { eventDistanceToNow(it.startMillis, now) }
-                        .thenByDescending { it.startMillis >= now }
-                        .thenBy { it.startMillis },
-                ) ?: candidates.first()
+                val nearestFuture = candidates.filter { it.startMillis >= now }.minByOrNull { it.startMillis }
+                nearestFuture ?: candidates.maxByOrNull { it.startMillis } ?: candidates.first()
             }
 
     private fun eventDistanceToNow(
         startMillis: Long,
         now: Long,
     ): Long = if (startMillis >= now) startMillis - now else now - startMillis
+
+    private fun calendarFutureFirstGroup(
+        startMillis: Long,
+        now: Long,
+    ): Int = if (startMillis >= now) 0 else 1
+
+    private fun calendarFutureFirstOrderKey(
+        startMillis: Long,
+        now: Long,
+    ): Long = if (startMillis >= now) startMillis else Long.MAX_VALUE - startMillis
 }

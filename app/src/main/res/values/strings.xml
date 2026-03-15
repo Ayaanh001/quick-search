@@ -602,26 +602,26 @@
         <item quantity="one">Every %d Year</item>
         <item quantity="other">Every %d Years</item>
     </plurals>
-    <string name="calendar_repeats_generic">recurring</string>
-    <string name="calendar_repeats_daily">daily</string>
-    <string name="calendar_repeats_weekly">weekly</string>
-    <string name="calendar_repeats_monthly">monthly</string>
-    <string name="calendar_repeats_yearly">yearly</string>
+    <string name="calendar_repeats_generic">Recurring</string>
+    <string name="calendar_repeats_daily">Daily</string>
+    <string name="calendar_repeats_weekly">Weekly</string>
+    <string name="calendar_repeats_monthly">Monthly</string>
+    <string name="calendar_repeats_yearly">Yearly</string>
     <plurals name="calendar_repeats_every_days">
-        <item quantity="one">every %d day</item>
-        <item quantity="other">every %d days</item>
+        <item quantity="one">Every %d day</item>
+        <item quantity="other">Every %d days</item>
     </plurals>
     <plurals name="calendar_repeats_every_weeks">
-        <item quantity="one">every %d week</item>
-        <item quantity="other">every %d weeks</item>
+        <item quantity="one">Every %d week</item>
+        <item quantity="other">Every %d weeks</item>
     </plurals>
     <plurals name="calendar_repeats_every_months">
-        <item quantity="one">every %d month</item>
-        <item quantity="other">every %d months</item>
+        <item quantity="one">Every %d month</item>
+        <item quantity="other">Every %d months</item>
     </plurals>
     <plurals name="calendar_repeats_every_years">
-        <item quantity="one">every %d year</item>
-        <item quantity="other">every %d years</item>
+        <item quantity="one">Every %d year</item>
+        <item quantity="other">Every %d years</item>
     </plurals>
     <string name="calendar_relative_today">Today</string>
     <string name="calendar_relative_yesterday">Yesterday</string>
