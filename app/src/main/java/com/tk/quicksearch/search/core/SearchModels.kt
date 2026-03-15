@@ -429,6 +429,7 @@ data class SearchUiState(
         // Gemini
         val hasGeminiApiKey: Boolean = false,
         val geminiApiKeyLast4: String? = null,
+        val isSavingGeminiApiKey: Boolean = false,
         val personalContext: String = "",
         val geminiModel: String = GeminiModelCatalog.DEFAULT_MODEL_ID,
         val geminiGroundingEnabled: Boolean = GeminiModelCatalog.DEFAULT_GROUNDING_ENABLED,
@@ -545,6 +546,7 @@ fun SearchUiState(
                 disabledSections = features.disabledSections,
                 hasGeminiApiKey = features.hasGeminiApiKey,
                 geminiApiKeyLast4 = features.geminiApiKeyLast4,
+                isSavingGeminiApiKey = features.isSavingGeminiApiKey,
                 personalContext = features.personalContext,
                 geminiModel = features.geminiModel,
                 geminiGroundingEnabled = features.geminiGroundingEnabled,

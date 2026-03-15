@@ -53,6 +53,7 @@ fun DirectSearchSetupCard(
     directSearchEnabled: Boolean,
     onSetGeminiApiKey: (String?) -> Unit,
     geminiApiKeyLast4: String?,
+    isSavingGeminiApiKey: Boolean = false,
     onOpenDirectSearchConfigure: (() -> Unit)? = null,
     isExpanded: Boolean = true,
     onToggleExpanded: (() -> Unit)? = null,
@@ -281,16 +282,22 @@ fun DirectSearchSetupCard(
                                 }
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Button(
+                                    enabled = !isSavingGeminiApiKey && apiKeyInput.trim().isNotEmpty(),
                                     onClick = {
                                         val trimmed = apiKeyInput.trim()
                                         if (trimmed.isNotEmpty()) {
                                             onSetGeminiApiKey(trimmed)
-                                            apiKeyInput = ""
-                                            showInput = false
                                         }
                                     },
                                 ) {
-                                    Text(text = stringResource(R.string.dialog_save))
+                                    Text(
+                                        text =
+                                            if (isSavingGeminiApiKey) {
+                                                stringResource(R.string.settings_gemini_api_key_saving)
+                                            } else {
+                                                stringResource(R.string.dialog_save)
+                                            },
+                                    )
                                 }
                             }
                         } else {

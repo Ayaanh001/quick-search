@@ -132,6 +132,7 @@ internal fun SettingsDetailLevel1Screen(
                             onSetAmazonDomain = callbacks.onSetAmazonDomain,
                             onSetGeminiApiKey = callbacks.onSetGeminiApiKey,
                             geminiApiKeyLast4 = state.geminiApiKeyLast4,
+                            isSavingGeminiApiKey = state.isSavingGeminiApiKey,
                             personalContext = state.personalContext,
                             onSetPersonalContext = callbacks.onSetPersonalContext,
                             geminiModel = state.geminiModel,

@@ -30,6 +30,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.SearchUiState
 import com.tk.quicksearch.search.core.SearchViewModel
+import com.tk.quicksearch.search.core.SearchEngine
+import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutDisplayName
 import com.tk.quicksearch.search.appSettings.AppSettingResult
 import com.tk.quicksearch.search.appSettings.AppSettingResultAction
@@ -470,8 +472,14 @@ fun SearchRoute(
             },
             onPhoneNumberSelected = viewModel::onPhoneNumberSelected,
             onDismissPhoneNumberSelection = viewModel::dismissPhoneNumberSelection,
-            onSearchTargetClick = { query: String, target: com.tk.quicksearch.search.core.SearchTarget ->
-                runExternalNavigationFromOverlay { viewModel.openSearchTarget(query, target) }
+            onSearchTargetClick = { query: String, target: SearchTarget ->
+                val isDirectSearchTarget =
+                    target is SearchTarget.Engine && target.engine == SearchEngine.DIRECT_SEARCH
+                if (isDirectSearchTarget) {
+                    viewModel.openSearchTarget(query, target)
+                } else {
+                    runExternalNavigationFromOverlay { viewModel.openSearchTarget(query, target) }
+                }
             },
             onSearchEngineLongPress = onSearchEngineLongPress,
             onDirectSearchEmailClick = { email: String ->

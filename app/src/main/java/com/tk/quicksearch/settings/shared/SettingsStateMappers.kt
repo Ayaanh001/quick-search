@@ -67,6 +67,7 @@ internal fun SearchUiState.toSettingsScreenState(): SettingsScreenState =
         recentQueriesEnabled = recentQueriesEnabled,
         hasGeminiApiKey = hasGeminiApiKey,
         geminiApiKeyLast4 = geminiApiKeyLast4,
+        isSavingGeminiApiKey = isSavingGeminiApiKey,
         personalContext = personalContext,
         geminiModel = geminiModel,
         geminiGroundingEnabled = geminiGroundingEnabled,

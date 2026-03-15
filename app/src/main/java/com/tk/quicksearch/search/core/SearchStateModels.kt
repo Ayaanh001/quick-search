@@ -135,6 +135,7 @@ data class SearchFeatureState(
         // Gemini / Direct Search
         val hasGeminiApiKey: Boolean = false,
         val geminiApiKeyLast4: String? = null,
+        val isSavingGeminiApiKey: Boolean = false,
         val personalContext: String = "",
         val geminiModel: String = GeminiModelCatalog.DEFAULT_MODEL_ID,
         val geminiGroundingEnabled: Boolean = GeminiModelCatalog.DEFAULT_GROUNDING_ENABLED,

@@ -87,6 +87,7 @@ data class SettingsScreenState(
     val recentQueriesEnabled: Boolean,
     val hasGeminiApiKey: Boolean = false,
     val geminiApiKeyLast4: String? = null,
+    val isSavingGeminiApiKey: Boolean = false,
     val personalContext: String = "",
     val geminiModel: String,
     val geminiGroundingEnabled: Boolean,

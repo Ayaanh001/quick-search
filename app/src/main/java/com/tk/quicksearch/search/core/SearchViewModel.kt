@@ -3458,25 +3458,30 @@ class SearchViewModel(
 
     fun setGeminiApiKey(apiKey: String?) {
         viewModelScope.launch(Dispatchers.IO) {
-            directSearchHandler.setGeminiApiKey(apiKey)
+            updateFeatureState { it.copy(isSavingGeminiApiKey = true) }
+            try {
+                directSearchHandler.setGeminiApiKey(apiKey)
 
-            val hasGemini = !apiKey.isNullOrBlank()
-            searchEngineManager.updateSearchTargetsForGemini(hasGemini)
+                val hasGemini = !apiKey.isNullOrBlank()
+                searchEngineManager.updateSearchTargetsForGemini(hasGemini)
 
-            val availableModels =
-                    if (hasGemini) {
-                        directSearchHandler.refreshAvailableGeminiModels(forceRefresh = true)
-                    } else {
-                        directSearchHandler.getAvailableGeminiModels()
-                    }
+                val availableModels =
+                        if (hasGemini) {
+                            directSearchHandler.refreshAvailableGeminiModels(forceRefresh = true)
+                        } else {
+                            directSearchHandler.getAvailableGeminiModels()
+                        }
 
-            updateFeatureState {
-                it.copy(
-                        hasGeminiApiKey = hasGemini,
-                        geminiApiKeyLast4 = apiKey?.trim()?.takeLast(4),
-                        geminiModel = directSearchHandler.getGeminiModel(),
-                        availableGeminiModels = availableModels,
-                )
+                updateFeatureState {
+                    it.copy(
+                            hasGeminiApiKey = hasGemini,
+                            geminiApiKeyLast4 = apiKey?.trim()?.takeLast(4),
+                            geminiModel = directSearchHandler.getGeminiModel(),
+                            availableGeminiModels = availableModels,
+                    )
+                }
+            } finally {
+                updateFeatureState { it.copy(isSavingGeminiApiKey = false) }
             }
         }
     }

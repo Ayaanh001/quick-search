@@ -131,6 +131,7 @@ fun SearchEngineSetupScreen(
                 showAddSearchEngineButton = false,
                 onSetGeminiApiKey = viewModel::setGeminiApiKey,
                 geminiApiKeyLast4 = uiState.geminiApiKeyLast4,
+                isSavingGeminiApiKey = uiState.isSavingGeminiApiKey,
                 personalContext = uiState.personalContext,
                 onSetPersonalContext = viewModel::setPersonalContext,
                 geminiModel = uiState.geminiModel,
