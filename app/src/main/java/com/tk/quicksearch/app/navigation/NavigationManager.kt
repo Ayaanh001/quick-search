@@ -24,6 +24,7 @@ import com.tk.quicksearch.onboarding.FinalSetupScreen
 import com.tk.quicksearch.onboarding.SearchEngineSetupScreen
 import com.tk.quicksearch.onboarding.permissionScreen.PermissionsScreen
 import com.tk.quicksearch.search.appSettings.AppSettingsDestination
+import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.core.SearchViewModel
 import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.search.searchScreen.SearchRoute
@@ -163,6 +164,12 @@ fun MainContent(
                 PermissionsScreen(
                     currentStep = 1,
                     onPermissionsComplete = {
+                        val hasCalendarPermission =
+                            context.checkSelfPermission(Manifest.permission.READ_CALENDAR) ==
+                                android.content.pm.PackageManager.PERMISSION_GRANTED
+                        if (hasCalendarPermission) {
+                            searchViewModel.setSectionEnabled(SearchSection.CALENDAR, true)
+                        }
                         currentScreen = AppScreen.SearchEngineSetup
                         searchViewModel.handleOptionalPermissionChange()
                     },

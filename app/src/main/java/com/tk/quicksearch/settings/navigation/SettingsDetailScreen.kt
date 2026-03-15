@@ -162,6 +162,7 @@ internal fun SettingsDetailLevel1Screen(
                             hasUsagePermission = hasUsagePermission,
                             hasContactPermission = PermissionUtils.hasContactsPermission(context),
                             hasFilePermission = PermissionHelper.checkFilesPermission(context),
+                            hasCalendarPermission = PermissionUtils.hasCalendarPermission(context),
                             onNavigateToExcludedItems = {
                                 if (hasExcludedItems) {
                                     onNavigateToDetail(SettingsDetailType.EXCLUDED_ITEMS)

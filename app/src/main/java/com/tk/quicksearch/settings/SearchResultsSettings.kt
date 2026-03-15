@@ -259,6 +259,7 @@ fun SearchResultsSettingsSection(
     hasUsagePermission: Boolean,
     hasContactPermission: Boolean,
     hasFilePermission: Boolean,
+    hasCalendarPermission: Boolean,
     onNavigateToExcludedItems: () -> Unit,
     onNavigateToAppManagement: () -> Unit,
     onNavigateToAppShortcuts: () -> Unit,
@@ -303,10 +304,20 @@ fun SearchResultsSettingsSection(
             deviceSettingsSubtitle = stringResource(R.string.settings_view_all_desc),
             onDeviceSettingsClick = onNavigateToDeviceSettings,
             onDeviceSettingsClickNoRipple = true,
-            calendarSubtitle = stringResource(R.string.settings_calendar_view_all_events_desc),
+            calendarSubtitle =
+                if (hasCalendarPermission) {
+                    stringResource(R.string.settings_calendar_view_all_events_desc)
+                } else {
+                    null
+                },
             calendarTagLabel = stringResource(R.string.settings_new_tag),
-            onCalendarClick = onNavigateToCalendarEvents,
-            onCalendarClickNoRipple = true,
+            onCalendarClick =
+                if (hasCalendarPermission) {
+                    onNavigateToCalendarEvents
+                } else {
+                    null
+                },
+            onCalendarClickNoRipple = hasCalendarPermission,
             showTitle = false,
         )
 

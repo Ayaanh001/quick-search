@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
@@ -31,11 +32,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.models.CalendarEventInfo
 import com.tk.quicksearch.search.searchScreen.LocalOverlayDividerColor
@@ -51,6 +53,12 @@ import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticConfirm
 
 private const val ROW_MIN_HEIGHT_DP = 52
+
+private data class CalendarMenuItem(
+    val textResId: Int,
+    val icon: @Composable () -> Unit,
+    val onClick: () -> Unit,
+)
 
 @Composable
 fun CalendarEventsSection(
@@ -268,72 +276,90 @@ private fun CalendarEventRow(
         DropdownMenu(
             expanded = showMenu,
             onDismissRequest = { showMenu = false },
+            shape = RoundedCornerShape(24.dp),
+            properties = PopupProperties(focusable = false),
             containerColor = AppColors.DialogBackground,
         ) {
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        stringResource(
+            val menuItems = buildList {
+                add(
+                    CalendarMenuItem(
+                        textResId =
                             if (isPinned) {
                                 R.string.action_unpin_generic
                             } else {
                                 R.string.action_pin_generic
                             },
-                        ),
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (isPinned) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
-                        contentDescription = null,
-                    )
-                },
-                onClick = {
-                    showMenu = false
-                    onTogglePin(event)
-                },
-            )
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        stringResource(
+                        icon = {
+                            Icon(
+                                painter =
+                                    painterResource(
+                                        if (isPinned) {
+                                            R.drawable.ic_unpin
+                                        } else {
+                                            R.drawable.ic_pin
+                                        },
+                                    ),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            showMenu = false
+                            onTogglePin(event)
+                        },
+                    ),
+                )
+                add(
+                    CalendarMenuItem(
+                        textResId =
                             if (isExcluded) {
                                 R.string.action_include_generic
                             } else {
                                 R.string.action_exclude_generic
                             },
-                        ),
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (isExcluded) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff,
-                        contentDescription = null,
-                    )
-                },
-                onClick = {
-                    showMenu = false
-                    if (isExcluded) onInclude(event) else onExclude(event)
-                },
-            )
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        stringResource(
+                        icon = {
+                            Icon(
+                                imageVector =
+                                    if (isExcluded) {
+                                        Icons.Rounded.Visibility
+                                    } else {
+                                        Icons.Rounded.VisibilityOff
+                                    },
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            showMenu = false
+                            if (isExcluded) onInclude(event) else onExclude(event)
+                        },
+                    ),
+                )
+                add(
+                    CalendarMenuItem(
+                        textResId =
                             if (hasNickname) {
                                 R.string.action_edit_nickname
                             } else {
                                 R.string.action_add_nickname
                             },
-                        ),
-                    )
-                },
-                leadingIcon = { Icon(imageVector = Icons.Rounded.Edit, contentDescription = null) },
-                onClick = {
-                    showMenu = false
-                    onNicknameClick(event)
-                },
-            )
+                        icon = { Icon(imageVector = Icons.Rounded.Edit, contentDescription = null) },
+                        onClick = {
+                            showMenu = false
+                            onNicknameClick(event)
+                        },
+                    ),
+                )
+            }
+
+            menuItems.forEachIndexed { index, item ->
+                if (index > 0) {
+                    HorizontalDivider()
+                }
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(item.textResId)) },
+                    leadingIcon = { item.icon() },
+                    onClick = item.onClick,
+                )
+            }
         }
     }
 }
