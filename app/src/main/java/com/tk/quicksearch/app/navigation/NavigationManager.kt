@@ -421,6 +421,7 @@ private fun NavigationContent(
                 }
                 SearchRoute(
                     viewModel = viewModel,
+                    onCloseAppRequest = onFinishActivity,
                     onSettingsClick = {
                         navigateToSettings(settingsDetailType ?: lastOpenedSettingsDetail)
                     },

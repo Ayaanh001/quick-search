@@ -62,6 +62,7 @@ fun SearchRoute(
     onOpenReleaseNotesFeatures: () -> Unit = {},
     onOpenAppSettingDestination: (AppSettingsDestination) -> Unit = {},
     onOverlayDismissRequest: (() -> Unit)? = null,
+    onCloseAppRequest: (() -> Unit)? = null,
     onShowToast: (Int) -> Unit = {},
     viewModel: SearchViewModel = viewModel(),
     onWelcomeAnimationCompleted: (() -> Unit)? = null,
@@ -380,14 +381,17 @@ fun SearchRoute(
         } else {
             modifier.fillMaxSize()
         }
-    val shouldAutoCloseOverlay = isOverlayPresentation && uiState.autoCloseOverlay
-    val dismissOverlayIfNeeded: () -> Unit = {
-        if (shouldAutoCloseOverlay) {
+    val shouldAutoCloseApp = uiState.autoCloseOverlay
+    val dismissSearchSurfaceIfNeeded: () -> Unit = dismiss@{
+        if (!shouldAutoCloseApp) return@dismiss
+        if (isOverlayPresentation) {
             onOverlayDismissRequest?.invoke()
+        } else {
+            onCloseAppRequest?.invoke()
         }
     }
     val runExternalNavigationFromOverlay: (() -> Unit) -> Unit = { action ->
-        dismissOverlayIfNeeded()
+        dismissSearchSurfaceIfNeeded()
         action()
     }
 

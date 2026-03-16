@@ -107,6 +107,7 @@ class ContactRepository(
         private const val PACKAGE_FIRST_INDEX = 0
         private const val PACKAGE_SECOND_INDEX = 1
         private const val MAX_HYDRATED_CONTACT_CACHE_SIZE = 600
+        private val WHITESPACE_REGEX = "\\s+".toRegex()
     }
 
     // ==================== Public API ====================
@@ -170,11 +171,21 @@ class ContactRepository(
         query: String,
         limit: Int,
     ): List<ContactInfo> {
-        if (query.isBlank() || !hasPermission()) return emptyList()
+        if (query.isBlank() || limit <= 0 || !hasPermission()) return emptyList()
 
         val normalizedProviderQuery = SearchTextNormalizer.normalizeQueryWhitespace(query)
         val contacts = queryContactsBySearch(normalizedProviderQuery, limit)
-        return contacts.values.map { it.toMinimalContactInfo() }
+        if (contacts.size < limit) {
+            val remaining = limit - contacts.size
+            val fallbackContacts =
+                queryContactsByNameTokenFallback(
+                    query = normalizedProviderQuery,
+                    limit = remaining,
+                    existingContactIds = contacts.keys,
+                )
+            contacts.putAll(fallbackContacts)
+        }
+        return contacts.values.take(limit).map { it.toMinimalContactInfo() }
     }
 
     /**
@@ -256,6 +267,51 @@ class ContactRepository(
                 PHONE_PROJECTION,
                 null,
                 null,
+                SORT_ORDER,
+            ) ?: return LinkedHashMap()
+
+        return cursor.use { processPhoneCursor(it, limit) }
+    }
+
+    /**
+     * Fallback query for devices/providers where CONTENT_FILTER_URI may miss middle/last name
+     * matches. Requires every query token to be present somewhere in the contact display name.
+     */
+    private fun queryContactsByNameTokenFallback(
+        query: String,
+        limit: Int,
+        existingContactIds: Collection<Long>,
+    ): LinkedHashMap<Long, MutableContact> {
+        if (limit <= 0 || query.isBlank()) return LinkedHashMap()
+
+        val queryTokens = query.split(WHITESPACE_REGEX).filter { it.isNotBlank() }
+        if (queryTokens.isEmpty()) return LinkedHashMap()
+
+        val tokenClauses =
+            queryTokens.joinToString(" AND ") {
+                "(LOWER(${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY}) LIKE ? " +
+                    "OR LOWER(${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_ALTERNATIVE}) LIKE ?)"
+            }
+        val exclusionsClause =
+            if (existingContactIds.isNotEmpty()) {
+                " AND ${buildNotInClause(ContactsContract.CommonDataKinds.Phone.CONTACT_ID, existingContactIds)}"
+            } else {
+                ""
+            }
+        val selection = tokenClauses + exclusionsClause
+        val selectionArgs =
+            queryTokens
+                .flatMap { token ->
+                    val likeToken = "%${token.lowercase(Locale.getDefault())}%"
+                    listOf(likeToken, likeToken)
+                }.toTypedArray()
+
+        val cursor =
+            contentResolver.query(
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                PHONE_PROJECTION,
+                selection,
+                selectionArgs,
                 SORT_ORDER,
             ) ?: return LinkedHashMap()
 
@@ -553,6 +609,14 @@ class ContactRepository(
     ): String {
         val idList = ids.joinToString(",")
         return "$columnName IN ($idList)"
+    }
+
+    private fun buildNotInClause(
+        columnName: String,
+        ids: Collection<Long>,
+    ): String {
+        val idList = ids.joinToString(",")
+        return "$columnName NOT IN ($idList)"
     }
 
     /**

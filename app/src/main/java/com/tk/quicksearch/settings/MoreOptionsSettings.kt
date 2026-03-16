@@ -22,7 +22,6 @@ fun MoreOptionsSettings(
     appIconShape: AppIconShape,
     onSetAppIconShape: (AppIconShape) -> Unit,
     selectedIconPackPackage: String?,
-    overlayModeEnabled: Boolean,
     topResultIndicatorEnabled: Boolean,
     onTopResultIndicatorToggle: (Boolean) -> Unit,
     openKeyboardOnLaunch: Boolean,
@@ -33,7 +32,6 @@ fun MoreOptionsSettings(
     onAutoCloseOverlayToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val showAutoCloseOverlayToggle = overlayModeEnabled
     val showCircularAppIconsToggle = selectedIconPackPackage.isNullOrBlank()
 
     ElevatedCard(
@@ -41,17 +39,15 @@ fun MoreOptionsSettings(
         shape = MaterialTheme.shapes.extraLarge,
     ) {
         Column {
-            if (showAutoCloseOverlayToggle) {
-                SettingsToggleRow(
-                    title = stringResource(R.string.auto_close_overlay_toggle_title),
-                    subtitle = stringResource(R.string.auto_close_overlay_toggle_desc),
-                    checked = autoCloseOverlay,
-                    onCheckedChange = onAutoCloseOverlayToggle,
-                    leadingIcon = Icons.Rounded.Close,
-                    isFirstItem = true,
-                    isLastItem = false,
-                )
-            }
+            SettingsToggleRow(
+                title = stringResource(R.string.auto_close_overlay_toggle_title),
+                subtitle = stringResource(R.string.auto_close_overlay_toggle_desc),
+                checked = autoCloseOverlay,
+                onCheckedChange = onAutoCloseOverlayToggle,
+                leadingIcon = Icons.Rounded.Close,
+                isFirstItem = true,
+                isLastItem = false,
+            )
 
             if (showCircularAppIconsToggle) {
                 SettingsToggleRow(
@@ -64,7 +60,7 @@ fun MoreOptionsSettings(
                         )
                     },
                     leadingIcon = Icons.Rounded.Apps,
-                    isFirstItem = !showAutoCloseOverlayToggle,
+                    isFirstItem = false,
                     isLastItem = false,
                 )
             }
@@ -75,7 +71,7 @@ fun MoreOptionsSettings(
                 checked = topResultIndicatorEnabled,
                 onCheckedChange = onTopResultIndicatorToggle,
                 leadingIcon = Icons.Rounded.CheckCircle,
-                isFirstItem = !showAutoCloseOverlayToggle && !showCircularAppIconsToggle,
+                isFirstItem = false,
                 isLastItem = false,
             )
 

@@ -73,18 +73,7 @@ internal fun rememberDerivedState(state: SearchUiState): DerivedState {
     val hasPinnedAppShortcuts = state.pinnedAppShortcuts.isNotEmpty()
     val columns = getAppGridColumns()
     val visibleRowCount =
-        if (isSearching ||
-            hasPinnedContacts ||
-            hasPinnedFiles ||
-            hasPinnedSettings ||
-            hasPinnedCalendarEvents ||
-            hasPinnedAppShortcuts ||
-            (
-                !state.query.isNotBlank() &&
-                    state.recentQueriesEnabled &&
-                    state.recentItems.isNotEmpty()
-            )
-        ) {
+        if (isSearching) {
             SearchScreenConstants.SEARCH_ROW_COUNT
         } else {
             SearchScreenConstants.ROW_COUNT
