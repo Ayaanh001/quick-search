@@ -116,6 +116,12 @@ class SearchViewModel(
 
     private val initialResultsState =
             SearchResultsState(
+                    query =
+                            if (startupPreferencesReader.isClearQueryOnLaunchEnabled()) {
+                                ""
+                            } else {
+                                inMemoryRetainedQuery
+                            },
                     recentApps = startupSnapshot?.suggestedApps.orEmpty(),
                     indexedAppCount = startupSnapshot?.suggestedApps?.size ?: 0,
             )
@@ -176,6 +182,9 @@ class SearchViewModel(
                     appSuggestionsEnabled =
                             startupSnapshot?.appSuggestionsEnabled
                                     ?: startupPreferencesReader.areAppSuggestionsEnabled(),
+                    selectRetainedQuery =
+                            !startupPreferencesReader.isClearQueryOnLaunchEnabled() &&
+                                    inMemoryRetainedQuery.isNotEmpty(),
             )
 
     private val repository by lazy { AppsRepository(appContext) }
@@ -2180,6 +2189,7 @@ class SearchViewModel(
         val previousQuery = _resultsState.value.query
         // Prevent redundant updates
         if (newQuery == previousQuery) return
+        inMemoryRetainedQuery = newQuery
 
         val trimmedQuery = newQuery.trim()
         val DirectSearchState = _resultsState.value.DirectSearchState
@@ -3741,6 +3751,7 @@ class SearchViewModel(
     }
 
     companion object {
+        @Volatile private var inMemoryRetainedQuery: String = ""
         private const val MAX_RECENT_ITEMS = 10
         // Debounce for the background app-search job (ms).  Kept intentionally
         // shorter than the 150 ms secondary-search debounce because app results

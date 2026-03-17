@@ -1,5 +1,6 @@
 package com.tk.quicksearch.app
 
+import android.app.SearchManager
 import android.content.Intent
 import android.os.Bundle
 import android.os.Trace
@@ -373,7 +374,21 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun extractTextFromIntent(intent: Intent?): String? {
-        return when (intent?.action) {
+        if (intent == null) return null
+
+        val queryFromCommonExtras =
+            listOf(
+                    SearchManager.QUERY,
+                    Intent.EXTRA_TEXT,
+                    "query",
+                    "q",
+                    "text",
+                )
+                .asSequence()
+                .mapNotNull { key -> intent.extras?.get(key)?.toString()?.trim() }
+                .firstOrNull { it.isNotBlank() }
+
+        return when (intent.action) {
             Intent.ACTION_PROCESS_TEXT ->
                 intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()?.trim()
                     ?.takeIf { it.isNotBlank() }
@@ -381,6 +396,11 @@ class MainActivity : ComponentActivity() {
                 if (intent.type == "text/plain")
                     intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()?.takeIf { it.isNotBlank() }
                 else null
+            Intent.ACTION_SEARCH,
+            Intent.ACTION_WEB_SEARCH,
+            Intent.ACTION_VIEW,
+            Intent.ACTION_MAIN,
+            -> queryFromCommonExtras
             else -> null
         }
     }
