@@ -239,6 +239,7 @@ internal fun AppShortcutRow(
         onNicknameClick: (StaticShortcut) -> Unit,
         iconPackPackage: String?,
         showAppLabel: Boolean = true,
+        subtitleText: String? = null,
         enableLongPress: Boolean = true,
         onLongPressOverride: (() -> Unit)? = null,
         icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
@@ -306,6 +307,12 @@ internal fun AppShortcutRow(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
+                        val secondaryText =
+                                if (showAppLabel) {
+                                        subtitleText?.takeIf { it.isNotBlank() } ?: shortcut.appLabel
+                                } else {
+                                        null
+                                }
                         Text(
                                 text = displayName,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -313,9 +320,9 @@ internal fun AppShortcutRow(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                         )
-                        if (showAppLabel) {
+                        if (!secondaryText.isNullOrBlank()) {
                                 Text(
-                                        text = shortcut.appLabel,
+                                        text = secondaryText,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,

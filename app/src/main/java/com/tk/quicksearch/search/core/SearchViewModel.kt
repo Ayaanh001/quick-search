@@ -2628,7 +2628,12 @@ class SearchViewModel(
     fun openEmail(email: String) = navigationHandler.openEmail(email)
 
     fun launchAppShortcut(shortcut: StaticShortcut) {
-        val error = launchStaticShortcut(getApplication(), shortcut)
+        val error =
+            launchStaticShortcut(
+                context = getApplication(),
+                shortcut = shortcut,
+                skipSearchTargetQueryHistory = true,
+            )
         if (error != null) {
             showToast(error)
         } else {

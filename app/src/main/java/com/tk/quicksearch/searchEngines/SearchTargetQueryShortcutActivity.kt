@@ -36,6 +36,7 @@ class SearchTargetQueryShortcutActivity : ComponentActivity() {
 
         val app = application as Application
         val userPreferences = UserAppPreferences(this)
+        val shouldAddQueryToHistory = !intent.getBooleanExtra(EXTRA_SKIP_QUERY_HISTORY, false)
 
         when (targetType) {
             TARGET_TYPE_ENGINE -> {
@@ -55,7 +56,9 @@ class SearchTargetQueryShortcutActivity : ComponentActivity() {
                     return
                 }
 
-                userPreferences.addRecentItem(RecentSearchEntry.Query(query))
+                if (shouldAddQueryToHistory) {
+                    userPreferences.addRecentItem(RecentSearchEntry.Query(query))
+                }
                 val amazonDomain =
                     if (engine == SearchEngine.AMAZON) {
                         userPreferences.getAmazonDomain()
@@ -74,7 +77,9 @@ class SearchTargetQueryShortcutActivity : ComponentActivity() {
                         ?.let {
                             runCatching { SearchTargetShortcutMode.valueOf(it) }.getOrNull()
                         } ?: SearchTargetShortcutMode.AUTO
-                userPreferences.addRecentItem(RecentSearchEntry.Query(query))
+                if (shouldAddQueryToHistory) {
+                    userPreferences.addRecentItem(RecentSearchEntry.Query(query))
+                }
                 when (browserShortcutMode) {
                     SearchTargetShortcutMode.FORCE_URL ->
                         IntentHelpers.openBrowserUrl(app, query, browserPackage, ::showToastMessage)
@@ -93,7 +98,9 @@ class SearchTargetQueryShortcutActivity : ComponentActivity() {
             TARGET_TYPE_CUSTOM -> {
                 val urlTemplate = intent.getStringExtra(EXTRA_CUSTOM_URL_TEMPLATE).orEmpty()
                 if (urlTemplate.isBlank()) return
-                userPreferences.addRecentItem(RecentSearchEntry.Query(query))
+                if (shouldAddQueryToHistory) {
+                    userPreferences.addRecentItem(RecentSearchEntry.Query(query))
+                }
                 IntentHelpers.openCustomSearchUrl(app, query, urlTemplate, ::showToastMessage)
             }
         }
@@ -117,6 +124,7 @@ class SearchTargetQueryShortcutActivity : ComponentActivity() {
         const val EXTRA_BROWSER_PACKAGE = "com.tk.quicksearch.extra.SHORTCUT_BROWSER_PACKAGE"
         const val EXTRA_BROWSER_SHORTCUT_MODE = "com.tk.quicksearch.extra.SHORTCUT_BROWSER_SHORTCUT_MODE"
         const val EXTRA_CUSTOM_URL_TEMPLATE = "com.tk.quicksearch.extra.SHORTCUT_CUSTOM_URL_TEMPLATE"
+        const val EXTRA_SKIP_QUERY_HISTORY = "com.tk.quicksearch.extra.SKIP_SHORTCUT_QUERY_HISTORY"
 
         const val TARGET_TYPE_ENGINE = "engine"
         const val TARGET_TYPE_BROWSER = "browser"

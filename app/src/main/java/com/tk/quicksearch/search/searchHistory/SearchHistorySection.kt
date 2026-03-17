@@ -57,12 +57,14 @@ import com.tk.quicksearch.search.files.FileResultRow
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.ContactMethod
 import com.tk.quicksearch.search.models.DeviceFile
+import com.tk.quicksearch.search.data.AppShortcutRepository.SearchTargetShortcutMode
 import com.tk.quicksearch.search.searchScreen.LocalOverlayDividerColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
 import com.tk.quicksearch.search.searchScreen.components.CollapseButton
 import com.tk.quicksearch.search.searchScreen.components.ExpandableResultsCard
 import com.tk.quicksearch.search.searchScreen.components.ExpandButton
+import com.tk.quicksearch.searchEngines.SearchTargetQueryShortcutActivity
 import com.tk.quicksearch.shared.ui.components.TipBanner
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
@@ -389,6 +391,7 @@ private fun RecentSearchItemRow(
             }
 
             is RecentSearchItem.AppShortcut -> {
+                val historySubtext = resolveAppShortcutHistorySubtext(item.shortcut)
                 Box(modifier = Modifier.padding(appShortcutRowPadding())) {
                     AppShortcutRow(
                         shortcut = item.shortcut,
@@ -402,7 +405,8 @@ private fun RecentSearchItemRow(
                         onAppInfoClick = {},
                         onNicknameClick = {},
                         iconPackPackage = null,
-                        showAppLabel = false,
+                        showAppLabel = !historySubtext.isNullOrBlank(),
+                        subtitleText = historySubtext,
                         enableLongPress = false,
                         onLongPressOverride = { showRemoveMenu = true },
                         iconTint = iconColor,
@@ -465,6 +469,43 @@ private fun dividerPadding(item: RecentSearchItem) =
         is RecentSearchItem.Setting -> SETTINGS_HORIZONTAL_PADDING.dp
         else -> DesignTokens.SpacingMedium
     }
+
+private fun resolveAppShortcutHistorySubtext(shortcut: StaticShortcut): String? {
+    val deepLink =
+        shortcut.intents
+            .asSequence()
+            .mapNotNull { it.dataString?.trim() }
+            .firstOrNull { it.isNotBlank() }
+    if (shortcut.id.startsWith("custom_deeplink_") && !deepLink.isNullOrBlank()) {
+        return deepLink
+    }
+
+    val searchIntent =
+        shortcut.intents.firstOrNull {
+            it.action == SearchTargetQueryShortcutActivity.ACTION_LAUNCH_SEARCH_TARGET_QUERY_SHORTCUT
+        } ?: return null
+    val query =
+        searchIntent
+            .getStringExtra(SearchTargetQueryShortcutActivity.EXTRA_QUERY)
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?: return null
+    val targetType =
+        searchIntent.getStringExtra(SearchTargetQueryShortcutActivity.EXTRA_TARGET_TYPE).orEmpty()
+    if (targetType != SearchTargetQueryShortcutActivity.TARGET_TYPE_BROWSER) {
+        return null
+    }
+    val browserShortcutMode =
+        searchIntent
+            .getStringExtra(SearchTargetQueryShortcutActivity.EXTRA_BROWSER_SHORTCUT_MODE)
+            ?.let { runCatching { SearchTargetShortcutMode.valueOf(it) }.getOrNull() }
+            ?: SearchTargetShortcutMode.AUTO
+    return if (browserShortcutMode == SearchTargetShortcutMode.FORCE_URL) {
+        query
+    } else {
+        null
+    }
+}
 
 @Composable
 private fun InlineSearchHistoryTip(

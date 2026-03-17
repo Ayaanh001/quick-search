@@ -20,6 +20,7 @@ import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.data.AppShortcutRepository.isUserCreatedShortcut
 import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutDisplayName
 import com.tk.quicksearch.search.data.AppShortcutRepository.shortcutKey
+import com.tk.quicksearch.searchEngines.SearchTargetQueryShortcutActivity
 import org.json.JSONArray
 import org.json.JSONObject
 import org.xmlpull.v1.XmlPullParser
@@ -594,6 +595,7 @@ private const val META_DATA_SHORTCUTS = "android.app.shortcuts"
 fun launchStaticShortcut(
     context: Context,
     shortcut: StaticShortcut,
+    skipSearchTargetQueryHistory: Boolean = false,
 ): String? {
     if (!shortcut.enabled) {
         return context.getString(R.string.error_shortcut_disabled)
@@ -604,7 +606,16 @@ fun launchStaticShortcut(
     var lastErrorMessage: String? = null
     var noActivityIntentDetails: String = ""
     intents.forEach { baseIntent ->
-        val intent = Intent(baseIntent).apply { putExtra(Intent.EXTRA_SHORTCUT_ID, shortcut.id) }
+        val intent =
+            Intent(baseIntent).apply {
+                putExtra(Intent.EXTRA_SHORTCUT_ID, shortcut.id)
+                if (
+                    skipSearchTargetQueryHistory &&
+                    action == SearchTargetQueryShortcutActivity.ACTION_LAUNCH_SEARCH_TARGET_QUERY_SHORTCUT
+                ) {
+                    putExtra(SearchTargetQueryShortcutActivity.EXTRA_SKIP_QUERY_HISTORY, true)
+                }
+            }
         val details = formatIntentDetails(intent)
         val resolved = pm.resolveActivity(intent, 0)
         if (resolved == null) {
