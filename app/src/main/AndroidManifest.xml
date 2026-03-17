@@ -5,6 +5,9 @@
     <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony.calling"
+        android:required="false" />
 
     <!-- Network Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
