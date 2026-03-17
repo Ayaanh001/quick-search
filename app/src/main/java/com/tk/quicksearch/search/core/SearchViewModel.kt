@@ -766,7 +766,7 @@ class SearchViewModel(
     private var lockedShortcutTarget: SearchTarget? = null
     private var lockedAliasSearchSection: SearchSection? = null
     private var lockedToolMode: SearchToolType? = null
-    private var clearQueryOnLaunch: Boolean = true
+    private var clearQueryOnLaunch: Boolean = initialConfigState.clearQueryOnLaunch
     private var amazonDomain: String? = null
     private var pendingNavigationClear: Boolean = false
     private var isStartupComplete: Boolean = false
@@ -812,7 +812,8 @@ class SearchViewModel(
     }
 
     fun handleOnStop() {
-        if (clearQueryOnLaunch) {
+        val shouldClearQueryOnStop = _configState.value.clearQueryOnLaunch
+        if (shouldClearQueryOnStop) {
             clearQuery()
         } else if (pendingNavigationClear && _resultsState.value.query.isNotEmpty()) {
             updateConfigState { it.copy(selectRetainedQuery = true) }
