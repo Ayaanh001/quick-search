@@ -102,3 +102,4 @@ Thumbs.db
 .agent/
 .cursor/
 .kotlin/
+.codex/
