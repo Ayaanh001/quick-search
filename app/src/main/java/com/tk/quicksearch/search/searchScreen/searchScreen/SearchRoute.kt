@@ -1,6 +1,8 @@
 package com.tk.quicksearch.search.searchScreen
 
 import android.Manifest
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -382,6 +384,7 @@ fun SearchRoute(
             modifier.fillMaxSize()
         }
     val shouldAutoCloseApp = uiState.autoCloseOverlay
+    val mainHandler = remember { Handler(Looper.getMainLooper()) }
     val dismissSearchSurfaceIfNeeded: () -> Unit = dismiss@{
         if (!shouldAutoCloseApp) return@dismiss
         if (isOverlayPresentation) {
@@ -391,8 +394,9 @@ fun SearchRoute(
         }
     }
     val runExternalNavigationFromOverlay: (() -> Unit) -> Unit = { action ->
-        dismissSearchSurfaceIfNeeded()
         action()
+        // Launch external navigation while this Activity is still foregrounded, then close.
+        mainHandler.post { dismissSearchSurfaceIfNeeded() }
     }
 
     Box(modifier = containerModifier) {
