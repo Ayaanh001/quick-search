@@ -185,6 +185,7 @@ class MainActivity : ComponentActivity() {
                 startVoiceSearch =
                     startVoiceForAssistant || startVoiceFromShortcut || startVoiceFromWidget,
                 micAction = micAction,
+                initialQuery = extractTextFromIntent(intent),
             )
             finish()
             return true
@@ -371,9 +372,27 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    private fun extractTextFromIntent(intent: Intent?): String? {
+        return when (intent?.action) {
+            Intent.ACTION_PROCESS_TEXT ->
+                intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()?.trim()
+                    ?.takeIf { it.isNotBlank() }
+            Intent.ACTION_SEND ->
+                if (intent.type == "text/plain")
+                    intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()?.takeIf { it.isNotBlank() }
+                else null
+            else -> null
+        }
+    }
+
     private fun handleIntent(intent: Intent?) {
         if (isExplicitLauncherLaunch(intent)) {
             navigationRequest.value = NavigationRequest(destination = RootDestination.Search)
+        }
+
+        val incomingText = extractTextFromIntent(intent)
+        if (incomingText != null) {
+            searchViewModel.onQueryChange(incomingText)
         }
 
         if (intent?.action == ACTION_SEARCH_TARGET_SHORTCUT) {

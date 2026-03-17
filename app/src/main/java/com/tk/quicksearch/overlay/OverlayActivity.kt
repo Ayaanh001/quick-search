@@ -68,6 +68,7 @@ class OverlayActivity : ComponentActivity() {
         animationToken = intent?.getLongExtra(OverlayModeController.EXTRA_ANIMATION_TOKEN, 0L) ?: 0L
         initializeVoiceSearchHandler()
         handleVoiceIntentIfNeeded(intent)
+        handleInitialQueryIfNeeded(intent)
 
         renderOverlayContent()
         startupCoordinator.scheduleAfterFirstFrame(window)
@@ -82,6 +83,7 @@ class OverlayActivity : ComponentActivity() {
         animationToken = intent.getLongExtra(OverlayModeController.EXTRA_ANIMATION_TOKEN, animationToken)
         renderOverlayContent()
         handleVoiceIntentIfNeeded(intent)
+        handleInitialQueryIfNeeded(intent)
     }
 
     override fun onStop() {
@@ -139,6 +141,13 @@ class OverlayActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun handleInitialQueryIfNeeded(intent: android.content.Intent?) {
+        val query = intent?.getStringExtra(OverlayModeController.EXTRA_INITIAL_QUERY)
+            ?.takeIf { it.isNotBlank() } ?: return
+        intent.removeExtra(OverlayModeController.EXTRA_INITIAL_QUERY)
+        searchViewModel.onQueryChange(query)
     }
 
     private fun handleVoiceIntentIfNeeded(intent: android.content.Intent?) {

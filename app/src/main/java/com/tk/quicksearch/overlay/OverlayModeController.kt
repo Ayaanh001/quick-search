@@ -14,11 +14,13 @@ object OverlayModeController {
     const val EXTRA_START_VOICE_SEARCH = "overlay_start_voice_search"
     const val EXTRA_MIC_ACTION = "overlay_mic_action"
     const val EXTRA_ANIMATION_TOKEN = "overlay_animation_token"
+    const val EXTRA_INITIAL_QUERY = "overlay_initial_query"
 
     fun startOverlay(
         context: Context,
         startVoiceSearch: Boolean = false,
         micAction: MicAction = MicAction.DEFAULT_VOICE_SEARCH,
+        initialQuery: String? = null,
     ) {
         val intent =
             Intent(context, OverlayActivity::class.java).apply {
@@ -26,6 +28,7 @@ object OverlayModeController {
                 putExtra(EXTRA_START_VOICE_SEARCH, startVoiceSearch)
                 putExtra(EXTRA_MIC_ACTION, micAction.value)
                 putExtra(EXTRA_ANIMATION_TOKEN, System.currentTimeMillis())
+                initialQuery?.let { putExtra(EXTRA_INITIAL_QUERY, it) }
             }
         context.startActivity(intent)
     }
