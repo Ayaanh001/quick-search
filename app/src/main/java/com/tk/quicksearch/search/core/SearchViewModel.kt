@@ -766,6 +766,7 @@ class SearchViewModel(
     private var overlayModeEnabled: Boolean = false
     private var autoCloseOverlay: Boolean = true
     private var directDialEnabled: Boolean = false
+    private var assistantLaunchVoiceModeEnabled: Boolean = false
     private var hasSeenDirectDialChoice: Boolean = false
     private var appSuggestionsEnabled: Boolean = true
     private var showAppLabels: Boolean = true
@@ -1087,6 +1088,7 @@ class SearchViewModel(
         autoCloseOverlay = prefs.autoCloseOverlay
         overlayModeEnabled = prefs.overlayModeEnabled
         directDialEnabled = prefs.directDialEnabled
+        assistantLaunchVoiceModeEnabled = userPreferences.isAssistantLaunchVoiceModeEnabled()
         hasSeenDirectDialChoice = prefs.hasSeenDirectDialChoice
         appSuggestionsEnabled = prefs.appSuggestionsEnabled
         showAppLabels = prefs.showAppLabels
@@ -1134,6 +1136,7 @@ class SearchViewModel(
             it.copy(
                     amazonDomain = amazonDomain,
                     directDialEnabled = directDialEnabled,
+                    assistantLaunchVoiceModeEnabled = assistantLaunchVoiceModeEnabled,
                     disabledAppShortcutIds = userPreferences.getDisabledAppShortcutIds(),
                     recentQueriesEnabled = prefs.searchHistoryEnabled,
                     webSuggestionsCount = userPreferences.getWebSuggestionsCount(),
@@ -2032,6 +2035,14 @@ class SearchViewModel(
             userPreferences.setDirectDialManuallyDisabled(!enabled)
         }
         updateFeatureState { it.copy(directDialEnabled = enabled) }
+    }
+
+    fun setAssistantLaunchVoiceModeEnabled(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            assistantLaunchVoiceModeEnabled = enabled
+            userPreferences.setAssistantLaunchVoiceModeEnabled(enabled)
+            updateFeatureState { it.copy(assistantLaunchVoiceModeEnabled = enabled) }
+        }
     }
 
     fun onQueryChange(newQuery: String) {

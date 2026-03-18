@@ -312,6 +312,7 @@ fun SearchRoute(
             AppSettingsToggleKey.SEARCH_DEVICE_SETTINGS -> !uiState.disabledSections.contains(SearchSection.SETTINGS)
             AppSettingsToggleKey.SEARCH_CALENDAR -> !uiState.disabledSections.contains(SearchSection.CALENDAR)
             AppSettingsToggleKey.SEARCH_APP_SETTINGS -> !uiState.disabledSections.contains(SearchSection.APP_SETTINGS)
+            AppSettingsToggleKey.ASSISTANT_LAUNCH_VOICE_MODE -> uiState.assistantLaunchVoiceModeEnabled
             null -> false
         }
     }
@@ -381,6 +382,7 @@ fun SearchRoute(
             AppSettingsToggleKey.SEARCH_DEVICE_SETTINGS -> viewModel.setSectionEnabled(SearchSection.SETTINGS, enabled)
             AppSettingsToggleKey.SEARCH_CALENDAR -> viewModel.setSectionEnabled(SearchSection.CALENDAR, enabled)
             AppSettingsToggleKey.SEARCH_APP_SETTINGS -> viewModel.setSectionEnabled(SearchSection.APP_SETTINGS, enabled)
+            AppSettingsToggleKey.ASSISTANT_LAUNCH_VOICE_MODE -> viewModel.setAssistantLaunchVoiceModeEnabled(enabled)
             null -> Unit
         }
     }

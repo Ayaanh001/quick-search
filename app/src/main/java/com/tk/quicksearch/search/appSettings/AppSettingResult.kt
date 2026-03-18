@@ -33,6 +33,9 @@ enum class AppSettingsDestination {
     DEVELOPMENT,
     FEATURES_LIST,
     OPEN_SOURCE_LICENSES,
+    SET_DEFAULT_ASSISTANT,
+    ADD_HOME_SCREEN_WIDGET,
+    ADD_QUICK_SETTINGS_TILE,
 }
 
 enum class AppSettingsToggleKey {
@@ -63,6 +66,7 @@ enum class AppSettingsToggleKey {
     SEARCH_DEVICE_SETTINGS,
     SEARCH_CALENDAR,
     SEARCH_APP_SETTINGS,
+    ASSISTANT_LAUNCH_VOICE_MODE,
 }
 
 data class AppSettingResult(

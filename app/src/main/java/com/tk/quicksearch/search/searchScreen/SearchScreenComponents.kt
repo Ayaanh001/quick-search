@@ -80,7 +80,7 @@ internal fun PersistentSearchBar(
     shortcutCodes: Map<String, String> = emptyMap(),
     shortcutEnabled: Map<String, Boolean> = emptyMap(),
     isSearchEngineAliasSuffixEnabled: Boolean = true,
-    onSearchAction: () -> Unit,
+    onSearchAction: () -> Boolean,
     shouldUseNumberKeyboard: Boolean,
     detectedShortcutTarget: com.tk.quicksearch.search.core.SearchTarget? = null,
     detectedAliasSearchSection: com.tk.quicksearch.search.core.SearchSection? = null,

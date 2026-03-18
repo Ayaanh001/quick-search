@@ -44,42 +44,49 @@ class AppSettingsRepository(
                 titleRes = R.string.settings_search_engines_title,
                 descriptionRes = R.string.settings_search_engines_desc,
                 destination = AppSettingsDestination.SEARCH_ENGINES,
-                keywords = listOf("engines", "gemini", "google", "alias", "api", "gemini api key", "direct search"),
+                keywords = listOf("add", "engines", "gemini", "alias", "api", "gemini api key", "direct search"),
             )
             addNavigation(
                 id = "app_settings_tools",
                 titleRes = R.string.settings_tools_title,
                 descriptionRes = R.string.settings_tools_desc,
                 destination = AppSettingsDestination.TOOLS,
-                keywords = listOf("calculator", "unit converter", "conversion", "tools"),
+                keywords = listOf("calculator", "unit converter", "conversion", "tools", "alias"),
+            )
+            addNavigation(
+                id = "app_settings_launch_options",
+                titleRes = R.string.settings_launch_options_title,
+                descriptionRes = R.string.settings_launch_options_desc,
+                destination = AppSettingsDestination.LAUNCH_OPTIONS,
+                keywords = listOf("launch options"),
             )
             addNavigation(
                 id = "app_settings_default_assistant",
                 titleRes = R.string.settings_default_assistant_title,
                 descriptionRes = R.string.settings_default_assistant_desc,
-                destination = AppSettingsDestination.LAUNCH_OPTIONS,
-                keywords = listOf("launch options", "digital assistant", "assistant", "default assistant"),
+                destination = AppSettingsDestination.SET_DEFAULT_ASSISTANT,
+                keywords = listOf("digital assistant", "default assistant"),
             )
-            addNavigation(
+            addToggle(
                 id = "app_settings_assistant_voice_mode",
                 titleRes = R.string.settings_assistant_voice_mode_title,
                 descriptionRes = R.string.settings_assistant_voice_mode_desc,
-                destination = AppSettingsDestination.LAUNCH_OPTIONS,
-                keywords = listOf("launch options", "assistant voice", "voice mode", "assistant"),
+                toggleKey = AppSettingsToggleKey.ASSISTANT_LAUNCH_VOICE_MODE,
+                keywords = listOf("voice mode", "assistant"),
             )
             addNavigation(
                 id = "app_settings_home_screen_widget",
                 titleRes = R.string.settings_home_screen_widget_title,
                 descriptionRes = R.string.settings_home_screen_widget_desc,
-                destination = AppSettingsDestination.LAUNCH_OPTIONS,
-                keywords = listOf("launch options", "widget", "home screen"),
+                destination = AppSettingsDestination.ADD_HOME_SCREEN_WIDGET,
+                keywords = listOf("widget"),
             )
             addNavigation(
                 id = "app_settings_quick_settings_tile",
                 titleRes = R.string.settings_quick_settings_tile_title,
                 descriptionRes = R.string.settings_quick_settings_tile_desc,
-                destination = AppSettingsDestination.LAUNCH_OPTIONS,
-                keywords = listOf("launch options", "tile", "quick settings", "notification shade"),
+                destination = AppSettingsDestination.ADD_QUICK_SETTINGS_TILE,
+                keywords = listOf("tile", "quick settings"),
             )
             addNavigation(
                 id = "app_settings_more_options",
@@ -93,7 +100,7 @@ class AppSettingsRepository(
                 titleRes = R.string.settings_permissions_title,
                 descriptionRes = R.string.settings_permissions_desc,
                 destination = AppSettingsDestination.PERMISSIONS,
-                keywords = listOf("usage access", "contacts", "files", "call"),
+                keywords = listOf("access"),
             )
             addNavigation(
                 id = "app_settings_app_management",

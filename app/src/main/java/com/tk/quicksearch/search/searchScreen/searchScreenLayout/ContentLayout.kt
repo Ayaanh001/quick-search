@@ -216,6 +216,7 @@ fun ContentLayout(
                     ItemPriorityConfig.ItemType.CONTACTS_SECTION,
                     ItemPriorityConfig.ItemType.SETTINGS_SECTION,
                     ItemPriorityConfig.ItemType.CALENDAR_SECTION,
+                    ItemPriorityConfig.ItemType.APP_SETTINGS_SECTION,
                     -> true
 
                     else -> false
@@ -377,6 +378,16 @@ fun ContentLayout(
                     if (shouldRenderSection(SearchSection.CALENDAR)) {
                         renderSection(
                             SearchSection.CALENDAR,
+                            sectionParams,
+                            sectionContext,
+                        )
+                    }
+                }
+
+                ItemPriorityConfig.ItemType.APP_SETTINGS_SECTION -> {
+                    if (shouldRenderSection(SearchSection.APP_SETTINGS)) {
+                        renderSection(
+                            SearchSection.APP_SETTINGS,
                             sectionParams,
                             sectionContext,
                         )

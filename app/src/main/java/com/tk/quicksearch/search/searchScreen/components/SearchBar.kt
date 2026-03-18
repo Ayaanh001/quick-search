@@ -115,7 +115,7 @@ internal fun PersistentSearchBar(
     shortcutCodes: Map<String, String> = emptyMap(),
     shortcutEnabled: Map<String, Boolean> = emptyMap(),
     isSearchEngineAliasSuffixEnabled: Boolean = true,
-    onSearchAction: () -> Unit,
+    onSearchAction: () -> Boolean,
     shouldUseNumberKeyboard: Boolean,
     detectedShortcutTarget: SearchTarget? = null,
     detectedAliasSearchSection: SearchSection? = null,
@@ -567,8 +567,8 @@ internal fun PersistentSearchBar(
             keyboardActions =
                 KeyboardActions(
                     onSearch = {
-                        onSearchAction()
-                        if (query.isNotBlank()) {
+                        val keepKeyboardFromAction = onSearchAction()
+                        if (!keepKeyboardFromAction && query.isNotBlank()) {
                             // Only hide keyboard if the first engine is
                             // not
                             // DIRECT_ANSWER

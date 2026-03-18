@@ -85,8 +85,7 @@ internal fun resolvePredictedSubmitTarget(
         return PredictedSubmitTarget.Calendar(firstCalendarEvent.eventId)
     }
 
-    val firstAppSetting =
-        renderingState.appSettingResults.firstOrNull { it.isNavigateAction }
+    val firstAppSetting = renderingState.appSettingResults.firstOrNull()
     if (firstAppSetting != null) {
         return PredictedSubmitTarget.AppSetting(firstAppSetting.id)
     }

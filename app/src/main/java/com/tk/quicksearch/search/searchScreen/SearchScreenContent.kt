@@ -342,69 +342,76 @@ internal fun SearchScreenContent(
                                 defaultBrowserTarget(state.searchTargetsOrder, defaultBrowserPackage)
                         if (browserTarget != null) {
                             onSearchTargetClick(trimmedQuery, browserTarget)
-                            return@PersistentSearchBar
+                            return@PersistentSearchBar false
                         }
                     }
 
                     val firstApp = renderingState.displayApps.firstOrNull()
                     if (firstApp != null) {
                         onAppClick(firstApp)
-                    } else {
-                        val firstAppShortcut = renderingState.appShortcutResults.firstOrNull()
-                        if (firstAppShortcut != null) {
-                            appShortcutsParams.onShortcutClick(firstAppShortcut)
+                        return@PersistentSearchBar false
+                    }
+
+                    val firstAppShortcut = renderingState.appShortcutResults.firstOrNull()
+                    if (firstAppShortcut != null) {
+                        appShortcutsParams.onShortcutClick(firstAppShortcut)
+                        return@PersistentSearchBar false
+                    }
+
+                    val firstContact = renderingState.contactResults.firstOrNull()
+                    if (firstContact != null) {
+                        if (firstContact.hasContactMethods) {
+                            contactsParams.onShowContactMethods(firstContact)
                         } else {
-                            val firstContact = renderingState.contactResults.firstOrNull()
-                            if (firstContact != null) {
-                                if (firstContact.hasContactMethods) {
-                                    contactsParams.onShowContactMethods(firstContact)
-                                } else {
-                                    contactsParams.onContactClick(firstContact)
-                                }
-                            } else {
-                                val firstFile = renderingState.fileResults.firstOrNull()
-                                if (firstFile != null) {
-                                    filesParams.onFileClick(firstFile)
-                                } else {
-                                    val firstSetting = renderingState.settingResults.firstOrNull()
-                                    if (firstSetting != null) {
-                                        settingsParams.onSettingClick(firstSetting)
-                                    } else {
-                                        val firstCalendarEvent = renderingState.calendarEvents.firstOrNull()
-                                        if (firstCalendarEvent != null) {
-                                            calendarParams.onEventClick(firstCalendarEvent)
-                                        } else {
-                                            val firstAppSetting =
-                                                renderingState.appSettingResults.firstOrNull {
-                                                    it.isNavigateAction
-                                                }
-                                            if (firstAppSetting != null) {
-                                                settingsParams.onAppSettingClick(firstAppSetting)
-                                                return@PersistentSearchBar
-                                            }
-                                            // Check if a shortcut is detected
-                                            if (isCalculatorMode) {
-                                                return@PersistentSearchBar
-                                            } else if (state.detectedShortcutTarget != null) {
-                                                // Query already has shortcut stripped by ViewModel when
-                                                // shortcut-at-start is detected
-                                                onSearchTargetClick(
-                                                        trimmedQuery,
-                                                        state.detectedShortcutTarget
-                                                )
-                                            } else {
-                                                val primaryTarget = enabledTargets.firstOrNull()
-                                                if (primaryTarget != null && trimmedQuery.isNotBlank()
-                                                ) {
-                                                    onSearchTargetClick(trimmedQuery, primaryTarget)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            contactsParams.onContactClick(firstContact)
+                        }
+                        return@PersistentSearchBar false
+                    }
+
+                    val firstFile = renderingState.fileResults.firstOrNull()
+                    if (firstFile != null) {
+                        filesParams.onFileClick(firstFile)
+                        return@PersistentSearchBar false
+                    }
+
+                    val firstSetting = renderingState.settingResults.firstOrNull()
+                    if (firstSetting != null) {
+                        settingsParams.onSettingClick(firstSetting)
+                        return@PersistentSearchBar false
+                    }
+
+                    val firstCalendarEvent = renderingState.calendarEvents.firstOrNull()
+                    if (firstCalendarEvent != null) {
+                        calendarParams.onEventClick(firstCalendarEvent)
+                        return@PersistentSearchBar false
+                    }
+
+                    val firstAppSetting = renderingState.appSettingResults.firstOrNull()
+                    if (firstAppSetting != null) {
+                        if (firstAppSetting.isToggleAction) {
+                            val currentValue = settingsParams.isAppSettingToggleChecked(firstAppSetting)
+                            settingsParams.onAppSettingToggle(firstAppSetting, !currentValue)
+                            return@PersistentSearchBar true // keep keyboard open for toggles
+                        } else {
+                            settingsParams.onAppSettingClick(firstAppSetting)
+                            return@PersistentSearchBar false
                         }
                     }
+
+                    // Check if a shortcut is detected
+                    if (isCalculatorMode) {
+                        return@PersistentSearchBar false
+                    } else if (state.detectedShortcutTarget != null) {
+                        // Query already has shortcut stripped by ViewModel when
+                        // shortcut-at-start is detected
+                        onSearchTargetClick(trimmedQuery, state.detectedShortcutTarget)
+                    } else {
+                        val primaryTarget = enabledTargets.firstOrNull()
+                        if (primaryTarget != null && trimmedQuery.isNotBlank()) {
+                            onSearchTargetClick(trimmedQuery, primaryTarget)
+                        }
+                    }
+                    false
                 },
         )
     }

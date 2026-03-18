@@ -368,6 +368,7 @@ data class SearchUiState(
         val pendingDirectCallNumber: String? = null,
         val pendingThirdPartyCall: PendingThirdPartyCall? = null,
         val directDialEnabled: Boolean = false,
+        val assistantLaunchVoiceModeEnabled: Boolean = false,
         // File display preferences
         val enabledFileTypes: Set<com.tk.quicksearch.search.models.FileType> =
                 com.tk.quicksearch.search.models.FileType.values()
@@ -559,6 +560,7 @@ fun SearchUiState(
                 recentQueriesEnabled = features.recentQueriesEnabled,
                 hasDismissedSearchHistoryTip = features.hasDismissedSearchHistoryTip,
                 directDialEnabled = features.directDialEnabled,
+                assistantLaunchVoiceModeEnabled = features.assistantLaunchVoiceModeEnabled,
                 shouldShowUsagePermissionBanner = features.shouldShowUsagePermissionBanner,
                 // ── SearchUiConfigState ───────────────────────────────────────────
                 startupPhase = config.startupPhase,

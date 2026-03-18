@@ -304,6 +304,7 @@ fun SearchResultsSettingsSection(
             deviceSettingsSubtitle = stringResource(R.string.settings_view_all_desc),
             onDeviceSettingsClick = onNavigateToDeviceSettings,
             onDeviceSettingsClickNoRipple = true,
+            appSettingsSubtitle = stringResource(R.string.settings_app_settings_desc),
             calendarSubtitle =
                 if (hasCalendarPermission) {
                     stringResource(R.string.settings_calendar_view_all_events_desc)

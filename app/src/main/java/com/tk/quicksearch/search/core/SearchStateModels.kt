@@ -151,6 +151,8 @@ data class SearchFeatureState(
         val hasDismissedSearchHistoryTip: Boolean = false,
         // Direct dial
         val directDialEnabled: Boolean = false,
+        // Assistant launch voice mode
+        val assistantLaunchVoiceModeEnabled: Boolean = false,
         // Usage permission banner
         val shouldShowUsagePermissionBanner: Boolean = false,
 )

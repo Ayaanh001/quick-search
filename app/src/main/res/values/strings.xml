@@ -516,7 +516,8 @@
     <string name="section_apps">Apps</string>
     <string name="section_app_shortcuts">App Shortcuts</string>
     <string name="section_calendar">Calendar</string>
-    <string name="section_app_settings">Quick Search Settings</string>
+    <string name="section_app_settings">App Settings</string>
+    <string name="settings_app_settings_desc">Search for Quick Search settings</string>
     <string name="settings_manage_apps_title">Manage Apps</string>
     <string name="settings_manage_apps_desc">Manage your apps</string>
     <string name="settings_manage_shortcuts_desc">Manage your app shortcuts</string>

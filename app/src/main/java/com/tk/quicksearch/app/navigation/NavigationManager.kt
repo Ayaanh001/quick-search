@@ -478,6 +478,21 @@ private fun NavigationContent(
                                 navigateToSettings(SettingsDetailType.FEATURES_LIST)
                             AppSettingsDestination.OPEN_SOURCE_LICENSES ->
                                 navigateToSettings(SettingsDetailType.OPEN_SOURCE_LICENSES)
+                            AppSettingsDestination.SET_DEFAULT_ASSISTANT -> {
+                                try {
+                                    context.startActivity(Intent(android.provider.Settings.ACTION_VOICE_INPUT_SETTINGS))
+                                } catch (e: Exception) {
+                                    try {
+                                        context.startActivity(Intent(android.provider.Settings.ACTION_SETTINGS))
+                                    } catch (e2: Exception) {
+                                        Toast.makeText(context, context.getString(R.string.settings_unable_to_open_settings), Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                            AppSettingsDestination.ADD_HOME_SCREEN_WIDGET ->
+                                com.tk.quicksearch.widgets.utils.requestAddQuickSearchWidget(context)
+                            AppSettingsDestination.ADD_QUICK_SETTINGS_TILE ->
+                                com.tk.quicksearch.tile.requestAddQuickSearchTile(context)
                         }
                     },
                     onOpenSearchHistorySettings = {
