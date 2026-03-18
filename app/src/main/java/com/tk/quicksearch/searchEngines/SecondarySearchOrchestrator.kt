@@ -6,7 +6,6 @@ import com.tk.quicksearch.search.core.SearchUiState
 import com.tk.quicksearch.search.core.SectionManager
 import com.tk.quicksearch.search.core.UnifiedSearchHandler
 import com.tk.quicksearch.search.webSuggestions.WebSuggestionHandler
-import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -127,7 +126,6 @@ class SecondarySearchOrchestrator(
                 SearchSection.CALENDAR !in sectionManager.disabledSections
         val canSearchAppSettings =
             !isSingleCharacterQuery &&
-                FeatureFlags.isAppSettingsSearchEnabled() &&
                 SearchSection.APP_SETTINGS !in sectionManager.disabledSections
         val canSearchAppShortcuts = SearchSection.APP_SHORTCUTS !in sectionManager.disabledSections
 
@@ -339,7 +337,6 @@ class SecondarySearchOrchestrator(
                 isSectionEnabled(SearchSection.CALENDAR)
         val isAppSettingsEnabled =
             !isSingleCharacterQuery &&
-                FeatureFlags.isAppSettingsSearchEnabled() &&
                 isSectionEnabled(SearchSection.APP_SETTINGS)
         val isAppShortcutsEnabled =
             isSectionEnabled(SearchSection.APP_SHORTCUTS)

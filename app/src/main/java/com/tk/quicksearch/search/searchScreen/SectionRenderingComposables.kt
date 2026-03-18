@@ -42,7 +42,7 @@ fun renderSection(
         SearchSection.APP_SHORTCUTS -> renderAppShortcutsSection(params, sectionContext)
         SearchSection.SETTINGS -> renderSettingsSection(params, sectionContext)
         SearchSection.CALENDAR -> renderCalendarSection(params, sectionContext)
-        SearchSection.APP_SETTINGS -> Unit // Rendered separately via AppSettingsResultsSection
+        SearchSection.APP_SETTINGS -> renderAppSettingsSection(params, sectionContext)
     }
 }
 
@@ -249,52 +249,60 @@ private fun renderAppShortcutsSection(
     }
 }
 
-/** Renders the settings section if it should be displayed. */
+/** Renders the device settings section if it should be displayed. */
 @Composable
 private fun renderSettingsSection(
     params: SectionRenderParams,
     context: SectionRenderContext,
 ) {
     if (context.shouldRenderSettings && params.settingsParams != null) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (context.settingsList.isNotEmpty() && !context.isAppSettingsExpanded) {
-                DeviceSettingsResultsSection(
-                    settings = context.settingsList,
-                    isExpanded = context.isDeviceSettingsExpanded,
-                    pinnedSettingIds = params.settingsParams.pinnedSettingIds,
-                    onSettingClick = params.settingsParams.onSettingClick,
-                    onTogglePin = params.settingsParams.onTogglePin,
-                    onExclude = params.settingsParams.onExclude,
-                    onNicknameClick = params.settingsParams.onNicknameClick,
-                    getSettingNickname = params.settingsParams.getSettingNickname,
-                    showAllResults = context.showAllSettingsResults,
-                    showExpandControls = context.showDeviceSettingsExpandControls,
-                    onExpandClick = context.deviceSettingsExpandClick,
-                    expandedCardMaxHeight = params.settingsParams.expandedCardMaxHeight,
-                    showWallpaperBackground = params.settingsParams.showWallpaperBackground,
-                    predictedTarget = params.settingsParams.predictedTarget,
-                    fillExpandedHeight = context.isSectionAliasMode,
-                )
-            }
-            if (context.appSettingsList.isNotEmpty() && !context.isDeviceSettingsExpanded) {
-                AppSettingsResultsSection(
-                    appSettings = context.appSettingsList,
-                    isExpanded = context.isAppSettingsExpanded,
-                    onAppSettingClick = params.settingsParams.onAppSettingClick,
-                    onAppSettingToggle = params.settingsParams.onAppSettingToggle,
-                    onWebSuggestionsCountChange =
-                        params.settingsParams.onAppSettingWebSuggestionsCountChange,
-                    isAppSettingToggleChecked = params.settingsParams.isAppSettingToggleChecked,
-                    webSuggestionsCount = params.settingsParams.appSettingWebSuggestionsCount,
-                    showAllResults = context.showAllSettingsResults,
-                    showExpandControls = context.showAppSettingsExpandControls,
-                    onExpandClick = context.appSettingsExpandClick,
-                    expandedCardMaxHeight = params.settingsParams.expandedCardMaxHeight,
-                    showWallpaperBackground = params.settingsParams.showWallpaperBackground,
-                    predictedTarget = params.settingsParams.predictedTarget,
-                    fillExpandedHeight = context.isSectionAliasMode,
-                )
-            }
+        if (context.settingsList.isNotEmpty() && !context.isAppSettingsExpanded) {
+            DeviceSettingsResultsSection(
+                settings = context.settingsList,
+                isExpanded = context.isDeviceSettingsExpanded,
+                pinnedSettingIds = params.settingsParams.pinnedSettingIds,
+                onSettingClick = params.settingsParams.onSettingClick,
+                onTogglePin = params.settingsParams.onTogglePin,
+                onExclude = params.settingsParams.onExclude,
+                onNicknameClick = params.settingsParams.onNicknameClick,
+                getSettingNickname = params.settingsParams.getSettingNickname,
+                showAllResults = context.showAllSettingsResults,
+                showExpandControls = context.showDeviceSettingsExpandControls,
+                onExpandClick = context.deviceSettingsExpandClick,
+                expandedCardMaxHeight = params.settingsParams.expandedCardMaxHeight,
+                showWallpaperBackground = params.settingsParams.showWallpaperBackground,
+                predictedTarget = params.settingsParams.predictedTarget,
+                fillExpandedHeight = context.isSectionAliasMode,
+            )
+        }
+    }
+}
+
+/** Renders the app settings section if it should be displayed. */
+@Composable
+private fun renderAppSettingsSection(
+    params: SectionRenderParams,
+    context: SectionRenderContext,
+) {
+    if (context.shouldRenderSettings && params.settingsParams != null) {
+        if (context.appSettingsList.isNotEmpty() && !context.isDeviceSettingsExpanded) {
+            AppSettingsResultsSection(
+                appSettings = context.appSettingsList,
+                isExpanded = context.isAppSettingsExpanded,
+                onAppSettingClick = params.settingsParams.onAppSettingClick,
+                onAppSettingToggle = params.settingsParams.onAppSettingToggle,
+                onWebSuggestionsCountChange =
+                    params.settingsParams.onAppSettingWebSuggestionsCountChange,
+                isAppSettingToggleChecked = params.settingsParams.isAppSettingToggleChecked,
+                webSuggestionsCount = params.settingsParams.appSettingWebSuggestionsCount,
+                showAllResults = context.showAllSettingsResults,
+                showExpandControls = context.showAppSettingsExpandControls,
+                onExpandClick = context.appSettingsExpandClick,
+                expandedCardMaxHeight = params.settingsParams.expandedCardMaxHeight,
+                showWallpaperBackground = params.settingsParams.showWallpaperBackground,
+                predictedTarget = params.settingsParams.predictedTarget,
+                fillExpandedHeight = context.isSectionAliasMode,
+            )
         }
     }
 }

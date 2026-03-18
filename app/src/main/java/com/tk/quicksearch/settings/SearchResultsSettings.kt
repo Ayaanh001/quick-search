@@ -1,15 +1,16 @@
 package com.tk.quicksearch.settings.settingsDetailScreen
 
-import androidx.compose.foundation.background
 import com.tk.quicksearch.settings.shared.SectionSettingsSection
 import com.tk.quicksearch.settings.shared.SettingsScreenCallbacks
 import com.tk.quicksearch.settings.shared.SettingsScreenState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,7 +34,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -162,90 +163,104 @@ private fun LaunchOptionsCard(
     hasFilePermission: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val itemShape = MaterialTheme.shapes.extraLarge
-    val buttonBackgroundColor = MaterialTheme.colorScheme.surfaceContainerLow
-
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(
-                    bottom = DesignTokens.SpacingLarge,
-                ),
-        horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    ElevatedCard(modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge) {
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .clip(itemShape)
-                .background(buttonBackgroundColor)
-                .clickable(onClick = { onRefreshApps(true) })
-                .padding(DesignTokens.SpacingMedium),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
+            modifier = Modifier.padding(
+                horizontal = DesignTokens.SpacingXXLarge,
+                vertical = DesignTokens.SpacingXLarge,
+            ),
+            verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingMedium),
         ) {
-            Icon(
-                imageVector = Icons.Rounded.Apps,
-                contentDescription = stringResource(R.string.settings_refresh_apps_title),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(22.dp),
-            )
             Text(
-                text = stringResource(R.string.settings_refresh_apps_title),
-                style = MaterialTheme.typography.labelSmall,
+                text = stringResource(R.string.settings_refresh_data_title),
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
             )
-        }
-        if (hasContactPermission) {
-            Column(
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .clip(itemShape)
-                    .background(buttonBackgroundColor)
-                    .clickable(onClick = { onRefreshContacts(true) })
-                    .padding(DesignTokens.SpacingMedium),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Max),
+                horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Contacts,
-                    contentDescription = stringResource(R.string.settings_refresh_contacts_title),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(22.dp),
-                )
-                Text(
-                    text = stringResource(R.string.settings_refresh_contacts_title),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        }
-        if (hasFilePermission) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(itemShape)
-                    .background(buttonBackgroundColor)
-                    .clickable(onClick = { onRefreshFiles(true) })
-                    .padding(DesignTokens.SpacingMedium),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.InsertDriveFile,
-                    contentDescription = stringResource(R.string.settings_refresh_files_title),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(22.dp),
-                )
-                Text(
-                    text = stringResource(R.string.settings_refresh_files_title),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center,
-                )
+                OutlinedButton(
+                    onClick = { onRefreshApps(true) },
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    shape = DesignTokens.ShapeMedium,
+                    contentPadding = PaddingValues(
+                        horizontal = DesignTokens.SpacingSmall,
+                        vertical = DesignTokens.SpacingMedium,
+                    ),
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXXSmall),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Apps,
+                            contentDescription = null,
+                            modifier = Modifier.size(DesignTokens.IconSizeSmall),
+                        )
+                        Text(
+                            text = stringResource(R.string.settings_refresh_apps_button),
+                            style = MaterialTheme.typography.labelSmall,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+                if (hasContactPermission) {
+                    OutlinedButton(
+                        onClick = { onRefreshContacts(true) },
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        shape = DesignTokens.ShapeMedium,
+                        contentPadding = PaddingValues(
+                            horizontal = DesignTokens.SpacingSmall,
+                            vertical = DesignTokens.SpacingMedium,
+                        ),
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXXSmall),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Contacts,
+                                contentDescription = null,
+                                modifier = Modifier.size(DesignTokens.IconSizeSmall),
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_refresh_contacts_button),
+                                style = MaterialTheme.typography.labelSmall,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
+                }
+                if (hasFilePermission) {
+                    OutlinedButton(
+                        onClick = { onRefreshFiles(true) },
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        shape = DesignTokens.ShapeMedium,
+                        contentPadding = PaddingValues(
+                            horizontal = DesignTokens.SpacingSmall,
+                            vertical = DesignTokens.SpacingMedium,
+                        ),
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXXSmall),
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.InsertDriveFile,
+                                contentDescription = null,
+                                modifier = Modifier.size(DesignTokens.IconSizeSmall),
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_refresh_files_button),
+                                style = MaterialTheme.typography.labelSmall,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -311,8 +326,7 @@ fun SearchResultsSettingsSection(
                 } else {
                     null
                 },
-            calendarTagLabel = stringResource(R.string.settings_new_tag),
-            onCalendarClick =
+onCalendarClick =
                 if (hasCalendarPermission) {
                     onNavigateToCalendarEvents
                 } else {

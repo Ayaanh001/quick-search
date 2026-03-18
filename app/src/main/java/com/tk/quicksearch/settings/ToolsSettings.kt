@@ -56,7 +56,6 @@ fun ToolsSettingsSection(
                         ToolToggleCardModel(
                             title = stringResource(R.string.unit_converter_toggle_title),
                             subtitle = stringResource(R.string.unit_converter_toggle_desc),
-                            tagLabel = stringResource(R.string.settings_new_tag),
                             checked = unitConverterEnabled,
                             onCheckedChange = onUnitConverterToggle,
                             leadingIcon = Icons.Rounded.Straighten,

@@ -279,7 +279,6 @@ fun SettingsScreen(
                         SettingsCardItem(
                             title = stringResource(R.string.settings_search_results_title),
                             description = stringResource(R.string.settings_search_results_desc),
-                            tagLabel = stringResource(R.string.settings_new_tag),
                             icon = Icons.Rounded.Search,
                             actionOnPress = {
                                 onNavigateToDetail(SettingsDetailType.SEARCH_RESULTS)
@@ -300,7 +299,6 @@ fun SettingsScreen(
                         SettingsCardItem(
                             title = stringResource(R.string.settings_tools_title),
                             description = stringResource(R.string.settings_tools_desc),
-                            tagLabel = stringResource(R.string.settings_new_tag),
                             icon = Icons.Rounded.Build,
                             actionOnPress = {
                                 onNavigateToDetail(SettingsDetailType.TOOLS)
