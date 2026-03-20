@@ -50,6 +50,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.calendar.calendarRelativeDateLabel
+import com.tk.quicksearch.search.calendar.formatAbsoluteDate
+import com.tk.quicksearch.search.calendar.getDayOfWeekName
 import com.tk.quicksearch.search.core.*
 import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
@@ -179,16 +181,32 @@ fun CalculatorResult(
     val isToolMode = calculatorState.isToolMode
     val showInvalidExpression = calculatorState.showInvalidExpression
 
-    // For date calculator, compute the relative label from parsedDateMillis
+    val isReverseDateMode = calculatorState.isReverseDateMode
+    val parsedDateMillis = calculatorState.parsedDateMillis
+    val dateDiffLabel = calculatorState.dateDiffLabel
+
+    // For normal date calc: compute relative label from parsedDateMillis
     val dateLabel: String? =
             if (calculatorState.toolType == SearchToolType.DATE_CALCULATOR &&
-                    calculatorState.parsedDateMillis != null) {
-                calendarRelativeDateLabel(calculatorState.parsedDateMillis)
+                    parsedDateMillis != null &&
+                    !isReverseDateMode) {
+                calendarRelativeDateLabel(parsedDateMillis)
             } else {
                 null
             }
 
-    if (result == null && dateLabel == null && !isToolMode) return
+    // For reverse date calc: compute absolute date label from parsedDateMillis
+    val absoluteDateLabel: String? =
+            if (isReverseDateMode && parsedDateMillis != null) {
+                formatAbsoluteDate(parsedDateMillis)
+            } else {
+                null
+            }
+
+    // Day of week shown for both modes (not for diff mode)
+    val dayOfWeek: String? = parsedDateMillis?.let { getDayOfWeekName(it) }
+
+    if (result == null && dateLabel == null && absoluteDateLabel == null && dateDiffLabel == null && !isToolMode) return
 
     @Suppress("DEPRECATION")
     val clipboardManager = LocalClipboardManager.current
@@ -202,7 +220,7 @@ fun CalculatorResult(
     val cardElevation =
             AppColors.getCardElevation(showWallpaperBackground = showWallpaperBackground)
 
-    val copyText = dateLabel ?: result
+    val copyText = absoluteDateLabel ?: dateDiffLabel ?: dateLabel ?: result
     val onLongClick: (() -> Unit)? =
             if (copyText != null) {
                 { clipboardManager.setText(AnnotatedString(copyText)) }
@@ -217,8 +235,16 @@ fun CalculatorResult(
                 verticalArrangement = Arrangement.Center,
         ) {
             when {
+                absoluteDateLabel != null -> {
+                    DateCalculatorResultText(label = absoluteDateLabel, dayOfWeek = dayOfWeek, isAbsoluteDate = true)
+                }
+
+                dateDiffLabel != null -> {
+                    DateCalculatorResultText(label = dateDiffLabel)
+                }
+
                 dateLabel != null -> {
-                    DateCalculatorResultText(label = dateLabel)
+                    DateCalculatorResultText(label = dateLabel, dayOfWeek = dayOfWeek)
                 }
 
                 result != null -> {
@@ -376,7 +402,11 @@ private fun UnitConverterResultText(result: String) {
 }
 
 @Composable
-private fun DateCalculatorResultText(label: String) {
+private fun DateCalculatorResultText(
+    label: String,
+    dayOfWeek: String? = null,
+    isAbsoluteDate: Boolean = false,
+) {
     // Split into alternating text/number segments: e.g. "30 years 6 months ago"
     // → ["30"(num), " years "(text), "6"(num), " months ago"(text)]
     val segments = remember(label) {
@@ -394,37 +424,49 @@ private fun DateCalculatorResultText(label: String) {
     }
 
     val hasNumbers = segments.any { it.second }
-    if (!hasNumbers) {
-        // Today / Tomorrow / Yesterday — no number, show as large single text
-        Text(
-            text = label,
-            style = MaterialTheme.typography.displaySmall,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        return
-    }
 
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXSmall),
-    ) {
-        for ((text, isNumber) in segments) {
-            val trimmed = text.trim()
-            if (trimmed.isEmpty()) continue
-            if (isNumber) {
-                Text(
-                    text = trimmed,
-                    style = MaterialTheme.typography.displayMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.alignByBaseline(),
-                )
-            } else {
-                Text(
-                    text = trimmed,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.alignByBaseline(),
-                )
+    Column(verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXSmall)) {
+        if (!hasNumbers || isAbsoluteDate) {
+            // Absolute dates (e.g. "20th March, 2024") and special labels (Today / Tomorrow /
+            // Yesterday) — render as a single uniform block so month names are never small.
+            Text(
+                text = label,
+                style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        } else {
+            // Relative dates (e.g. "2 years 6 months ago") — big numbers, smaller unit labels.
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXSmall),
+            ) {
+                for ((text, isNumber) in segments) {
+                    val trimmed = text.trim()
+                    if (trimmed.isEmpty()) continue
+                    if (isNumber) {
+                        Text(
+                            text = trimmed,
+                            style = MaterialTheme.typography.displaySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.alignByBaseline(),
+                        )
+                    } else {
+                        Text(
+                            text = trimmed,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.alignByBaseline(),
+                        )
+                    }
+                }
             }
+        }
+
+        if (dayOfWeek != null) {
+            Text(
+                text = dayOfWeek,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

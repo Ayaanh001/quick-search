@@ -23,27 +23,78 @@ class DateCalculatorHandler(
                     toolType = SearchToolType.DATE_CALCULATOR,
                 )
             }
-            val parsedDate = DateCalculatorUtils.parseDateQuery(trimmedQuery)
-            return if (parsedDate != null) {
-                CalculatorState(
+            DateCalculatorUtils.parseDateDiffQuery(trimmedQuery)?.let { (date1, date2) ->
+                return CalculatorState(
+                    dateDiffLabel = DateCalculatorUtils.diffLabel(date1, date2),
+                    isDateCalculatorMode = true,
+                    toolType = SearchToolType.DATE_CALCULATOR,
+                )
+            }
+
+            DateCalculatorUtils.parseOffsetFromDateQuery(trimmedQuery)?.let { parsedDate ->
+                return CalculatorState(
+                    parsedDateMillis = parsedDate.toEpochMillis(),
+                    isReverseDateMode = true,
+                    isDateCalculatorMode = true,
+                    toolType = SearchToolType.DATE_CALCULATOR,
+                )
+            }
+
+            DateCalculatorUtils.parseDateQuery(trimmedQuery)?.let { parsedDate ->
+                return CalculatorState(
                     parsedDateMillis = parsedDate.toEpochMillis(),
                     isDateCalculatorMode = true,
                     toolType = SearchToolType.DATE_CALCULATOR,
                 )
-            } else {
-                CalculatorState(
+            }
+
+            DateCalculatorUtils.parseRelativeDateQuery(trimmedQuery)?.let { parsedDate ->
+                return CalculatorState(
+                    parsedDateMillis = parsedDate.toEpochMillis(),
+                    isReverseDateMode = true,
                     isDateCalculatorMode = true,
                     toolType = SearchToolType.DATE_CALCULATOR,
-                    showInvalidExpression = true,
                 )
             }
+
+            return CalculatorState(
+                isDateCalculatorMode = true,
+                toolType = SearchToolType.DATE_CALCULATOR,
+                showInvalidExpression = true,
+            )
         }
 
-        val parsedDate = DateCalculatorUtils.parseDateQuery(trimmedQuery) ?: return CalculatorState()
-        return CalculatorState(
-            parsedDateMillis = parsedDate.toEpochMillis(),
-            toolType = SearchToolType.DATE_CALCULATOR,
-        )
+        DateCalculatorUtils.parseDateDiffQuery(trimmedQuery)?.let { (date1, date2) ->
+            return CalculatorState(
+                dateDiffLabel = DateCalculatorUtils.diffLabel(date1, date2),
+                toolType = SearchToolType.DATE_CALCULATOR,
+            )
+        }
+
+        DateCalculatorUtils.parseOffsetFromDateQuery(trimmedQuery)?.let { parsedDate ->
+            return CalculatorState(
+                parsedDateMillis = parsedDate.toEpochMillis(),
+                isReverseDateMode = true,
+                toolType = SearchToolType.DATE_CALCULATOR,
+            )
+        }
+
+        DateCalculatorUtils.parseDateQuery(trimmedQuery)?.let { parsedDate ->
+            return CalculatorState(
+                parsedDateMillis = parsedDate.toEpochMillis(),
+                toolType = SearchToolType.DATE_CALCULATOR,
+            )
+        }
+
+        DateCalculatorUtils.parseRelativeDateQuery(trimmedQuery)?.let { parsedDate ->
+            return CalculatorState(
+                parsedDateMillis = parsedDate.toEpochMillis(),
+                isReverseDateMode = true,
+                toolType = SearchToolType.DATE_CALCULATOR,
+            )
+        }
+
+        return CalculatorState()
     }
 
     private fun LocalDate.toEpochMillis(): Long =

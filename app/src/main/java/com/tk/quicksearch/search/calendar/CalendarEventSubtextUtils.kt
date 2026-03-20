@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.Period
 import java.time.ZoneId
+import java.time.format.TextStyle
 import java.util.Date
 import java.util.Locale
 
@@ -39,6 +40,27 @@ private data class CalendarRecurrenceInfo(
     val frequency: CalendarRecurrenceFrequency,
     val interval: Int,
 )
+
+/** Returns the full day-of-week name (e.g. "Monday") for the given epoch millis. */
+fun getDayOfWeekName(millis: Long): String {
+    val date = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
+    return date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
+}
+
+/** Returns a formatted absolute date string (e.g. "20th March, 2024") for the given epoch millis. */
+fun formatAbsoluteDate(millis: Long): String {
+    val date = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
+    val month = date.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
+    val day = date.dayOfMonth
+    val suffix = when {
+        day in 11..13 -> "th"
+        day % 10 == 1 -> "st"
+        day % 10 == 2 -> "nd"
+        day % 10 == 3 -> "rd"
+        else -> "th"
+    }
+    return "${day}${suffix} ${month}, ${date.year}"
+}
 
 @Composable
 fun formatCalendarEventDate(event: CalendarEventInfo): String {

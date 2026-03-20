@@ -156,6 +156,10 @@ data class CalculatorState(
         val showInvalidExpression: Boolean = false,
         /** Epoch millis for the date parsed by the date calculator tool. */
         val parsedDateMillis: Long? = null,
+        /** True when the user entered a relative expression (e.g. "2 years ago") and the result is an absolute date. */
+        val isReverseDateMode: Boolean = false,
+        /** Human-readable difference label when two dates are compared, e.g. "1 year 2 months 3 days". */
+        val dateDiffLabel: String? = null,
 ) {
         val isToolMode: Boolean
                 get() = isCalculatorMode || isUnitConverterMode || isDateCalculatorMode
