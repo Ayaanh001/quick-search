@@ -1,5 +1,9 @@
 package com.tk.quicksearch.widgets.customButtonsWidget
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.util.Base64
+import androidx.core.graphics.drawable.toBitmap
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -54,6 +58,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -68,6 +73,7 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.SearchUiState
 import com.tk.quicksearch.search.core.SearchViewModel
 import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
+import com.tk.quicksearch.search.data.AppShortcutRepository.loadAppIconBase64
 import com.tk.quicksearch.search.data.AppShortcutRepository.rememberShortcutIcon
 import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.models.AppInfo
@@ -80,6 +86,7 @@ import com.tk.quicksearch.widgets.utils.WidgetPreferences
 import com.tk.quicksearch.widgets.utils.WidgetConfigConstants
 import com.tk.quicksearch.widgets.utils.WidgetButtonSlotConfig
 import kotlinx.coroutines.delay
+import java.io.ByteArrayOutputStream
 
 @Composable
 fun CustomWidgetButtonsSection(
@@ -423,6 +430,7 @@ private fun CustomWidgetButtonDialog(
     onDismiss: () -> Unit,
     onSelect: (CustomWidgetButtonAction) -> Unit,
 ) {
+    val context = LocalContext.current
     var query by remember { mutableStateOf(TextFieldValue("")) }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -531,7 +539,9 @@ private fun CustomWidgetButtonDialog(
                                         result = result,
                                         iconPackPackage = iconPackPackage,
                                         isSelected = isSelected,
-                                        onClick = { onSelect(result.toAction()) },
+                                        onClick = {
+                                            onSelect(result.toPersistedAction(context))
+                                        },
                                     )
                                     HorizontalDivider(
                                         color = MaterialTheme.colorScheme.outlineVariant,
@@ -757,7 +767,58 @@ private sealed class CustomWidgetSearchResult {
                 )
             }
         }
+
+    fun toPersistedAction(context: Context): CustomWidgetButtonAction =
+        when (this) {
+            is AppShortcut -> {
+                val iconBase64 =
+                    shortcut.iconBase64
+                        ?: loadShortcutIconBase64(
+                            context = context,
+                            packageName = shortcut.packageName,
+                            iconResId = shortcut.iconResId,
+                        )
+                        ?: loadAppIconBase64(context, shortcut.packageName)
+
+                CustomWidgetButtonAction.AppShortcut(
+                    packageName = shortcut.packageName,
+                    appLabel = shortcut.appLabel,
+                    id = shortcut.id,
+                    shortLabel = shortcut.shortLabel,
+                    longLabel = shortcut.longLabel,
+                    iconResId = shortcut.iconResId,
+                    iconBase64 = iconBase64,
+                    enabled = shortcut.enabled,
+                    intents = shortcut.intents,
+                )
+            }
+
+            else -> toAction()
+        }
 }
+
+private fun loadShortcutIconBase64(
+    context: Context,
+    packageName: String,
+    iconResId: Int?,
+): String? {
+    val resId = iconResId ?: return null
+    val targetContext = runCatching { context.createPackageContext(packageName, 0) }.getOrNull() ?: return null
+    val drawable =
+        runCatching {
+            targetContext.resources.getDrawable(resId, targetContext.theme)
+        }.getOrNull() ?: return null
+    val bitmap = runCatching { drawable.toBitmap(width = 96, height = 96) }.getOrNull() ?: return null
+    return bitmap.toBase64Png()
+}
+
+private fun Bitmap.toBase64Png(): String? =
+    runCatching {
+        ByteArrayOutputStream().use { output ->
+            if (!compress(Bitmap.CompressFormat.PNG, 100, output)) return null
+            Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP)
+        }
+    }.getOrNull()
 
 private fun buildCustomWidgetSearchResults(state: SearchUiState): List<CustomWidgetSearchResult> =
     buildList {

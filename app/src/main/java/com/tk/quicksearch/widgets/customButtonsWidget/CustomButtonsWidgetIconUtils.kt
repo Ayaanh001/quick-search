@@ -108,20 +108,9 @@ private fun loadShortcutIconBitmap(
             )
         }
     }
-
-    val resId = action.iconResId ?: return null
-    val targetContext =
-        runCatching {
-            context.createPackageContext(action.packageName, 0)
-        }.getOrNull() ?: return null
-
-    val drawable =
-        runCatching {
-            targetContext.resources.getDrawable(resId, targetContext.theme)
-        }.getOrNull() ?: return null
-
-    val sizePx = iconSizePx.coerceAtLeast(1)
-    return runCatching { drawable.toBitmap(width = sizePx, height = sizePx) }.getOrNull()
+    // Do not restore shortcut icons from persisted resource IDs.
+    // Resource IDs can be reassigned after app updates, which causes icon mismatches.
+    return null
 }
 
 private fun loadContactBitmap(

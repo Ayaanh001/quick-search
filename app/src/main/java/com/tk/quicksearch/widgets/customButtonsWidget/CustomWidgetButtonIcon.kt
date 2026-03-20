@@ -55,7 +55,16 @@ fun CustomWidgetButtonIcon(
         }
 
         is CustomWidgetButtonAction.AppShortcut -> {
-            val shortcut = remember(action) { action.toStaticShortcut() }
+            val shortcut =
+                remember(action) {
+                    action.toStaticShortcut().let { staticShortcut ->
+                        if (action.iconBase64.isNullOrBlank()) {
+                            staticShortcut.copy(iconResId = null)
+                        } else {
+                            staticShortcut
+                        }
+                    }
+                }
             val iconSizePx = with(LocalDensity.current) { iconSize.roundToPx() }
             val iconBitmap = rememberShortcutIcon(shortcut = shortcut, iconSizePx = iconSizePx)
             if (iconBitmap != null) {

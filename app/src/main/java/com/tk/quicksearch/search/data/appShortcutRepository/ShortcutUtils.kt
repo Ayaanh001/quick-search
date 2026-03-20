@@ -332,6 +332,15 @@ private fun parseStaticShortcuts(
                         "shortcut" -> {
                             val id = currentId?.trim()
                             if (currentEnabled && id != null && isValidShortcutId(id)) {
+                                val iconBase64 =
+                                    currentIcon
+                                        ?.let { iconResId ->
+                                            kotlin.runCatching {
+                                                res.getDrawable(iconResId, targetContext.theme)
+                                            }.getOrNull()
+                                                ?.toBitmap(width = 96, height = 96)
+                                                ?.let(::bitmapToBase64Png)
+                                        }
                                 shortcuts.add(
                                     StaticShortcut(
                                         packageName = packageName,
@@ -340,6 +349,7 @@ private fun parseStaticShortcuts(
                                         shortLabel = currentShortLabel,
                                         longLabel = currentLongLabel,
                                         iconResId = currentIcon,
+                                        iconBase64 = iconBase64,
                                         enabled = currentEnabled,
                                         intents = currentIntents.toList(),
                                     ),
