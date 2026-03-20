@@ -380,6 +380,7 @@ private fun ContactList(
                         .align(Alignment.CenterHorizontally)
                         .height(ContactUiConstants.EXPAND_BUTTON_HEIGHT.dp)
                         .padding(top = DesignTokens.SpacingXXSmall),
+                textResId = R.string.action_expand_more_contacts,
             )
             Spacer(modifier = Modifier.height(8.dp))
         }

@@ -219,6 +219,7 @@ private fun AppShortcutsCardContent(
                         ExpandButton(
                                 onClick = onExpandClick,
                                 modifier = Modifier.align(Alignment.CenterHorizontally),
+                                textResId = R.string.action_expand_more_shortcuts,
                         )
                 }
         }

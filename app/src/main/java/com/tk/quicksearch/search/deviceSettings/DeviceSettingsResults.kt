@@ -73,29 +73,15 @@ fun DeviceSettingsResultsSection(
         val overlayCardColor = LocalOverlayResultCardColor.current
         val overlayDividerColor = LocalOverlayDividerColor.current
         if (settings.isEmpty()) return
-        var isDeviceSettingsExpandedBySelf by remember { mutableStateOf(false) }
 
         val predictedSettingId = (predictedTarget as? PredictedSubmitTarget.Setting)?.id
         val deviceSettingsScrollState = rememberScrollState()
-        val isDeviceSettingsExpanded = isExpanded && isDeviceSettingsExpandedBySelf
-
-        val onDeviceSettingsExpandClick = {
-                if (isDeviceSettingsExpanded) {
-                        isDeviceSettingsExpandedBySelf = false
-                        onExpandClick()
-                } else {
-                        isDeviceSettingsExpandedBySelf = true
-                        if (!isExpanded) {
-                                onExpandClick()
-                        }
-                }
-        }
+        val displayAsExpanded = isExpanded || showAllResults
 
         Column(
                 modifier = modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-                val displayAsExpanded = isDeviceSettingsExpanded || showAllResults
                 val hasPredictedRow =
                         predictedSettingId != null &&
                                 settings.any { it.id == predictedSettingId }
@@ -104,7 +90,7 @@ fun DeviceSettingsResultsSection(
 
                 ExpandableResultsCard(
                         resultCount = settings.size,
-                        isExpanded = isDeviceSettingsExpanded,
+                        isExpanded = displayAsExpanded,
                         showAllResults = showAllResults,
                         isTopPredicted = useCardLevelPrediction,
                         showExpandControls = showExpandControls,
@@ -124,7 +110,7 @@ fun DeviceSettingsResultsSection(
                         Column(
                                 modifier =
                                         contentModifier.then(
-                                                if (isDeviceSettingsExpanded) {
+                                                if (isExpanded) {
                                                         Modifier.verticalScroll(deviceSettingsScrollState)
                                                 } else {
                                                         Modifier
@@ -183,7 +169,7 @@ fun DeviceSettingsResultsSection(
 
                                         if (cardState.shouldShowExpandButton) {
                                                 ExpandButton(
-                                                        onClick = onDeviceSettingsExpandClick,
+                                                        onClick = onExpandClick,
                                                         modifier =
                                                                 Modifier.align(
                                                                                 Alignment.CenterHorizontally,
@@ -313,7 +299,7 @@ private fun ExpandButton(
                         ),
         ) {
                 Text(
-                        text = stringResource(R.string.action_expand_more),
+                        text = stringResource(R.string.action_expand_more_device_settings),
                         style = MaterialTheme.typography.bodySmall,
                         color = moreActionColor,
                 )

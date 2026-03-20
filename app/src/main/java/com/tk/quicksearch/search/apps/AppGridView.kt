@@ -503,7 +503,7 @@ private fun AppIconSurface(
                 if (iconBitmap != null) {
                     val clipModifier =
                             when {
-                                appIconShape == AppIconShape.CIRCLE && !hasCustomIconPack ->
+                                appIconShape == AppIconShape.CIRCLE ->
                                         Modifier.clip(androidx.compose.foundation.shape.CircleShape)
                                 iconIsLegacy -> Modifier.clip(DesignTokens.ShapeLarge)
                                 else -> Modifier

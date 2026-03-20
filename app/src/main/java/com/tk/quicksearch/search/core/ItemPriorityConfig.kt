@@ -69,7 +69,7 @@ object ItemPriorityConfig {
      * 6. Inline search engines (if enabled)
      * 7. No results message (if nothing found)
      *
-     * Section priority within search results: APPS > APP_SHORTCUTS > CONTACTS > FILES > CALENDAR > APP_SETTINGS > SETTINGS
+     * Section priority within search results: APPS > APP_SHORTCUTS > CONTACTS > FILES > CALENDAR > SETTINGS > APP_SETTINGS
      */
     val SEARCHING_STATE_LAYOUT: List<ItemType> =
         listOf(
@@ -82,8 +82,8 @@ object ItemPriorityConfig {
             ItemType.CONTACTS_SECTION,
             ItemType.FILES_SECTION,
             ItemType.CALENDAR_SECTION,
-            ItemType.APP_SETTINGS_SECTION,
             ItemType.SETTINGS_SECTION,
+            ItemType.APP_SETTINGS_SECTION,
             // Fallback suggestions
             ItemType.WEB_SUGGESTIONS,
             ItemType.SEARCH_ENGINES_INLINE,
@@ -99,7 +99,7 @@ object ItemPriorityConfig {
      * 3. Recent queries
      * 4. Recent apps (displayed after pinned apps)
      *
-     * Section priority: APPS > APP_SHORTCUTS > CONTACTS > FILES > CALENDAR > APP_SETTINGS > SETTINGS
+     * Section priority: APPS > APP_SHORTCUTS > CONTACTS > FILES > CALENDAR > SETTINGS > APP_SETTINGS
      */
     val APP_OPEN_STATE_LAYOUT: List<ItemType> =
         listOf(
@@ -110,8 +110,8 @@ object ItemPriorityConfig {
             ItemType.CONTACTS_SECTION,
             ItemType.FILES_SECTION,
             ItemType.CALENDAR_SECTION,
-            ItemType.APP_SETTINGS_SECTION,
             ItemType.SETTINGS_SECTION,
+            ItemType.APP_SETTINGS_SECTION,
             // Recent queries/suggestions
             ItemType.RECENT_QUERIES,
         )
@@ -119,7 +119,7 @@ object ItemPriorityConfig {
     /**
      * Section priority order - used within each layout for rendering sections.
      *
-     * Priority (highest to lowest): APPS > APP_SHORTCUTS > CONTACTS > FILES > CALENDAR > APP_SETTINGS > SETTINGS
+     * Priority (highest to lowest): APPS > APP_SHORTCUTS > CONTACTS > FILES > CALENDAR > SETTINGS > APP_SETTINGS
      */
     val searchingStatePriority: List<SearchSection> =
         listOf(
@@ -128,14 +128,14 @@ object ItemPriorityConfig {
             SearchSection.CONTACTS,
             SearchSection.FILES,
             SearchSection.CALENDAR,
-            SearchSection.APP_SETTINGS,
             SearchSection.SETTINGS,
+            SearchSection.APP_SETTINGS,
         )
 
     /**
      * Section priority order for app open state (pinned items and recent apps).
      *
-     * Priority (highest to lowest): APPS > APP_SHORTCUTS > CONTACTS > FILES > CALENDAR > APP_SETTINGS > SETTINGS
+     * Priority (highest to lowest): APPS > APP_SHORTCUTS > CONTACTS > FILES > CALENDAR > SETTINGS > APP_SETTINGS
      */
     val appOpenStatePriority: List<SearchSection> =
         listOf(
@@ -144,8 +144,8 @@ object ItemPriorityConfig {
             SearchSection.CONTACTS,
             SearchSection.FILES,
             SearchSection.CALENDAR,
-            SearchSection.APP_SETTINGS,
             SearchSection.SETTINGS,
+            SearchSection.APP_SETTINGS,
         )
 
     /**

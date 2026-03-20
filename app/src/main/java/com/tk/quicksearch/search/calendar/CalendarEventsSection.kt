@@ -179,6 +179,7 @@ fun CalendarEventsSection(
                     ExpandButton(
                         onClick = onExpandClick,
                         modifier = Modifier.align(Alignment.CenterHorizontally),
+                        textResId = R.string.action_expand_more_events,
                     )
                 }
             }

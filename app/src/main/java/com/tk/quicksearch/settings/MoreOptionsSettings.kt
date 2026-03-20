@@ -21,7 +21,6 @@ import com.tk.quicksearch.settings.shared.SettingsToggleRow
 fun MoreOptionsSettings(
     appIconShape: AppIconShape,
     onSetAppIconShape: (AppIconShape) -> Unit,
-    selectedIconPackPackage: String?,
     topResultIndicatorEnabled: Boolean,
     onTopResultIndicatorToggle: (Boolean) -> Unit,
     openKeyboardOnLaunch: Boolean,
@@ -32,8 +31,6 @@ fun MoreOptionsSettings(
     onAutoCloseOverlayToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val showCircularAppIconsToggle = selectedIconPackPackage.isNullOrBlank()
-
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
@@ -49,21 +46,19 @@ fun MoreOptionsSettings(
                 isLastItem = false,
             )
 
-            if (showCircularAppIconsToggle) {
-                SettingsToggleRow(
-                    title = stringResource(R.string.settings_circular_app_icons_title),
-                    subtitle = stringResource(R.string.settings_circular_app_icons_desc),
-                    checked = appIconShape == AppIconShape.CIRCLE,
-                    onCheckedChange = { enabled ->
-                        onSetAppIconShape(
-                            if (enabled) AppIconShape.CIRCLE else AppIconShape.DEFAULT,
-                        )
-                    },
-                    leadingIcon = Icons.Rounded.Apps,
-                    isFirstItem = false,
-                    isLastItem = false,
-                )
-            }
+            SettingsToggleRow(
+                title = stringResource(R.string.settings_circular_app_icons_title),
+                subtitle = stringResource(R.string.settings_circular_app_icons_desc),
+                checked = appIconShape == AppIconShape.CIRCLE,
+                onCheckedChange = { enabled ->
+                    onSetAppIconShape(
+                        if (enabled) AppIconShape.CIRCLE else AppIconShape.DEFAULT,
+                    )
+                },
+                leadingIcon = Icons.Rounded.Apps,
+                isFirstItem = false,
+                isLastItem = false,
+            )
 
             SettingsToggleRow(
                 title = stringResource(R.string.top_result_indicator_toggle_title),

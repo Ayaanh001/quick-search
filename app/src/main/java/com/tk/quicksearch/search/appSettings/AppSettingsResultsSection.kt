@@ -309,7 +309,7 @@ private fun ExpandButton(
             ),
     ) {
         Text(
-            text = stringResource(R.string.action_expand_more),
+            text = stringResource(R.string.action_expand_more_app_settings),
             style = MaterialTheme.typography.bodySmall,
             color = moreActionColor,
         )
