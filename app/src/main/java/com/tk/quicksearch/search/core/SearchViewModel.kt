@@ -526,7 +526,6 @@ class SearchViewModel(
                     enabledFileTypes = s.enabledFileTypes,
                     showFolders = s.showFolders,
                     showSystemFiles = s.showSystemFiles,
-                    showHiddenFiles = s.showHiddenFiles,
                     folderWhitelistPatterns = s.folderWhitelistPatterns,
                     folderBlacklistPatterns = s.folderBlacklistPatterns,
                     excludedFileExtensions = s.excludedFileExtensions,
@@ -763,7 +762,6 @@ class SearchViewModel(
     private var enabledFileTypes: Set<FileType> = emptySet()
     private var showFolders: Boolean = false
     private var showSystemFiles: Boolean = false
-    private var showHiddenFiles: Boolean = false
     private var folderWhitelistPatterns: Set<String> = emptySet()
     private var folderBlacklistPatterns: Set<String> = emptySet()
     private var excludedFileExtensions: Set<String> = emptySet()
@@ -1084,7 +1082,6 @@ class SearchViewModel(
         enabledFileTypes = prefs.enabledFileTypes
         showFolders = prefs.showFolders
         showSystemFiles = prefs.showSystemFiles
-        showHiddenFiles = prefs.showHiddenFiles
         folderWhitelistPatterns = prefs.folderWhitelistPatterns
         folderBlacklistPatterns = prefs.folderBlacklistPatterns
         excludedFileExtensions = prefs.excludedFileExtensions
@@ -1133,7 +1130,6 @@ class SearchViewModel(
                     customImageUri = customImageUri,
                     showFolders = showFolders,
                     showSystemFiles = showSystemFiles,
-                    showHiddenFiles = showHiddenFiles,
                     folderWhitelistPatterns = folderWhitelistPatterns,
                     folderBlacklistPatterns = folderBlacklistPatterns,
                     excludedFileExtensions = excludedFileExtensions,
@@ -3383,20 +3379,6 @@ class SearchViewModel(
             userPreferences.setShowSystemFiles(show)
             showSystemFiles = show
             updateUiState { it.copy(showSystemFiles = show) }
-
-            // Re-run file search if there's an active query
-            val query = _resultsState.value.query
-            if (query.isNotBlank()) {
-                secondarySearchOrchestrator.performSecondarySearches(query)
-            }
-        }
-    }
-
-    fun setShowHiddenFiles(show: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            userPreferences.setShowHiddenFiles(show)
-            showHiddenFiles = show
-            updateUiState { it.copy(showHiddenFiles = show) }
 
             // Re-run file search if there's an active query
             val query = _resultsState.value.query

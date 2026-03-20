@@ -17,7 +17,6 @@ import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
 import androidx.compose.material.icons.rounded.VideoLibrary
 import androidx.compose.material.icons.rounded.Visibility
-import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -168,8 +167,6 @@ private fun ExcludedExtensionChip(
  * @param onToggleFolders Callback when folders toggle is changed
  * @param showSystemFiles Whether system files are shown in search results
  * @param onToggleSystemFiles Callback when system files toggle is changed
- * @param showHiddenFiles Whether hidden files are shown in search results
- * @param onToggleHiddenFiles Callback when hidden files toggle is changed
  * @param folderWhitelistPatterns Folder path patterns that should be allowed in results
  * @param onSetFolderWhitelistPatterns Callback when whitelist patterns change
  * @param folderBlacklistPatterns Folder path patterns that should be blocked in results
@@ -186,8 +183,6 @@ fun FileTypesSection(
     onToggleFolders: (Boolean) -> Unit,
     showSystemFiles: Boolean,
     onToggleSystemFiles: (Boolean) -> Unit,
-    showHiddenFiles: Boolean,
-    onToggleHiddenFiles: (Boolean) -> Unit,
     folderWhitelistPatterns: Set<String>,
     onSetFolderWhitelistPatterns: (Set<String>) -> Unit,
     folderBlacklistPatterns: Set<String>,
@@ -249,9 +244,18 @@ fun FileTypesSection(
                     },
                     leadingIcon = getFileTypeIcon(fileType),
                     isFirstItem = index == 0,
-                    isLastItem = index == orderedFileTypes.lastIndex,
+                    isLastItem = false,
                 )
             }
+
+            SettingsToggleRow(
+                title = stringResource(R.string.settings_system_files_toggle),
+                checked = showSystemFiles,
+                onCheckedChange = onToggleSystemFiles,
+                leadingIcon = Icons.Rounded.Visibility,
+                isFirstItem = false,
+                isLastItem = excludedExtensions.isEmpty(),
+            )
 
             // Excluded extensions section
             if (excludedExtensions.isNotEmpty()) {
@@ -319,31 +323,6 @@ fun FileTypesSection(
                     }
                 }
             }
-        }
-    }
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    // Card 3: System Files & Hidden Files toggles
-    ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = DesignTokens.ExtraLargeCardShape) {
-        Column {
-            SettingsToggleRow(
-                title = stringResource(R.string.settings_system_files_toggle),
-                checked = showSystemFiles,
-                onCheckedChange = onToggleSystemFiles,
-                leadingIcon = Icons.Rounded.Visibility,
-                isFirstItem = true,
-                isLastItem = false,
-            )
-
-            SettingsToggleRow(
-                title = stringResource(R.string.settings_hidden_files_toggle),
-                checked = showHiddenFiles,
-                onCheckedChange = onToggleHiddenFiles,
-                leadingIcon = Icons.Rounded.VisibilityOff,
-                isFirstItem = false,
-                isLastItem = true,
-            )
         }
     }
 

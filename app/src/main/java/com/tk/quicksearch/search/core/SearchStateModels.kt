@@ -196,11 +196,9 @@ data class SearchUiConfigState(
         val selectedIconPackPackage: String? = null,
         val availableIconPacks: List<IconPackInfo> = emptyList(),
         // File display preferences
-        val enabledFileTypes: Set<FileType> =
-                FileType.values().filter { it != FileType.OTHER }.toSet(),
+        val enabledFileTypes: Set<FileType> = FileType.values().toSet(),
         val showFolders: Boolean = false,
         val showSystemFiles: Boolean = false,
-        val showHiddenFiles: Boolean = false,
         val folderWhitelistPatterns: Set<String> = emptySet(),
         val folderBlacklistPatterns: Set<String> = emptySet(),
         val excludedFileExtensions: Set<String> = emptySet(),

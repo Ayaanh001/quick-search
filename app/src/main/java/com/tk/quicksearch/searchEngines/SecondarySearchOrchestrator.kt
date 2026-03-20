@@ -185,7 +185,6 @@ class SecondarySearchOrchestrator(
                         enableFuzzySettingsSearch = false,
                         showFolders = currentState.showFolders,
                         showSystemFiles = currentState.showSystemFiles,
-                        showHiddenFiles = currentState.showHiddenFiles,
                         aliasSection = null,
                     )
 
@@ -370,7 +369,6 @@ class SecondarySearchOrchestrator(
                         enableFuzzySettingsSearch = shouldSearchSettings && useFuzzyMatching,
                         showFolders = currentState.showFolders,
                         showSystemFiles = currentState.showSystemFiles,
-                        showHiddenFiles = currentState.showHiddenFiles,
                         aliasSection = section,
                     )
 

@@ -22,7 +22,6 @@ class StartupPreferencesFacade(
             val enabledFileTypes: Set<FileType>,
             val showFolders: Boolean,
             val showSystemFiles: Boolean,
-            val showHiddenFiles: Boolean,
             val folderWhitelistPatterns: Set<String>,
             val folderBlacklistPatterns: Set<String>,
             val excludedFileExtensions: Set<String>,
@@ -88,10 +87,8 @@ class StartupPreferencesFacade(
                         Set<String>
         val enabledFileTypes =
                 if (enabledFileTypesNames == null) {
-                    // Default: all file types enabled except OTHER
-                    com.tk.quicksearch.search.models.FileType.values()
-                            .filter { it != com.tk.quicksearch.search.models.FileType.OTHER }
-                            .toSet()
+                    // Default: all file types enabled
+                    com.tk.quicksearch.search.models.FileType.values().toSet()
                 } else {
                     enabledFileTypesNames
                         .mapNotNull { name -> com.tk.quicksearch.search.models.FileType.values().find { it.name == name } }
@@ -108,19 +105,21 @@ class StartupPreferencesFacade(
                                 Boolean
                                 ?: false,
                 showSystemFiles =
-                        allPrefs[
-                                com.tk.quicksearch.search.data.preferences.BasePreferences
-                                        .KEY_SHOW_SYSTEM_FILES,
-                        ] as?
-                                Boolean
-                                ?: false,
-                showHiddenFiles =
-                        allPrefs[
-                                com.tk.quicksearch.search.data.preferences.BasePreferences
-                                        .KEY_SHOW_HIDDEN_FILES,
-                        ] as?
-                                Boolean
-                                ?: false,
+                        (
+                                allPrefs[
+                                        com.tk.quicksearch.search.data.preferences.BasePreferences
+                                                .KEY_SHOW_SYSTEM_FILES,
+                                ] as?
+                                        Boolean
+                                ?: false
+                        ) || (
+                                allPrefs[
+                                        com.tk.quicksearch.search.data.preferences.BasePreferences
+                                                .KEY_SHOW_HIDDEN_FILES,
+                                ] as?
+                                        Boolean
+                                ?: false
+                        ),
                 folderWhitelistPatterns =
                         allPrefs[
                                 com.tk.quicksearch.search.data.preferences.BasePreferences
@@ -397,10 +396,8 @@ class StartupPreferencesFacade(
                         Set<String>
         val enabledFileTypes =
                 if (enabledFileTypesNames == null) {
-                    // Default: all file types enabled except OTHER
-                    com.tk.quicksearch.search.models.FileType.values()
-                            .filter { it != com.tk.quicksearch.search.models.FileType.OTHER }
-                            .toSet()
+                    // Default: all file types enabled
+                    com.tk.quicksearch.search.models.FileType.values().toSet()
                 } else {
                     enabledFileTypesNames
                         .mapNotNull { name -> com.tk.quicksearch.search.models.FileType.values().find { it.name == name } }
@@ -418,19 +415,21 @@ class StartupPreferencesFacade(
                                         Boolean
                                         ?: false,
                         showSystemFiles =
-                                allPrefs[
-                                        com.tk.quicksearch.search.data.preferences.BasePreferences
-                                                .KEY_SHOW_SYSTEM_FILES,
-                                ] as?
-                                        Boolean
-                                        ?: false,
-                        showHiddenFiles =
-                                allPrefs[
-                                        com.tk.quicksearch.search.data.preferences.BasePreferences
-                                                .KEY_SHOW_HIDDEN_FILES,
-                                ] as?
-                                        Boolean
-                                        ?: false,
+                                (
+                                        allPrefs[
+                                                com.tk.quicksearch.search.data.preferences.BasePreferences
+                                                        .KEY_SHOW_SYSTEM_FILES,
+                                        ] as?
+                                                Boolean
+                                        ?: false
+                                ) || (
+                                        allPrefs[
+                                                com.tk.quicksearch.search.data.preferences.BasePreferences
+                                                        .KEY_SHOW_HIDDEN_FILES,
+                                        ] as?
+                                                Boolean
+                                        ?: false
+                                ),
                         folderWhitelistPatterns =
                                 allPrefs[
                                         com.tk.quicksearch.search.data.preferences.BasePreferences

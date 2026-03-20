@@ -43,13 +43,16 @@ class FilePreferences(
 
     fun setShowFoldersInResults(show: Boolean) = prefs.edit().putBoolean(BasePreferences.KEY_SHOW_FOLDERS_IN_RESULTS, show).apply()
 
-    fun getShowSystemFiles(): Boolean = prefs.getBoolean(BasePreferences.KEY_SHOW_SYSTEM_FILES, false)
+    fun getShowSystemFiles(): Boolean =
+        prefs.getBoolean(BasePreferences.KEY_SHOW_SYSTEM_FILES, false) ||
+            prefs.getBoolean(BasePreferences.KEY_SHOW_HIDDEN_FILES, false)
 
-    fun setShowSystemFiles(show: Boolean) = prefs.edit().putBoolean(BasePreferences.KEY_SHOW_SYSTEM_FILES, show).apply()
-
-    fun getShowHiddenFiles(): Boolean = prefs.getBoolean(BasePreferences.KEY_SHOW_HIDDEN_FILES, false)
-
-    fun setShowHiddenFiles(show: Boolean) = prefs.edit().putBoolean(BasePreferences.KEY_SHOW_HIDDEN_FILES, show).apply()
+    fun setShowSystemFiles(show: Boolean) =
+        prefs
+            .edit()
+            .putBoolean(BasePreferences.KEY_SHOW_SYSTEM_FILES, show)
+            .remove(BasePreferences.KEY_SHOW_HIDDEN_FILES)
+            .apply()
 
     fun getFolderWhitelistPatterns(): Set<String> = getStringSet(BasePreferences.KEY_FOLDER_WHITELIST_PATTERNS)
 
@@ -74,8 +77,8 @@ class FilePreferences(
     fun getEnabledFileTypes(): Set<FileType> {
         val key = BasePreferences.KEY_ENABLED_FILE_TYPES
         return if (!prefs.contains(key)) {
-            // Default: all file types enabled except OTHER
-            FileType.values().filter { it != FileType.OTHER }.toSet()
+            // Default: all file types enabled
+            FileType.values().toSet()
         } else {
             val enabledNames = prefs.getStringSet(key, emptySet()).orEmpty()
             enabledNames
@@ -95,7 +98,7 @@ class FilePreferences(
 
     fun clearEnabledFileTypes(): Set<FileType> {
         clearStringSet(BasePreferences.KEY_ENABLED_FILE_TYPES)
-        // Return the default enabled file types (all except OTHER)
-        return FileType.values().filter { it != FileType.OTHER }.toSet()
+        // Return the default enabled file types
+        return FileType.values().toSet()
     }
 }

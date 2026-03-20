@@ -233,8 +233,6 @@ internal fun SettingsDetailLevel2Screen(
                                 onToggleFolders = callbacks.onToggleFolders,
                                 showSystemFiles = state.showSystemFiles,
                                 onToggleSystemFiles = callbacks.onToggleSystemFiles,
-                                showHiddenFiles = state.showHiddenFiles,
-                                onToggleHiddenFiles = callbacks.onToggleHiddenFiles,
                                 folderWhitelistPatterns = state.folderWhitelistPatterns,
                                 onSetFolderWhitelistPatterns = callbacks.onSetFolderWhitelistPatterns,
                                 folderBlacklistPatterns = state.folderBlacklistPatterns,

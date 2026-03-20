@@ -216,10 +216,6 @@ class UserAppPreferences(
 
     fun setShowSystemFiles(show: Boolean) = filePreferences.setShowSystemFiles(show)
 
-    fun getShowHiddenFiles(): Boolean = filePreferences.getShowHiddenFiles()
-
-    fun setShowHiddenFiles(show: Boolean) = filePreferences.setShowHiddenFiles(show)
-
     fun getFolderWhitelistPatterns(): Set<String> = filePreferences.getFolderWhitelistPatterns()
 
     fun setFolderWhitelistPatterns(patterns: Set<String>) =

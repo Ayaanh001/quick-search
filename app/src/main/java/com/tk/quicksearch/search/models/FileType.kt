@@ -16,6 +16,7 @@ object FileTypeUtils {
     private val VIDEO_PREFIX = "video/"
     private val AUDIO_PREFIX = "audio/"
     private val APK_MIME_TYPE = "application/vnd.android.package-archive"
+    private val BINARY_MIME_TYPE = "application/octet-stream"
 
     private val DOCUMENT_PREFIXES =
         setOf(
@@ -31,6 +32,87 @@ object FileTypeUtils {
             "application/rtf",
             "application/x-rtf",
             "text/",
+        )
+
+    private val DOCUMENT_EXTENSIONS =
+        setOf(
+            "pdf",
+            "doc",
+            "docx",
+            "xls",
+            "xlsx",
+            "ppt",
+            "pptx",
+            "odt",
+            "ods",
+            "odp",
+            "rtf",
+            "txt",
+            "md",
+            "csv",
+            "json",
+            "xml",
+            "yaml",
+            "yml",
+            "html",
+            "htm",
+            "log",
+            "epub",
+        )
+
+    private val IMAGE_EXTENSIONS =
+        setOf(
+            "jpg",
+            "jpeg",
+            "png",
+            "gif",
+            "bmp",
+            "webp",
+            "heic",
+            "heif",
+            "svg",
+            "avif",
+            "tiff",
+            "tif",
+            "ico",
+            "raw",
+            "dng",
+            "cr2",
+            "nef",
+            "arw",
+        )
+
+    private val VIDEO_EXTENSIONS =
+        setOf(
+            "mp4",
+            "mkv",
+            "avi",
+            "mov",
+            "wmv",
+            "flv",
+            "webm",
+            "m4v",
+            "3gp",
+            "mpeg",
+            "mpg",
+            "ts",
+        )
+
+    private val AUDIO_EXTENSIONS =
+        setOf(
+            "mp3",
+            "wav",
+            "aac",
+            "m4a",
+            "flac",
+            "ogg",
+            "oga",
+            "wma",
+            "opus",
+            "amr",
+            "aiff",
+            "mid",
+            "midi",
         )
 
     fun getFileType(mimeType: String?): FileType {
@@ -49,25 +131,40 @@ object FileTypeUtils {
     }
 
     fun getFileTypeFromName(fileName: String): FileType? {
-        val normalizedName = fileName.lowercase()
-        return when {
-            normalizedName.endsWith(".apk") -> FileType.APKS
-            else -> null
-        }
+        val extension = extensionOf(fileName) ?: return null
+        return getFileTypeByExtension(extension).takeIf { it != FileType.OTHER }
     }
 
     private fun isDocumentType(normalizedMime: String): Boolean = DOCUMENT_PREFIXES.any { normalizedMime.startsWith(it) }
 
     fun getFileType(file: DeviceFile): FileType {
         if (file.isDirectory) {
-            return FileType.DOCUMENTS
+            return FileType.OTHER
         }
         val typeFromMime = getFileType(file.mimeType)
-        if (typeFromMime != FileType.OTHER) {
+        val normalizedMime = file.mimeType?.lowercase()
+        val shouldTrustMime = normalizedMime != null && normalizedMime != BINARY_MIME_TYPE
+        if (typeFromMime != FileType.OTHER && shouldTrustMime) {
             return typeFromMime
         }
-        return getFileTypeFromName(file.displayName) ?: FileType.OTHER
+        return getFileTypeFromName(file.displayName) ?: typeFromMime
     }
+
+    private fun extensionOf(fileName: String): String? =
+        fileName
+            .substringAfterLast('.', missingDelimiterValue = "")
+            .lowercase()
+            .takeIf { it.isNotBlank() }
+
+    private fun getFileTypeByExtension(extension: String): FileType =
+        when {
+            extension == "apk" -> FileType.APKS
+            extension in IMAGE_EXTENSIONS -> FileType.PICTURES
+            extension in VIDEO_EXTENSIONS -> FileType.VIDEOS
+            extension in AUDIO_EXTENSIONS -> FileType.AUDIO
+            extension in DOCUMENT_EXTENSIONS -> FileType.DOCUMENTS
+            else -> FileType.OTHER
+        }
 
     fun isPdf(file: DeviceFile): Boolean {
         if (file.isDirectory) return false

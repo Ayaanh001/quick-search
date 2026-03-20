@@ -56,8 +56,6 @@ import com.tk.quicksearch.search.searchScreen.predictedSubmitHighlight
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.getAppGridColumns
 import com.tk.quicksearch.shared.util.hapticConfirm
-import kotlin.math.ceil
-import kotlin.math.min
 
 private const val ROW_COUNT = 2
 private enum class AppIconDisplayMode {
@@ -239,16 +237,11 @@ private fun AppGrid(
 ) {
     val maxVisibleColumns = getAppGridColumns()
     val columns =
-            remember(apps, rowCount, maxVisibleColumns, isSearching) {
+            remember(apps, maxVisibleColumns) {
                 if (apps.isEmpty()) {
                     1
-                } else if (isSearching) {
-                    maxVisibleColumns.coerceAtLeast(1)
                 } else {
-                    val rowsToFill = rowCount.coerceAtLeast(1)
-                    val columnsNeededToAvoidGaps =
-                            ceil(apps.size.toFloat() / rowsToFill.toFloat()).toInt()
-                    min(maxVisibleColumns, columnsNeededToAvoidGaps.coerceAtLeast(1))
+                    maxVisibleColumns.coerceAtLeast(1)
                 }
             }
     val rows =

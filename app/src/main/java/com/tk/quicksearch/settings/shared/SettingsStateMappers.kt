@@ -15,7 +15,6 @@ internal fun SearchUiState.toSettingsScreenState(): SettingsScreenState =
         enabledFileTypes = enabledFileTypes,
         showFolders = showFolders,
         showSystemFiles = showSystemFiles,
-        showHiddenFiles = showHiddenFiles,
         folderWhitelistPatterns = folderWhitelistPatterns,
         folderBlacklistPatterns = folderBlacklistPatterns,
         excludedFileExtensions = excludedFileExtensions,

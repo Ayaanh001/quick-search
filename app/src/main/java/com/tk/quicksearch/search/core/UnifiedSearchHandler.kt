@@ -83,7 +83,6 @@ class UnifiedSearchHandler(
                 enableFuzzySettingsSearch: Boolean = false,
                 showFolders: Boolean = true,
                 showSystemFiles: Boolean = false,
-                showHiddenFiles: Boolean = false,
                 aliasSection: SearchSection? = null,
         ): UnifiedSearchResults =
                 withContext(Dispatchers.IO) {
@@ -196,7 +195,6 @@ class UnifiedSearchHandler(
                                                                 folderBlacklistPatterns,
                                                                 showFolders,
                                                                 showSystemFiles,
-                                                                showHiddenFiles,
                                                                 recencyIndex.fileScores,
                                                                 includeFuzzyCandidates =
                                                                         enableFuzzyFileSearch,
@@ -283,7 +281,6 @@ class UnifiedSearchHandler(
                                         folderBlacklistPatterns,
                                         showFolders,
                                         showSystemFiles,
-                                        showHiddenFiles,
                                         nicknameOnlyFileUriHydrationLimit,
                                 )
                         val nicknameCalendarEvents =
@@ -381,7 +378,6 @@ class UnifiedSearchHandler(
                 folderBlacklistPatterns: Set<String>,
                 showFolders: Boolean,
                 showSystemFiles: Boolean,
-                showHiddenFiles: Boolean,
                 nicknameOnlyFileUriHydrationLimit: Int,
         ): List<DeviceFile> {
                 if (!canSearchFiles) return emptyList()
@@ -406,26 +402,28 @@ class UnifiedSearchHandler(
 
                 return if (limitedNicknameOnlyUris.isNotEmpty()) {
                         fileRepository.getFilesByUris(limitedNicknameOnlyUris.toSet()).filter { file ->
-                                val fileType =
-                                        com.tk.quicksearch.search.models.FileTypeUtils.getFileType(
-                                                file,
-                                        )
-
-                                if (file.isDirectory && !showFolders) return@filter false
-
                                 val isSystem =
                                         FileClassifier.isSystemFolder(file) ||
                                                 FileClassifier.isSystemFile(file)
+                                if (file.isDirectory) {
+                                        if (!showFolders) return@filter false
+                                } else {
+                                        val fileType =
+                                                com.tk.quicksearch.search.models.FileTypeUtils
+                                                        .getFileType(file)
+                                        if (fileType !in enabledFileTypes) return@filter false
+                                        if (fileType == FileType.OTHER && isSystem) return@filter false
+                                }
+
                                 if (isSystem && !showSystemFiles) return@filter false
 
                                 val isHidden = file.displayName.startsWith(".")
-                                if (isHidden && !showHiddenFiles) return@filter false
+                                if (isHidden && !showSystemFiles) return@filter false
 
-                                if (!showHiddenFiles && FileClassifier.isInTrashFolder(file))
+                                if (!showSystemFiles && FileClassifier.isInTrashFolder(file))
                                         return@filter false
 
-                                fileType in enabledFileTypes &&
-                                        !excludedFileUris.contains(file.uri.toString()) &&
+                                !excludedFileUris.contains(file.uri.toString()) &&
                                         pathMatcher(file) &&
                                         !FileUtils.isFileExtensionExcluded(
                                                 file.displayName,

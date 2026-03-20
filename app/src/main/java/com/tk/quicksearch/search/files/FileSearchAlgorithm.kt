@@ -23,7 +23,6 @@ object FileSearchAlgorithm {
             folderBlacklistPatterns: Set<String>,
             showFolders: Boolean,
             showSystemFiles: Boolean,
-            showHiddenFiles: Boolean,
             fileNicknames: Map<String, String?>,
             recentFileScores: Map<String, Int> = emptyMap(),
             resultLimit: Int = 25,
@@ -40,7 +39,6 @@ object FileSearchAlgorithm {
                         folderBlacklistPatterns = folderBlacklistPatterns,
                         showFolders = showFolders,
                         showSystemFiles = showSystemFiles,
-                        showHiddenFiles = showHiddenFiles,
                 )
 
         return rankFiles(
@@ -61,7 +59,6 @@ object FileSearchAlgorithm {
             folderBlacklistPatterns: Set<String>,
             showFolders: Boolean,
             showSystemFiles: Boolean,
-            showHiddenFiles: Boolean,
             fileNicknames: Map<String, String?>,
             recentFileScores: Map<String, Int> = emptyMap(),
             resultLimit: Int = 25,
@@ -77,7 +74,6 @@ object FileSearchAlgorithm {
                         folderBlacklistPatterns = folderBlacklistPatterns,
                         showFolders = showFolders,
                         showSystemFiles = showSystemFiles,
-                        showHiddenFiles = showHiddenFiles,
                 )
 
         return rankFiles(filteredFiles, queryContext, fileNicknames, recentFileScores).take(resultLimit)
@@ -93,7 +89,6 @@ object FileSearchAlgorithm {
             folderBlacklistPatterns: Set<String>,
             showFolders: Boolean,
             showSystemFiles: Boolean,
-            showHiddenFiles: Boolean,
     ): List<DeviceFile> {
         if (query.isBlank()) return emptyList()
 
@@ -107,24 +102,27 @@ object FileSearchAlgorithm {
                 )
 
         return fullList.filter { file ->
-            val fileType = FileTypeUtils.getFileType(file)
-            val fileTypeMatches = fileType in enabledFileTypes
-
-            if (file.isDirectory && !showFolders) return@filter false
-
-            val isApk = isApkFile(file)
-            if (isApk && FileType.APKS !in enabledFileTypes) return@filter false
-
             val isSystem = FileClassifier.isSystemFolder(file) || FileClassifier.isSystemFile(file)
+
+            if (file.isDirectory) {
+                if (!showFolders) return@filter false
+            } else {
+                val fileType = FileTypeUtils.getFileType(file)
+                if (fileType !in enabledFileTypes) return@filter false
+                if (fileType == FileType.OTHER && isSystem) return@filter false
+
+                val isApk = isApkFile(file)
+                if (isApk && FileType.APKS !in enabledFileTypes) return@filter false
+            }
+
             if (isSystem && !showSystemFiles) return@filter false
 
             val isHidden = file.displayName.startsWith(".")
-            if (isHidden && !showHiddenFiles) return@filter false
+            if (isHidden && !showSystemFiles) return@filter false
 
-            if (!showHiddenFiles && FileClassifier.isInTrashFolder(file)) return@filter false
+            if (!showSystemFiles && FileClassifier.isInTrashFolder(file)) return@filter false
 
-            fileTypeMatches &&
-                    !excludedFileUris.contains(file.uri.toString()) &&
+            !excludedFileUris.contains(file.uri.toString()) &&
                     pathMatcher(file) &&
                     !FileUtils.isFileExtensionExcluded(
                             file.displayName,

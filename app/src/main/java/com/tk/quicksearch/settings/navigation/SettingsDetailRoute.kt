@@ -270,7 +270,6 @@ fun SettingsDetailRoute(
                     onToggleFileType = viewModel::setFileTypeEnabled,
                     onToggleFolders = viewModel::setShowFolders,
                     onToggleSystemFiles = viewModel::setShowSystemFiles,
-                    onToggleHiddenFiles = viewModel::setShowHiddenFiles,
                     onSetFolderWhitelistPatterns = viewModel::setFolderWhitelistPatterns,
                     onSetFolderBlacklistPatterns = viewModel::setFolderBlacklistPatterns,
                     onRemoveExcludedFileExtension = viewModel::removeExcludedFileExtension,

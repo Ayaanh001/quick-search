@@ -303,7 +303,6 @@ fun SearchRoute(
                 uiState.appIconShape == com.tk.quicksearch.search.core.AppIconShape.CIRCLE
             AppSettingsToggleKey.SHOW_FOLDERS -> uiState.showFolders
             AppSettingsToggleKey.SHOW_SYSTEM_FILES -> uiState.showSystemFiles
-            AppSettingsToggleKey.SHOW_HIDDEN_FILES -> uiState.showHiddenFiles
             AppSettingsToggleKey.DIRECT_DIAL -> uiState.directDialEnabled
             AppSettingsToggleKey.SEARCH_APPS -> !uiState.disabledSections.contains(SearchSection.APPS)
             AppSettingsToggleKey.SEARCH_APP_SHORTCUTS -> !uiState.disabledSections.contains(SearchSection.APP_SHORTCUTS)
@@ -359,7 +358,6 @@ fun SearchRoute(
                 )
             AppSettingsToggleKey.SHOW_FOLDERS -> viewModel.setShowFolders(enabled)
             AppSettingsToggleKey.SHOW_SYSTEM_FILES -> viewModel.setShowSystemFiles(enabled)
-            AppSettingsToggleKey.SHOW_HIDDEN_FILES -> viewModel.setShowHiddenFiles(enabled)
             AppSettingsToggleKey.DIRECT_DIAL -> {
                 if (enabled) {
                     if (uiState.hasCallPermission) {
@@ -594,9 +592,7 @@ fun SearchRoute(
             onReleaseNotesAcknowledged = viewModel::acknowledgeReleaseNotes,
             onReleaseNotesViewAllFeatures = onOpenReleaseNotesFeatures,
             onWebSuggestionClick = { suggestion: String ->
-                runExternalNavigationFromOverlay {
-                    viewModel.onWebSuggestionTap(suggestion)
-                }
+                viewModel.onWebSuggestionTap(suggestion)
             },
             onSearchEngineOnboardingDismissed = viewModel::onSearchEngineOnboardingDismissed,
             onContactActionHintDismissed = viewModel::onContactActionHintDismissed,

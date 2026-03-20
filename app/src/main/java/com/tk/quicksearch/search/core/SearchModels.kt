@@ -375,12 +375,9 @@ data class SearchUiState(
         val assistantLaunchVoiceModeEnabled: Boolean = false,
         // File display preferences
         val enabledFileTypes: Set<com.tk.quicksearch.search.models.FileType> =
-                com.tk.quicksearch.search.models.FileType.values()
-                        .filter { it != com.tk.quicksearch.search.models.FileType.OTHER }
-                        .toSet(),
+                com.tk.quicksearch.search.models.FileType.values().toSet(),
         val showFolders: Boolean = false,
         val showSystemFiles: Boolean = false,
-        val showHiddenFiles: Boolean = false,
         val folderWhitelistPatterns: Set<String> = emptySet(),
         val folderBlacklistPatterns: Set<String> = emptySet(),
         val excludedFileExtensions: Set<String> = emptySet(),
@@ -600,7 +597,6 @@ fun SearchUiState(
                 enabledFileTypes = config.enabledFileTypes,
                 showFolders = config.showFolders,
                 showSystemFiles = config.showSystemFiles,
-                showHiddenFiles = config.showHiddenFiles,
                 folderWhitelistPatterns = config.folderWhitelistPatterns,
                 folderBlacklistPatterns = config.folderBlacklistPatterns,
                 excludedFileExtensions = config.excludedFileExtensions,
