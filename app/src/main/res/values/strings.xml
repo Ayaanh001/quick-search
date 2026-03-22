@@ -910,11 +910,13 @@
     <string name="calculator_invalid_or_unsupported_expression">Invalid or unsupported expression</string>
     <string name="unit_converter_toggle_title">Unit Converter</string>
     <string name="unit_converter_toggle_desc">Usage instructions and examples</string>
+    <string name="unit_converter_toggle_action_desc">Toggle unit converter on or off</string>
     <string name="unit_converter_enter_conversion_hint">Enter a conversion (e.g., 5lbs in kgs)</string>
     <string name="unit_converter_invalid_or_unsupported_query">Invalid or unsupported conversion</string>
     <string name="unit_converter_info_title">Unit Converter</string>
     <string name="date_calculator_toggle_title">Date &amp; Time Calculator</string>
     <string name="date_calculator_toggle_desc">Usage instructions and examples</string>
+    <string name="date_calculator_toggle_action_desc">Toggle date &amp; time calculator on or off</string>
     <string name="date_calculator_info_title">Date &amp; Time Calculator</string>
     <!-- Unit Converter info screen categories -->
     <string name="unit_converter_category_length">Length</string>

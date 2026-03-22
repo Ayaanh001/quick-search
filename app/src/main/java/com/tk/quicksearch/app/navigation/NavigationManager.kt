@@ -493,6 +493,10 @@ private fun NavigationContent(
                                 com.tk.quicksearch.widgets.utils.requestAddQuickSearchWidget(context)
                             AppSettingsDestination.ADD_QUICK_SETTINGS_TILE ->
                                 com.tk.quicksearch.tile.requestAddQuickSearchTile(context)
+                            AppSettingsDestination.UNIT_CONVERTER_INFO ->
+                                navigateToSettings(SettingsDetailType.UNIT_CONVERTER_INFO)
+                            AppSettingsDestination.DATE_CALCULATOR_INFO ->
+                                navigateToSettings(SettingsDetailType.DATE_CALCULATOR_INFO)
                         }
                     },
                     onOpenSearchHistorySettings = {

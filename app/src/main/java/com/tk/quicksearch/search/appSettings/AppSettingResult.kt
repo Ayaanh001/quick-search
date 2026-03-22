@@ -36,6 +36,8 @@ enum class AppSettingsDestination {
     SET_DEFAULT_ASSISTANT,
     ADD_HOME_SCREEN_WIDGET,
     ADD_QUICK_SETTINGS_TILE,
+    UNIT_CONVERTER_INFO,
+    DATE_CALCULATOR_INFO,
 }
 
 enum class AppSettingsToggleKey {
@@ -47,6 +49,7 @@ enum class AppSettingsToggleKey {
     SEARCH_ENGINE_ALIAS_SUFFIX,
     CALCULATOR,
     UNIT_CONVERTER,
+    DATE_CALCULATOR,
     APP_SUGGESTIONS,
     WEB_SUGGESTIONS,
     RECENT_QUERIES,

@@ -292,6 +292,7 @@ fun SearchRoute(
             AppSettingsToggleKey.SEARCH_ENGINE_ALIAS_SUFFIX -> uiState.isSearchEngineAliasSuffixEnabled
             AppSettingsToggleKey.CALCULATOR -> uiState.calculatorEnabled
             AppSettingsToggleKey.UNIT_CONVERTER -> uiState.unitConverterEnabled
+            AppSettingsToggleKey.DATE_CALCULATOR -> uiState.dateCalculatorEnabled
             AppSettingsToggleKey.APP_SUGGESTIONS -> uiState.appSuggestionsEnabled
             AppSettingsToggleKey.WEB_SUGGESTIONS -> uiState.webSuggestionsEnabled
             AppSettingsToggleKey.RECENT_QUERIES -> uiState.recentQueriesEnabled
@@ -341,6 +342,7 @@ fun SearchRoute(
             AppSettingsToggleKey.SEARCH_ENGINE_ALIAS_SUFFIX -> viewModel.setSearchEngineAliasSuffixEnabled(enabled)
             AppSettingsToggleKey.CALCULATOR -> viewModel.setCalculatorEnabled(enabled)
             AppSettingsToggleKey.UNIT_CONVERTER -> viewModel.setUnitConverterEnabled(enabled)
+            AppSettingsToggleKey.DATE_CALCULATOR -> viewModel.setDateCalculatorEnabled(enabled)
             AppSettingsToggleKey.APP_SUGGESTIONS -> viewModel.setAppSuggestionsEnabled(enabled)
             AppSettingsToggleKey.WEB_SUGGESTIONS -> viewModel.setWebSuggestionsEnabled(enabled)
             AppSettingsToggleKey.RECENT_QUERIES -> viewModel.setRecentQueriesEnabled(enabled)

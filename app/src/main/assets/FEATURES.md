@@ -2,7 +2,7 @@
 
 This document highlights all the available features. It also includes details about hidden or non-obvious features that you might miss.
 
-**Version**: 2.8 (Updated March 16 2026)
+**Version**: 2.9 (Updated March 22 2026)
 
 ### Search
 
@@ -10,8 +10,9 @@ This document highlights all the available features. It also includes details ab
 - **App Shortcuts Search** - Find and launch app shortcuts instantly
 - **Contact Search** - Quickly locate contacts in your phone and perform various actions for that contact, e.g. Call, SMS, Google Meet Voice/Video call, WhatsApp (Chat, Audio/Video Call), Telegram (Chat, Audio/Video Call), Signal (Chat, Audio/Video Call)
 - **File Search** - Search through device files & folders
-- **Device Settings Search** - Find specific device settings
 - **Calendar Events Search** - Search through your calendar events
+- **Device Settings Search** - Find specific device settings
+- **App Settings Search** - Find and access Quick Search app settings directly by searching
 - **App Suggestions** - Shows suggested apps when no search query is entered. You can also choose to hide app suggestions completely. This feature requires usage access permission. If permission is not granted, the app shows suggestions based on apps you recently opened from within the app.
 
 ---
@@ -44,6 +45,15 @@ This document highlights all the available features. It also includes details ab
   - Pressure: Pa, kPa, MPa, bar, mbar, psi, atm, torr, mmHg
   - Angle: rad, deg, grad, rev
   - Frequency: Hz, kHz, MHz, GHz, rpm
+- **Date & Time Calculator** - Parse natural language dates and times in the search bar. You can enable or disable the tool and set an optional alias (in Tools settings; tap the row for examples). Supported input types include:
+  - **Named dates** — e.g. March 12 2025, July 4, Dec 25 2026
+  - **Relative dates** — e.g. in 3 months, 2 weeks ago, in 1 year 6 months, 10 days ago
+  - **Date differences** — e.g. March 5 to March 20, Jan 1 to Dec 31 2025
+  - **Offset from a date** — e.g. 5 days from March 12, 3 months before June 1, 2 weeks after July 4
+  - **Time arithmetic** — e.g. 6 hours from now, 45 minutes ago, 2 hours 30 minutes later
+  - **Time ranges** — e.g. 9am to 5pm, 14:00 to 17:30, 8:30am to 12:00pm
+  - **Absolute time** — e.g. 5pm, 14:30, 9am
+  - **Time offset from a time** — e.g. 3 hours after 5pm, 30 minutes before 9am, 1 hour after 14:00
 
 ---
 
@@ -54,6 +64,7 @@ Add aliases at the start of your query to quickly let the app know what you want
 - **Search Section Aliases** - Configure aliases to instantly focus on specific result sections (apps, app shortcuts, contacts, files, device settings) from the search bar.
 - **Search Engine Aliases** - Assign aliases (like `ggl` for Google) to quickly trigger any search engine just by typing your alias at the start or end of the query. (When you add an alias at the end of your query, hit space to trigger it.)
 - **Calculator Alias** - Set a dedicated alias that switches the search bar into calculator mode on demand.
+- **Date & Time Calculator Alias** - Set a dedicated alias that switches the search bar into date & time calculator mode on demand.
 
 ---
 
@@ -221,6 +232,7 @@ Long-press on most results to open a context menu with quick actions.
 - **Direct Search (Gemini API)**
   - If the results contain emails, phone numbers, or links, you can tap them to email, call, or open them.
   - You can quickly change the model by tapping on "Powered by" text in the result.
+- **Keyboard Action Button** - Tap on keyboard action button to automatically open the top result
 - **Show/Switch Keyboard Button** - When you close the keyboard, a small "Open Keyboard" button appears so that you don't have to tap on the search bar. When you type numbers in search, a "Switch to number" keyboard will appear. This is useful when using the calculator.
 - **Alias-based Contact and File Searches** - When you trigger contact/files search using an alias, the app will search more deeply.
 - **Search History Items** - Long-press on any search history item to remove it from your search history.
@@ -231,6 +243,7 @@ Long-press on most results to open a context menu with quick actions.
 - **Contact Image Tap** - Tap on the contact photo to open the contact in the default contacts app to edit it.
 - **Access Beta Features** - Tap on version number 5 times to unlock new beta features. These features are hidden because they're not fully implemented & tested, so expect bugs. You can disable these features by long-pressing on the version number.
 - Long-press Direct Search, Calculator or any tool result to copy it to clipboard.
+- You can send text to Quick Search by selecting Quick Search in phone's text-selection menu and share sheet.
 
 ---
 

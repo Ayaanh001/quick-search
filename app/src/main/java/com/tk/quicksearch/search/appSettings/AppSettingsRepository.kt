@@ -262,9 +262,30 @@ class AppSettingsRepository(
             addToggle(
                 id = "app_toggle_unit_converter",
                 titleRes = R.string.unit_converter_toggle_title,
-                descriptionRes = R.string.unit_converter_toggle_desc,
+                descriptionRes = R.string.unit_converter_toggle_action_desc,
                 toggleKey = AppSettingsToggleKey.UNIT_CONVERTER,
                 keywords = listOf("unit", "converter", "conversion"),
+            )
+            addNavigation(
+                id = "app_nav_unit_converter_info",
+                titleRes = R.string.unit_converter_toggle_title,
+                descriptionRes = R.string.unit_converter_toggle_desc,
+                destination = AppSettingsDestination.UNIT_CONVERTER_INFO,
+                keywords = listOf("unit", "converter", "conversion", "examples"),
+            )
+            addToggle(
+                id = "app_toggle_date_calculator",
+                titleRes = R.string.date_calculator_toggle_title,
+                descriptionRes = R.string.date_calculator_toggle_action_desc,
+                toggleKey = AppSettingsToggleKey.DATE_CALCULATOR,
+                keywords = listOf("date", "time", "calculator"),
+            )
+            addNavigation(
+                id = "app_nav_date_calculator_info",
+                titleRes = R.string.date_calculator_toggle_title,
+                descriptionRes = R.string.date_calculator_toggle_desc,
+                destination = AppSettingsDestination.DATE_CALCULATOR_INFO,
+                keywords = listOf("date", "time", "calculator", "examples"),
             )
             addToggle(
                 id = "app_toggle_app_suggestions",
