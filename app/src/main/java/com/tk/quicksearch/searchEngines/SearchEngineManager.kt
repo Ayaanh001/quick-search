@@ -471,9 +471,6 @@ class SearchEngineManager(
             val updated =
                 savedDisabled.toMutableSet().apply {
                     addAll(browserIds)
-                    if (!isPackageInstalled(packageManager, PackageConstants.WIKIPEDIA_PACKAGE_NAME)) {
-                        add(SearchEngine.WIKIPEDIA.name)
-                    }
                 }
             if (updated != savedDisabled) {
                 userPreferences.setDisabledSearchEngines(updated)
@@ -485,9 +482,6 @@ class SearchEngineManager(
         val updatedDisabled =
             savedDisabled.toMutableSet().apply {
                 addAll(newBrowserIds)
-                if (!isPackageInstalled(packageManager, PackageConstants.WIKIPEDIA_PACKAGE_NAME)) {
-                    add(SearchEngine.WIKIPEDIA.name)
-                }
             }
         if (updatedDisabled != savedDisabled) {
             userPreferences.setDisabledSearchEngines(updatedDisabled)
