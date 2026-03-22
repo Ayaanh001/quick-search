@@ -512,6 +512,7 @@ internal fun SearchScreenContent(
                                         onKeyboardSwitchToggle()
                                     }
                                 },
+                                showWallpaperBackground = state.showWallpaperBackground,
                         )
                     }
                 }

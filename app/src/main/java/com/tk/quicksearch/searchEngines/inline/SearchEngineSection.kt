@@ -27,7 +27,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
@@ -40,6 +39,7 @@ import com.tk.quicksearch.searchEngines.shared.SearchTargetConstants
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.shared.util.isLandscape
 import com.tk.quicksearch.shared.util.isTablet
+import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 /** Constants for search engine section layout. */
@@ -94,7 +94,7 @@ fun SearchEngineIconsSection(
     val scrollState = externalScrollState ?: rememberLazyListState()
 
     // Match compact section background with the persistent search bar for visual consistency.
-    val backgroundColor = Color.Black.copy(alpha = 0.5f)
+    val backgroundColor = AppColors.getCompactSectionBackground(showWallpaperBackground)
 
     if (detectedShortcutTarget != null) {
         // Check if query starts with the shortcut and remove it

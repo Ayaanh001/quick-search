@@ -76,8 +76,8 @@ internal val DarkQuickSearchAppColorPalette =
 
 internal val LightQuickSearchAppColorPalette =
     QuickSearchAppColorPalette(
-        searchBarBackground = Color.Black.copy(alpha = 0.08f),
-        searchBarBorder = Color.Black.copy(alpha = 0.24f),
+        searchBarBackground = Color.White,
+        searchBarBorder = Color.White,
         searchBarTextAndIcon = Color(0xFF1F1B24),
         settingsCardBackground = Color.Black.copy(alpha = 0.06f),
         settingsText = Color(0xFF1F1B24),
@@ -108,7 +108,7 @@ internal val LocalQuickSearchAppColorPalette =
         DarkQuickSearchAppColorPalette
     }
 
-internal val LocalAppIsDarkTheme = staticCompositionLocalOf { true }
+val LocalAppIsDarkTheme = staticCompositionLocalOf { true }
 
 object AppColors {
     // Theme-aware semantic colors ------------------------------------------------------------
@@ -389,9 +389,12 @@ object AppColors {
     @Composable
     fun getCardColors(showWallpaperBackground: Boolean): CardColors =
         if (showWallpaperBackground) {
-            CardDefaults.cardColors(
-                containerColor = OverlayMedium,
-            )
+            val containerColor = if (LocalAppIsDarkTheme.current) {
+                OverlayMedium
+            } else {
+                Color.White.copy(alpha = 0.5f)
+            }
+            CardDefaults.cardColors(containerColor = containerColor)
         } else {
             CardDefaults.elevatedCardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -402,6 +405,18 @@ object AppColors {
      * Returns appropriate card elevation based on wallpaper background setting and theme.
      * Cards with wallpaper background or in light mode use no elevation; dark mode uses standard elevation.
      */
+    /**
+     * Returns the background color for the compact search engine section strip.
+     * In light mode with wallpaper, uses white with transparency; otherwise uses black with transparency.
+     */
+    @Composable
+    fun getCompactSectionBackground(showWallpaperBackground: Boolean): Color =
+        if (showWallpaperBackground && !LocalAppIsDarkTheme.current) {
+            Color.White.copy(alpha = 0.5f)
+        } else {
+            Color.Black.copy(alpha = 0.5f)
+        }
+
     @Composable
     fun getCardElevation(showWallpaperBackground: Boolean): CardElevation =
         if (showWallpaperBackground || !LocalAppIsDarkTheme.current) {

@@ -414,7 +414,7 @@ internal fun PersistentSearchBar(
                     }
                 }.border(
                     width = DesignTokens.SearchFieldBorderWidth,
-                    color = AppColors.DialogText.copy(alpha = borderAlpha.value),
+                    color = AppColors.SearchBarBorder.copy(alpha = borderAlpha.value),
                     shape = DesignTokens.ShapeXXLarge,
                 ).clip(DesignTokens.ShapeXXLarge)
                 .background(searchBarBackground),
