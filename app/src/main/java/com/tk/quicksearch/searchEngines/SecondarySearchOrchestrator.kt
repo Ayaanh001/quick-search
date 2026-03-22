@@ -344,7 +344,7 @@ class SecondarySearchOrchestrator(
         val shouldSearchFiles = section == SearchSection.FILES && isFilesEnabled
         val shouldSearchSettings = section == SearchSection.SETTINGS && isSettingsEnabled
         val shouldSearchCalendar = section == SearchSection.CALENDAR && isCalendarEnabled
-        val shouldSearchAppSettings = section == SearchSection.SETTINGS && isAppSettingsEnabled
+        val shouldSearchAppSettings = section == SearchSection.APP_SETTINGS && isAppSettingsEnabled
         val shouldSearchAppShortcuts =
             section == SearchSection.APP_SHORTCUTS && isAppShortcutsEnabled
 

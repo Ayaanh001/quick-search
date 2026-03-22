@@ -183,8 +183,9 @@ fun ContentLayout(
                 !suggestionWasSelected
 
     // Recent Queries Logic (for App Open State mainly, but CONFIG has RECENT_QUERIES item)
+    // Suppress regular history in alias mode — alias recent items are shown in the section slot instead.
     val showRecentItems =
-        !hasQuery && state.recentQueriesEnabled && state.recentItems.isNotEmpty()
+        !hasQuery && state.detectedAliasSearchSection == null && state.recentQueriesEnabled && state.recentItems.isNotEmpty()
 
     var searchHistoryExpanded by remember { mutableStateOf(false) }
     LaunchedEffect(showRecentItems) {
@@ -195,6 +196,7 @@ fun ContentLayout(
         showRecentItems && searchHistoryExpanded
     val activeAliasSection = state.detectedAliasSearchSection
     val isSectionAliasMode = activeAliasSection != null
+    val showAliasRecentItems = isSectionAliasMode && !hasQuery && state.aliasRecentItems.isNotEmpty()
 
     fun shouldRenderSection(section: SearchSection): Boolean {
         if (hidePinnedAndAppsWhenSearchHistoryExpanded) return false
@@ -336,41 +338,85 @@ fun ContentLayout(
 
                 ItemPriorityConfig.ItemType.APP_SHORTCUTS_SECTION -> {
                     if (shouldRenderSection(SearchSection.APP_SHORTCUTS)) {
-                        renderSection(
-                            SearchSection.APP_SHORTCUTS,
-                            sectionParams,
-                            sectionContext,
-                        )
+                        if (showAliasRecentItems) {
+                            AliasRecentItemsSection(
+                                items = state.aliasRecentItems,
+                                contactsParams = effectiveContactsParams,
+                                filesParams = effectiveFilesParams,
+                                settingsParams = effectiveSettingsParams,
+                                appShortcutsParams = effectiveAppShortcutsParams,
+                                onWebSuggestionClick = onWebSuggestionClick,
+                                onDeleteRecentItem = onDeleteRecentItem,
+                                expandedCardMaxHeight = expandedCardMaxHeight,
+                                showWallpaperBackground = effectiveShowWallpaperBackground,
+                                isOverlayPresentation = isOverlayPresentation,
+                            )
+                        } else {
+                            renderSection(SearchSection.APP_SHORTCUTS, sectionParams, sectionContext)
+                        }
                     }
                 }
 
                 ItemPriorityConfig.ItemType.FILES_SECTION -> {
                     if (shouldRenderSection(SearchSection.FILES)) {
-                        renderSection(
-                            SearchSection.FILES,
-                            sectionParams,
-                            sectionContext,
-                        )
+                        if (showAliasRecentItems) {
+                            AliasRecentItemsSection(
+                                items = state.aliasRecentItems,
+                                contactsParams = effectiveContactsParams,
+                                filesParams = effectiveFilesParams,
+                                settingsParams = effectiveSettingsParams,
+                                appShortcutsParams = effectiveAppShortcutsParams,
+                                onWebSuggestionClick = onWebSuggestionClick,
+                                onDeleteRecentItem = onDeleteRecentItem,
+                                expandedCardMaxHeight = expandedCardMaxHeight,
+                                showWallpaperBackground = effectiveShowWallpaperBackground,
+                                isOverlayPresentation = isOverlayPresentation,
+                            )
+                        } else {
+                            renderSection(SearchSection.FILES, sectionParams, sectionContext)
+                        }
                     }
                 }
 
                 ItemPriorityConfig.ItemType.CONTACTS_SECTION -> {
                     if (shouldRenderSection(SearchSection.CONTACTS)) {
-                        renderSection(
-                            SearchSection.CONTACTS,
-                            sectionParams,
-                            sectionContext,
-                        )
+                        if (showAliasRecentItems) {
+                            AliasRecentItemsSection(
+                                items = state.aliasRecentItems,
+                                contactsParams = effectiveContactsParams,
+                                filesParams = effectiveFilesParams,
+                                settingsParams = effectiveSettingsParams,
+                                appShortcutsParams = effectiveAppShortcutsParams,
+                                onWebSuggestionClick = onWebSuggestionClick,
+                                onDeleteRecentItem = onDeleteRecentItem,
+                                expandedCardMaxHeight = expandedCardMaxHeight,
+                                showWallpaperBackground = effectiveShowWallpaperBackground,
+                                isOverlayPresentation = isOverlayPresentation,
+                            )
+                        } else {
+                            renderSection(SearchSection.CONTACTS, sectionParams, sectionContext)
+                        }
                     }
                 }
 
                 ItemPriorityConfig.ItemType.SETTINGS_SECTION -> {
                     if (shouldRenderSection(SearchSection.SETTINGS)) {
-                        renderSection(
-                            SearchSection.SETTINGS,
-                            sectionParams,
-                            sectionContext,
-                        )
+                        if (showAliasRecentItems) {
+                            AliasRecentItemsSection(
+                                items = state.aliasRecentItems,
+                                contactsParams = effectiveContactsParams,
+                                filesParams = effectiveFilesParams,
+                                settingsParams = effectiveSettingsParams,
+                                appShortcutsParams = effectiveAppShortcutsParams,
+                                onWebSuggestionClick = onWebSuggestionClick,
+                                onDeleteRecentItem = onDeleteRecentItem,
+                                expandedCardMaxHeight = expandedCardMaxHeight,
+                                showWallpaperBackground = effectiveShowWallpaperBackground,
+                                isOverlayPresentation = isOverlayPresentation,
+                            )
+                        } else {
+                            renderSection(SearchSection.SETTINGS, sectionParams, sectionContext)
+                        }
                     }
                 }
 
@@ -386,11 +432,22 @@ fun ContentLayout(
 
                 ItemPriorityConfig.ItemType.APP_SETTINGS_SECTION -> {
                     if (shouldRenderSection(SearchSection.APP_SETTINGS)) {
-                        renderSection(
-                            SearchSection.APP_SETTINGS,
-                            sectionParams,
-                            sectionContext,
-                        )
+                        if (showAliasRecentItems) {
+                            AliasRecentItemsSection(
+                                items = state.aliasRecentItems,
+                                contactsParams = effectiveContactsParams,
+                                filesParams = effectiveFilesParams,
+                                settingsParams = effectiveSettingsParams,
+                                appShortcutsParams = effectiveAppShortcutsParams,
+                                onWebSuggestionClick = onWebSuggestionClick,
+                                onDeleteRecentItem = onDeleteRecentItem,
+                                expandedCardMaxHeight = expandedCardMaxHeight,
+                                showWallpaperBackground = effectiveShowWallpaperBackground,
+                                isOverlayPresentation = isOverlayPresentation,
+                            )
+                        } else {
+                            renderSection(SearchSection.APP_SETTINGS, sectionParams, sectionContext)
+                        }
                     }
                 }
 
@@ -534,4 +591,47 @@ fun ContentLayout(
             }
         }
     }
+}
+
+@Composable
+private fun AliasRecentItemsSection(
+    items: List<com.tk.quicksearch.search.searchHistory.RecentSearchItem>,
+    contactsParams: ContactsSectionParams,
+    filesParams: FilesSectionParams,
+    settingsParams: SettingsSectionParams,
+    appShortcutsParams: AppShortcutsSectionParams,
+    onWebSuggestionClick: (String) -> Unit,
+    onDeleteRecentItem: (RecentSearchEntry) -> Unit,
+    expandedCardMaxHeight: Dp,
+    showWallpaperBackground: Boolean,
+    isOverlayPresentation: Boolean,
+) {
+    SearchHistorySection(
+        items = items,
+        callingApp = contactsParams.callingApp ?: CallingApp.CALL,
+        messagingApp = contactsParams.messagingApp ?: MessagingApp.MESSAGES,
+        onRecentQueryClick = onWebSuggestionClick,
+        onContactClick = contactsParams.onContactClick,
+        onShowContactMethods = contactsParams.onShowContactMethods,
+        onCallContact = contactsParams.onCallContact,
+        onSmsContact = contactsParams.onSmsContact,
+        onContactMethodClick = contactsParams.onContactMethodClick,
+        getPrimaryContactCardAction = contactsParams.getPrimaryContactCardAction,
+        getSecondaryContactCardAction = contactsParams.getSecondaryContactCardAction,
+        onPrimaryActionLongPress = contactsParams.onPrimaryActionLongPress,
+        onSecondaryActionLongPress = contactsParams.onSecondaryActionLongPress,
+        onCustomAction = contactsParams.onCustomAction,
+        onFileClick = filesParams.onFileClick,
+        onSettingClick = settingsParams.onSettingClick,
+        onAppShortcutClick = appShortcutsParams.onShortcutClick,
+        onAppSettingClick = settingsParams.onAppSettingClick,
+        onAppSettingToggle = settingsParams.onAppSettingToggle,
+        isAppSettingToggleChecked = settingsParams.isAppSettingToggleChecked,
+        onDeleteRecentItem = onDeleteRecentItem,
+        expandedCardMaxHeight = expandedCardMaxHeight,
+        showWallpaperBackground = showWallpaperBackground,
+        isOverlayPresentation = isOverlayPresentation,
+        alwaysExpanded = true,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }

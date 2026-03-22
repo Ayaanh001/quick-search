@@ -87,6 +87,8 @@ data class SearchResultsState(
         val detectedAliasSearchSection: SearchSection? = null,
         // Recent items (shown when query is blank)
         val recentItems: List<RecentSearchItem> = emptyList(),
+        // Recently opened items filtered to the active alias section (shown when alias detected + query blank)
+        val aliasRecentItems: List<RecentSearchItem> = emptyList(),
         // Cache invalidation counters
         val nicknameUpdateVersion: Int = 0,
         val contactActionsVersion: Int = 0,

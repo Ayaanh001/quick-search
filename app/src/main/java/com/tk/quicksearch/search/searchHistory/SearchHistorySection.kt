@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import com.tk.quicksearch.R
+import com.tk.quicksearch.search.appSettings.AppSettingResult
+import com.tk.quicksearch.search.appSettings.AppSettingResultRow
 import com.tk.quicksearch.search.appShortcuts.AppShortcutRow
 import com.tk.quicksearch.search.contacts.components.ContactResultRow
 import com.tk.quicksearch.search.contacts.models.ContactCardAction
@@ -100,6 +102,9 @@ fun SearchHistorySection(
     onFileClick: (DeviceFile) -> Unit,
     onSettingClick: (DeviceSetting) -> Unit,
     onAppShortcutClick: (StaticShortcut) -> Unit,
+    onAppSettingClick: (AppSettingResult) -> Unit = {},
+    onAppSettingToggle: (AppSettingResult, Boolean) -> Unit = { _, _ -> },
+    isAppSettingToggleChecked: (AppSettingResult) -> Boolean = { false },
     onDeleteRecentItem: (RecentSearchEntry) -> Unit,
     showSearchHistoryTip: Boolean = false,
     onOpenSearchHistorySettings: () -> Unit = {},
@@ -108,13 +113,14 @@ fun SearchHistorySection(
     expandedCardMaxHeight: Dp = SearchScreenConstants.EXPANDED_CARD_MAX_HEIGHT,
     showWallpaperBackground: Boolean = false,
     isOverlayPresentation: Boolean = false,
+    alwaysExpanded: Boolean = false,
 ) {
     val overlayCardColor = LocalOverlayResultCardColor.current
     val overlayDividerColor = LocalOverlayDividerColor.current
     if (items.isEmpty()) return
-    var isExpanded by remember { mutableStateOf(false) }
+    var isExpanded by remember { mutableStateOf(alwaysExpanded) }
     val keyboardController = LocalSoftwareKeyboardController.current
-    val canExpand = items.size > 1
+    val canExpand = !alwaysExpanded && items.size > 1
     val scrollState = rememberScrollState()
     val expandedHistoryMaxHeight =
         if (isOverlayPresentation) {
@@ -183,6 +189,9 @@ fun SearchHistorySection(
                             onFileClick = onFileClick,
                             onSettingClick = onSettingClick,
                             onAppShortcutClick = onAppShortcutClick,
+                            onAppSettingClick = onAppSettingClick,
+                            onAppSettingToggle = onAppSettingToggle,
+                            isAppSettingToggleChecked = isAppSettingToggleChecked,
                             onDeleteRecentItem = onDeleteRecentItem,
                             showDivider = if (showTipBelowFirstItem) false else baseShowDivider,
                             showWallpaperBackground = showWallpaperBackground,
@@ -227,6 +236,9 @@ fun SearchHistorySection(
                             onFileClick = onFileClick,
                             onSettingClick = onSettingClick,
                             onAppShortcutClick = onAppShortcutClick,
+                            onAppSettingClick = onAppSettingClick,
+                            onAppSettingToggle = onAppSettingToggle,
+                            isAppSettingToggleChecked = isAppSettingToggleChecked,
                             onDeleteRecentItem = onDeleteRecentItem,
                             showDivider = if (showTipBelowFirstItem) false else baseShowDivider,
                             showWallpaperBackground = showWallpaperBackground,
@@ -261,7 +273,7 @@ fun SearchHistorySection(
             }
         }
 
-        if (isExpanded) {
+        if (isExpanded && !alwaysExpanded) {
             CollapseButton(
                 onClick = {
                     isExpanded = false
@@ -299,6 +311,9 @@ private fun RecentSearchItemRow(
     onFileClick: (DeviceFile) -> Unit,
     onSettingClick: (DeviceSetting) -> Unit,
     onAppShortcutClick: (StaticShortcut) -> Unit,
+    onAppSettingClick: (AppSettingResult) -> Unit,
+    onAppSettingToggle: (AppSettingResult, Boolean) -> Unit,
+    isAppSettingToggleChecked: (AppSettingResult) -> Boolean,
     onDeleteRecentItem: (RecentSearchEntry) -> Unit,
     showDivider: Boolean,
     showWallpaperBackground: Boolean,
@@ -413,6 +428,20 @@ private fun RecentSearchItemRow(
                     )
                 }
             }
+
+            is RecentSearchItem.AppSetting -> {
+                Box(modifier = Modifier.padding(settingsRowPadding())) {
+                    AppSettingResultRow(
+                        setting = item.setting,
+                        checked = isAppSettingToggleChecked(item.setting),
+                        onToggle = onAppSettingToggle,
+                        onWebSuggestionsCountChange = {},
+                        onClick = onAppSettingClick,
+                        webSuggestionsCount = 0,
+                        isPredicted = false,
+                    )
+                }
+            }
         }
 
         DropdownMenu(
@@ -467,6 +496,7 @@ private fun dividerPadding(item: RecentSearchItem) =
     when (item) {
         is RecentSearchItem.Query -> DesignTokens.SpacingLarge
         is RecentSearchItem.Setting -> SETTINGS_HORIZONTAL_PADDING.dp
+        is RecentSearchItem.AppSetting -> SETTINGS_HORIZONTAL_PADDING.dp
         else -> DesignTokens.SpacingMedium
     }
 

@@ -378,6 +378,15 @@ fun OverlayRoot(
                                                         )
                                                         handleClose()
                                                 },
+                                                onOpenAppSettingDestination = { destination ->
+                                                        handleOverlayAppSettingDestination(
+                                                                context = context,
+                                                                destination = destination,
+                                                                viewModel = viewModel,
+                                                                autoCloseOverlay = uiState.autoCloseOverlay,
+                                                                onCloseRequested = handleClose,
+                                                        )
+                                                },
                                         )
                                 }
                         }

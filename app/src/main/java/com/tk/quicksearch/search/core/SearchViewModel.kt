@@ -443,6 +443,7 @@ class SearchViewModel(
                     detectedShortcutTarget = s.detectedShortcutTarget,
                     detectedAliasSearchSection = s.detectedAliasSearchSection,
                     recentItems = s.recentItems,
+                    aliasRecentItems = s.aliasRecentItems,
                     nicknameUpdateVersion = s.nicknameUpdateVersion,
                     contactActionsVersion = s.contactActionsVersion,
             )
@@ -1626,6 +1627,7 @@ class SearchViewModel(
                                 }
                             }
                         }
+                        is RecentSearchEntry.AppSetting -> Unit
                     }
                 }
             }
@@ -1633,10 +1635,71 @@ class SearchViewModel(
         }
     }
 
+    private fun refreshAliasRecentItems(section: SearchSection?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val allOpens = userPreferences.getRecentResultOpens()
+            val filteredEntries: List<RecentSearchEntry> = when (section) {
+                SearchSection.CONTACTS -> allOpens.filterIsInstance<RecentSearchEntry.Contact>()
+                SearchSection.FILES -> allOpens.filterIsInstance<RecentSearchEntry.File>()
+                SearchSection.SETTINGS -> allOpens.filterIsInstance<RecentSearchEntry.Setting>()
+                SearchSection.APP_SHORTCUTS -> allOpens.filterIsInstance<RecentSearchEntry.AppShortcut>()
+                SearchSection.APP_SETTINGS -> allOpens.filterIsInstance<RecentSearchEntry.AppSetting>()
+                else -> {
+                    updateResultsState { it.copy(aliasRecentItems = emptyList()) }
+                    return@launch
+                }
+            }
+
+            val limited = filteredEntries.take(MAX_RECENT_ITEMS)
+
+            val contactIds = limited.filterIsInstance<RecentSearchEntry.Contact>().map { it.contactId }.toSet()
+            val fileUris = limited.filterIsInstance<RecentSearchEntry.File>().map { it.uri }.toSet()
+            val settingIds = limited.filterIsInstance<RecentSearchEntry.Setting>().map { it.id }.toSet()
+            val shortcutKeys = limited.filterIsInstance<RecentSearchEntry.AppShortcut>().map { it.shortcutKey }.toSet()
+            val appSettingIds = limited.filterIsInstance<RecentSearchEntry.AppSetting>().map { it.id }.toSet()
+
+            val contactsById = contactRepository.getContactsByIds(contactIds).associateBy { it.contactId }
+            val filesByUri = fileRepository.getFilesByUris(fileUris).associateBy { it.uri.toString() }
+            val settingsById = settingsSearchHandler.getSettingsByIds(settingIds)
+            val shortcutsByKey = appShortcutSearchHandler.getShortcutsByKeys(shortcutKeys)
+            val appSettingsById = appSettingsSearchHandler.getSettingsByIds(appSettingIds)
+
+            val pinnedContactIds = userPreferences.getPinnedContactIds()
+            val pinnedFileUris = userPreferences.getPinnedFileUris()
+            val pinnedSettingIds = userPreferences.getPinnedSettingIds()
+            val pinnedAppShortcutIds = userPreferences.getPinnedAppShortcutIds()
+
+            val items = buildList {
+                limited.forEach { entry ->
+                    when (entry) {
+                        is RecentSearchEntry.Contact -> contactsById[entry.contactId]?.let {
+                            if (entry.contactId !in pinnedContactIds) add(RecentSearchItem.Contact(entry, it))
+                        }
+                        is RecentSearchEntry.File -> filesByUri[entry.uri]?.let {
+                            if (entry.uri !in pinnedFileUris) add(RecentSearchItem.File(entry, it))
+                        }
+                        is RecentSearchEntry.Setting -> settingsById[entry.id]?.let {
+                            if (entry.id !in pinnedSettingIds) add(RecentSearchItem.Setting(entry, it))
+                        }
+                        is RecentSearchEntry.AppShortcut -> shortcutsByKey[entry.shortcutKey]?.let {
+                            if (entry.shortcutKey !in pinnedAppShortcutIds) add(RecentSearchItem.AppShortcut(entry, it))
+                        }
+                        is RecentSearchEntry.AppSetting -> appSettingsById[entry.id]?.let {
+                            add(RecentSearchItem.AppSetting(entry, it))
+                        }
+                        is RecentSearchEntry.Query -> Unit
+                    }
+                }
+            }
+            updateResultsState { it.copy(aliasRecentItems = items) }
+        }
+    }
+
     fun deleteRecentItem(entry: RecentSearchEntry) {
         viewModelScope.launch(Dispatchers.IO) {
             userPreferences.deleteRecentItem(entry)
             refreshRecentItems()
+            refreshAliasRecentItems(lockedAliasSearchSection)
         }
     }
 
@@ -2321,6 +2384,7 @@ class SearchViewModel(
             }
             // Load recent queries when query is empty
             refreshRecentItems()
+            refreshAliasRecentItems(lockedAliasSearchSection)
             return
         }
 
@@ -2417,6 +2481,7 @@ class SearchViewModel(
                     calendarEvents =
                             if (showingTool || shouldClearSecondaryResults) emptyList()
                             else state.calendarEvents,
+                    aliasRecentItems = emptyList(),
             )
         }
 
@@ -3298,6 +3363,13 @@ class SearchViewModel(
     fun trackRecentSettingTap(settingId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             userPreferences.addRecentItem(RecentSearchEntry.Setting(settingId))
+        }
+    }
+
+    fun trackRecentAppSettingTap(settingId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            userPreferences.addRecentItem(RecentSearchEntry.AppSetting(settingId))
+            refreshAliasRecentItems(lockedAliasSearchSection)
         }
     }
 

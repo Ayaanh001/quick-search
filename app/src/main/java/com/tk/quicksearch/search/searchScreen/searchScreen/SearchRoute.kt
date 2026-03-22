@@ -318,6 +318,7 @@ fun SearchRoute(
     }
 
     val onAppSettingToggle: (AppSettingResult, Boolean) -> Unit = { setting, enabled ->
+        viewModel.trackRecentAppSettingTap(setting.id)
         when (setting.toggleKey) {
             AppSettingsToggleKey.OVERLAY_MODE -> {
                 viewModel.setOverlayModeEnabled(enabled)
@@ -388,6 +389,7 @@ fun SearchRoute(
     }
 
     val onAppSettingClick: (AppSettingResult) -> Unit = appSettingClick@{ setting ->
+        viewModel.trackRecentAppSettingTap(setting.id)
         if (setting.action != AppSettingResultAction.NAVIGATE) return@appSettingClick
         setting.destination?.let { destination ->
             onOpenAppSettingDestination(destination)

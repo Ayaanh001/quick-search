@@ -431,37 +431,11 @@ private fun NavigationContent(
                         navigateToSettings(settingsDetailType ?: lastOpenedSettingsDetail)
                     },
                     onOpenAppSettingDestination = { destination ->
+                        destination.toSettingsDetailTypeOrNull()?.let { detailType ->
+                            navigateToSettings(detailType)
+                            return@SearchRoute
+                        }
                         when (destination) {
-                            AppSettingsDestination.APPEARANCE ->
-                                navigateToSettings(SettingsDetailType.APPEARANCE)
-                            AppSettingsDestination.SEARCH_RESULTS ->
-                                navigateToSettings(SettingsDetailType.SEARCH_RESULTS)
-                            AppSettingsDestination.SEARCH_ENGINES ->
-                                navigateToSettings(SettingsDetailType.SEARCH_ENGINES)
-                            AppSettingsDestination.TOOLS ->
-                                navigateToSettings(SettingsDetailType.TOOLS)
-                            AppSettingsDestination.LAUNCH_OPTIONS ->
-                                navigateToSettings(SettingsDetailType.LAUNCH_OPTIONS)
-                            AppSettingsDestination.MORE_OPTIONS ->
-                                navigateToSettings(SettingsDetailType.MORE_OPTIONS)
-                            AppSettingsDestination.PERMISSIONS ->
-                                navigateToSettings(SettingsDetailType.PERMISSIONS)
-                            AppSettingsDestination.APP_MANAGEMENT ->
-                                navigateToSettings(SettingsDetailType.APP_MANAGEMENT)
-                            AppSettingsDestination.APP_SHORTCUTS ->
-                                navigateToSettings(SettingsDetailType.APP_SHORTCUTS)
-                            AppSettingsDestination.CALLS_TEXTS ->
-                                navigateToSettings(SettingsDetailType.CALLS_TEXTS)
-                            AppSettingsDestination.FILES ->
-                                navigateToSettings(SettingsDetailType.FILES)
-                            AppSettingsDestination.DEVICE_SETTINGS ->
-                                navigateToSettings(SettingsDetailType.DEVICE_SETTINGS)
-                            AppSettingsDestination.EXCLUDED_ITEMS ->
-                                navigateToSettings(SettingsDetailType.EXCLUDED_ITEMS)
-                            AppSettingsDestination.DIRECT_SEARCH_CONFIGURE ->
-                                navigateToSettings(SettingsDetailType.DIRECT_SEARCH_CONFIGURE)
-                            AppSettingsDestination.CALENDAR_EVENTS ->
-                                navigateToSettings(SettingsDetailType.CALENDAR_EVENTS)
                             AppSettingsDestination.RELOAD_APPS ->
                                 viewModel.refreshApps(showToast = true)
                             AppSettingsDestination.RELOAD_CONTACTS ->
@@ -474,10 +448,6 @@ private fun NavigationContent(
                                 launchRateQuickSearch(context)
                             AppSettingsDestination.DEVELOPMENT ->
                                 launchDevelopmentPage(context)
-                            AppSettingsDestination.FEATURES_LIST ->
-                                navigateToSettings(SettingsDetailType.FEATURES_LIST)
-                            AppSettingsDestination.OPEN_SOURCE_LICENSES ->
-                                navigateToSettings(SettingsDetailType.OPEN_SOURCE_LICENSES)
                             AppSettingsDestination.SET_DEFAULT_ASSISTANT -> {
                                 try {
                                     context.startActivity(Intent(android.provider.Settings.ACTION_VOICE_INPUT_SETTINGS))
@@ -493,10 +463,7 @@ private fun NavigationContent(
                                 com.tk.quicksearch.widgets.utils.requestAddQuickSearchWidget(context)
                             AppSettingsDestination.ADD_QUICK_SETTINGS_TILE ->
                                 com.tk.quicksearch.tile.requestAddQuickSearchTile(context)
-                            AppSettingsDestination.UNIT_CONVERTER_INFO ->
-                                navigateToSettings(SettingsDetailType.UNIT_CONVERTER_INFO)
-                            AppSettingsDestination.DATE_CALCULATOR_INFO ->
-                                navigateToSettings(SettingsDetailType.DATE_CALCULATOR_INFO)
+                            else -> Unit
                         }
                     },
                     onOpenSearchHistorySettings = {

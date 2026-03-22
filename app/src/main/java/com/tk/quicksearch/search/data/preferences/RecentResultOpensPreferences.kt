@@ -34,10 +34,21 @@ class RecentResultOpensPreferences(
         )
     }
 
+    fun deleteRecentResultOpen(entry: RecentSearchEntry) {
+        val currentItems = getRecentResultOpens().toMutableList()
+        currentItems.removeAll { it.stableKey == entry.stableKey }
+        PreferenceUtils.setStringListPref(
+            sessionPrefs,
+            BasePreferences.KEY_RECENT_RESULT_OPENS,
+            currentItems.map { it.toJsonString() },
+        )
+    }
+
     private fun isRankableEntry(entry: RecentSearchEntry): Boolean =
         entry is RecentSearchEntry.Contact ||
             entry is RecentSearchEntry.File ||
             entry is RecentSearchEntry.Setting ||
+            entry is RecentSearchEntry.AppSetting ||
             entry is RecentSearchEntry.AppShortcut
 
     companion object {

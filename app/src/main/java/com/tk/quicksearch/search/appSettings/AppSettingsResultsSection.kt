@@ -167,7 +167,7 @@ fun AppSettingsResultsSection(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun AppSettingResultRow(
+internal fun AppSettingResultRow(
     setting: AppSettingResult,
     checked: Boolean,
     onToggle: (AppSettingResult, Boolean) -> Unit,

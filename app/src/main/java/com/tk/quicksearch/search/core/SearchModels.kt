@@ -470,6 +470,7 @@ data class SearchUiState(
         val hasDismissedSearchHistoryTip: Boolean = false,
         // Recent items
         val recentItems: List<RecentSearchItem> = emptyList(),
+        val aliasRecentItems: List<RecentSearchItem> = emptyList(),
         val recentQueriesEnabled: Boolean = true,
         // Usage permission banner
         val shouldShowUsagePermissionBanner: Boolean = false,
@@ -533,6 +534,7 @@ fun SearchUiState(
                 detectedShortcutTarget = results.detectedShortcutTarget,
                 detectedAliasSearchSection = results.detectedAliasSearchSection,
                 recentItems = results.recentItems,
+                aliasRecentItems = results.aliasRecentItems,
                 nicknameUpdateVersion = results.nicknameUpdateVersion,
                 contactActionsVersion = results.contactActionsVersion,
                 // ── SearchPermissionState ─────────────────────────────────────────

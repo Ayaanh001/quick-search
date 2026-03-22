@@ -11,6 +11,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -77,6 +79,7 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.tk.quicksearch.R
+import com.tk.quicksearch.search.apps.rememberAppIcon
 import com.tk.quicksearch.search.core.SearchEngine
 import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.core.SearchToolType
@@ -658,21 +661,45 @@ private fun SearchBarLeadingIcon(
         }
 
         is LeadingIconState.Section -> {
-            Icon(
-                imageVector =
-                    when (iconState.section) {
-                        SearchSection.APPS -> Icons.Rounded.Apps
-                        SearchSection.APP_SHORTCUTS -> Icons.AutoMirrored.Rounded.Shortcut
-                        SearchSection.CONTACTS -> Icons.Rounded.Person
-                        SearchSection.FILES -> Icons.AutoMirrored.Rounded.InsertDriveFile
-                        SearchSection.SETTINGS -> Icons.Rounded.Settings
-                        SearchSection.CALENDAR -> Icons.Rounded.CalendarMonth
-                        SearchSection.APP_SETTINGS -> Icons.Rounded.Settings
-                    },
-                contentDescription = stringResource(R.string.desc_search_icon),
-                tint = iconTint,
-                modifier = Modifier.padding(start = DesignTokens.SpacingXSmall),
-            )
+            if (iconState.section == SearchSection.APP_SETTINGS) {
+                val appIconResult = rememberAppIcon(
+                    packageName = "com.tk.quicksearch",
+                    iconPackPackage = null,
+                )
+                val bitmap = appIconResult.bitmap
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap,
+                        contentDescription = stringResource(R.string.desc_search_icon),
+                        modifier = Modifier
+                            .padding(start = DesignTokens.SpacingSmall)
+                            .size(DesignTokens.IconSize),
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Rounded.Settings,
+                        contentDescription = stringResource(R.string.desc_search_icon),
+                        tint = iconTint,
+                        modifier = Modifier.padding(start = DesignTokens.SpacingXSmall),
+                    )
+                }
+            } else {
+                Icon(
+                    imageVector =
+                        when (iconState.section) {
+                            SearchSection.APPS -> Icons.Rounded.Apps
+                            SearchSection.APP_SHORTCUTS -> Icons.AutoMirrored.Rounded.Shortcut
+                            SearchSection.CONTACTS -> Icons.Rounded.Person
+                            SearchSection.FILES -> Icons.AutoMirrored.Rounded.InsertDriveFile
+                            SearchSection.SETTINGS -> Icons.Rounded.Settings
+                            SearchSection.CALENDAR -> Icons.Rounded.CalendarMonth
+                            SearchSection.APP_SETTINGS -> Icons.Rounded.Settings
+                        },
+                    contentDescription = stringResource(R.string.desc_search_icon),
+                    tint = iconTint,
+                    modifier = Modifier.padding(start = DesignTokens.SpacingXSmall),
+                )
+            }
         }
 
         LeadingIconState.Search -> {

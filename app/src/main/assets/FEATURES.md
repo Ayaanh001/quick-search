@@ -65,6 +65,7 @@ Add aliases at the start of your query to quickly let the app know what you want
 - **Search Engine Aliases** - Assign aliases (like `ggl` for Google) to quickly trigger any search engine just by typing your alias at the start or end of the query. (When you add an alias at the end of your query, hit space to trigger it.)
 - **Calculator Alias** - Set a dedicated alias that switches the search bar into calculator mode on demand.
 - **Date & Time Calculator Alias** - Set a dedicated alias that switches the search bar into date & time calculator mode on demand.
+- When alias is detected for any search result type, but the query is empty, recently opened items for that particular search type will appear. For calendar events, upcoming events will be displayed.
 
 ---
 

@@ -752,8 +752,10 @@ class UserAppPreferences(
 
     fun clearRecentQueries() = recentSearchesPreferences.clearRecentQueries()
 
-    fun deleteRecentItem(entry: com.tk.quicksearch.search.searchHistory.RecentSearchEntry) =
-            recentSearchesPreferences.deleteRecentItem(entry)
+    fun deleteRecentItem(entry: com.tk.quicksearch.search.searchHistory.RecentSearchEntry) {
+        recentSearchesPreferences.deleteRecentItem(entry)
+        recentResultOpensPreferences.deleteRecentResultOpen(entry)
+    }
 
     fun areRecentQueriesEnabled(): Boolean = recentSearchesPreferences.areRecentQueriesEnabled()
 

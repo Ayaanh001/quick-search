@@ -1,5 +1,6 @@
 package com.tk.quicksearch.search.searchHistory
 
+import com.tk.quicksearch.search.appSettings.AppSettingResult
 import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
 import com.tk.quicksearch.search.deviceSettings.DeviceSetting
 import com.tk.quicksearch.search.models.ContactInfo
@@ -40,6 +41,12 @@ sealed class RecentSearchEntry {
         override val stableKey: String = "app_shortcut:$shortcutKey"
     }
 
+    data class AppSetting(
+        val id: String,
+    ) : RecentSearchEntry() {
+        override val stableKey: String = "app_setting:$id"
+    }
+
     fun toJsonString(): String {
         val json = JSONObject()
         when (this) {
@@ -67,6 +74,11 @@ sealed class RecentSearchEntry {
                 json.put(FIELD_TYPE, TYPE_APP_SHORTCUT)
                 json.put(FIELD_SHORTCUT_KEY, shortcutKey)
             }
+
+            is AppSetting -> {
+                json.put(FIELD_TYPE, TYPE_APP_SETTING)
+                json.put(FIELD_SETTING_ID, id)
+            }
         }
         return json.toString()
     }
@@ -84,6 +96,7 @@ sealed class RecentSearchEntry {
         private const val TYPE_FILE = "file"
         private const val TYPE_SETTING = "setting"
         private const val TYPE_APP_SHORTCUT = "app_shortcut"
+        private const val TYPE_APP_SETTING = "app_setting"
 
         fun fromRaw(raw: String): RecentSearchEntry? {
             val trimmed = raw.trim()
@@ -127,6 +140,13 @@ sealed class RecentSearchEntry {
                                 ?.let { AppShortcut(it) }
                         }
 
+                        TYPE_APP_SETTING -> {
+                            json
+                                .optString(FIELD_SETTING_ID)
+                                .takeIf { it.isNotBlank() }
+                                ?.let { AppSetting(it) }
+                        }
+
                         else -> {
                             null
                         }
@@ -163,5 +183,10 @@ sealed class RecentSearchItem(
     data class AppShortcut(
         override val entry: RecentSearchEntry.AppShortcut,
         val shortcut: StaticShortcut,
+    ) : RecentSearchItem(entry)
+
+    data class AppSetting(
+        override val entry: RecentSearchEntry.AppSetting,
+        val setting: AppSettingResult,
     ) : RecentSearchItem(entry)
 }
