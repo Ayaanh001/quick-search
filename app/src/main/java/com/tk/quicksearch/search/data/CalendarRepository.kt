@@ -87,6 +87,21 @@ class CalendarRepository(
         return queryEventsAroundNow(now = System.currentTimeMillis(), limit = limit)
     }
 
+    fun getUpcomingEventsSortedAscending(limit: Int): List<CalendarEventInfo> {
+        if (limit <= 0 || !hasPermission()) return emptyList()
+        val now = System.currentTimeMillis()
+        val windowEnd = now + (MILLIS_PER_YEAR * FUTURE_WINDOW_YEARS)
+        val rows = queryInstancesInWindow(now, windowEnd, limit * 4, eventIds = null)
+        if (rows.isEmpty()) return emptyList()
+        return rows
+            .filter { it.startMillis >= now }
+            .groupBy { it.eventId }
+            .mapValues { (_, instances) -> instances.minByOrNull { it.startMillis }!! }
+            .values
+            .sortedBy { it.startMillis }
+            .take(limit)
+    }
+
     fun getEventInstancesAroundNow(limit: Int = 2000): List<CalendarEventInfo> {
         if (limit <= 0 || !hasPermission()) return emptyList()
         return queryEventInstancesAroundNow(now = System.currentTimeMillis(), limit = limit)

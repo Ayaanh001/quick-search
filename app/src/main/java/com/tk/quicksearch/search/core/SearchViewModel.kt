@@ -1637,6 +1637,14 @@ class SearchViewModel(
 
     private fun refreshAliasRecentItems(section: SearchSection?) {
         viewModelScope.launch(Dispatchers.IO) {
+            if (section == SearchSection.CALENDAR) {
+                val excludedEventIds = userPreferences.getExcludedCalendarEventIds()
+                val upcoming = calendarRepository.getUpcomingEventsSortedAscending(limit = MAX_RECENT_ITEMS)
+                    .filterNot { excludedEventIds.contains(it.eventId) }
+                updateUiState { it.copy(calendarEvents = upcoming, aliasRecentItems = emptyList()) }
+                return@launch
+            }
+
             val allOpens = userPreferences.getRecentResultOpens()
             val filteredEntries: List<RecentSearchEntry> = when (section) {
                 SearchSection.CONTACTS -> allOpens.filterIsInstance<RecentSearchEntry.Contact>()

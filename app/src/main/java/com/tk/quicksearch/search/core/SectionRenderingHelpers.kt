@@ -340,7 +340,8 @@ fun rememberSectionRenderContext(
         shouldRenderCalendar =
             when (state.calendarSectionState) {
                 is CalendarSectionVisibility.ShowingResults -> {
-                    renderingState.hasPinnedCalendarEvents
+                    renderingState.hasPinnedCalendarEvents ||
+                        state.detectedAliasSearchSection == SearchSection.CALENDAR
                 }
 
                 else -> false
@@ -411,7 +412,7 @@ fun rememberSectionRenderContext(
                 renderingState.pinnedAppShortcuts
             },
         calendarEventsList =
-            if (isSearching) {
+            if (isSearching || state.detectedAliasSearchSection == SearchSection.CALENDAR) {
                 renderingState.calendarEvents
             } else {
                 renderingState.pinnedCalendarEvents
