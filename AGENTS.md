@@ -96,7 +96,7 @@ Use it as the primary implementation playbook for building new features and upda
 - `search/overlay/OverlayActivity.kt`
 - `search/overlay/OverlayRoot.kt`
 - `search/overlay/OverlayModeController.kt`
-- Overlay gradient utils: `search/searchScreen/OverlayGradientThemeUtils.kt`
+- App theme color utils: `search/searchScreen/AppThemeUtils.kt`
 
 ### Settings
 

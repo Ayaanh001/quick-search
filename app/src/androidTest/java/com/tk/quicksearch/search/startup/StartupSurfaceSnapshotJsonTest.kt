@@ -1,7 +1,7 @@
 package com.tk.quicksearch.search.startup
 
 import com.tk.quicksearch.search.core.BackgroundSource
-import com.tk.quicksearch.search.core.OverlayGradientTheme
+import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.search.models.AppInfo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -18,7 +18,7 @@ class StartupSurfaceSnapshotJsonTest {
                 showWallpaperBackground = true,
                 wallpaperBackgroundAlpha = 0.42f,
                 wallpaperBlurRadius = 18f,
-                overlayGradientTheme = OverlayGradientTheme.AURORA,
+                appTheme = AppTheme.AURORA,
                 overlayThemeIntensity = 0.6f,
                 customImageUri = "content://image/test",
                 startupBackgroundPreviewPath = "/tmp/preview.jpg",

@@ -54,9 +54,9 @@ import com.tk.quicksearch.search.searchScreen.AppsSectionParams
 import com.tk.quicksearch.search.searchScreen.CalendarSectionParams
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.search.searchScreen.hasAnySearchResults
-import com.tk.quicksearch.search.searchScreen.overlayResultCardColor
-import com.tk.quicksearch.search.searchScreen.overlayDividerColor
-import com.tk.quicksearch.search.searchScreen.overlayActionColor
+import com.tk.quicksearch.search.searchScreen.appThemeResultCardColor
+import com.tk.quicksearch.search.searchScreen.appThemeDividerColor
+import com.tk.quicksearch.search.searchScreen.appThemeActionColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayDividerColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayActionColor
@@ -155,8 +155,8 @@ fun SearchContentArea(
     val isDarkMode = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val overlayCardColor =
         if (useOverlayThemeTints) {
-            overlayResultCardColor(
-                theme = state.overlayGradientTheme,
+            appThemeResultCardColor(
+                theme = state.appTheme,
                 isDarkMode = isDarkMode,
                 intensity = state.overlayThemeIntensity,
             )
@@ -165,8 +165,8 @@ fun SearchContentArea(
         }
     val overlayDividerTint =
         if (useOverlayThemeTints) {
-            overlayDividerColor(
-                theme = state.overlayGradientTheme,
+            appThemeDividerColor(
+                theme = state.appTheme,
                 isDarkMode = isDarkMode,
                 intensity = state.overlayThemeIntensity,
             )
@@ -175,8 +175,8 @@ fun SearchContentArea(
         }
     val overlayActionTint =
         if (useOverlayThemeTints) {
-            overlayActionColor(
-                theme = state.overlayGradientTheme,
+            appThemeActionColor(
+                theme = state.appTheme,
                 isDarkMode = isDarkMode,
                 intensity = state.overlayThemeIntensity,
             )
@@ -412,6 +412,7 @@ fun SearchContentArea(
 
             if (renderingState.expandedSection != ExpandedSection.NONE && !isSectionAliasMode) {
                 CollapseButton(
+                    showWallpaperBackground = state.showWallpaperBackground,
                     onClick = {
                         when (renderingState.expandedSection) {
                             ExpandedSection.FILES -> {

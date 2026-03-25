@@ -5,7 +5,7 @@ import com.tk.quicksearch.search.core.CallingApp
 import com.tk.quicksearch.search.core.CustomSearchEngine
 import com.tk.quicksearch.search.core.MessagingApp
 import com.tk.quicksearch.search.core.BackgroundSource
-import com.tk.quicksearch.search.core.OverlayGradientTheme
+import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.search.core.SearchEngine
 import com.tk.quicksearch.search.data.preferences.*
 import com.tk.quicksearch.search.models.FileType
@@ -580,10 +580,10 @@ class UserAppPreferences(
 
     fun setWallpaperBlurRadius(radius: Float) = uiPreferences.setWallpaperBlurRadius(radius)
 
-    fun getOverlayGradientTheme(): OverlayGradientTheme = uiPreferences.getOverlayGradientTheme()
+    fun getAppTheme(): AppTheme = uiPreferences.getAppTheme()
 
-    fun setOverlayGradientTheme(theme: OverlayGradientTheme) =
-            uiPreferences.setOverlayGradientTheme(theme)
+    fun setAppTheme(theme: AppTheme) =
+            uiPreferences.setAppTheme(theme)
 
     fun getAppThemeMode(): com.tk.quicksearch.search.core.AppThemeMode = uiPreferences.getAppThemeMode()
 

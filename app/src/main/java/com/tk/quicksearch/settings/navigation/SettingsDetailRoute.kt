@@ -287,7 +287,7 @@ fun SettingsDetailRoute(
                     onSetCallingApp = viewModel::setCallingApp,
                     onWallpaperBackgroundAlphaChange = viewModel::setWallpaperBackgroundAlpha,
                     onWallpaperBlurRadiusChange = viewModel::setWallpaperBlurRadius,
-                    onSetOverlayGradientTheme = viewModel::setOverlayGradientTheme,
+                    onSetAppTheme = viewModel::setAppTheme,
                     onOverlayThemeIntensityChange = viewModel::setOverlayThemeIntensity,
                     onSetAppThemeMode = viewModel::setAppThemeMode,
                     onFontScaleMultiplierChange = viewModel::setFontScaleMultiplier,

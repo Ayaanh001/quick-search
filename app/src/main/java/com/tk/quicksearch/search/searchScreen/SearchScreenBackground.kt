@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tk.quicksearch.search.core.OverlayGradientTheme
+import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.search.data.preferences.UiPreferences
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
@@ -38,7 +38,7 @@ internal fun SearchScreenBackground(
     animateBlurRadius: Boolean = true,
     fallbackBackgroundAlpha: Float = 1f,
     useGradientFallback: Boolean = false,
-    overlayGradientTheme: OverlayGradientTheme = OverlayGradientTheme.MONOCHROME,
+    appTheme: AppTheme = AppTheme.MONOCHROME,
     overlayThemeIntensity: Float = UiPreferences.DEFAULT_OVERLAY_THEME_INTENSITY,
     wallpaperFixedHeight: Dp? = null,
     modifier: Modifier = Modifier,
@@ -99,8 +99,8 @@ internal fun SearchScreenBackground(
                 val fallbackGradientBrush =
                     Brush.linearGradient(
                         colors =
-                            overlayGradientColors(
-                                theme = overlayGradientTheme,
+                            AppThemeColors(
+                                theme = appTheme,
                                 isDarkMode = isDarkMode,
                                 alpha = fallbackAlpha,
                                 intensity = overlayThemeIntensity,

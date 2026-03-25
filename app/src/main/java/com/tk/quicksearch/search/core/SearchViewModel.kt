@@ -142,9 +142,9 @@ class SearchViewModel(
                     wallpaperBlurRadius =
                             startupSnapshot?.wallpaperBlurRadius
                                     ?: startupPreferencesReader.getWallpaperBlurRadius(),
-                    overlayGradientTheme =
-                            startupSnapshot?.overlayGradientTheme
-                                    ?: startupPreferencesReader.getOverlayGradientTheme(),
+                    appTheme =
+                            startupSnapshot?.appTheme
+                                    ?: startupPreferencesReader.getAppTheme(),
                     overlayThemeIntensity =
                             sanitizeOverlayThemeIntensity(
                                     startupSnapshot?.overlayThemeIntensity
@@ -505,7 +505,7 @@ class SearchViewModel(
                     showWallpaperBackground = s.showWallpaperBackground,
                     wallpaperBackgroundAlpha = s.wallpaperBackgroundAlpha,
                     wallpaperBlurRadius = s.wallpaperBlurRadius,
-                    overlayGradientTheme = s.overlayGradientTheme,
+                    appTheme = s.appTheme,
                     overlayThemeIntensity = s.overlayThemeIntensity,
                     appThemeMode = s.appThemeMode,
                     backgroundSource = s.backgroundSource,
@@ -780,7 +780,7 @@ class SearchViewModel(
     private var appIconShape: AppIconShape = AppIconShape.DEFAULT
     private var wallpaperBackgroundAlpha: Float = UiPreferences.DEFAULT_WALLPAPER_BACKGROUND_ALPHA
     private var wallpaperBlurRadius: Float = UiPreferences.DEFAULT_WALLPAPER_BLUR_RADIUS
-    private var overlayGradientTheme: OverlayGradientTheme = OverlayGradientTheme.MONOCHROME
+    private var appTheme: AppTheme = AppTheme.MONOCHROME
     private var overlayThemeIntensity: Float = UiPreferences.DEFAULT_OVERLAY_THEME_INTENSITY
     private var fontScaleMultiplier: Float = UiPreferences.DEFAULT_FONT_SCALE_MULTIPLIER
     private var backgroundSource: BackgroundSource = BackgroundSource.THEME
@@ -976,7 +976,7 @@ class SearchViewModel(
         autoCloseOverlay = startupPrefs.autoCloseOverlay
         wallpaperBackgroundAlpha = startupPrefs.wallpaperBackgroundAlpha
         wallpaperBlurRadius = startupPrefs.wallpaperBlurRadius
-        overlayGradientTheme = startupPrefs.overlayGradientTheme
+        appTheme = startupPrefs.appTheme
         overlayThemeIntensity = sanitizeOverlayThemeIntensity(startupPrefs.overlayThemeIntensity)
         backgroundSource = startupPrefs.backgroundSource
         customImageUri = startupPrefs.customImageUri
@@ -1005,7 +1005,7 @@ class SearchViewModel(
                         showWallpaperBackground = backgroundSource != BackgroundSource.THEME,
                         wallpaperBackgroundAlpha = wallpaperBackgroundAlpha,
                         wallpaperBlurRadius = wallpaperBlurRadius,
-                        overlayGradientTheme = overlayGradientTheme,
+                        appTheme = appTheme,
                         overlayThemeIntensity = overlayThemeIntensity,
                         backgroundSource = backgroundSource,
                         customImageUri = customImageUri,
@@ -1101,7 +1101,7 @@ class SearchViewModel(
         appIconShape = prefs.appIconShape
         wallpaperBackgroundAlpha = prefs.wallpaperBackgroundAlpha
         wallpaperBlurRadius = prefs.wallpaperBlurRadius
-        overlayGradientTheme = prefs.overlayGradientTheme
+        appTheme = prefs.appTheme
         overlayThemeIntensity = sanitizeOverlayThemeIntensity(prefs.overlayThemeIntensity)
         fontScaleMultiplier = sanitizeFontScaleMultiplier(prefs.fontScaleMultiplier)
         backgroundSource = prefs.backgroundSource
@@ -1124,7 +1124,7 @@ class SearchViewModel(
                     showWallpaperBackground = backgroundSource != BackgroundSource.THEME,
                     wallpaperBackgroundAlpha = wallpaperBackgroundAlpha,
                     wallpaperBlurRadius = wallpaperBlurRadius,
-                    overlayGradientTheme = overlayGradientTheme,
+                    appTheme = appTheme,
                     overlayThemeIntensity = overlayThemeIntensity,
                     fontScaleMultiplier = fontScaleMultiplier,
                     backgroundSource = backgroundSource,
@@ -3152,12 +3152,12 @@ class SearchViewModel(
         }
     }
 
-    fun setOverlayGradientTheme(theme: OverlayGradientTheme) {
+    fun setAppTheme(theme: AppTheme) {
         viewModelScope.launch(Dispatchers.IO) {
-            if (overlayGradientTheme == theme) return@launch
-            userPreferences.setOverlayGradientTheme(theme)
-            overlayGradientTheme = theme
-            updateConfigState { it.copy(overlayGradientTheme = theme) }
+            if (appTheme == theme) return@launch
+            userPreferences.setAppTheme(theme)
+            appTheme = theme
+            updateConfigState { it.copy(appTheme = theme) }
             saveStartupSurfaceSnapshotAsync(allowDuringQuery = true)
         }
     }
@@ -4130,7 +4130,7 @@ class SearchViewModel(
                     showWallpaperBackground = config.showWallpaperBackground,
                     wallpaperBackgroundAlpha = config.wallpaperBackgroundAlpha,
                     wallpaperBlurRadius = config.wallpaperBlurRadius,
-                    overlayGradientTheme = config.overlayGradientTheme,
+                    appTheme = config.appTheme,
                     overlayThemeIntensity = config.overlayThemeIntensity,
                     customImageUri = config.customImageUri,
                     startupBackgroundPreviewPath = previewPath,

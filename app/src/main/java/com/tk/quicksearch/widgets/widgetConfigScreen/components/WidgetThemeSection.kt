@@ -38,8 +38,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.search.core.OverlayGradientTheme
-import com.tk.quicksearch.search.searchScreen.overlayGradientColors
+import com.tk.quicksearch.search.core.AppTheme
+import com.tk.quicksearch.search.searchScreen.AppThemeColors
 import com.tk.quicksearch.widgets.WidgetConfigScreen.components.ThemeChoiceSegmentedButtonRow
 import com.tk.quicksearch.widgets.utils.WidgetConfigConstants
 import com.tk.quicksearch.widgets.utils.WidgetPreferences
@@ -55,15 +55,15 @@ fun WidgetThemeSection(
         remember {
             listOf(
                 WidgetBackgroundThemeOption(
-                    overlayTheme = OverlayGradientTheme.FOREST,
+                    appTheme = AppTheme.FOREST,
                     labelRes = R.string.settings_overlay_theme_forest,
                 ),
                 WidgetBackgroundThemeOption(
-                    overlayTheme = OverlayGradientTheme.AURORA,
+                    appTheme = AppTheme.AURORA,
                     labelRes = R.string.settings_overlay_theme_aurora,
                 ),
                 WidgetBackgroundThemeOption(
-                    overlayTheme = OverlayGradientTheme.SUNSET,
+                    appTheme = AppTheme.SUNSET,
                     labelRes = R.string.settings_overlay_theme_sunset,
                 ),
             )
@@ -93,8 +93,8 @@ fun WidgetThemeSection(
         ) {
             themeOptions.forEach { option ->
                 val previewColors =
-                    overlayGradientColors(
-                        theme = option.overlayTheme,
+                    AppThemeColors(
+                        theme = option.appTheme,
                         isDarkMode = isDarkMode,
                     )
                 val selectedArgb = previewColors.first().toArgb()
@@ -112,8 +112,8 @@ fun WidgetThemeSection(
             val isCustomSelected =
                 state.backgroundColor != null &&
                     themeOptions.none { option ->
-                        overlayGradientColors(
-                            theme = option.overlayTheme,
+                        AppThemeColors(
+                            theme = option.appTheme,
                             isDarkMode = isDarkMode,
                         ).first().toArgb() == state.backgroundColor
                     }
@@ -260,6 +260,6 @@ private fun CustomBackgroundColorDialog(
 }
 
 private data class WidgetBackgroundThemeOption(
-    val overlayTheme: OverlayGradientTheme,
+    val appTheme: AppTheme,
     val labelRes: Int,
 )

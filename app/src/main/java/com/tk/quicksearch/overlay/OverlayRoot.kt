@@ -43,7 +43,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.app.navigation.SettingsNavigationMemory
 import com.tk.quicksearch.search.core.BackgroundSource
-import com.tk.quicksearch.search.core.OverlayGradientTheme
+import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.search.core.SearchViewModel
 import com.tk.quicksearch.search.searchScreen.ExcludeUndoSnackbarHost
 import com.tk.quicksearch.search.searchScreen.SearchRoute
@@ -303,11 +303,11 @@ fun OverlayRoot(
                                                         uiState.backgroundSource ==
                                                                         BackgroundSource.THEME ||
                                                                 useMonoThemeFallback,
-                                                overlayGradientTheme =
+                                                appTheme =
                                                         if (useMonoThemeFallback) {
-                                                                OverlayGradientTheme.MONOCHROME
+                                                                AppTheme.MONOCHROME
                                                         } else {
-                                                                uiState.overlayGradientTheme
+                                                                uiState.appTheme
                                                         },
                                                 overlayThemeIntensity =
                                                         uiState.overlayThemeIntensity,

@@ -10,6 +10,9 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
+/** Frosted card fill in light mode (wallpaper / theme), mirrors dark mode's ~0.4f black scrim. */
+internal const val LightResultCardFrostAlpha = 0.72f
+
 /**
  * Theme-aware app-specific color tokens.
  *
@@ -108,7 +111,7 @@ internal val LightQuickSearchAppColorPalette =
         actionCustom = Color(0xFF607D8B),
         actionView = Color(0xFF9E9E9E),
         wallpaperOverlayTint = Color.White,
-        resultCardWallpaperBackground = Color.White,
+        resultCardWallpaperBackground = Color.White.copy(alpha = LightResultCardFrostAlpha),
         compactSectionBackground = Color.White.copy(alpha = 0.5f),
     )
 
@@ -531,16 +534,27 @@ object AppColors {
      * When disabled, uses standard Material Design surface container color.
      */
     @Composable
+    fun getResultCardContainerColor(showWallpaperBackground: Boolean): Color {
+        if (showWallpaperBackground) {
+            return ResultCardWallpaperBackground
+        }
+        val themeCardColor = LocalSearchColorTheme.current?.cardBackground
+        val fallback =
+            if (!LocalAppIsDarkTheme.current) {
+                MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.90f)
+            } else {
+                MaterialTheme.colorScheme.surfaceContainer
+            }
+        return themeCardColor ?: fallback
+    }
+
+    @Composable
     fun getCardColors(showWallpaperBackground: Boolean): CardColors =
         if (showWallpaperBackground) {
-            CardDefaults.cardColors(containerColor = ResultCardWallpaperBackground)
+            CardDefaults.cardColors(containerColor = getResultCardContainerColor(true))
         } else {
-            val themeCardColor = LocalSearchColorTheme.current?.cardBackground
-            val fallback =
-                if (!LocalAppIsDarkTheme.current) Color.White
-                else MaterialTheme.colorScheme.surfaceContainer
             CardDefaults.elevatedCardColors(
-                containerColor = themeCardColor ?: fallback,
+                containerColor = getResultCardContainerColor(false),
             )
         }
 

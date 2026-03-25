@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.IconPackInfo
-import com.tk.quicksearch.search.core.OverlayGradientTheme
+import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.settings.AppearanceSettings.FontSizeCard
 import com.tk.quicksearch.settings.AppearanceSettings.IconPackPickerDialog
 import com.tk.quicksearch.settings.AppearanceSettings.CombinedLayoutIconCard
@@ -34,10 +34,10 @@ fun AppearanceSettingsSection(
         wallpaperBlurRadius: Float,
         onWallpaperBackgroundAlphaChange: (Float) -> Unit,
         onWallpaperBlurRadiusChange: (Float) -> Unit,
-        overlayGradientTheme: OverlayGradientTheme,
+        appTheme: AppTheme,
         overlayThemeIntensity: Float,
         fontScaleMultiplier: Float,
-        onSetOverlayGradientTheme: (OverlayGradientTheme) -> Unit,
+        onSetAppTheme: (AppTheme) -> Unit,
         onOverlayThemeIntensityChange: (Float) -> Unit,
         appThemeMode: com.tk.quicksearch.search.core.AppThemeMode,
         onSetAppThemeMode: (com.tk.quicksearch.search.core.AppThemeMode) -> Unit,
@@ -82,9 +82,9 @@ fun AppearanceSettingsSection(
         Spacer(modifier = Modifier.height(16.dp))
 
         OverlayThemeCard(
-                selectedTheme = overlayGradientTheme,
+                selectedTheme = appTheme,
                 overlayThemeIntensity = overlayThemeIntensity,
-                onThemeSelected = onSetOverlayGradientTheme,
+                onThemeSelected = onSetAppTheme,
                 onOverlayThemeIntensityChange = onOverlayThemeIntensityChange,
                 backgroundSource = backgroundSource,
                 onSetBackgroundSource = onSetBackgroundSource,

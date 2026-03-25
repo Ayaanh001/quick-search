@@ -274,7 +274,7 @@ fun SearchScreen(
                     },
                 useGradientFallback =
                     state.backgroundSource == com.tk.quicksearch.search.core.BackgroundSource.THEME || stateResult.useMonoThemeFallback,
-                overlayGradientTheme = state.overlayGradientTheme,
+                appTheme = state.appTheme,
                 overlayThemeIntensity = state.overlayThemeIntensity,
             )
         }

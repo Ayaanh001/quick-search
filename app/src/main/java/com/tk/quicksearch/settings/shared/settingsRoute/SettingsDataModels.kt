@@ -5,7 +5,7 @@ import com.tk.quicksearch.search.core.AppIconShape
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.CallingApp
 import com.tk.quicksearch.search.core.MessagingApp
-import com.tk.quicksearch.search.core.OverlayGradientTheme
+import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.data.AppShortcutRepository.SearchTargetShortcutMode
 import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
@@ -58,7 +58,7 @@ data class SettingsScreenState(
     val wallpaperAvailable: Boolean,
     val wallpaperBackgroundAlpha: Float,
     val wallpaperBlurRadius: Float,
-    val overlayGradientTheme: OverlayGradientTheme,
+    val appTheme: AppTheme,
     val overlayThemeIntensity: Float,
     val appThemeMode: com.tk.quicksearch.search.core.AppThemeMode,
     val fontScaleMultiplier: Float,
@@ -125,7 +125,7 @@ data class SettingsScreenCallbacks(
     val onSetCallingApp: (CallingApp) -> Unit,
     val onWallpaperBackgroundAlphaChange: (Float) -> Unit,
     val onWallpaperBlurRadiusChange: (Float) -> Unit,
-    val onSetOverlayGradientTheme: (OverlayGradientTheme) -> Unit,
+    val onSetAppTheme: (AppTheme) -> Unit,
     val onOverlayThemeIntensityChange: (Float) -> Unit,
     val onSetAppThemeMode: (com.tk.quicksearch.search.core.AppThemeMode) -> Unit,
     val onFontScaleMultiplierChange: (Float) -> Unit,

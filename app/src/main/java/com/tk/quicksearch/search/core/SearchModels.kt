@@ -99,7 +99,7 @@ enum class CallingApp {
         SIGNAL,
 }
 
-enum class OverlayGradientTheme {
+enum class AppTheme {
         FOREST,
         AURORA,
         SUNSET,
@@ -419,7 +419,7 @@ data class SearchUiState(
         val showWallpaperBackground: Boolean = true,
         val wallpaperBackgroundAlpha: Float = UiPreferences.DEFAULT_WALLPAPER_BACKGROUND_ALPHA,
         val wallpaperBlurRadius: Float = UiPreferences.DEFAULT_WALLPAPER_BLUR_RADIUS,
-        val overlayGradientTheme: OverlayGradientTheme = OverlayGradientTheme.MONOCHROME,
+        val appTheme: AppTheme = AppTheme.MONOCHROME,
         val overlayThemeIntensity: Float = UiPreferences.DEFAULT_OVERLAY_THEME_INTENSITY,
         val appThemeMode: AppThemeMode = AppThemeMode.SYSTEM,
         val fontScaleMultiplier: Float = UiPreferences.DEFAULT_FONT_SCALE_MULTIPLIER,
@@ -589,7 +589,7 @@ fun SearchUiState(
                 showWallpaperBackground = config.showWallpaperBackground,
                 wallpaperBackgroundAlpha = config.wallpaperBackgroundAlpha,
                 wallpaperBlurRadius = config.wallpaperBlurRadius,
-                overlayGradientTheme = config.overlayGradientTheme,
+                appTheme = config.appTheme,
                 overlayThemeIntensity = config.overlayThemeIntensity,
                 appThemeMode = config.appThemeMode,
                 backgroundSource = config.backgroundSource,

@@ -51,9 +51,9 @@ import com.tk.quicksearch.searchEngines.inline.SearchEngineIconsSection
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.search.searchScreen.searchScreenLayout.SectionRenderingState
 import com.tk.quicksearch.search.searchScreen.searchScreenLayout.SearchContentArea
-import com.tk.quicksearch.search.searchScreen.overlayActionColor
-import com.tk.quicksearch.search.searchScreen.overlayDividerColor
-import com.tk.quicksearch.search.searchScreen.overlayResultCardColor
+import com.tk.quicksearch.search.searchScreen.appThemeActionColor
+import com.tk.quicksearch.search.searchScreen.appThemeDividerColor
+import com.tk.quicksearch.search.searchScreen.appThemeResultCardColor
 import com.tk.quicksearch.search.searchScreen.resolveSearchColorTheme
 import com.tk.quicksearch.shared.ui.theme.LocalSearchColorTheme
 import kotlinx.coroutines.delay
@@ -143,15 +143,15 @@ internal fun SearchScreenContent(
     val isDarkMode = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val searchColorTheme =
             resolveSearchColorTheme(
-                    theme = state.overlayGradientTheme,
+                    theme = state.appTheme,
                     backgroundSource = state.backgroundSource,
                     isDarkMode = isDarkMode,
                     intensity = state.overlayThemeIntensity,
             )
     val overlayCardColor =
             if (useOverlayThemeTints) {
-                overlayResultCardColor(
-                        theme = state.overlayGradientTheme,
+                appThemeResultCardColor(
+                        theme = state.appTheme,
                         isDarkMode = isDarkMode,
                         intensity = state.overlayThemeIntensity,
                 )
@@ -160,8 +160,8 @@ internal fun SearchScreenContent(
             }
     val overlayDividerTint =
             if (useOverlayThemeTints) {
-                overlayDividerColor(
-                        theme = state.overlayGradientTheme,
+                appThemeDividerColor(
+                        theme = state.appTheme,
                         isDarkMode = isDarkMode,
                         intensity = state.overlayThemeIntensity,
                 )
@@ -170,8 +170,8 @@ internal fun SearchScreenContent(
             }
     val overlayActionTint =
             if (useOverlayThemeTints) {
-                overlayActionColor(
-                        theme = state.overlayGradientTheme,
+                appThemeActionColor(
+                        theme = state.appTheme,
                         isDarkMode = isDarkMode,
                         intensity = state.overlayThemeIntensity,
                 )

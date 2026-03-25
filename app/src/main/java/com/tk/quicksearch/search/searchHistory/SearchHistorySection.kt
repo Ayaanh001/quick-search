@@ -267,6 +267,7 @@ fun SearchHistorySection(
 
         if (isExpanded && !alwaysExpanded) {
             CollapseButton(
+                showWallpaperBackground = showWallpaperBackground,
                 onClick = {
                     isExpanded = false
                     onExpandedChange(false)

@@ -5,7 +5,7 @@ import com.tk.quicksearch.search.core.AppIconShape
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.CallingApp
 import com.tk.quicksearch.search.core.MessagingApp
-import com.tk.quicksearch.search.core.OverlayGradientTheme
+import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 
 /** Preferences for UI-related settings such as layout, messaging app, banners, etc. */
@@ -135,15 +135,20 @@ class UiPreferences(
                 .apply()
     }
 
-    fun getOverlayGradientTheme(): OverlayGradientTheme {
-        val saved = prefs.getString(KEY_OVERLAY_GRADIENT_THEME, DEFAULT_OVERLAY_GRADIENT_THEME)
+    fun getAppTheme(): AppTheme {
+        val saved =
+                prefs.getString(KEY_APP_THEME, null)
+                        ?: prefs.getString(KEY_OVERLAY_GRADIENT_THEME, DEFAULT_APP_THEME)
         return saved?.let {
-            runCatching { OverlayGradientTheme.valueOf(it) }.getOrNull()
-        } ?: OverlayGradientTheme.MONOCHROME
+            runCatching { AppTheme.valueOf(it) }.getOrNull()
+        } ?: AppTheme.MONOCHROME
     }
 
-    fun setOverlayGradientTheme(theme: OverlayGradientTheme) {
-        prefs.edit().putString(KEY_OVERLAY_GRADIENT_THEME, theme.name).apply()
+    fun setAppTheme(theme: AppTheme) {
+        prefs.edit()
+                .putString(KEY_APP_THEME, theme.name)
+                .remove(KEY_OVERLAY_GRADIENT_THEME)
+                .apply()
     }
 
     fun getAppThemeMode(): com.tk.quicksearch.search.core.AppThemeMode {
@@ -602,6 +607,7 @@ class UiPreferences(
         const val KEY_INSTALL_TIME = "install_time"
         const val KEY_WALLPAPER_BACKGROUND_ALPHA = "wallpaper_background_alpha"
         const val KEY_WALLPAPER_BLUR_RADIUS = "wallpaper_blur_radius"
+        const val KEY_APP_THEME = "app_theme"
         const val KEY_OVERLAY_GRADIENT_THEME = "overlay_gradient_theme"
         const val KEY_APP_THEME_MODE = "app_theme_mode"
         const val KEY_OVERLAY_THEME_INTENSITY = "overlay_theme_intensity"
@@ -652,7 +658,7 @@ class UiPreferences(
 
         const val DEFAULT_WALLPAPER_BACKGROUND_ALPHA = 0.5f
         const val DEFAULT_WALLPAPER_BLUR_RADIUS = 20f
-        const val DEFAULT_OVERLAY_GRADIENT_THEME = "MONOCHROME"
+        const val DEFAULT_APP_THEME = "MONOCHROME"
         const val DEFAULT_OVERLAY_THEME_INTENSITY = 0.5f
         const val DEFAULT_FONT_SCALE_MULTIPLIER = 1f
         const val OVERLAY_THEME_INTENSITY_STEP = 0.1f

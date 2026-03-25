@@ -59,10 +59,10 @@ import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.AppThemeMode
 import com.tk.quicksearch.search.core.BackgroundSource
-import com.tk.quicksearch.search.core.OverlayGradientTheme
+import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.search.data.preferences.UiPreferences
-import com.tk.quicksearch.search.searchScreen.overlayGradientColors
+import com.tk.quicksearch.search.searchScreen.AppThemeColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.WallpaperUtils
 import com.tk.quicksearch.shared.util.hapticToggle
@@ -70,9 +70,9 @@ import kotlin.math.roundToInt
 
 @Composable
 fun OverlayThemeCard(
-        selectedTheme: OverlayGradientTheme,
+        selectedTheme: AppTheme,
         overlayThemeIntensity: Float,
-        onThemeSelected: (OverlayGradientTheme) -> Unit,
+        onThemeSelected: (AppTheme) -> Unit,
         onOverlayThemeIntensityChange: (Float) -> Unit,
         backgroundSource: BackgroundSource,
         onSetBackgroundSource: (BackgroundSource) -> Unit,
@@ -89,7 +89,7 @@ fun OverlayThemeCard(
     val effectiveBackgroundSource =
             if (useMonoThemeFallback) BackgroundSource.THEME else backgroundSource
     val effectiveSelectedTheme =
-            if (useMonoThemeFallback) OverlayGradientTheme.MONOCHROME else selectedTheme
+            if (useMonoThemeFallback) AppTheme.MONOCHROME else selectedTheme
     val isThemeSourceSelected = effectiveBackgroundSource == BackgroundSource.THEME
 
     val minIntensity = UiPreferences.MIN_OVERLAY_THEME_INTENSITY
@@ -108,19 +108,19 @@ fun OverlayThemeCard(
             remember {
                 listOf(
                         OverlayThemeOption(
-                                theme = OverlayGradientTheme.MONOCHROME,
+                                theme = AppTheme.MONOCHROME,
                                 labelRes = R.string.settings_overlay_theme_monochrome,
                         ),
                         OverlayThemeOption(
-                                theme = OverlayGradientTheme.FOREST,
+                                theme = AppTheme.FOREST,
                                 labelRes = R.string.settings_overlay_theme_forest,
                         ),
                         OverlayThemeOption(
-                                theme = OverlayGradientTheme.AURORA,
+                                theme = AppTheme.AURORA,
                                 labelRes = R.string.settings_overlay_theme_aurora,
                         ),
                         OverlayThemeOption(
-                                theme = OverlayGradientTheme.SUNSET,
+                                theme = AppTheme.SUNSET,
                                 labelRes = R.string.settings_overlay_theme_sunset,
                         ),
                 )
@@ -205,7 +205,7 @@ fun OverlayThemeCard(
                                                 .background(
                                                         Brush.linearGradient(
                                                                 colors =
-                                                                        overlayGradientColors(
+                                                                        AppThemeColors(
                                                                                 theme = option.theme,
                                                                                 isDarkMode = isDarkMode,
                                                                                 intensity = overlayThemeIntensity,
@@ -678,6 +678,6 @@ private fun OverlaySourceBox(
 }
 
 private data class OverlayThemeOption(
-        val theme: OverlayGradientTheme,
+        val theme: AppTheme,
         val labelRes: Int,
 )

@@ -22,6 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.searchScreen.LocalOverlayActionColor
+import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
+import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.LocalSearchColorTheme
 
 private const val EXPAND_ICON_SIZE = 18
@@ -58,17 +60,19 @@ internal fun ExpandButton(
 internal fun CollapseButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    showWallpaperBackground: Boolean = false,
 ) {
     val overlayActionColor = LocalOverlayActionColor.current
     val collapseContentColor = expandCollapseActionContentColor(overlayActionColor)
     val collapseBorderColor = collapseContentColor.copy(alpha = 0.5f)
+    val cardContainerColor = resultCardContainerColor(showWallpaperBackground)
     OutlinedButton(
         onClick = onClick,
         modifier = modifier,
         border = BorderStroke(1.dp, collapseBorderColor),
         colors =
             ButtonDefaults.outlinedButtonColors(
-                containerColor = Color.Transparent,
+                containerColor = cardContainerColor,
                 contentColor = collapseContentColor,
             ),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -86,6 +90,12 @@ internal fun CollapseButton(
             color = collapseContentColor,
         )
     }
+}
+
+@Composable
+private fun resultCardContainerColor(showWallpaperBackground: Boolean): Color {
+    LocalOverlayResultCardColor.current?.let { return it }
+    return AppColors.getResultCardContainerColor(showWallpaperBackground)
 }
 
 @Composable

@@ -3,7 +3,7 @@ package com.tk.quicksearch.search.data
 import android.content.Context
 import com.tk.quicksearch.search.core.AppIconShape
 import com.tk.quicksearch.search.core.BackgroundSource
-import com.tk.quicksearch.search.core.OverlayGradientTheme
+import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.search.models.FileType
 import com.tk.quicksearch.search.data.UserAppPreferences
 
@@ -37,7 +37,7 @@ class StartupPreferencesFacade(
             val hasSeenSearchEngineOnboarding: Boolean,
             val wallpaperBackgroundAlpha: Float,
             val wallpaperBlurRadius: Float,
-            val overlayGradientTheme: OverlayGradientTheme,
+            val appTheme: AppTheme,
             val overlayThemeIntensity: Float,
             val fontScaleMultiplier: Float,
             val backgroundSource: BackgroundSource,
@@ -227,18 +227,21 @@ class StartupPreferencesFacade(
                                 Float
                                 ?: com.tk.quicksearch.search.data.preferences.UiPreferences
                                         .DEFAULT_WALLPAPER_BLUR_RADIUS,
-                overlayGradientTheme =
+                appTheme =
                         (
-                                allPrefs[
+                                (allPrefs[
                                         com.tk.quicksearch.search.data.preferences.UiPreferences
-                                                .KEY_OVERLAY_GRADIENT_THEME,
-                                ] as?
-                                        String
+                                                .KEY_APP_THEME,
+                                ] as? String)
+                                        ?: (allPrefs[
+                                                com.tk.quicksearch.search.data.preferences
+                                                        .UiPreferences.KEY_OVERLAY_GRADIENT_THEME,
+                                        ] as? String)
                                 )
                                 ?.let { value ->
-                                    runCatching { OverlayGradientTheme.valueOf(value) }.getOrNull()
+                                    runCatching { AppTheme.valueOf(value) }.getOrNull()
                                 }
-                                ?: OverlayGradientTheme.MONOCHROME,
+                                ?: AppTheme.MONOCHROME,
                 overlayThemeIntensity =
                         allPrefs[
                                 com.tk.quicksearch.search.data.preferences.UiPreferences
@@ -531,19 +534,22 @@ class StartupPreferencesFacade(
                                         Float
                                 ?: com.tk.quicksearch.search.data.preferences.UiPreferences
                                         .DEFAULT_WALLPAPER_BLUR_RADIUS,
-                        overlayGradientTheme =
+                        appTheme =
                                 (
-                                        allPrefs[
+                                        (allPrefs[
                                                 com.tk.quicksearch.search.data.preferences.UiPreferences
-                                                        .KEY_OVERLAY_GRADIENT_THEME,
-                                        ] as?
-                                                String
+                                                        .KEY_APP_THEME,
+                                        ] as? String)
+                                                ?: (allPrefs[
+                                                        com.tk.quicksearch.search.data.preferences
+                                                                .UiPreferences.KEY_OVERLAY_GRADIENT_THEME,
+                                                ] as? String)
                                         )
                                         ?.let { value ->
-                                            runCatching { OverlayGradientTheme.valueOf(value) }
+                                            runCatching { AppTheme.valueOf(value) }
                                                     .getOrNull()
                                         }
-                                        ?: OverlayGradientTheme.MONOCHROME,
+                                        ?: AppTheme.MONOCHROME,
                         overlayThemeIntensity =
                                 allPrefs[
                                         com.tk.quicksearch.search.data.preferences.UiPreferences

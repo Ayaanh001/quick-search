@@ -1,7 +1,7 @@
 package com.tk.quicksearch.search.startup
 
 import com.tk.quicksearch.search.core.BackgroundSource
-import com.tk.quicksearch.search.core.OverlayGradientTheme
+import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.search.models.AppInfo
 import org.json.JSONArray
 import org.json.JSONObject
@@ -18,7 +18,7 @@ data class StartupSurfaceSnapshot(
     val showWallpaperBackground: Boolean,
     val wallpaperBackgroundAlpha: Float,
     val wallpaperBlurRadius: Float,
-    val overlayGradientTheme: OverlayGradientTheme,
+    val appTheme: AppTheme,
     val overlayThemeIntensity: Float,
     val customImageUri: String?,
     val startupBackgroundPreviewPath: String?,
@@ -39,7 +39,8 @@ internal object StartupSurfaceSnapshotJson {
     private const val KEY_SHOW_WALLPAPER = "showWallpaperBackground"
     private const val KEY_WALLPAPER_ALPHA = "wallpaperBackgroundAlpha"
     private const val KEY_WALLPAPER_BLUR = "wallpaperBlurRadius"
-    private const val KEY_OVERLAY_THEME = "overlayGradientTheme"
+    private const val KEY_APP_THEME = "appTheme"
+    private const val LEGACY_KEY_APP_THEME = "overlayGradientTheme"
     private const val KEY_THEME_INTENSITY = "overlayThemeIntensity"
     private const val KEY_CUSTOM_IMAGE_URI = "customImageUri"
     private const val KEY_PREVIEW_PATH = "startupBackgroundPreviewPath"
@@ -71,7 +72,7 @@ internal object StartupSurfaceSnapshotJson {
                 put(KEY_SHOW_WALLPAPER, snapshot.showWallpaperBackground)
                 put(KEY_WALLPAPER_ALPHA, snapshot.wallpaperBackgroundAlpha.toDouble())
                 put(KEY_WALLPAPER_BLUR, snapshot.wallpaperBlurRadius.toDouble())
-                put(KEY_OVERLAY_THEME, snapshot.overlayGradientTheme.name)
+                put(KEY_APP_THEME, snapshot.appTheme.name)
                 put(KEY_THEME_INTENSITY, snapshot.overlayThemeIntensity.toDouble())
                 put(KEY_ONE_HANDED, snapshot.oneHandedMode)
                 put(KEY_BOTTOM_SEARCH_BAR, snapshot.bottomSearchBarEnabled)
@@ -121,11 +122,12 @@ internal object StartupSurfaceSnapshotJson {
                     ?.let { runCatching { BackgroundSource.valueOf(it) }.getOrNull() }
                     ?: BackgroundSource.THEME
 
-            val overlayTheme =
-                root.optString(KEY_OVERLAY_THEME)
-                    .takeIf { it.isNotBlank() }
-                    ?.let { runCatching { OverlayGradientTheme.valueOf(it) }.getOrNull() }
-                    ?: OverlayGradientTheme.MONOCHROME
+            val appThemeRaw =
+                root.optString(KEY_APP_THEME).takeIf { it.isNotBlank() }
+                    ?: root.optString(LEGACY_KEY_APP_THEME).takeIf { it.isNotBlank() }
+            val appTheme =
+                appThemeRaw?.let { runCatching { AppTheme.valueOf(it) }.getOrNull() }
+                    ?: AppTheme.MONOCHROME
 
             val suggestedApps =
                 root.optJSONArray(KEY_SUGGESTED_APPS)
@@ -139,7 +141,7 @@ internal object StartupSurfaceSnapshotJson {
                 showWallpaperBackground = root.optBoolean(KEY_SHOW_WALLPAPER, backgroundSource != BackgroundSource.THEME),
                 wallpaperBackgroundAlpha = root.optDouble(KEY_WALLPAPER_ALPHA, 0.5).toFloat(),
                 wallpaperBlurRadius = root.optDouble(KEY_WALLPAPER_BLUR, 20.0).toFloat(),
-                overlayGradientTheme = overlayTheme,
+                appTheme = appTheme,
                 overlayThemeIntensity = root.optDouble(KEY_THEME_INTENSITY, 0.5).toFloat(),
                 customImageUri = root.optString(KEY_CUSTOM_IMAGE_URI).takeIf { it.isNotBlank() },
                 startupBackgroundPreviewPath = root.optString(KEY_PREVIEW_PATH).takeIf { it.isNotBlank() },
