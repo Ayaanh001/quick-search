@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +50,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -70,17 +68,13 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.data.preferences.GeminiPreferences
-import com.tk.quicksearch.search.searchScreen.resolveSearchColorTheme
 import com.tk.quicksearch.settings.settingsDetailScreen.SettingsDetailType
 import com.tk.quicksearch.settings.shared.*
 import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import com.tk.quicksearch.shared.ui.components.TipBanner
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
-import com.tk.quicksearch.shared.ui.theme.LocalAppIsDarkTheme
-import com.tk.quicksearch.shared.ui.theme.LocalSearchColorTheme
 import com.tk.quicksearch.shared.util.FeedbackUtils
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -133,15 +127,6 @@ fun SettingsScreen(
     var includeGeminiApiKeyInNextExport by remember { mutableStateOf(false) }
     var showApiKeyExportWarningDialog by remember { mutableStateOf(false) }
     FeatureFlags.initialize(context)
-    val isDarkMode = LocalAppIsDarkTheme.current
-    val searchColorTheme = remember(state.appTheme, state.overlayThemeIntensity, isDarkMode) {
-        resolveSearchColorTheme(
-            theme = state.appTheme,
-            backgroundSource = BackgroundSource.THEME,
-            isDarkMode = isDarkMode,
-            intensity = state.overlayThemeIntensity,
-        )
-    }
 
     val exportLauncher =
         rememberLauncherForActivityResult(
@@ -199,12 +184,15 @@ fun SettingsScreen(
             }
         }
 
-    CompositionLocalProvider(LocalSearchColorTheme provides searchColorTheme) {
+    SettingsScreenBackground(
+        appTheme = state.appTheme,
+        overlayThemeIntensity = state.overlayThemeIntensity,
+        modifier = modifier,
+    ) {
     Column(
         modifier =
-            modifier
+            Modifier
                 .fillMaxSize()
-                .background(searchColorTheme.background)
                 .safeDrawingPadding(),
     ) {
         SettingsHeader(onBack = callbacks.onBack)

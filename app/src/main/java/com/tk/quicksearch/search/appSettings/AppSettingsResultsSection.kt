@@ -6,7 +6,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -16,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -24,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.Alignment
@@ -38,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.apps.rememberAppIcon
 import com.tk.quicksearch.search.contacts.components.ContactUiConstants
-import com.tk.quicksearch.search.searchScreen.LocalOverlayActionColor
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
 import com.tk.quicksearch.search.searchScreen.components.ExpandableResultsCard
@@ -291,33 +287,9 @@ private fun ExpandButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val overlayActionColor = LocalOverlayActionColor.current
-    val moreActionColor =
-        if (overlayActionColor != null) {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        } else {
-            MaterialTheme.colorScheme.primary
-        }
-
-    TextButton(
+    com.tk.quicksearch.search.searchScreen.components.ExpandButton(
         onClick = onClick,
         modifier = modifier,
-        contentPadding =
-            PaddingValues(
-                horizontal = EXPAND_BUTTON_HORIZONTAL_PADDING.dp,
-                vertical = 0.dp,
-            ),
-    ) {
-        Text(
-            text = stringResource(R.string.action_expand_more_app_settings),
-            style = MaterialTheme.typography.bodySmall,
-            color = moreActionColor,
-        )
-        Icon(
-            imageVector = Icons.Rounded.ExpandMore,
-            contentDescription = stringResource(R.string.desc_expand),
-            tint = moreActionColor,
-            modifier = Modifier.size(ContactUiConstants.EXPAND_ICON_SIZE.dp),
-        )
-    }
+        textResId = R.string.action_expand_more_app_settings,
+    )
 }

@@ -14,6 +14,12 @@ import androidx.compose.ui.unit.dp
 internal const val LightResultCardFrostAlpha = 0.72f
 
 /**
+ * Base alpha for THEME-mode fallback background layers.
+ * Shared by search and settings so both screens render the same theme-depth.
+ */
+internal const val ThemeModeFallbackBackgroundAlpha = 0.6f
+
+/**
  * Theme-aware app-specific color tokens.
  *
  * Material colors remain in [MaterialTheme.colorScheme]. This file centralizes custom semantic
@@ -568,7 +574,11 @@ object AppColors {
      */
     @Composable
     fun getCompactSectionBackground(showWallpaperBackground: Boolean): Color =
-        if (showWallpaperBackground) CompactSectionBackground else Color.Black.copy(alpha = 0.5f)
+        when {
+            showWallpaperBackground -> CompactSectionBackground
+            !LocalAppIsDarkTheme.current -> Color.White.copy(alpha = 0.5f)
+            else -> Color.Black.copy(alpha = 0.5f)
+        }
 
     @Composable
     fun getCardElevation(showWallpaperBackground: Boolean): CardElevation =

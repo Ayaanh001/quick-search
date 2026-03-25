@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
@@ -28,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.AppThemeMode
 import com.tk.quicksearch.settings.shared.SettingsCard
-import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
@@ -94,7 +94,7 @@ private fun AppThemeOption(
         if (selected) {
             MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
         } else {
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+            Color.Transparent
         }
 
     Column(

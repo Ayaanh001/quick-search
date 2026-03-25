@@ -88,6 +88,7 @@ import com.tk.quicksearch.searchEngines.shared.IconRenderStyle
 import com.tk.quicksearch.searchEngines.shared.SearchTargetIcon
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.LocalAppIsDarkTheme
 import com.tk.quicksearch.shared.util.hapticStrong
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -100,6 +101,8 @@ private const val LeadingIconExitDurationMs = 120
 private const val LeadingIconEnterDelayMs = 40
 private const val LeadingIconEnterInitialScale = 0.88f
 private const val LeadingIconExitTargetScale = 0.88f
+private const val LightSearchBarShadowAmbientAlpha = 0.38f
+private const val LightSearchBarShadowSpotAlpha = 0.62f
 private val AliasMorphTextStartPadding = DesignTokens.Spacing48 + DesignTokens.SpacingXSmall
 private val AliasMorphHorizontalTravel = DesignTokens.Spacing28
 private val AliasMorphVerticalTravel = DesignTokens.SpacingXXSmall
@@ -143,7 +146,10 @@ internal fun PersistentSearchBar(
         } else {
             AppColors.SearchBarBackground
         }
+    val accentColor = AppColors.Accent
     val iconAndTextColor = AppColors.SearchBarTextAndIcon
+    val isDarkTheme = LocalAppIsDarkTheme.current
+    val searchBarIconColor = if (isDarkTheme) iconAndTextColor else Color(0xFF6B6572)
     val isAliasDetected =
         detectedShortcutTarget != null || detectedAliasSearchSection != null || activeToolType != null
     val aliasVisualTransformation =
@@ -334,7 +340,17 @@ internal fun PersistentSearchBar(
         modifier =
             modifier
                 .fillMaxWidth()
-                .graphicsLayer() // GPU acceleration
+                .graphicsLayer {
+                    // Keep the search bar elevated in light mode with an accent-tinted shadow.
+                    if (!isDarkTheme) {
+                        shadowElevation = with(density) { DesignTokens.ElevationLevel4.toPx() }
+                        shape = DesignTokens.ShapeXXLarge
+                        ambientShadowColor = accentColor.copy(alpha = LightSearchBarShadowAmbientAlpha)
+                        spotShadowColor = accentColor.copy(alpha = LightSearchBarShadowSpotAlpha)
+                    } else {
+                        shadowElevation = 0f
+                    }
+                }
                 .drawBehind {
                     val alpha = glowAlpha.value
                     if (alpha > 0f) {
@@ -502,7 +518,7 @@ internal fun PersistentSearchBar(
                 ) { currentIconState ->
                     SearchBarLeadingIcon(
                         iconState = currentIconState,
-                        iconTint = iconAndTextColor,
+                        iconTint = searchBarIconColor,
                     )
                 }
             },
@@ -531,7 +547,7 @@ internal fun PersistentSearchBar(
                                         R.string
                                             .desc_clear_search,
                                     ),
-                                tint = iconAndTextColor,
+                                tint = searchBarIconColor,
                             )
                         }
                     } else {
@@ -553,7 +569,7 @@ internal fun PersistentSearchBar(
                                         R.string
                                             .desc_open_settings,
                                     ),
-                                tint = iconAndTextColor,
+                                tint = searchBarIconColor,
                             )
                         }
                     }

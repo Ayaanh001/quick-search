@@ -60,7 +60,6 @@ import com.tk.quicksearch.search.core.AppThemeMode
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.settings.shared.SettingsCard
-import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.search.data.preferences.UiPreferences
 import com.tk.quicksearch.search.searchScreen.AppThemeColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
@@ -591,7 +590,7 @@ private fun AppModeOption(
             else MaterialTheme.colorScheme.outlineVariant
     val backgroundColor =
             if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+            else Color.Transparent
 
     Column(
             modifier =
@@ -648,7 +647,13 @@ private fun OverlaySourceBox(
                         Modifier.fillMaxWidth()
                                 .height(52.dp)
                                 .clip(MaterialTheme.shapes.medium)
-                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                .background(
+                                        if (selected) {
+                                            MaterialTheme.colorScheme.surfaceContainerHigh
+                                        } else {
+                                            Color.Transparent
+                                        },
+                                )
                                 .clickable(onClick = onClick)
                                 .border(
                                         width = if (selected) 2.dp else 1.dp,

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.LocalAppIsDarkTheme
 
 private const val PILL_BACKGROUND_ALPHA = 0.4f
 private val ALIAS_ICON_SIZE = 14.dp
@@ -48,6 +50,7 @@ fun AliasPill(
             textColor
         }
     val shouldUseSurfaceClick = onClick != null && onClearClick == null
+    val showLightModeOutline = showBackground && !LocalAppIsDarkTheme.current
     Surface(
         modifier =
             modifier
@@ -61,6 +64,12 @@ fun AliasPill(
                     },
                 ),
         shape = DesignTokens.ShapeFull,
+        border =
+            if (showLightModeOutline) {
+                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            } else {
+                null
+            },
         color =
             if (showBackground) {
                 AppColors.DialogBackground.copy(alpha = PILL_BACKGROUND_ALPHA)

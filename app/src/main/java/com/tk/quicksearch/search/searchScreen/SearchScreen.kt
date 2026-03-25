@@ -31,6 +31,7 @@ import com.tk.quicksearch.search.searchScreen.DerivedState
 import com.tk.quicksearch.search.searchScreen.SearchRoute
 import com.tk.quicksearch.search.searchScreen.SearchScreenStateManagement
 import com.tk.quicksearch.search.searchScreen.SearchScreenDialogLogic
+import com.tk.quicksearch.shared.ui.theme.ThemeModeFallbackBackgroundAlpha
 
 private const val STARTUP_BACKGROUND_TRANSITION_DURATION_MS = 90
 
@@ -268,7 +269,7 @@ fun SearchScreen(
                     },
                 fallbackBackgroundAlpha =
                     if (state.backgroundSource == com.tk.quicksearch.search.core.BackgroundSource.THEME) {
-                        0.6f
+                        ThemeModeFallbackBackgroundAlpha
                     } else {
                         1f
                     },

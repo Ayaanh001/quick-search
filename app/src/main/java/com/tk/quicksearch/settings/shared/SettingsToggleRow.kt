@@ -14,11 +14,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
@@ -166,6 +168,10 @@ fun SettingsToggleRow(
                 checked = checked,
                 onCheckedChange = onToggle,
                 modifier = Modifier.scale(0.85f),
+                colors =
+                    SwitchDefaults.colors(
+                        uncheckedTrackColor = Color.Transparent,
+                    ),
             )
         }
 

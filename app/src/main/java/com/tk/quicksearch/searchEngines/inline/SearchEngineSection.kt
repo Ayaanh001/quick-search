@@ -27,6 +27,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
@@ -41,6 +44,7 @@ import com.tk.quicksearch.shared.util.isLandscape
 import com.tk.quicksearch.shared.util.isTablet
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.LocalAppIsDarkTheme
 
 /** Constants for search engine section layout. */
 private object SearchEngineSectionConstants {
@@ -54,6 +58,8 @@ private object SearchEngineSectionConstants {
     val VERTICAL_PADDING = SearchTargetConstants.VERTICAL_PADDING
     val SEARCH_ICON_SPACING = SearchTargetConstants.SEARCH_ICON_SPACING
 }
+private const val LightSectionShadowAmbientAlpha = 0.38f
+private const val LightSectionShadowSpotAlpha = 0.62f
 
 /**
  * Composable section displaying search engine icons in a scrollable row.
@@ -95,6 +101,20 @@ fun SearchEngineIconsSection(
 
     // Match compact section background with the persistent search bar for visual consistency.
     val backgroundColor = AppColors.getCompactSectionBackground(showWallpaperBackground)
+    val accentColor = AppColors.Accent
+    val isDarkTheme = LocalAppIsDarkTheme.current
+    val density = LocalDensity.current
+    val compactSectionShape: Shape =
+        if (isOverlayPresentation && !hasBottomSearchBar) {
+            RoundedCornerShape(
+                topStart = 20.dp,
+                topEnd = 20.dp,
+                bottomStart = 28.dp,
+                bottomEnd = 28.dp,
+            )
+        } else {
+            RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+        }
 
     if (detectedShortcutTarget != null) {
         // Check if query starts with the shortcut and remove it
@@ -121,19 +141,21 @@ fun SearchEngineIconsSection(
         }
     } else {
         Surface(
-            modifier = modifier.extendToScreenEdges(),
+            modifier =
+                modifier
+                    .extendToScreenEdges()
+                    .graphicsLayer {
+                        if (!isDarkTheme) {
+                            shadowElevation = with(density) { DesignTokens.ElevationLevel4.toPx() }
+                            shape = compactSectionShape
+                            ambientShadowColor = accentColor.copy(alpha = LightSectionShadowAmbientAlpha)
+                            spotShadowColor = accentColor.copy(alpha = LightSectionShadowSpotAlpha)
+                        } else {
+                            shadowElevation = 0f
+                        }
+                    },
             color = backgroundColor,
-            shape =
-                if (isOverlayPresentation && !hasBottomSearchBar) {
-                    RoundedCornerShape(
-                        topStart = 20.dp,
-                        topEnd = 20.dp,
-                        bottomStart = 28.dp,
-                        bottomEnd = 28.dp,
-                    )
-                } else {
-                    RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
-                },
+            shape = compactSectionShape,
         ) {
             SearchEngineContent(
                 query = query,

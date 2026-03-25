@@ -17,14 +17,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.searchScreen.LocalOverlayActionColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.shared.ui.theme.AppColors
-import com.tk.quicksearch.shared.ui.theme.LocalSearchColorTheme
 
 private const val EXPAND_ICON_SIZE = 18
 
@@ -99,16 +97,5 @@ private fun resultCardContainerColor(showWallpaperBackground: Boolean): Color {
 }
 
 @Composable
-private fun expandCollapseActionContentColor(overlayActionColor: Color?): Color {
-    if (overlayActionColor == null) {
-        return MaterialTheme.colorScheme.primary
-    }
-    val backdrop =
-        LocalSearchColorTheme.current?.background
-            ?: MaterialTheme.colorScheme.background
-    return if (backdrop.luminance() > 0.5f) {
-        MaterialTheme.colorScheme.onSurface
-    } else {
-        Color.White
-    }
-}
+private fun expandCollapseActionContentColor(overlayActionColor: Color?): Color =
+    MaterialTheme.colorScheme.primary

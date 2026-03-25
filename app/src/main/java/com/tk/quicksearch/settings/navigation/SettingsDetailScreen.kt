@@ -2,7 +2,6 @@ package com.tk.quicksearch.settings.settingsDetailScreen
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,7 +24,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,8 +35,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.search.core.BackgroundSource
-import com.tk.quicksearch.search.searchScreen.resolveSearchColorTheme
 import com.tk.quicksearch.search.utils.PermissionUtils
 import com.tk.quicksearch.searchEngines.getId
 import com.tk.quicksearch.shared.permissions.PermissionHelper
@@ -47,11 +43,10 @@ import com.tk.quicksearch.settings.OpenSourceLicenseEntry
 import com.tk.quicksearch.settings.OpenSourceLicensesList
 import com.tk.quicksearch.settings.searchEnginesScreen.SearchEngines
 import com.tk.quicksearch.settings.shared.SettingsScreenCallbacks
+import com.tk.quicksearch.settings.shared.SettingsScreenBackground
 import com.tk.quicksearch.settings.shared.SettingsScreenState
 import com.tk.quicksearch.settings.shared.settingsContentWidth
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
-import com.tk.quicksearch.shared.ui.theme.LocalAppIsDarkTheme
-import com.tk.quicksearch.shared.ui.theme.LocalSearchColorTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -91,22 +86,15 @@ internal fun SettingsDetailLevel1Screen(
             state.excludedFileExtensions.isNotEmpty() ||
             state.excludedSettings.isNotEmpty() ||
             state.excludedAppShortcuts.isNotEmpty()
-    val isDarkMode = LocalAppIsDarkTheme.current
-    val searchColorTheme = remember(state.appTheme, state.overlayThemeIntensity, isDarkMode) {
-        resolveSearchColorTheme(
-            theme = state.appTheme,
-            backgroundSource = BackgroundSource.THEME,
-            isDarkMode = isDarkMode,
-            intensity = state.overlayThemeIntensity,
-        )
-    }
-
-    CompositionLocalProvider(LocalSearchColorTheme provides searchColorTheme) {
+    SettingsScreenBackground(
+        appTheme = state.appTheme,
+        overlayThemeIntensity = state.overlayThemeIntensity,
+        modifier = modifier,
+    ) {
     Box(
         modifier =
-            modifier
+            Modifier
                 .fillMaxSize()
-                .background(searchColorTheme.background)
                 .safeDrawingPadding(),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -360,7 +348,7 @@ internal fun SettingsDetailLevel1Screen(
             }
         }
     }
-    } // end CompositionLocalProvider
+    }
 }
 
 @Composable

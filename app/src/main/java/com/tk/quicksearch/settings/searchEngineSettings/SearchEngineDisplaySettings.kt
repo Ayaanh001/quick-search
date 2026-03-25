@@ -1,6 +1,7 @@
 package com.tk.quicksearch.settings.searchEnginesScreen
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -159,13 +161,19 @@ private fun CompactRowCountPills(
             onClick = { onSelectRowCount(1) },
             label = { Text(stringResource(R.string.settings_compact_rows_one_row)) },
             shape = DesignTokens.ShapeFull,
+            border =
+                if (oneRowSelected) {
+                    null
+                } else {
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                },
             colors =
                 AssistChipDefaults.assistChipColors(
                     containerColor =
                         if (oneRowSelected) {
                             MaterialTheme.colorScheme.primary
                         } else {
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                            Color.Transparent
                         },
                     labelColor =
                         if (oneRowSelected) {
@@ -180,13 +188,19 @@ private fun CompactRowCountPills(
             onClick = { onSelectRowCount(2) },
             label = { Text(stringResource(R.string.settings_compact_rows_two_rows)) },
             shape = DesignTokens.ShapeFull,
+            border =
+                if (twoRowsSelected) {
+                    null
+                } else {
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                },
             colors =
                 AssistChipDefaults.assistChipColors(
                     containerColor =
                         if (twoRowsSelected) {
                             MaterialTheme.colorScheme.primary
                         } else {
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                            Color.Transparent
                         },
                     labelColor =
                         if (twoRowsSelected) {

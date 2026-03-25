@@ -1,6 +1,7 @@
 package com.tk.quicksearch.settings.AppearanceSettings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -109,13 +111,19 @@ private fun FontSizeChip(
                 )
             },
             shape = RoundedCornerShape(999.dp),
+            border =
+                    if (selected) {
+                        null
+                    } else {
+                        BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                    },
             colors =
                     AssistChipDefaults.assistChipColors(
                             containerColor =
                                     if (selected) {
                                         MaterialTheme.colorScheme.primary
                                     } else {
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                                        Color.Transparent
                                     },
                             labelColor =
                                     if (selected) {
