@@ -97,7 +97,7 @@ val SunsetThemeAccent = ThemeAccentColors(
 )
 
 val MonochromeThemeAccent = ThemeAccentColors(
-    lightPrimary = Color(0xFF000000),
+    lightPrimary = Color(0xFF49454F),
     lightOnPrimary = Color(0xFFFFFFFF),
     lightPrimaryContainer = Color(0xFF2A2A2A),
     lightOnPrimaryContainer = Color(0xFFFFFFFF),

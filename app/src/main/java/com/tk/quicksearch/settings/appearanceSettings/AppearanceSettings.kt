@@ -19,7 +19,7 @@ import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.settings.AppearanceSettings.FontSizeCard
 import com.tk.quicksearch.settings.AppearanceSettings.IconPackPickerDialog
 import com.tk.quicksearch.settings.AppearanceSettings.CombinedLayoutIconCard
-import com.tk.quicksearch.settings.AppearanceSettings.OverlayThemeCard
+import com.tk.quicksearch.settings.AppearanceSettings.AppThemeCard
 import com.tk.quicksearch.settings.AppearanceSettings.WallpaperCard
 import com.tk.quicksearch.settings.searchEnginesScreen.SearchEngineAppearanceCard
 
@@ -81,7 +81,7 @@ fun AppearanceSettingsSection(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OverlayThemeCard(
+        AppThemeCard(
                 selectedTheme = appTheme,
                 overlayThemeIntensity = overlayThemeIntensity,
                 onThemeSelected = onSetAppTheme,

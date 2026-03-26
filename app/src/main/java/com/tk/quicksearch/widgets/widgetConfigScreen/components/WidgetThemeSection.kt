@@ -56,15 +56,15 @@ fun WidgetThemeSection(
             listOf(
                 WidgetBackgroundThemeOption(
                     appTheme = AppTheme.FOREST,
-                    labelRes = R.string.settings_overlay_theme_forest,
+                    labelRes = R.string.settings_app_theme_forest,
                 ),
                 WidgetBackgroundThemeOption(
                     appTheme = AppTheme.AURORA,
-                    labelRes = R.string.settings_overlay_theme_aurora,
+                    labelRes = R.string.settings_app_theme_aurora,
                 ),
                 WidgetBackgroundThemeOption(
                     appTheme = AppTheme.SUNSET,
-                    labelRes = R.string.settings_overlay_theme_sunset,
+                    labelRes = R.string.settings_app_theme_sunset,
                 ),
             )
         }

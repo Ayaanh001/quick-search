@@ -99,6 +99,7 @@ fun SearchTargetIcon(
                                     SearchEngine.CHATGPT,
                                     SearchEngine.GROK,
                                     SearchEngine.AMAZON,
+                                    SearchEngine.WIKIPEDIA,
                                 )
 
                         val backgroundColor = MaterialTheme.colorScheme.background
