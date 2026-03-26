@@ -45,9 +45,10 @@ internal fun ContactActionButton(
     usePhoneIconForCallActions: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
+    val callIconTint = AppColors.CallIconTint
     val iconColor =
         when (method) {
-            is ContactMethod.Phone -> AppColors.ActionPhone
+            is ContactMethod.Phone -> callIconTint
 
             is ContactMethod.Sms -> AppColors.ActionSms
 
@@ -70,7 +71,7 @@ internal fun ContactActionButton(
 
             is ContactMethod.Email -> AppColors.ActionEmail
 
-            is ContactMethod.VideoCall -> AppColors.ActionVideoCall
+            is ContactMethod.VideoCall -> callIconTint
 
             is ContactMethod.CustomApp -> AppColors.ActionCustom
 
@@ -125,13 +126,18 @@ private fun ContactActionIcon(
     tint: Color,
     usePhoneIconForCallActions: Boolean = false,
 ) {
+    val callIconTint = AppColors.CallIconTint
     if (usePhoneIconForCallActions &&
-        (method is ContactMethod.Phone || method is ContactMethod.VideoCall)
+        (method is ContactMethod.Phone ||
+            method is ContactMethod.VideoCall ||
+            method is ContactMethod.WhatsAppCall ||
+            method is ContactMethod.TelegramCall ||
+            method is ContactMethod.SignalCall)
     ) {
         Icon(
             imageVector = Icons.Rounded.Call,
             contentDescription = null,
-            tint = tint,
+            tint = callIconTint,
             modifier = Modifier.size(DesignTokens.LargeIconSize),
         )
         return

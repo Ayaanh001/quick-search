@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
+import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.settings.shared.SettingsCard
 import com.tk.quicksearch.search.apps.rememberAppIcon
@@ -360,7 +361,7 @@ fun ClearAllConfirmationDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    androidx.compose.material3.AlertDialog(
+    AppAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = stringResource(R.string.settings_excluded_items_clear_all)) },
         text = {

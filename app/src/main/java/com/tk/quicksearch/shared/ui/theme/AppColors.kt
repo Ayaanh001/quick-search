@@ -100,7 +100,7 @@ internal val LightQuickSearchAppColorPalette =
         overlayMedium = Color.Black.copy(alpha = 0.16f),
         overlayHigh = Color.Black.copy(alpha = 0.24f),
         overlayVeryHigh = Color.Black.copy(alpha = 0.6f),
-        dialogBackground = Color(0xFFF8F7FB),
+        dialogBackground = Color.White,
         dialogText = Color(0xFF1F1B24),
         onboardingScrimTop = Color.Black.copy(alpha = 0.62f),
         onboardingScrimMiddle = Color.Black.copy(alpha = 0.4f),
@@ -187,6 +187,14 @@ object AppColors {
     val IconTintSecondary: Color
         @Composable
         get() = MaterialTheme.colorScheme.onSurfaceVariant
+
+    /**
+     * Tint for phone/call icons across all calling action buttons.
+     * White in dark mode, dark grey in light mode.
+     */
+    val CallIconTint: Color
+        @Composable
+        get() = if (LocalAppIsDarkTheme.current) Color.White else Color(0xFF6B6572)
 
     // Settings colors ----------------------------------------------------------------------
 
@@ -565,8 +573,8 @@ object AppColors {
         }
 
     /**
-     * Returns appropriate card elevation based on wallpaper background setting and theme.
-     * Cards with wallpaper background or in light mode use no elevation; dark mode uses standard elevation.
+     * Returns flat card elevation for all app cards.
+     * Result, suggestions, history, and settings cards are intentionally elevation-free.
      */
     /**
      * Returns the background color for the compact search engine section strip.
@@ -582,10 +590,6 @@ object AppColors {
 
     @Composable
     fun getCardElevation(showWallpaperBackground: Boolean): CardElevation =
-        if (showWallpaperBackground || !LocalAppIsDarkTheme.current) {
-            CardDefaults.cardElevation(defaultElevation = 0.dp)
-        } else {
-            CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
-        }
+        CardDefaults.cardElevation(defaultElevation = 0.dp)
 
 }

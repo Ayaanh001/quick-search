@@ -94,7 +94,12 @@ fun MainContent(
     }
 
     LaunchedEffect(settingsDetailType) {
-        settingsDetailType?.let(SettingsNavigationMemory::rememberSettingsDetail)
+        val detail = settingsDetailType
+        if (detail != null) {
+            SettingsNavigationMemory.rememberSettingsDetail(detail)
+        } else {
+            SettingsNavigationMemory.clear()
+        }
     }
 
     // Permission request handlers for settings detail screens

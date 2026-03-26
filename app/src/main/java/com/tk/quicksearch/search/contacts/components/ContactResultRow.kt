@@ -52,7 +52,6 @@ import com.tk.quicksearch.search.searchScreen.components.topPredictedRowContaine
 import com.tk.quicksearch.search.searchScreen.components.topPredictedRowContentPadding
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
-import com.tk.quicksearch.shared.ui.theme.LocalAppIsDarkTheme
 import com.tk.quicksearch.shared.util.hapticConfirm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -361,12 +360,8 @@ private fun ContactActionButtons(
                                                                         R.string.contacts_action_call,
                                                                 ),
                                                         tint =
-                                                                if (hasNumber) {
-                                                                        if (LocalAppIsDarkTheme.current) AppColors.DialogText else Color(0xFF6B6572)
-                                                                } else {
-                                                                        MaterialTheme.colorScheme
-                                                                                .onSurfaceVariant
-                                                                },
+                                                                if (hasNumber) AppColors.CallIconTint
+                                                                else MaterialTheme.colorScheme.onSurfaceVariant,
                                                         modifier =
                                                                 Modifier.size(
                                                                         ContactUiConstants
@@ -451,12 +446,8 @@ private fun ContactActionButtons(
                                                                                 .contacts_action_sms,
                                                                 ),
                                                         tint =
-                                                                if (hasNumber) {
-                                                                        if (LocalAppIsDarkTheme.current) AppColors.DialogText else Color(0xFF6B6572)
-                                                                } else {
-                                                                        MaterialTheme.colorScheme
-                                                                                .onSurfaceVariant
-                                                                },
+                                                                if (hasNumber) AppColors.CallIconTint
+                                                                else MaterialTheme.colorScheme.onSurfaceVariant,
                                                         modifier =
                                                                 Modifier.size(
                                                                         (ContactUiConstants
@@ -565,11 +556,7 @@ private fun ContactActionIconForButton(
         enabled: Boolean,
 ) {
         val tint = if (enabled) Color.Unspecified else MaterialTheme.colorScheme.onSurfaceVariant
-        val whiteTint = if (enabled) {
-                if (LocalAppIsDarkTheme.current) AppColors.DialogText else Color(0xFF6B6572)
-        } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-        }
+        val callIconTint = if (enabled) AppColors.CallIconTint else MaterialTheme.colorScheme.onSurfaceVariant
         val modifier = Modifier.size(ContactUiConstants.ACTION_ICON_SIZE.dp)
         val smsModifier = Modifier.size((ContactUiConstants.ACTION_ICON_SIZE * 0.9f).dp)
 
@@ -579,7 +566,7 @@ private fun ContactActionIconForButton(
                         Icon(
                                 imageVector = Icons.Rounded.Call, // Explicit request for phone icon
                                 contentDescription = null,
-                                tint = whiteTint,
+                                tint = callIconTint,
                                 modifier = modifier,
                         )
                 }
@@ -627,7 +614,7 @@ private fun ContactActionIconForButton(
                         Icon(
                                 imageVector = Icons.Rounded.Sms,
                                 contentDescription = null,
-                                tint = whiteTint, // SMS icon usually white based on existing code
+                                tint = callIconTint,
                                 modifier = smsModifier,
                         )
                 }

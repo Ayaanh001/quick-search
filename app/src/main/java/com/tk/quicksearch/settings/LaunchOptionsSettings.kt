@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.AlertDialog
+import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +42,7 @@ fun LaunchOptionsSettings(
     var showWidgetConfirmDialog by remember { mutableStateOf(false) }
 
     if (showWidgetConfirmDialog) {
-        AlertDialog(
+        AppAlertDialog(
             onDismissRequest = { showWidgetConfirmDialog = false },
             title = { Text(stringResource(R.string.settings_home_screen_widget_title)) },
             text = { Text(stringResource(R.string.settings_home_screen_widget_confirm_message)) },

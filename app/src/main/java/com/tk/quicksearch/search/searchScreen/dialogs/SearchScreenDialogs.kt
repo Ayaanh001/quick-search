@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.Canvas
-import androidx.compose.material3.AlertDialog
+import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -58,7 +58,7 @@ internal fun ReleaseNotesDialog(
         stringArrayResource(R.array.release_notes_points)
             .filter { it.isNotBlank() }
 
-    AlertDialog(
+    AppAlertDialog(
         onDismissRequest = onAcknowledge,
         title = {
             Text(

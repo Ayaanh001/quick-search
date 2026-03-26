@@ -39,7 +39,7 @@ import androidx.compose.material.icons.rounded.RocketLaunch
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.Upload
-import androidx.compose.material3.AlertDialog
+import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import androidx.compose.material3.ButtonDefaults
 import com.tk.quicksearch.settings.shared.SettingsCard
 import androidx.compose.material3.HorizontalDivider
@@ -440,7 +440,7 @@ fun SettingsScreen(
     } // end CompositionLocalProvider
 
     if (showImportWarningDialog) {
-        AlertDialog(
+        AppAlertDialog(
             onDismissRequest = {
                 showImportWarningDialog = false
             },
@@ -473,7 +473,7 @@ fun SettingsScreen(
     }
 
     if (showApiKeyExportWarningDialog) {
-        AlertDialog(
+        AppAlertDialog(
             onDismissRequest = {
                 showApiKeyExportWarningDialog = false
             },

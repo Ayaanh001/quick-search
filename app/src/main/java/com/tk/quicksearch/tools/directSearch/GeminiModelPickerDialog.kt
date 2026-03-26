@@ -13,7 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material3.AlertDialog
+import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -50,7 +50,7 @@ fun GeminiModelPickerDialog(
                 }
         }
 
-        AlertDialog(
+        AppAlertDialog(
                 onDismissRequest = onDismiss,
                 title = { Text(text = stringResource(R.string.dialog_gemini_model_picker_title)) },
                 text = {

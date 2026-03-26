@@ -12,11 +12,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,10 +25,10 @@ import com.tk.quicksearch.search.calendar.calendarRecurrenceLabel
 import com.tk.quicksearch.search.calendar.calendarRelativeDateLabel
 import com.tk.quicksearch.search.calendar.formatCalendarEventDate
 import com.tk.quicksearch.search.models.CalendarEventInfo
+import com.tk.quicksearch.shared.ui.components.AppBottomSheet
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun CalendarEventInstancesDrawer(
     title: String,
     nearestInstance: CalendarEventInfo,
@@ -38,12 +36,7 @@ fun CalendarEventInstancesDrawer(
     onDismissRequest: () -> Unit,
     onInstanceClick: (CalendarEventInfo) -> Unit,
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 0.dp,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-    ) {
+    AppBottomSheet(onDismissRequest = onDismissRequest) {
         Column(
             modifier =
                 Modifier

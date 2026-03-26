@@ -25,7 +25,7 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Public
-import androidx.compose.material3.AlertDialog
+import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -279,7 +279,7 @@ fun AddAppDeepLinkDialog(
         keyboardController?.show()
     }
 
-    AlertDialog(
+    AppAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = stringResource(R.string.settings_app_shortcuts_add_deep_link_dialog_title)) },
         text = {
@@ -432,7 +432,7 @@ fun AddSearchTargetShortcutDialog(
         keyboardController?.show()
     }
 
-    AlertDialog(
+    AppAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = stringResource(titleResId, targetLabel)) },
         text = {
@@ -524,7 +524,7 @@ fun EditCustomShortcutDialog(
         }
     val appIconResult = rememberAppIcon(packageName = shortcut.packageName, iconPackPackage = iconPackPackage)
 
-    AlertDialog(
+    AppAlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Row(

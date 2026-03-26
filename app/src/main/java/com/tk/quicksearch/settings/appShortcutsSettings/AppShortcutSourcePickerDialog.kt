@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
+import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,7 +38,7 @@ fun AppShortcutSourcePickerDialog(
     onDismiss: () -> Unit,
     onSourceSelected: (AppShortcutSource) -> Unit,
 ) {
-    AlertDialog(
+    AppAlertDialog(
         modifier = Modifier.fillMaxWidth(0.94f),
         properties = DialogProperties(usePlatformDefaultWidth = false),
         onDismissRequest = onDismiss,

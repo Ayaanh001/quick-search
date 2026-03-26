@@ -2,7 +2,7 @@ package com.tk.quicksearch.search.searchScreen
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material3.AlertDialog
+import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -101,7 +101,7 @@ internal fun SearchScreenDialogLogic(
 
     // Personal context dialog
     if (showPersonalContextDialog) {
-        AlertDialog(
+        AppAlertDialog(
             onDismissRequest = { setShowPersonalContextDialog(false) },
             title = {
                 Text(text = stringResource(R.string.settings_direct_search_personal_context_title))

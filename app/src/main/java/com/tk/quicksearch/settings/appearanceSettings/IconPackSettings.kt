@@ -14,7 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Android
-import androidx.compose.material3.AlertDialog
+import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +38,7 @@ fun IconPackPickerDialog(
         onSelect: (String?) -> Unit,
         onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    AppAlertDialog(
             onDismissRequest = onDismiss,
             title = {
                 Text(

@@ -9,5 +9,9 @@ object SettingsNavigationMemory {
         lastOpenedSettingsDetailType = detailType
     }
 
+    fun clear() {
+        lastOpenedSettingsDetailType = null
+    }
+
     fun getLastOpenedSettingsDetail(): SettingsDetailType? = lastOpenedSettingsDetailType
 }

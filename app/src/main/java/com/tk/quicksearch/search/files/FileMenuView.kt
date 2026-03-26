@@ -14,7 +14,7 @@ import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material3.AlertDialog
+import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -87,7 +87,7 @@ fun FileInfoDialog(
     val fileTypeText = FileUtils.getFileExtension(deviceFile.displayName) ?: "—"
     val sizeText = fileSizeBytes?.let { formatFileSize(it) } ?: "—"
 
-    AlertDialog(
+    AppAlertDialog(
             onDismissRequest = onDismiss,
             title = { Text(text = deviceFile.displayName) },
             text = {

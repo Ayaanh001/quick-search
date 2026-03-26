@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.AlertDialog
+import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -171,7 +171,7 @@ internal fun WallpaperPermissionFallbackDialog(controller: WallpaperPermissionCo
     if (!controller.showFallbackDialog) return
     val context = LocalContext.current
 
-    AlertDialog(
+    AppAlertDialog(
         onDismissRequest = controller.onDismissFallbackDialog,
         title = {
             Text(text = context.getString(R.string.wallpaper_permission_fallback_title))

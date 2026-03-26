@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material3.AlertDialog
+import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -212,7 +212,7 @@ private fun CustomBackgroundColorDialog(
     var hexValue by rememberSaveable { mutableStateOf(initialHex) }
     val isValidHex = hexValue.matches(Regex("^[0-9A-Fa-f]{6}$"))
 
-    AlertDialog(
+    AppAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = stringResource(R.string.widget_background_color_custom_dialog_title)) },
         text = {
