@@ -437,7 +437,7 @@ fun SettingsScreen(
             )
         }
     }
-    } // end CompositionLocalProvider
+    }
 
     if (showImportWarningDialog) {
         AppAlertDialog(

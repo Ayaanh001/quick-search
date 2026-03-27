@@ -1,18 +1,21 @@
 package com.tk.quicksearch.search.searchScreen.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.material.icons.rounded.Keyboard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,8 +43,10 @@ internal fun KeyboardSwitchPill(
     val isDarkTheme = LocalAppIsDarkTheme.current
     val backgroundColor = if (isDarkTheme) Color.Black else Color.White
     val labelColor = if (isDarkTheme) Color.White else Color.Black
+    val interactionSource = remember { MutableInteractionSource() }
     Surface(
-        modifier = modifier.clickable(onClick = onClick),
+        onClick = onClick,
+        interactionSource = interactionSource,
         shape = DesignTokens.ShapeFull,
         color = backgroundColor,
         tonalElevation = DesignTokens.ElevationLevel0,
@@ -59,6 +64,47 @@ internal fun KeyboardSwitchPill(
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelSmall,
+                color = labelColor,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+    }
+}
+
+@Composable
+internal fun OpenKeyboardAction(
+    text: String,
+    onClick: () -> Unit,
+    showWallpaperBackground: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val isDarkTheme = LocalAppIsDarkTheme.current
+    val backgroundColor = AppColors.getCompactSectionBackground(showWallpaperBackground)
+    val labelColor = if (isDarkTheme) Color.White else Color.Black
+    Surface(
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
+        color = backgroundColor,
+        tonalElevation = DesignTokens.ElevationLevel0,
+    ) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 75.dp)
+                    .padding(vertical = DesignTokens.SpacingXSmall),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Keyboard,
+                contentDescription = null,
+                tint = labelColor,
+                modifier = Modifier.size(DesignTokens.IconSize),
+            )
+            Spacer(modifier = Modifier.size(DesignTokens.SpacingSmall))
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyMedium,
                 color = labelColor,
                 fontWeight = FontWeight.Medium,
             )

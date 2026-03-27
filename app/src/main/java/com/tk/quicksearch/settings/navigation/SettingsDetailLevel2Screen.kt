@@ -380,5 +380,5 @@ internal fun SettingsDetailLevel2Screen(
             )
         }
     }
-    } // end CompositionLocalProvider
+    }
 }

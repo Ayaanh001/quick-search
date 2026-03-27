@@ -53,6 +53,8 @@ private object SearchEngineSectionConstants {
     val ROW_SPACING = 10.dp
     val PREDICTION_HIGHLIGHT_HEIGHT_EXTRA = 12.dp
     val PREDICTION_HIGHLIGHT_WIDTH_EXTRA = 8.dp
+    val PREDICTION_HIGHLIGHT_CONTENT_PADDING =
+        (PREDICTION_HIGHLIGHT_WIDTH_EXTRA / 2) + DesignTokens.BorderWidth
     val SEARCH_ICON_SIZE = SearchTargetConstants.SEARCH_ICON_SIZE
     val HORIZONTAL_PADDING = SearchTargetConstants.HORIZONTAL_PADDING
     val VERTICAL_PADDING = SearchTargetConstants.VERTICAL_PADDING
@@ -91,6 +93,7 @@ fun SearchEngineIconsSection(
     showOverlayExpandChevron: Boolean = false,
     onOverlayExpandClick: (() -> Unit)? = null,
     isOverlayExpanded: Boolean = false,
+    removeBottomCornerRadiusInOverlay: Boolean = false,
     compactRowCount: Int = 1,
     predictedTarget: PredictedSubmitTarget? = null,
     appIconShape: AppIconShape = AppIconShape.DEFAULT,
@@ -109,8 +112,8 @@ fun SearchEngineIconsSection(
             RoundedCornerShape(
                 topStart = 20.dp,
                 topEnd = 20.dp,
-                bottomStart = 28.dp,
-                bottomEnd = 28.dp,
+                bottomStart = if (removeBottomCornerRadiusInOverlay) 0.dp else 28.dp,
+                bottomEnd = if (removeBottomCornerRadiusInOverlay) 0.dp else 28.dp,
             )
         } else {
             RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
@@ -290,7 +293,7 @@ private fun ScrollableEngineIcons(
                 horizontalArrangement = Arrangement.spacedBy(SearchEngineSectionConstants.SPACING),
                 contentPadding =
                     PaddingValues(
-                        horizontal = SearchEngineSectionConstants.PREDICTION_HIGHLIGHT_WIDTH_EXTRA / 2,
+                        horizontal = SearchEngineSectionConstants.PREDICTION_HIGHLIGHT_CONTENT_PADDING,
                     ),
                 modifier =
                     Modifier
@@ -343,7 +346,7 @@ private fun ScrollableEngineIcons(
                 horizontalArrangement = Arrangement.spacedBy(SearchEngineSectionConstants.SPACING),
                 contentPadding =
                     PaddingValues(
-                        horizontal = SearchEngineSectionConstants.PREDICTION_HIGHLIGHT_WIDTH_EXTRA / 2,
+                        horizontal = SearchEngineSectionConstants.PREDICTION_HIGHLIGHT_CONTENT_PADDING,
                     ),
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -373,7 +376,7 @@ private fun ScrollableEngineIcons(
 @Composable
 private fun calculateItemWidth(maxWidth: androidx.compose.ui.unit.Dp, itemsPerRow: Int): androidx.compose.ui.unit.Dp {
     val totalSpacing = SearchEngineSectionConstants.SPACING * (itemsPerRow - 1)
-    val totalHorizontalContentPadding = SearchEngineSectionConstants.PREDICTION_HIGHLIGHT_WIDTH_EXTRA
+    val totalHorizontalContentPadding = SearchEngineSectionConstants.PREDICTION_HIGHLIGHT_CONTENT_PADDING * 2
     return (maxWidth - totalSpacing - totalHorizontalContentPadding) / itemsPerRow
 }
 

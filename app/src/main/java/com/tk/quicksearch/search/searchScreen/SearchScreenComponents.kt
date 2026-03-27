@@ -133,6 +133,19 @@ internal fun KeyboardSwitchPill(
 )
 
 @Composable
+internal fun OpenKeyboardAction(
+    text: String,
+    onClick: () -> Unit,
+    showWallpaperBackground: Boolean,
+    modifier: Modifier = Modifier,
+) = com.tk.quicksearch.search.searchScreen.components.OpenKeyboardAction(
+    text = text,
+    onClick = onClick,
+    showWallpaperBackground = showWallpaperBackground,
+    modifier = modifier,
+)
+
+@Composable
 internal fun OverlayExpandPill(
     text: String,
     onClick: () -> Unit,

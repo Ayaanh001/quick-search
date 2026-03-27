@@ -103,6 +103,7 @@ fun SearchContentArea(
     onOpenSearchHistorySettings: () -> Unit = {},
     onDismissSearchHistoryTip: () -> Unit = {},
     onGeminiModelInfoClick: () -> Unit = {},
+    onSearchHistoryExpandedChange: (Boolean) -> Unit = {},
     showCalculator: Boolean = false,
     showDirectSearch: Boolean = false,
     directSearchState: DirectSearchState? = null,
@@ -405,6 +406,7 @@ fun SearchContentArea(
                             onOpenSearchHistorySettings = onOpenSearchHistorySettings,
                             onDismissSearchHistoryTip = onDismissSearchHistoryTip,
                             onGeminiModelInfoClick = onGeminiModelInfoClick,
+                            onSearchHistoryExpandedChange = onSearchHistoryExpandedChange,
                         )
                     }
                 }

@@ -79,6 +79,7 @@ fun ContentLayout(
     onOpenSearchHistorySettings: () -> Unit = {},
     onDismissSearchHistoryTip: () -> Unit = {},
     onGeminiModelInfoClick: () -> Unit = {},
+    onSearchHistoryExpandedChange: (Boolean) -> Unit = {},
 ) {
     val context = LocalContext.current
     val effectiveContactsParams =
@@ -190,6 +191,9 @@ fun ContentLayout(
     var searchHistoryExpanded by remember { mutableStateOf(false) }
     LaunchedEffect(showRecentItems) {
         if (!showRecentItems) searchHistoryExpanded = false
+    }
+    LaunchedEffect(searchHistoryExpanded) {
+        onSearchHistoryExpandedChange(searchHistoryExpanded)
     }
 
     val hidePinnedAndAppsWhenSearchHistoryExpanded =

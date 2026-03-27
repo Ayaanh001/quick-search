@@ -1,6 +1,7 @@
 package com.tk.quicksearch.search.searchScreen
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -105,6 +106,7 @@ internal fun SearchScreenContent(
     val density = LocalDensity.current
     var canShowOpenKeyboardPill by
             remember(isOverlayPresentation) { mutableStateOf(!isOverlayPresentation) }
+    var isSearchHistoryExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(isOverlayPresentation) {
         if (!isOverlayPresentation) {
@@ -180,6 +182,26 @@ internal fun SearchScreenContent(
             }
     val shouldRenderInlineNumberKeyboardOperators =
             shouldShowNumberKeyboardOperators && !isOverlayPresentation
+    val openKeyboardText = stringResource(R.string.action_open_keyboard)
+    val showOpenKeyboardAction =
+            expandedSection == ExpandedSection.NONE &&
+                    !showBottomSearchBar &&
+                    !isImeVisible &&
+                    canShowOpenKeyboardPill
+    val keyboardSwitchText =
+            if (isToolMode) {
+                null
+            } else if (manuallySwitchedToNumberKeyboard) {
+                stringResource(R.string.keyboard_switch_back)
+            } else if (state.query.isNotEmpty() &&
+                            state.query.none { it.isLetter() } &&
+                            state.detectedShortcutTarget == null &&
+                            state.detectedAliasSearchSection == null
+            ) {
+                stringResource(R.string.keyboard_switch_to_number)
+            } else {
+                null
+            }
     val shouldShowPredictedHighlight = isImeVisible
     val predictedTarget =
             remember(
@@ -477,6 +499,7 @@ internal fun SearchScreenContent(
                 onOpenSearchHistorySettings = onOpenSearchHistorySettings,
                 onDismissSearchHistoryTip = onDismissSearchHistoryTip,
                 onGeminiModelInfoClick = onGeminiModelInfoClick,
+                onSearchHistoryExpandedChange = { isSearchHistoryExpanded = it },
                 showCalculator = state.calculatorState.isToolMode || state.calculatorState.result != null || state.calculatorState.parsedDateMillis != null || state.calculatorState.dateDiffLabel != null || state.calculatorState.timeResultLabel != null,
                 showDirectSearch = state.DirectSearchState.status != DirectSearchStatus.Idle,
                 directSearchState = state.DirectSearchState,
@@ -489,24 +512,8 @@ internal fun SearchScreenContent(
         // Fixed search engines section at the bottom (above keyboard, not scrollable)
         // Hide when files or contacts are expanded
         if (expandedSection == ExpandedSection.NONE) {
-            val pillText =
-                    if (!isImeVisible && canShowOpenKeyboardPill) {
-                        stringResource(R.string.action_open_keyboard)
-                    } else if (isToolMode) {
-                        null
-                    } else if (manuallySwitchedToNumberKeyboard) {
-                        stringResource(R.string.keyboard_switch_back)
-                    } else if (state.query.isNotEmpty() &&
-                                    state.query.none { it.isLetter() } &&
-                                    state.detectedShortcutTarget == null &&
-                                    state.detectedAliasSearchSection == null
-                    ) {
-                        stringResource(R.string.keyboard_switch_to_number)
-                    } else {
-                        null
-                    }
             AnimatedVisibility(
-                    visible = pillText != null,
+                    visible = keyboardSwitchText != null,
                     enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
                     exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
             ) {
@@ -520,22 +527,16 @@ internal fun SearchScreenContent(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (pillText != null) {
+                    if (keyboardSwitchText != null) {
                         KeyboardSwitchPill(
-                                text = pillText,
-                                onClick = {
-                                    if (!isImeVisible) {
-                                        keyboardController?.show()
-                                    } else {
-                                        onKeyboardSwitchToggle()
-                                    }
-                                },
+                                text = keyboardSwitchText,
+                                onClick = onKeyboardSwitchToggle,
                         )
                     }
                 }
             }
 
-            if (!hideCompactSearchEnginesInToolMode) {
+            if (!hideCompactSearchEnginesInToolMode && !isSearchHistoryExpanded) {
                 CompositionLocalProvider(
                         LocalOverlayResultCardColor provides overlayCardColor,
                         LocalOverlayDividerColor provides overlayDividerTint,
@@ -557,6 +558,7 @@ internal fun SearchScreenContent(
                                         showWallpaperBackground = state.showWallpaperBackground,
                                         isOverlayPresentation = isOverlayPresentation,
                                         hasBottomSearchBar = showBottomSearchBar,
+                                        removeBottomCornerRadiusInOverlay = isOverlayPresentation && showOpenKeyboardAction,
                                         compactRowCount = state.searchEngineCompactRowCount,
                                         predictedTarget = predictedTargetForIndicator,
                                         appIconShape = state.appIconShape,
@@ -575,6 +577,7 @@ internal fun SearchScreenContent(
                                         showWallpaperBackground = state.showWallpaperBackground,
                                         isOverlayPresentation = isOverlayPresentation,
                                         hasBottomSearchBar = showBottomSearchBar,
+                                        removeBottomCornerRadiusInOverlay = false,
                                         compactRowCount = 1,
                                         predictedTarget = predictedTargetForIndicator,
                                         appIconShape = state.appIconShape,
@@ -593,6 +596,7 @@ internal fun SearchScreenContent(
                                         showWallpaperBackground = state.showWallpaperBackground,
                                         isOverlayPresentation = isOverlayPresentation,
                                         hasBottomSearchBar = showBottomSearchBar,
+                                        removeBottomCornerRadiusInOverlay = false,
                                         compactRowCount = 1,
                                         predictedTarget = predictedTargetForIndicator,
                                         appIconShape = state.appIconShape,
@@ -607,66 +611,136 @@ internal fun SearchScreenContent(
                 }
             }
 
-            AnimatedVisibility(
-                    visible =
-                            shouldRenderInlineNumberKeyboardOperators &&
-                                    !showBottomSearchBar,
-                    enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
-                    exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
-            ) {
-                NumberKeyboardOperatorPills(
-                        modifier = Modifier.imePadding(),
-                        isOverlayPresentation = isOverlayPresentation,
-                        onOperatorClick = { operator ->
-                            onQueryChanged(state.query + operator)
-                        },
-                )
+            Box(modifier = Modifier.fillMaxWidth().extendToScreenEdges()) {
+                androidx.compose.animation.AnimatedVisibility(
+                        visible = shouldRenderInlineNumberKeyboardOperators && !showBottomSearchBar,
+                        modifier = Modifier.fillMaxWidth(),
+                        enter =
+                                fadeIn(animationSpec = tween(durationMillis = 180)) +
+                                        expandVertically(
+                                                expandFrom = Alignment.Bottom,
+                                                animationSpec = tween(durationMillis = 220),
+                                        ),
+                        exit =
+                                fadeOut(animationSpec = tween(durationMillis = 130)) +
+                                        shrinkVertically(
+                                                shrinkTowards = Alignment.Bottom,
+                                                animationSpec = tween(durationMillis = 180),
+                                        ),
+                ) {
+                    NumberKeyboardOperatorPills(
+                            modifier = Modifier.imePadding(),
+                            isOverlayPresentation = isOverlayPresentation,
+                            extendToScreenEdges = false,
+                            onOperatorClick = { operator ->
+                                onQueryChanged(state.query + operator)
+                            },
+                    )
+                }
             }
         }
 
         if (showSearchField && showBottomSearchBar) {
             val shouldShowCompactBottomBarBackground =
+                    expandedSection == ExpandedSection.NONE &&
                     state.isSearchEngineCompactMode &&
+                            !hideCompactSearchEnginesInToolMode &&
+                            !isSearchHistoryExpanded &&
                             state.detectedShortcutTarget == null &&
                             state.detectedAliasSearchSection == null
 
-            if (shouldShowCompactBottomBarBackground) {
+            Box(
+                    modifier =
+                            Modifier
+                                    .fillMaxWidth()
+                                    .then(
+                                            if (shouldShowCompactBottomBarBackground) {
+                                                Modifier
+                                                        .extendToScreenEdges()
+                                                        .background(
+                                                                AppColors.getCompactSectionBackground(
+                                                                        state.showWallpaperBackground
+                                                                )
+                                                        )
+                                            } else {
+                                                Modifier
+                                            }
+                                    )
+            ) {
                 Box(
                         modifier =
                                 Modifier
                                         .fillMaxWidth()
-                                        .extendToScreenEdges()
-                                        .background(AppColors.getCompactSectionBackground(state.showWallpaperBackground))
+                                        .then(
+                                                if (shouldShowCompactBottomBarBackground) {
+                                                    Modifier.padding(horizontal = DesignTokens.SpacingXLarge)
+                                                } else {
+                                                    Modifier
+                                                }
+                                        )
                 ) {
-                    Box(
-                            modifier =
-                                    Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = DesignTokens.SpacingXLarge)
-                    ) {
-                        searchFieldContent()
-                    }
+                    searchFieldContent()
                 }
-            } else {
-                searchFieldContent()
             }
 
-            AnimatedVisibility(
-                    visible =
-                            expandedSection == ExpandedSection.NONE &&
-                                    shouldRenderInlineNumberKeyboardOperators,
-                    enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
-                    exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top),
+            Box(modifier = Modifier.fillMaxWidth().extendToScreenEdges()) {
+                androidx.compose.animation.AnimatedVisibility(
+                        visible =
+                                expandedSection == ExpandedSection.NONE &&
+                                        shouldRenderInlineNumberKeyboardOperators,
+                        modifier = Modifier.fillMaxWidth(),
+                        enter =
+                                fadeIn(animationSpec = tween(durationMillis = 180)) +
+                                        expandVertically(
+                                                expandFrom = Alignment.Bottom,
+                                                animationSpec = tween(durationMillis = 220),
+                                        ),
+                        exit =
+                                fadeOut(animationSpec = tween(durationMillis = 130)) +
+                                        shrinkVertically(
+                                                shrinkTowards = Alignment.Bottom,
+                                                animationSpec = tween(durationMillis = 180),
+                                        ),
+                ) {
+                    NumberKeyboardOperatorPills(
+                            modifier = Modifier.imePadding(),
+                            isOverlayPresentation = isOverlayPresentation,
+                            extendToScreenEdges = false,
+                            onOperatorClick = { operator ->
+                                onQueryChanged(state.query + operator)
+                            },
+                    )
+                }
+            }
+        }
+
+        Box(modifier = Modifier.fillMaxWidth().extendToScreenEdges()) {
+            androidx.compose.animation.AnimatedVisibility(
+                    visible = showOpenKeyboardAction,
+                    modifier = Modifier.fillMaxWidth(),
+                    enter =
+                            fadeIn(animationSpec = tween(durationMillis = 180)) +
+                                    expandVertically(
+                                            expandFrom = Alignment.Bottom,
+                                            animationSpec = tween(durationMillis = 220),
+                                    ),
+                    exit =
+                            fadeOut(animationSpec = tween(durationMillis = 130)) +
+                                    shrinkVertically(
+                                            shrinkTowards = Alignment.Bottom,
+                                            animationSpec = tween(durationMillis = 180),
+                                    ),
             ) {
-                NumberKeyboardOperatorPills(
-                        modifier = Modifier.imePadding(),
-                        isOverlayPresentation = isOverlayPresentation,
-                        onOperatorClick = { operator ->
-                            onQueryChanged(state.query + operator)
+                OpenKeyboardAction(
+                        text = openKeyboardText,
+                        showWallpaperBackground = state.showWallpaperBackground,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            keyboardController?.show()
                         },
                 )
             }
         }
     }
-    } // end CompositionLocalProvider(LocalSearchColorTheme)
+    } 
 }
