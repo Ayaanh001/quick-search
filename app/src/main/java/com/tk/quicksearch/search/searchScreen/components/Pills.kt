@@ -38,10 +38,8 @@ internal fun KeyboardSwitchPill(
     modifier: Modifier = Modifier,
 ) {
     val isDarkTheme = LocalAppIsDarkTheme.current
-    val backgroundColor =
-        if (isDarkTheme) Color.Black else AppColors.KeyboardButtonBackground
-    val labelColor =
-        if (isDarkTheme) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+    val backgroundColor = if (isDarkTheme) Color.Black else Color.White
+    val labelColor = if (isDarkTheme) Color.White else Color.Black
     Surface(
         modifier = modifier.clickable(onClick = onClick),
         shape = DesignTokens.ShapeFull,

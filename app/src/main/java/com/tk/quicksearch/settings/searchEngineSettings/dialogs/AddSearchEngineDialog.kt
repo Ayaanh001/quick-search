@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import com.tk.quicksearch.shared.ui.components.AppAlertDialog
+import com.tk.quicksearch.shared.ui.components.dialogTextFieldColors
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +22,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -170,6 +170,7 @@ fun AddSearchEngineDialog(
                                 singleLine = true,
                                 maxLines = 1,
                                 isError = !isNameValid,
+                                colors = dialogTextFieldColors(),
                             )
                         } else {
                             Text(
@@ -212,11 +213,7 @@ fun AddSearchEngineDialog(
                                 }
                             },
                         ),
-                    colors =
-                        TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        ),
+                    colors = dialogTextFieldColors(),
                 )
 
                 when {

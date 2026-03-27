@@ -1,7 +1,9 @@
 package com.tk.quicksearch.search.data
 
 import android.content.Context
+import android.content.res.Configuration
 import com.tk.quicksearch.search.core.AppIconShape
+import com.tk.quicksearch.search.core.AppThemeMode
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.search.models.FileType
@@ -64,6 +66,24 @@ class StartupPreferencesFacade(
             // Full startup preferences (loaded in background)
             val startupPreferences: StartupPreferences,
     )
+
+    private fun computeIsDarkMode(allPrefs: Map<String, *>): Boolean {
+        val modeName =
+                allPrefs[
+                        com.tk.quicksearch.search.data.preferences.UiPreferences.KEY_APP_THEME_MODE,
+                ] as? String
+        val mode = modeName?.let { runCatching { AppThemeMode.valueOf(it) }.getOrNull() }
+                ?: AppThemeMode.SYSTEM
+        return when (mode) {
+            AppThemeMode.DARK -> true
+            AppThemeMode.LIGHT -> false
+            AppThemeMode.SYSTEM -> {
+                val nightModeFlags =
+                        context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+                nightModeFlags == Configuration.UI_MODE_NIGHT_YES
+            }
+        }
+    }
 
     /**
      * Optimized: Loads all preferences needed during startup in a single batch operation. Uses
@@ -212,21 +232,31 @@ class StartupPreferencesFacade(
                                 Boolean
                                 ?: false,
                 wallpaperBackgroundAlpha =
-                        allPrefs[
-                                com.tk.quicksearch.search.data.preferences.UiPreferences
-                                        .KEY_WALLPAPER_BACKGROUND_ALPHA,
-                        ] as?
-                                Float
-                                ?: com.tk.quicksearch.search.data.preferences.UiPreferences
-                                        .DEFAULT_WALLPAPER_BACKGROUND_ALPHA,
+                        run {
+                            val isDark = computeIsDarkMode(allPrefs)
+                            val key = if (isDark)
+                                com.tk.quicksearch.search.data.preferences.UiPreferences.KEY_WALLPAPER_BACKGROUND_ALPHA
+                            else
+                                com.tk.quicksearch.search.data.preferences.UiPreferences.KEY_WALLPAPER_BACKGROUND_ALPHA_LIGHT
+                            val default = if (isDark)
+                                com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_WALLPAPER_BACKGROUND_ALPHA
+                            else
+                                com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_WALLPAPER_BACKGROUND_ALPHA_LIGHT
+                            allPrefs[key] as? Float ?: default
+                        },
                 wallpaperBlurRadius =
-                        allPrefs[
-                                com.tk.quicksearch.search.data.preferences.UiPreferences
-                                        .KEY_WALLPAPER_BLUR_RADIUS,
-                        ] as?
-                                Float
-                                ?: com.tk.quicksearch.search.data.preferences.UiPreferences
-                                        .DEFAULT_WALLPAPER_BLUR_RADIUS,
+                        run {
+                            val isDark = computeIsDarkMode(allPrefs)
+                            val key = if (isDark)
+                                com.tk.quicksearch.search.data.preferences.UiPreferences.KEY_WALLPAPER_BLUR_RADIUS
+                            else
+                                com.tk.quicksearch.search.data.preferences.UiPreferences.KEY_WALLPAPER_BLUR_RADIUS_LIGHT
+                            val default = if (isDark)
+                                com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_WALLPAPER_BLUR_RADIUS
+                            else
+                                com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_WALLPAPER_BLUR_RADIUS_LIGHT
+                            allPrefs[key] as? Float ?: default
+                        },
                 appTheme =
                         (
                                 (allPrefs[
@@ -519,21 +549,31 @@ class StartupPreferencesFacade(
                                         Boolean
                                 ?: false,
                         wallpaperBackgroundAlpha =
-                                allPrefs[
-                                        com.tk.quicksearch.search.data.preferences.UiPreferences
-                                                .KEY_WALLPAPER_BACKGROUND_ALPHA,
-                                ] as?
-                                        Float
-                                ?: com.tk.quicksearch.search.data.preferences.UiPreferences
-                                        .DEFAULT_WALLPAPER_BACKGROUND_ALPHA,
+                                run {
+                                    val isDark = computeIsDarkMode(allPrefs)
+                                    val key = if (isDark)
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences.KEY_WALLPAPER_BACKGROUND_ALPHA
+                                    else
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences.KEY_WALLPAPER_BACKGROUND_ALPHA_LIGHT
+                                    val default = if (isDark)
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_WALLPAPER_BACKGROUND_ALPHA
+                                    else
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_WALLPAPER_BACKGROUND_ALPHA_LIGHT
+                                    allPrefs[key] as? Float ?: default
+                                },
                         wallpaperBlurRadius =
-                                allPrefs[
-                                        com.tk.quicksearch.search.data.preferences.UiPreferences
-                                                .KEY_WALLPAPER_BLUR_RADIUS,
-                                ] as?
-                                        Float
-                                ?: com.tk.quicksearch.search.data.preferences.UiPreferences
-                                        .DEFAULT_WALLPAPER_BLUR_RADIUS,
+                                run {
+                                    val isDark = computeIsDarkMode(allPrefs)
+                                    val key = if (isDark)
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences.KEY_WALLPAPER_BLUR_RADIUS
+                                    else
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences.KEY_WALLPAPER_BLUR_RADIUS_LIGHT
+                                    val default = if (isDark)
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_WALLPAPER_BLUR_RADIUS
+                                    else
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_WALLPAPER_BLUR_RADIUS_LIGHT
+                                    allPrefs[key] as? Float ?: default
+                                },
                         appTheme =
                                 (
                                         (allPrefs[

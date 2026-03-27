@@ -108,28 +108,37 @@ class UiPreferences(
         recordCurrentInstallTime()
     }
 
-    fun getWallpaperBackgroundAlpha(): Float =
+    fun getWallpaperBackgroundAlpha(isDarkMode: Boolean): Float =
             prefs.getFloat(
-                    UiPreferences.KEY_WALLPAPER_BACKGROUND_ALPHA,
-                    UiPreferences.DEFAULT_WALLPAPER_BACKGROUND_ALPHA,
+                    if (isDarkMode) UiPreferences.KEY_WALLPAPER_BACKGROUND_ALPHA
+                    else UiPreferences.KEY_WALLPAPER_BACKGROUND_ALPHA_LIGHT,
+                    if (isDarkMode) UiPreferences.DEFAULT_WALLPAPER_BACKGROUND_ALPHA
+                    else UiPreferences.DEFAULT_WALLPAPER_BACKGROUND_ALPHA_LIGHT,
             )
 
-    fun setWallpaperBackgroundAlpha(alpha: Float) {
+    fun setWallpaperBackgroundAlpha(alpha: Float, isDarkMode: Boolean) {
         prefs.edit()
-                .putFloat(UiPreferences.KEY_WALLPAPER_BACKGROUND_ALPHA, alpha.coerceIn(0f, 1f))
+                .putFloat(
+                        if (isDarkMode) UiPreferences.KEY_WALLPAPER_BACKGROUND_ALPHA
+                        else UiPreferences.KEY_WALLPAPER_BACKGROUND_ALPHA_LIGHT,
+                        alpha.coerceIn(0f, 1f),
+                )
                 .apply()
     }
 
-    fun getWallpaperBlurRadius(): Float =
+    fun getWallpaperBlurRadius(isDarkMode: Boolean): Float =
             prefs.getFloat(
-                    UiPreferences.KEY_WALLPAPER_BLUR_RADIUS,
-                    UiPreferences.DEFAULT_WALLPAPER_BLUR_RADIUS,
+                    if (isDarkMode) UiPreferences.KEY_WALLPAPER_BLUR_RADIUS
+                    else UiPreferences.KEY_WALLPAPER_BLUR_RADIUS_LIGHT,
+                    if (isDarkMode) UiPreferences.DEFAULT_WALLPAPER_BLUR_RADIUS
+                    else UiPreferences.DEFAULT_WALLPAPER_BLUR_RADIUS_LIGHT,
             )
 
-    fun setWallpaperBlurRadius(radius: Float) {
+    fun setWallpaperBlurRadius(radius: Float, isDarkMode: Boolean) {
         prefs.edit()
                 .putFloat(
-                        UiPreferences.KEY_WALLPAPER_BLUR_RADIUS,
+                        if (isDarkMode) UiPreferences.KEY_WALLPAPER_BLUR_RADIUS
+                        else UiPreferences.KEY_WALLPAPER_BLUR_RADIUS_LIGHT,
                         radius.coerceIn(0f, MAX_WALLPAPER_BLUR_RADIUS),
                 )
                 .apply()
@@ -607,6 +616,8 @@ class UiPreferences(
         const val KEY_INSTALL_TIME = "install_time"
         const val KEY_WALLPAPER_BACKGROUND_ALPHA = "wallpaper_background_alpha"
         const val KEY_WALLPAPER_BLUR_RADIUS = "wallpaper_blur_radius"
+        const val KEY_WALLPAPER_BACKGROUND_ALPHA_LIGHT = "wallpaper_background_alpha_light"
+        const val KEY_WALLPAPER_BLUR_RADIUS_LIGHT = "wallpaper_blur_radius_light"
         const val KEY_APP_THEME = "app_theme"
         const val KEY_OVERLAY_GRADIENT_THEME = "overlay_gradient_theme"
         const val KEY_APP_THEME_MODE = "app_theme_mode"
@@ -658,6 +669,8 @@ class UiPreferences(
 
         const val DEFAULT_WALLPAPER_BACKGROUND_ALPHA = 0.5f
         const val DEFAULT_WALLPAPER_BLUR_RADIUS = 20f
+        const val DEFAULT_WALLPAPER_BACKGROUND_ALPHA_LIGHT = 0.10f
+        const val DEFAULT_WALLPAPER_BLUR_RADIUS_LIGHT = 4.8f
         const val DEFAULT_APP_THEME = "MONOCHROME"
         const val DEFAULT_OVERLAY_THEME_INTENSITY = 0.5f
         const val DEFAULT_FONT_SCALE_MULTIPLIER = 1f

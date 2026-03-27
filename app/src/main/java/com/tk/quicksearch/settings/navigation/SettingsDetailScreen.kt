@@ -35,6 +35,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
+import com.tk.quicksearch.search.core.AppTheme
+import com.tk.quicksearch.search.core.AppThemeMode
 import com.tk.quicksearch.search.utils.PermissionUtils
 import com.tk.quicksearch.searchEngines.getId
 import com.tk.quicksearch.shared.permissions.PermissionHelper
@@ -47,6 +49,8 @@ import com.tk.quicksearch.settings.shared.SettingsScreenBackground
 import com.tk.quicksearch.settings.shared.SettingsScreenState
 import com.tk.quicksearch.settings.shared.settingsContentWidth
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.LocalAppIsDarkTheme
+import com.tk.quicksearch.shared.ui.theme.QuickSearchTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -86,10 +90,16 @@ internal fun SettingsDetailLevel1Screen(
             state.excludedFileExtensions.isNotEmpty() ||
             state.excludedSettings.isNotEmpty() ||
             state.excludedAppShortcuts.isNotEmpty()
+    val effectiveAppTheme = if (detailType == SettingsDetailType.FEATURES_LIST) AppTheme.MONOCHROME else state.appTheme
     SettingsScreenBackground(
-        appTheme = state.appTheme,
+        appTheme = effectiveAppTheme,
         overlayThemeIntensity = state.overlayThemeIntensity,
         modifier = modifier,
+    ) {
+    val isDark = LocalAppIsDarkTheme.current
+    MonoThemeWrapper(
+        applyMono = detailType == SettingsDetailType.FEATURES_LIST,
+        isDark = isDark,
     ) {
     Box(
         modifier =
@@ -349,6 +359,7 @@ internal fun SettingsDetailLevel1Screen(
         }
     }
     }
+    }
 }
 
 @Composable
@@ -385,6 +396,22 @@ internal fun SettingsDetailHeader(
             Spacer(modifier = Modifier.width(DesignTokens.HeaderIconSpacing))
             it()
         }
+    }
+}
+
+@Composable
+private fun MonoThemeWrapper(
+    applyMono: Boolean,
+    isDark: Boolean,
+    content: @Composable () -> Unit,
+) {
+    if (applyMono) {
+        QuickSearchTheme(
+            appTheme = AppTheme.MONOCHROME,
+            appThemeMode = if (isDark) AppThemeMode.DARK else AppThemeMode.LIGHT,
+        ) { content() }
+    } else {
+        content()
     }
 }
 

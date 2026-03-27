@@ -572,13 +572,17 @@ class UserAppPreferences(
 
     fun setFirstLaunchCompleted() = uiPreferences.setFirstLaunchCompleted()
 
-    fun getWallpaperBackgroundAlpha(): Float = uiPreferences.getWallpaperBackgroundAlpha()
+    fun getWallpaperBackgroundAlpha(isDarkMode: Boolean): Float =
+            uiPreferences.getWallpaperBackgroundAlpha(isDarkMode)
 
-    fun setWallpaperBackgroundAlpha(alpha: Float) = uiPreferences.setWallpaperBackgroundAlpha(alpha)
+    fun setWallpaperBackgroundAlpha(alpha: Float, isDarkMode: Boolean) =
+            uiPreferences.setWallpaperBackgroundAlpha(alpha, isDarkMode)
 
-    fun getWallpaperBlurRadius(): Float = uiPreferences.getWallpaperBlurRadius()
+    fun getWallpaperBlurRadius(isDarkMode: Boolean): Float =
+            uiPreferences.getWallpaperBlurRadius(isDarkMode)
 
-    fun setWallpaperBlurRadius(radius: Float) = uiPreferences.setWallpaperBlurRadius(radius)
+    fun setWallpaperBlurRadius(radius: Float, isDarkMode: Boolean) =
+            uiPreferences.setWallpaperBlurRadius(radius, isDarkMode)
 
     fun getAppTheme(): AppTheme = uiPreferences.getAppTheme()
 

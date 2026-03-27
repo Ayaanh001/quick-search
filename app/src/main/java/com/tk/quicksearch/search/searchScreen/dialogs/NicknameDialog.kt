@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import com.tk.quicksearch.shared.ui.components.AppAlertDialog
+import com.tk.quicksearch.shared.ui.components.dialogTextFieldColors
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -103,6 +104,7 @@ fun NicknameDialog(
                             }
                         }
                     },
+                    colors = dialogTextFieldColors(),
                 )
             }
         },

@@ -32,6 +32,7 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import com.tk.quicksearch.shared.ui.components.AppAlertDialog
+import com.tk.quicksearch.shared.ui.components.dialogTextFieldColors
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -493,6 +494,7 @@ private fun CustomWidgetButtonDialog(
                         }
                     },
                     singleLine = true,
+                    colors = dialogTextFieldColors(),
                 )
 
                 // Show hint below search bar when there's no query

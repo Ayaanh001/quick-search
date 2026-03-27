@@ -107,6 +107,17 @@ class SearchViewModel(
             if (instantStartupSurfaceEnabled) startupSurfaceStore.loadSnapshot() else null
     private val initialBackgroundSource = startupPreferencesReader.getBackgroundSource()
     private val initialCustomImageUri = startupPreferencesReader.getCustomImageUri()
+    private val initialAppThemeMode = startupPreferencesReader.getAppThemeMode()
+    private val initialIsDarkMode: Boolean = when (initialAppThemeMode) {
+        AppThemeMode.DARK -> true
+        AppThemeMode.LIGHT -> false
+        AppThemeMode.SYSTEM -> {
+            val nightModeFlags =
+                    appContext.resources.configuration.uiMode and
+                            android.content.res.Configuration.UI_MODE_NIGHT_MASK
+            nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        }
+    }
     private val initialPreviewPath =
             startupSnapshot?.startupBackgroundPreviewPath?.takeIf { snapshotPath ->
                 startupSnapshot.backgroundSource == initialBackgroundSource &&
@@ -138,10 +149,14 @@ class SearchViewModel(
                                     ?: initialBackgroundSource != BackgroundSource.THEME,
                     wallpaperBackgroundAlpha =
                             startupSnapshot?.wallpaperBackgroundAlpha
-                                    ?: startupPreferencesReader.getWallpaperBackgroundAlpha(),
+                                    ?: startupPreferencesReader.getWallpaperBackgroundAlpha(
+                                            initialIsDarkMode,
+                                    ),
                     wallpaperBlurRadius =
                             startupSnapshot?.wallpaperBlurRadius
-                                    ?: startupPreferencesReader.getWallpaperBlurRadius(),
+                                    ?: startupPreferencesReader.getWallpaperBlurRadius(
+                                            initialIsDarkMode,
+                                    ),
                     appTheme =
                             startupSnapshot?.appTheme
                                     ?: startupPreferencesReader.getAppTheme(),
@@ -151,7 +166,7 @@ class SearchViewModel(
                                             ?: startupPreferencesReader.getOverlayThemeIntensity(),
                             ),
                     appThemeMode =
-                            startupPreferencesReader.getAppThemeMode(),
+                            initialAppThemeMode,
                     backgroundSource =
                             initialBackgroundSource,
                     customImageUri = initialCustomImageUri,
@@ -3132,10 +3147,23 @@ class SearchViewModel(
         refreshAppShortcutsState(updateResults = false)
     }
 
+    private fun computeEffectiveIsDarkMode(): Boolean {
+        return when (_configState.value.appThemeMode) {
+            AppThemeMode.DARK -> true
+            AppThemeMode.LIGHT -> false
+            AppThemeMode.SYSTEM -> {
+                val nightModeFlags =
+                        appContext.resources.configuration.uiMode and
+                                android.content.res.Configuration.UI_MODE_NIGHT_MASK
+                nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES
+            }
+        }
+    }
+
     fun setWallpaperBackgroundAlpha(alpha: Float) {
         viewModelScope.launch(Dispatchers.IO) {
             val sanitizedAlpha = alpha.coerceIn(0f, 1f)
-            userPreferences.setWallpaperBackgroundAlpha(sanitizedAlpha)
+            userPreferences.setWallpaperBackgroundAlpha(sanitizedAlpha, computeEffectiveIsDarkMode())
             wallpaperBackgroundAlpha = sanitizedAlpha
             updateConfigState { it.copy(wallpaperBackgroundAlpha = sanitizedAlpha) }
             saveStartupSurfaceSnapshotAsync(allowDuringQuery = true)
@@ -3145,7 +3173,7 @@ class SearchViewModel(
     fun setWallpaperBlurRadius(radius: Float) {
         viewModelScope.launch(Dispatchers.IO) {
             val sanitizedRadius = radius.coerceIn(0f, UiPreferences.MAX_WALLPAPER_BLUR_RADIUS)
-            userPreferences.setWallpaperBlurRadius(sanitizedRadius)
+            userPreferences.setWallpaperBlurRadius(sanitizedRadius, computeEffectiveIsDarkMode())
             wallpaperBlurRadius = sanitizedRadius
             updateConfigState { it.copy(wallpaperBlurRadius = sanitizedRadius) }
             saveStartupSurfaceSnapshotAsync(allowDuringQuery = true)
@@ -3163,8 +3191,31 @@ class SearchViewModel(
     }
 
     fun setAppThemeMode(theme: AppThemeMode) {
+        val previousIsDark = computeEffectiveIsDarkMode()
         userPreferences.setAppThemeMode(theme)
         updateConfigState { it.copy(appThemeMode = theme) }
+        val newIsDark = when (theme) {
+            AppThemeMode.DARK -> true
+            AppThemeMode.LIGHT -> false
+            AppThemeMode.SYSTEM -> {
+                val nightModeFlags =
+                        appContext.resources.configuration.uiMode and
+                                android.content.res.Configuration.UI_MODE_NIGHT_MASK
+                nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES
+            }
+        }
+        if (newIsDark != previousIsDark) {
+            viewModelScope.launch(Dispatchers.IO) {
+                val newAlpha = userPreferences.getWallpaperBackgroundAlpha(newIsDark)
+                val newBlur = userPreferences.getWallpaperBlurRadius(newIsDark)
+                wallpaperBackgroundAlpha = newAlpha
+                wallpaperBlurRadius = newBlur
+                updateConfigState {
+                    it.copy(wallpaperBackgroundAlpha = newAlpha, wallpaperBlurRadius = newBlur)
+                }
+                saveStartupSurfaceSnapshotAsync(allowDuringQuery = true)
+            }
+        }
     }
 
     fun setOverlayThemeIntensity(intensity: Float) {

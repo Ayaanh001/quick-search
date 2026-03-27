@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import com.tk.quicksearch.shared.ui.components.AppAlertDialog
+import com.tk.quicksearch.shared.ui.components.dialogTextFieldColors
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -164,6 +165,7 @@ fun EditCustomSearchEngineDialog(
                                 Text(text = stringResource(R.string.settings_add_search_engine_error_required))
                             }
                         },
+                        colors = dialogTextFieldColors(),
                     )
                 }
                 OutlinedTextField(
@@ -199,6 +201,7 @@ fun EditCustomSearchEngineDialog(
                             )
                         }
                     },
+                    colors = dialogTextFieldColors(),
                 )
 
                 OutlinedTextField(
@@ -233,6 +236,7 @@ fun EditCustomSearchEngineDialog(
                             Text(text = errorMessage)
                         }
                     },
+                    colors = dialogTextFieldColors(),
                 )
             }
         },

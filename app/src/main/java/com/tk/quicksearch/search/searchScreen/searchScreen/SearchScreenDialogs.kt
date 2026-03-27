@@ -3,6 +3,7 @@ package com.tk.quicksearch.search.searchScreen
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import com.tk.quicksearch.shared.ui.components.AppAlertDialog
+import com.tk.quicksearch.shared.ui.components.dialogTextFieldColors
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -121,6 +122,7 @@ internal fun SearchScreenDialogLogic(
                     shape = MaterialTheme.shapes.large,
                     singleLine = false,
                     minLines = 5,
+                    colors = dialogTextFieldColors(),
                 )
             },
             confirmButton = {

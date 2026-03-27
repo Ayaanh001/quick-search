@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Edit
 import com.tk.quicksearch.shared.ui.components.AppAlertDialog
+import com.tk.quicksearch.shared.ui.components.dialogTextFieldColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -246,6 +247,7 @@ private fun CustomBackgroundColorDialog(
                         KeyboardOptions(
                             capitalization = KeyboardCapitalization.Characters,
                         ),
+                    colors = dialogTextFieldColors(),
                 )
                 if (hasTyped && !isValidHex) {
                     Text(

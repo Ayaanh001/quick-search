@@ -26,6 +26,7 @@ import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Public
 import com.tk.quicksearch.shared.ui.components.AppAlertDialog
+import com.tk.quicksearch.shared.ui.components.dialogTextFieldColors
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -363,6 +364,7 @@ fun AddAppDeepLinkDialog(
                         singleLine = true,
                         maxLines = 1,
                         label = { Text(stringResource(R.string.settings_app_shortcuts_shortcut_name_label)) },
+                        colors = dialogTextFieldColors(),
                     )
                 }
                 OutlinedTextField(
@@ -371,6 +373,7 @@ fun AddAppDeepLinkDialog(
                     singleLine = true,
                     maxLines = 1,
                     label = { Text(stringResource(R.string.settings_app_shortcuts_deep_link_label)) },
+                    colors = dialogTextFieldColors(),
                 )
             }
         },
@@ -444,6 +447,7 @@ fun AddSearchTargetShortcutDialog(
                     singleLine = true,
                     maxLines = 1,
                     label = { Text(stringResource(R.string.settings_app_shortcuts_shortcut_name_label)) },
+                    colors = dialogTextFieldColors(),
                 )
                 OutlinedTextField(
                     value = shortcutValue,
@@ -458,6 +462,7 @@ fun AddSearchTargetShortcutDialog(
                     singleLine = false,
                     maxLines = 3,
                     label = { Text(stringResource(valueLabelResId)) },
+                    colors = dialogTextFieldColors(),
                 )
             }
         },
@@ -616,6 +621,7 @@ fun EditCustomShortcutDialog(
                         maxLines = 1,
                         isError = !canSave,
                         label = { Text(stringResource(R.string.settings_app_shortcuts_shortcut_name_label)) },
+                        colors = dialogTextFieldColors(),
                     )
                 }
                 editableConfiguredValue?.let { editableValue ->
@@ -644,6 +650,7 @@ fun EditCustomShortcutDialog(
                                 }
                             Text(stringResource(labelResId))
                         },
+                        colors = dialogTextFieldColors(),
                     )
                 }
             }
