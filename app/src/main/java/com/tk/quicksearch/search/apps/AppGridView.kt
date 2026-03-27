@@ -62,7 +62,6 @@ import com.tk.quicksearch.shared.util.hapticConfirm
 
 private const val ROW_COUNT = 2
 private val AppGridRowSpacing = DesignTokens.SpacingXSmall
-private val AppGridTopPadding = DesignTokens.SpacingXXSmall
 private val RegularAppIconSize = DesignTokens.IconSizeXLarge - DesignTokens.SpacingXXSmall
 private val TopResultIndicatorTopPadding = 0.dp
 private val TopResultIndicatorBottomPadding = DesignTokens.SpacingSmall
@@ -146,9 +145,7 @@ fun AppGridView(
             }
 
     Column(
-            modifier =
-                    modifier.fillMaxWidth()
-                            .padding(top = AppGridTopPadding),
+            modifier = modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(AppGridRowSpacing),
     ) {

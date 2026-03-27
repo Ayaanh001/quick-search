@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,6 +29,7 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.searchEngines.extendToScreenEdges
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.LocalAppIsDarkTheme
 
 @Composable
 internal fun KeyboardSwitchPill(
@@ -35,10 +37,15 @@ internal fun KeyboardSwitchPill(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isDarkTheme = LocalAppIsDarkTheme.current
+    val backgroundColor =
+        if (isDarkTheme) Color.Black else AppColors.KeyboardButtonBackground
+    val labelColor =
+        if (isDarkTheme) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
     Surface(
         modifier = modifier.clickable(onClick = onClick),
         shape = DesignTokens.ShapeFull,
-        color = AppColors.KeyboardButtonBackground,
+        color = backgroundColor,
         tonalElevation = DesignTokens.ElevationLevel0,
     ) {
         Row(
@@ -54,7 +61,7 @@ internal fun KeyboardSwitchPill(
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = labelColor,
                 fontWeight = FontWeight.Medium,
             )
         }

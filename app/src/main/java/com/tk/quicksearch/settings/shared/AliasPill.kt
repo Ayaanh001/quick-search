@@ -25,9 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
-import com.tk.quicksearch.shared.ui.theme.LocalAppIsDarkTheme
 
-private const val PILL_BACKGROUND_ALPHA = 0.4f
 private val ALIAS_ICON_SIZE = 14.dp
 private val ALIAS_CLEAR_ICON_SIZE = 16.dp
 
@@ -50,7 +48,6 @@ fun AliasPill(
             textColor
         }
     val shouldUseSurfaceClick = onClick != null && onClearClick == null
-    val showLightModeOutline = showBackground && !LocalAppIsDarkTheme.current
     Surface(
         modifier =
             modifier
@@ -65,21 +62,12 @@ fun AliasPill(
                 ),
         shape = DesignTokens.ShapeFull,
         border =
-            if (showLightModeOutline) {
+            if (showBackground) {
                 BorderStroke(1.dp, AppColors.SettingsDivider)
             } else {
                 null
             },
-        color =
-            if (showBackground) {
-                if (LocalAppIsDarkTheme.current) {
-                    Color.Black
-                } else {
-                    AppColors.DialogBackground.copy(alpha = PILL_BACKGROUND_ALPHA)
-                }
-            } else {
-                AppColors.AppBackgroundTransparent
-            },
+        color = Color.Transparent,
         tonalElevation = DesignTokens.ElevationLevel0,
     ) {
         val contentPadding =

@@ -656,6 +656,8 @@ private fun OverlaySourceBox(
         onClick: () -> Unit,
         content: @Composable BoxScope.() -> Unit,
 ) {
+    val isDarkMode = MaterialTheme.colorScheme.background.luminance() < 0.5f
+
     Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -669,14 +671,14 @@ private fun OverlaySourceBox(
                                 .background(Color.Transparent)
                                 .clickable(onClick = onClick)
                                 .then(
-                                        if (hasImage) {
-                                            Modifier
-                                        } else {
+                                        if (!hasImage || isDarkMode) {
                                             Modifier.border(
                                                     width = DesignTokens.BorderWidth,
                                                     color = AppColors.SettingsDivider,
                                                     shape = MaterialTheme.shapes.medium,
                                             )
+                                        } else {
+                                            Modifier
                                         },
                                 ),
                 contentAlignment = Alignment.Center,

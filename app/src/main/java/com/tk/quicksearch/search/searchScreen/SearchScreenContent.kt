@@ -304,11 +304,11 @@ internal fun SearchScreenContent(
             } else {
                 Modifier.padding(
                         bottom =
-                                if (state.oneHandedMode) {
+                                (if (state.oneHandedMode) {
                                     DesignTokens.SpacingMedium
                                 } else {
                                     DesignTokens.SpacingXSmall
-                                },
+                                }) + DesignTokens.SpacingXXSmall,
                 )
             }
 
@@ -432,7 +432,7 @@ internal fun SearchScreenContent(
             searchFieldContent()
         }
 
-        // Add spacing between search bar and apps list when bottom aligned setting is off
+        // Add spacing between search bar and scrollable content when bottom aligned setting is off
         if (showSearchField && !showBottomSearchBar && !state.oneHandedMode) {
             Spacer(modifier = Modifier.padding(top = DesignTokens.SpacingXSmall))
         }
@@ -440,10 +440,18 @@ internal fun SearchScreenContent(
         // Scrollable content between search bar and search engines
         SearchContentArea(
                 modifier =
-                        if (isOverlayPresentation) {
-                            Modifier.fillMaxWidth().weight(1f)
-                        } else {
-                            Modifier.weight(1f)
+                        run {
+                            val base =
+                                    if (isOverlayPresentation) {
+                                        Modifier.fillMaxWidth().weight(1f)
+                                    } else {
+                                        Modifier.weight(1f)
+                                    }
+                            if (showSearchField && showBottomSearchBar) {
+                                base.padding(top = DesignTokens.SpacingXXSmall)
+                            } else {
+                                base
+                            }
                         },
                 state = state,
                 renderingState = renderingState,
