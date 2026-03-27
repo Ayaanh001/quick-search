@@ -1,5 +1,6 @@
 package com.tk.quicksearch.shared.ui.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Row
@@ -52,10 +53,15 @@ fun TipBanner(
     textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyMedium,
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                shape = DesignTokens.ShapeXXLarge,
+            ),
         colors =
             CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
             ),
         shape = DesignTokens.ShapeXXLarge,
     ) {
@@ -85,10 +91,7 @@ fun TipBanner(
                 @Suppress("DEPRECATION")
                 ClickableText(
                     text = annotatedText,
-                    style =
-                        textStyle.copy(
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        ),
+                    style = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
                     modifier = contentModifier,
                     onClick = { offset ->
                         if (onContentClick != null) {
@@ -102,7 +105,7 @@ fun TipBanner(
                 Text(
                     text = text,
                     style = textStyle,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = contentModifier,
                 )
             }
