@@ -453,19 +453,32 @@ internal fun PersistentSearchBar(
                         }
                     }
                     .onPreviewKeyEvent { keyEvent ->
-                        if (
-                                keyEvent.type == KeyEventType.KeyDown &&
+                        when {
+                            keyEvent.type == KeyEventType.KeyDown &&
                                 keyEvent.key == Key.Backspace &&
                                 textFieldValue.text.isEmpty() &&
                                 (detectedShortcutTarget != null ||
                                     detectedAliasSearchSection != null ||
                                     activeToolType != null ||
-                                    isCalculatorMode)
-                        ) {
-                            onClearDetectedShortcut()
-                            true
-                        } else {
-                            false
+                                    isCalculatorMode) -> {
+                                onClearDetectedShortcut()
+                                true
+                            }
+                            keyEvent.type == KeyEventType.KeyUp &&
+                                (keyEvent.key == Key.Enter || keyEvent.key == Key.NumPadEnter) -> {
+                                val keepKeyboardFromAction = onSearchAction()
+                                if (!keepKeyboardFromAction && query.isNotBlank()) {
+                                    val firstTarget = enabledTargets.firstOrNull()
+                                    val keepKeyboard =
+                                        (firstTarget as? SearchTarget.Engine)?.engine ==
+                                            SearchEngine.DIRECT_SEARCH
+                                    if (!keepKeyboard) {
+                                        keyboardController?.hide()
+                                    }
+                                }
+                                true
+                            }
+                            else -> false
                         }
                     }
                     .animateContentSize(),

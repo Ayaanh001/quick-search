@@ -574,7 +574,10 @@ fun SearchRoute(
             onDirectDialChoiceSelected = viewModel::onDirectDialChoiceSelected,
             onDismissDirectDialChoice = viewModel::dismissDirectDialChoice,
             onReleaseNotesAcknowledged = viewModel::acknowledgeReleaseNotes,
-            onReleaseNotesViewAllFeatures = onOpenReleaseNotesFeatures,
+            onReleaseNotesViewAllFeatures = {
+                viewModel.acknowledgeReleaseNotes()
+                onOpenReleaseNotesFeatures()
+            },
             onWebSuggestionClick = { suggestion: String ->
                 viewModel.onWebSuggestionTap(suggestion)
             },

@@ -8,13 +8,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.Canvas
 import com.tk.quicksearch.shared.ui.components.AppAlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -25,13 +24,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withLink
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.data.AppShortcutRepository.StaticShortcut
@@ -96,32 +89,6 @@ internal fun ReleaseNotesDialog(
                             )
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    val annotatedLink =
-                        buildAnnotatedString {
-                            withLink(
-                                LinkAnnotation.Clickable(
-                                    tag = "features_link",
-                                    linkInteractionListener = {
-                                        onViewAllFeatures()
-                                    },
-                                )
-                            ) {
-                                withStyle(
-                                    style =
-                                        SpanStyle(
-                                            color = MaterialTheme.colorScheme.primary,
-                                            textDecoration = TextDecoration.Underline,
-                                        ),
-                                ) {
-                                    append(stringResource(R.string.release_notes_view_all_features))
-                                }
-                            }
-                        }
-
-                    Text(text = annotatedLink)
                 }
 
                 if (scrollState.maxValue > 0) {
@@ -136,8 +103,13 @@ internal fun ReleaseNotesDialog(
                 }
             }
         },
+        dismissButton = {
+            TextButton(onClick = onViewAllFeatures) {
+                Text(text = stringResource(R.string.release_notes_action_all_features))
+            }
+        },
         confirmButton = {
-            TextButton(onClick = onAcknowledge) {
+            Button(onClick = onAcknowledge) {
                 Text(text = stringResource(R.string.release_notes_action_got_it))
             }
         },

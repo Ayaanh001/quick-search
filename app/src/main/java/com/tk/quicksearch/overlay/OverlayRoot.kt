@@ -378,6 +378,15 @@ fun OverlayRoot(
                                                         )
                                                         handleClose()
                                                 },
+                                                onOpenReleaseNotesFeatures = {
+                                                        OverlayModeController.openMainActivity(
+                                                                context,
+                                                                openSettings = true,
+                                                                settingsDetailType =
+                                                                        SettingsDetailType.FEATURES_LIST,
+                                                        )
+                                                        handleClose()
+                                                },
                                                 onOpenAppSettingDestination = { destination ->
                                                         handleOverlayAppSettingDestination(
                                                                 context = context,

@@ -797,12 +797,12 @@
     <string name="release_notes_title_no_version">Quick Search Release Notes</string>
     <string-array name="release_notes_points">
         <item>Light themes (finally!) and UI improvements</item>
-        <item>Option to change apps per row</item>
+        <item>Option to change no. of apps per row</item>
         <item>Fuzzy search for device and app settings</item>
         <item>Bug fixes</item>
     </string-array>
+    <string name="release_notes_action_all_features">All Features</string>
     <string name="release_notes_action_got_it">Got it</string>
-    <string name="release_notes_view_all_features">View all features</string>
     <string name="settings_all_quick_search_features">Features List</string>
     <string name="settings_all_quick_search_features_desc">View the complete list of features and capabilities</string>
     <string name="settings_beta_tag">Beta</string>
