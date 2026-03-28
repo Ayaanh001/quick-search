@@ -4,10 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,7 +12,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.search.searchScreen.SearchScreenConstants
-import com.tk.quicksearch.shared.ui.theme.AppColors
+import com.tk.quicksearch.search.searchScreen.shared.SearchResultCard
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 internal data class ExpandableResultsCardState(
@@ -63,42 +59,21 @@ internal fun ExpandableResultsCard(
             Modifier.fillMaxWidth()
         }
 
-    val cardColors =
-        if (overlayCardColor != null) {
-            CardDefaults.cardColors(containerColor = overlayCardColor)
-        } else {
-            AppColors.getCardColors(showWallpaperBackground = showWallpaperBackground)
-        }
-    val cardElevation = AppColors.getCardElevation(showWallpaperBackground = showWallpaperBackground)
     val cardModifier =
         modifier
             .fillMaxWidth()
             .predictedSubmitHighlight(
                 isPredicted = isTopPredicted,
-                shape = MaterialTheme.shapes.extraLarge,
+                shape = DesignTokens.SearchResultCardShape,
             )
 
-    if (showWallpaperBackground) {
-        Card(
-            modifier = cardModifier,
-            colors = cardColors,
-            shape = MaterialTheme.shapes.extraLarge,
-            elevation = cardElevation,
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                content(contentModifier, state)
-            }
-        }
-    } else {
-        ElevatedCard(
-            modifier = cardModifier,
-            colors = cardColors,
-            shape = MaterialTheme.shapes.extraLarge,
-            elevation = cardElevation,
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                content(contentModifier, state)
-            }
+    SearchResultCard(
+        modifier = cardModifier,
+        showWallpaperBackground = showWallpaperBackground,
+        overlayContainerColor = overlayCardColor,
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            content(contentModifier, state)
         }
     }
 }

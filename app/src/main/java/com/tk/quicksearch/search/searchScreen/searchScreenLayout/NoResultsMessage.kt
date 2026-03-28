@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.searchScreen.hasAnySearchResults
 import com.tk.quicksearch.search.core.SearchUiState
+import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import kotlinx.coroutines.delay
 
@@ -86,7 +87,7 @@ internal fun NoResultsMessage(state: SearchUiState) {
             Text(
                 text = stringResource(R.string.no_results_found),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                color = AppColors.wallpaperAwareMutedSearchForeground(alpha = 0.6f),
                 textAlign = TextAlign.Center,
                 modifier =
                     Modifier.padding(

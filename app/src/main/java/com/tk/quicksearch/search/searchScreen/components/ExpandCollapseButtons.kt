@@ -108,10 +108,11 @@ internal fun CollapseButton(
 }
 
 @Composable
-private fun resultCardContainerColor(showWallpaperBackground: Boolean): Color {
-    LocalOverlayResultCardColor.current?.let { return it }
-    return AppColors.getResultCardContainerColor(showWallpaperBackground)
-}
+private fun resultCardContainerColor(showWallpaperBackground: Boolean): Color =
+    AppColors.getSearchResultCardContainerColor(
+        showWallpaperBackground,
+        LocalOverlayResultCardColor.current,
+    )
 
 @Composable
 private fun expandCollapseActionContentColor(overlayActionColor: Color?): Color =

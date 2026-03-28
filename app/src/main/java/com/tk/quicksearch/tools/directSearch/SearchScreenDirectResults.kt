@@ -24,9 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Straighten
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -53,10 +50,10 @@ import com.tk.quicksearch.search.calendar.calendarRelativeDateLabel
 import com.tk.quicksearch.search.calendar.formatAbsoluteDate
 import com.tk.quicksearch.search.calendar.getDayOfWeekName
 import com.tk.quicksearch.search.core.*
-import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
+import com.tk.quicksearch.search.searchScreen.shared.InformationCard
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
-import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
+import com.tk.quicksearch.shared.ui.theme.LocalImageBackgroundIsDark
 
 private val unitResultRegex = Regex("^([+-]?(?:\\d+(?:\\.\\d+)?|\\.\\d+))(?:\\s+(.+))?$")
 private val dateNumberRegex = Regex("(\\d+)")
@@ -79,16 +76,6 @@ fun DirectSearchResult(
 
     @Suppress("DEPRECATION")
     val clipboardManager = LocalClipboardManager.current
-    val overlayCardColor = LocalOverlayResultCardColor.current
-    val cardColors =
-            if (overlayCardColor != null) {
-                CardDefaults.cardColors(containerColor = overlayCardColor)
-            } else {
-                AppColors.getCardColors(showWallpaperBackground = showWallpaperBackground)
-            }
-    val cardElevation =
-            AppColors.getCardElevation(showWallpaperBackground = showWallpaperBackground)
-
     val content: @Composable () -> Unit = {
         Box(modifier = Modifier.fillMaxWidth()) {
             Column(
@@ -143,26 +130,14 @@ fun DirectSearchResult(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
     ) {
-        if (showWallpaperBackground) {
-            Card(
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 175.dp),
-                    colors = cardColors,
-                    shape = MaterialTheme.shapes.extraLarge,
-                    elevation = cardElevation,
-            ) { content() }
-        } else {
-            ElevatedCard(
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 175.dp),
-                    colors = cardColors,
-                    shape = MaterialTheme.shapes.extraLarge,
-                    elevation = cardElevation,
-            ) { content() }
-        }
+        InformationCard(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 175.dp),
+                showWallpaperBackground = showWallpaperBackground,
+        ) { content() }
 
         if (showAttribution) {
             GeminiAttributionRow(
                     modifier = Modifier.fillMaxWidth(),
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     usedModelId = directSearchState.usedModelId,
                     onClick = onGeminiModelInfoClick,
                     onLongClick = onOpenDirectSearchConfigure,
@@ -215,16 +190,6 @@ fun CalculatorResult(
 
     @Suppress("DEPRECATION")
     val clipboardManager = LocalClipboardManager.current
-    val overlayCardColor = LocalOverlayResultCardColor.current
-    val cardColors =
-            if (overlayCardColor != null) {
-                CardDefaults.cardColors(containerColor = overlayCardColor)
-            } else {
-                AppColors.getCardColors(showWallpaperBackground = showWallpaperBackground)
-            }
-    val cardElevation =
-            AppColors.getCardElevation(showWallpaperBackground = showWallpaperBackground)
-
     val copyText = timeResultLabel ?: absoluteDateLabel ?: dateDiffLabel ?: dateLabel ?: result
     val onLongClick: (() -> Unit)? =
             if (copyText != null) {
@@ -327,37 +292,19 @@ fun CalculatorResult(
             verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
     ) {
         val cardMinHeight = if (isDualTimeResult) 280.dp else 175.dp
-        if (showWallpaperBackground) {
-            Card(
-                    modifier =
-                            Modifier.fillMaxWidth()
-                                    .heightIn(min = cardMinHeight)
-                                    .combinedClickable(
-                                            onClick = {},
-                                            onLongClick = onLongClick,
-                                    ),
-                    colors = cardColors,
-                    shape = MaterialTheme.shapes.extraLarge,
-                    elevation = cardElevation,
-            ) { content() }
-        } else {
-            ElevatedCard(
-                    modifier =
-                            Modifier.fillMaxWidth()
-                                    .heightIn(min = cardMinHeight)
-                                    .combinedClickable(
-                                            onClick = {},
-                                            onLongClick = onLongClick,
-                                    ),
-                    colors = cardColors,
-                    shape = MaterialTheme.shapes.extraLarge,
-                    elevation = cardElevation,
-            ) { content() }
-        }
+        InformationCard(
+                modifier =
+                        Modifier.fillMaxWidth()
+                                .heightIn(min = cardMinHeight)
+                                .combinedClickable(
+                                        onClick = {},
+                                        onLongClick = onLongClick,
+                                ),
+                showWallpaperBackground = showWallpaperBackground,
+        ) { content() }
 
         CalculatorAttributionRow(
                 modifier = Modifier.fillMaxWidth(),
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 toolType = calculatorState.toolType,
         )
     }
@@ -512,15 +459,25 @@ private fun DateCalculatorResultText(
     }
 }
 
+@Composable
+private fun informationAttributionContentColor(): Color {
+    val imageBackgroundIsDark = LocalImageBackgroundIsDark.current
+    return when (imageBackgroundIsDark) {
+        true -> Color.White
+        false -> Color.Black
+        null -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+}
+
 /** Attribution row showing powered by Gemini or Gemma branding. */
 @Composable
 private fun GeminiAttributionRow(
         modifier: Modifier = Modifier,
-        contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
         usedModelId: String? = null,
         onClick: () -> Unit = {},
         onLongClick: () -> Unit = {},
 ) {
+    val contentColor = informationAttributionContentColor()
     val poweredByText = stringResource(R.string.direct_search_powered_by)
     val isGemma = usedModelId?.lowercase()?.startsWith("gemma-") == true
     val logoRes = if (isGemma) R.drawable.gemma_logo else R.drawable.gemini_logo
@@ -556,9 +513,9 @@ private fun GeminiAttributionRow(
 @Composable
 private fun CalculatorAttributionRow(
         modifier: Modifier = Modifier,
-        contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
         toolType: SearchToolType = SearchToolType.CALCULATOR,
 ) {
+    val contentColor = informationAttributionContentColor()
     val titleRes =
             when (toolType) {
                 SearchToolType.UNIT_CONVERTER -> R.string.unit_converter_toggle_title

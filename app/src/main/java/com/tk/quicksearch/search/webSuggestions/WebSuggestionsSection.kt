@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.NorthWest
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,8 +23,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.searchScreen.LocalOverlayDividerColor
+import com.tk.quicksearch.search.searchScreen.shared.SearchResultCard
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
@@ -84,7 +82,6 @@ private fun WebSuggestionsCard(
     showWallpaperBackground: Boolean = false,
     isShortcutDetected: Boolean = false,
 ) {
-    val overlayCardColor = LocalOverlayResultCardColor.current
     val overlayDividerColor = LocalOverlayDividerColor.current
     val textColor =
         if (showWallpaperBackground) AppColors.WallpaperTextPrimary else MaterialTheme.colorScheme.onSurface
@@ -92,16 +89,9 @@ private fun WebSuggestionsCard(
     val iconColor =
         if (showWallpaperBackground) AppColors.WallpaperTextSecondary else MaterialTheme.colorScheme.onSurfaceVariant
 
-    Card(
+    SearchResultCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-        colors =
-            if (overlayCardColor != null) {
-                CardDefaults.cardColors(containerColor = overlayCardColor)
-            } else {
-                AppColors.getCardColors(showWallpaperBackground)
-            },
-        elevation = AppColors.getCardElevation(showWallpaperBackground),
+        showWallpaperBackground = showWallpaperBackground,
     ) {
         Column {
             suggestions.forEachIndexed { index, suggestion ->

@@ -82,7 +82,13 @@ private fun loadAppIconBitmap(
             IconPackManager.loadIconBitmap(context, pack, packageName)
         }
     if (iconPackBitmap != null) {
-        return iconPackBitmap.asAndroidBitmap()
+        val androidBitmap = iconPackBitmap.asAndroidBitmap()
+        return Bitmap.createScaledBitmap(
+            androidBitmap,
+            iconSizePx.coerceAtLeast(1),
+            iconSizePx.coerceAtLeast(1),
+            true,
+        )
     }
     val drawable = runCatching { context.packageManager.getApplicationIcon(packageName) }.getOrNull()
     return drawable?.toBitmap(

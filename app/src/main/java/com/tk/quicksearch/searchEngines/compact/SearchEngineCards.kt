@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,10 +32,10 @@ import com.tk.quicksearch.searchEngines.getId
 import com.tk.quicksearch.searchEngines.shared.IconRenderStyle
 import com.tk.quicksearch.searchEngines.shared.SearchTargetConstants
 import com.tk.quicksearch.searchEngines.shared.SearchTargetIcon
-import com.tk.quicksearch.search.searchScreen.LocalOverlayResultCardColor
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
+import com.tk.quicksearch.search.searchScreen.shared.SearchResultCard
 import com.tk.quicksearch.search.searchScreen.predictedSubmitHighlight
-import com.tk.quicksearch.shared.ui.theme.AppColors
+import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticConfirm
 
 /**
@@ -128,22 +126,14 @@ fun SearchEngineCard(
         } else {
             R.string.search_on_engine
         }
-    val overlayCardColor = LocalOverlayResultCardColor.current
-    val cardColors =
-        if (overlayCardColor != null) {
-            CardDefaults.cardColors(containerColor = overlayCardColor)
-        } else {
-            AppColors.getCardColors(showWallpaperBackground)
-        }
-
-    ElevatedCard(
+    SearchResultCard(
         modifier =
             modifier
                 .fillMaxWidth()
-                .clip(MaterialTheme.shapes.extraLarge)
+                .clip(DesignTokens.SearchResultCardShape)
                 .predictedSubmitHighlight(
                     isPredicted = isPredicted,
-                    shape = MaterialTheme.shapes.extraLarge,
+                    shape = DesignTokens.SearchResultCardShape,
                 )
                 .combinedClickable(
                     onClick = {
@@ -152,9 +142,7 @@ fun SearchEngineCard(
                     },
                     onLongClick = onLongClick,
                 ),
-        colors = cardColors,
-        shape = MaterialTheme.shapes.extraLarge,
-        elevation = AppColors.getCardElevation(showWallpaperBackground),
+        showWallpaperBackground = showWallpaperBackground,
     ) {
         Row(
             modifier =
@@ -216,28 +204,20 @@ private fun SearchTargetCard(
     appIconShape: AppIconShape = AppIconShape.DEFAULT,
 ) {
     val view = LocalView.current
-    val overlayCardColor = LocalOverlayResultCardColor.current
     val actionLabelResId =
         if (isLikelyWebUrl(query)) {
             R.string.open_with_engine
         } else {
             R.string.search_on_engine
         }
-    val cardColors =
-        if (overlayCardColor != null) {
-            CardDefaults.cardColors(containerColor = overlayCardColor)
-        } else {
-            AppColors.getCardColors(showWallpaperBackground)
-        }
-
-    ElevatedCard(
+    SearchResultCard(
         modifier =
             modifier
                 .fillMaxWidth()
-                .clip(MaterialTheme.shapes.extraLarge)
+                .clip(DesignTokens.SearchResultCardShape)
                 .predictedSubmitHighlight(
                     isPredicted = isPredicted,
-                    shape = MaterialTheme.shapes.extraLarge,
+                    shape = DesignTokens.SearchResultCardShape,
                 )
                 .combinedClickable(
                     onClick = {
@@ -246,9 +226,7 @@ private fun SearchTargetCard(
                     },
                     onLongClick = onLongClick,
                 ),
-        colors = cardColors,
-        shape = MaterialTheme.shapes.extraLarge,
-        elevation = AppColors.getCardElevation(showWallpaperBackground),
+        showWallpaperBackground = showWallpaperBackground,
     ) {
         Row(
             modifier =
@@ -296,26 +274,16 @@ private fun CustomizeSearchEnginesCard(
     showWallpaperBackground: Boolean = false,
 ) {
     val view = LocalView.current
-    val overlayCardColor = LocalOverlayResultCardColor.current
-    val cardColors =
-        if (overlayCardColor != null) {
-            CardDefaults.cardColors(containerColor = overlayCardColor)
-        } else {
-            AppColors.getCardColors(showWallpaperBackground)
-        }
-
-    ElevatedCard(
+    SearchResultCard(
         modifier =
             modifier
                 .fillMaxWidth()
-                .clip(MaterialTheme.shapes.extraLarge)
+                .clip(DesignTokens.SearchResultCardShape)
                 .clickable {
                     hapticConfirm(view)()
                     onClick()
                 },
-        colors = cardColors,
-        shape = MaterialTheme.shapes.extraLarge,
-        elevation = AppColors.getCardElevation(showWallpaperBackground),
+        showWallpaperBackground = showWallpaperBackground,
     ) {
         Row(
             modifier =

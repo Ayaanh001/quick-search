@@ -390,6 +390,21 @@ object AppColors {
         @Composable
         get() = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
 
+    /**
+     * Muted empty-state / helper text on the search surface (e.g. global “no results” line).
+     * When [LocalImageBackgroundIsDark] is set, uses white or black at [alpha] like app grid labels;
+     * otherwise [MaterialTheme.colorScheme.onSurface] at [alpha].
+     */
+    @Composable
+    fun wallpaperAwareMutedSearchForeground(alpha: Float = 0.6f): Color {
+        val imageBackgroundIsDark = LocalImageBackgroundIsDark.current
+        return when (imageBackgroundIsDark) {
+            true -> Color.White.copy(alpha = alpha)
+            false -> Color.Black.copy(alpha = alpha)
+            null -> MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
+        }
+    }
+
     // Inline search engine highlight -------------------------------------------------------
 
     /** Fill color for the predicted/highlighted engine icon backdrop. */
@@ -610,6 +625,31 @@ object AppColors {
                 containerColor = getResultCardContainerColor(false),
             )
         }
+
+    /**
+     * Resolved container colors for search result cards (history, suggestions, section lists,
+     * engine cards, direct search). When [overlayContainerColor] is non-null (overlay theme),
+     * it wins; otherwise uses [getCardColors] for wallpaper vs standard surfaces.
+     */
+    @Composable
+    fun getSearchResultCardColors(
+        showWallpaperBackground: Boolean,
+        overlayContainerColor: Color?,
+    ): CardColors =
+        if (overlayContainerColor != null) {
+            CardDefaults.cardColors(containerColor = overlayContainerColor)
+        } else {
+            getCardColors(showWallpaperBackground)
+        }
+
+    /**
+     * Resolved container [Color] for search result cards — same rules as [getSearchResultCardColors].
+     */
+    @Composable
+    fun getSearchResultCardContainerColor(
+        showWallpaperBackground: Boolean,
+        overlayContainerColor: Color?,
+    ): Color = overlayContainerColor ?: getResultCardContainerColor(showWallpaperBackground)
 
     /**
      * Returns flat card elevation for all app cards.

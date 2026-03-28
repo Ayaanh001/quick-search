@@ -184,6 +184,13 @@ object DesignTokens {
     val ExtraLargeCardShape: Shape = ShapeXLarge
 
     /**
+     * Corner shape for search result surfaces: history, web suggestions, expandable section
+     * cards, engine cards, calculator/direct-search cards. Alias of [ExtraLargeCardShape]; change
+     * here to retune all search cards together.
+     */
+    val SearchResultCardShape: Shape = ExtraLargeCardShape
+
+    /**
      * Button corner radius - 24dp Note: M3 buttons often use full circle height (e.g. 40dp
      * height -> 20dp radius). 24dp radius suitable for 48dp height buttons.
      */

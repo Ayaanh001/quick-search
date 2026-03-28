@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
+import com.tk.quicksearch.search.data.preferences.UiPreferences
 import com.tk.quicksearch.settings.shared.SettingsCard
 import com.tk.quicksearch.settings.shared.SettingsToggleRow
 import com.tk.quicksearch.shared.ui.theme.AppColors
@@ -38,7 +39,7 @@ fun CombinedLayoutIconCard(
         onToggleOneHandedMode: (Boolean) -> Unit,
         showAppLabels: Boolean,
         onToggleAppLabels: (Boolean) -> Unit,
-        phoneAppGridColumns: Int = 5,
+        phoneAppGridColumns: Int = UiPreferences.DEFAULT_PHONE_APP_GRID_COLUMNS,
         onSetPhoneAppGridColumns: (Int) -> Unit = {},
         bottomSearchBarEnabled: Boolean,
         onToggleBottomSearchBar: (Boolean) -> Unit,

@@ -340,7 +340,7 @@ class AppSettingsRepository(
                 titleRes = R.string.settings_circular_app_icons_title,
                 descriptionRes = R.string.settings_circular_app_icons_desc,
                 toggleKey = AppSettingsToggleKey.CIRCULAR_APP_ICONS,
-                keywords = listOf("circular icons", "icon shape"),
+                keywords = listOf("circular icons", "icon shape", "circle"),
             )
             addToggle(
                 id = "app_toggle_direct_dial",

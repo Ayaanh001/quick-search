@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -484,7 +485,7 @@ private fun AppIconSurface(
 ) {
     val view = LocalView.current
     Surface(
-            modifier = Modifier.size(DesignTokens.AppIconSize),
+            modifier = Modifier.requiredSize(DesignTokens.AppIconSize),
             color = Color.Transparent,
             tonalElevation = 0.dp,
             shape = DesignTokens.ShapeLarge,

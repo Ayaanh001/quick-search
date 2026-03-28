@@ -38,7 +38,7 @@ internal fun PermissionDisabledCard(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             ),
         elevation = AppColors.getCardElevation(false),
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = DesignTokens.SearchResultCardShape,
     ) {
         Column(
             modifier =
@@ -78,6 +78,7 @@ internal fun UsagePermissionCard(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ),
         elevation = AppColors.getCardElevation(false),
+        shape = DesignTokens.SearchResultCardShape,
     ) {
         Column(
             modifier = Modifier.padding(DesignTokens.SpacingXLarge),

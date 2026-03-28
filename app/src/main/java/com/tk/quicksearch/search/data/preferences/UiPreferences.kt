@@ -631,7 +631,7 @@ class UiPreferences(
         const val KEY_APP_ICON_SHAPE = "app_icon_shape"
         const val KEY_SHOW_APP_LABELS = "show_app_labels"
         const val KEY_PHONE_APP_GRID_COLUMNS = "phone_app_grid_columns"
-        const val DEFAULT_PHONE_APP_GRID_COLUMNS = 5
+        const val DEFAULT_PHONE_APP_GRID_COLUMNS = 4
         const val KEY_LAST_SEEN_VERSION = "last_seen_version"
         const val KEY_DIRECT_SEARCH_SETUP_EXPANDED = "direct_search_setup_expanded"
         const val KEY_DISABLED_SEARCH_ENGINES_EXPANDED = "disabled_search_engines_expanded"
