@@ -172,6 +172,7 @@ fun SettingsToggleRow(
                 colors =
                     SwitchDefaults.colors(
                         uncheckedTrackColor = Color.Transparent,
+                        uncheckedBorderColor = Color.Transparent,
                     ),
             )
         }

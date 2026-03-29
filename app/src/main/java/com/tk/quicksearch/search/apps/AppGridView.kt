@@ -10,6 +10,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -664,50 +665,89 @@ private fun AppIconSurface(
                     )
                 }
             } else if (iconBitmap != null) {
-                val clipModifier =
-                        when {
-                            appIconShape == AppIconShape.CIRCLE ->
-                                    Modifier.clip(CircleShape)
-                            iconIsLegacy -> Modifier.clip(DesignTokens.ShapeLarge)
-                            else -> Modifier
-                        }
-                val bitmapShadowShape =
-                        when {
-                            appIconShape == AppIconShape.CIRCLE -> CircleShape
-                            iconIsLegacy -> DesignTokens.ShapeLarge
-                            else -> DesignTokens.ShapeLarge
-                        }
-                Image(
-                        bitmap = iconBitmap,
-                        contentDescription =
-                                stringResource(
-                                        R.string.desc_launch_app,
-                                        appName,
+                val isUnsupportedThemedIcon = showThemedIcon && monochromeData == null
+                if (isUnsupportedThemedIcon) {
+                    Box(
+                            modifier =
+                                    Modifier.then(
+                                                    if (useLightWallpaperShadow) {
+                                                        Modifier.shadow(
+                                                                elevation = DesignTokens.ElevationLevel2,
+                                                                shape = themedIconContainerShape,
+                                                                ambientColor =
+                                                                        Color.Black.copy(
+                                                                                alpha = LightWallpaperAppIconShadowAmbientAlpha,
+                                                                        ),
+                                                                spotColor =
+                                                                        Color.Black.copy(
+                                                                                alpha = LightWallpaperAppIconShadowSpotAlpha,
+                                                                        ),
+                                                        )
+                                                    } else {
+                                                        Modifier
+                                                    },
+                                            )
+                                            .size(appIconSize)
+                                            .clip(themedIconContainerShape)
+                                            .background(themedIconBackground),
+                            contentAlignment = Alignment.Center,
+                    ) {
+                        Image(
+                                bitmap = iconBitmap,
+                                contentDescription = stringResource(R.string.desc_launch_app, appName),
+                                modifier = Modifier.requiredSize(appIconSize * 0.55f),
+                                colorFilter = ColorFilter.tint(
+                                        themedIconForeground.copy(alpha = 0.6f),
+                                        BlendMode.SrcAtop,
                                 ),
-                        modifier =
-                                Modifier.then(
-                                                if (useLightWallpaperShadow) {
-                                                    Modifier.shadow(
-                                                            elevation = DesignTokens.ElevationLevel2,
-                                                            shape = bitmapShadowShape,
-                                                            ambientColor =
-                                                                    Color.Black.copy(
-                                                                            alpha =
-                                                                                    LightWallpaperAppIconShadowAmbientAlpha,
-                                                                    ),
-                                                            spotColor =
-                                                                    Color.Black.copy(
-                                                                            alpha =
-                                                                                    LightWallpaperAppIconShadowSpotAlpha,
-                                                                    ),
-                                                    )
-                                                } else {
-                                                    Modifier
-                                                },
-                                        )
-                                        .size(appIconSize)
-                                        .then(clipModifier),
-                )
+                        )
+                    }
+                } else {
+                    val clipModifier =
+                            when {
+                                appIconShape == AppIconShape.CIRCLE ->
+                                        Modifier.clip(CircleShape)
+                                iconIsLegacy -> Modifier.clip(DesignTokens.ShapeLarge)
+                                else -> Modifier
+                            }
+                    val bitmapShadowShape =
+                            when {
+                                appIconShape == AppIconShape.CIRCLE -> CircleShape
+                                iconIsLegacy -> DesignTokens.ShapeLarge
+                                else -> DesignTokens.ShapeLarge
+                            }
+                    Image(
+                            bitmap = iconBitmap,
+                            contentDescription =
+                                    stringResource(
+                                            R.string.desc_launch_app,
+                                            appName,
+                                    ),
+                            modifier =
+                                    Modifier.then(
+                                                    if (useLightWallpaperShadow) {
+                                                        Modifier.shadow(
+                                                                elevation = DesignTokens.ElevationLevel2,
+                                                                shape = bitmapShadowShape,
+                                                                ambientColor =
+                                                                        Color.Black.copy(
+                                                                                alpha =
+                                                                                        LightWallpaperAppIconShadowAmbientAlpha,
+                                                                        ),
+                                                                spotColor =
+                                                                        Color.Black.copy(
+                                                                                alpha =
+                                                                                        LightWallpaperAppIconShadowSpotAlpha,
+                                                                        ),
+                                                        )
+                                                    } else {
+                                                        Modifier
+                                                    },
+                                            )
+                                            .size(appIconSize)
+                                            .then(clipModifier),
+                    )
+                }
             }
         }
     }
