@@ -299,6 +299,8 @@ private fun renderAppSettingsSection(
                     params.settingsParams.onAppSettingWebSuggestionsCountChange,
                 isAppSettingToggleChecked = params.settingsParams.isAppSettingToggleChecked,
                 webSuggestionsCount = params.settingsParams.appSettingWebSuggestionsCount,
+                appSettingPhoneAppGridColumns = params.settingsParams.appSettingPhoneAppGridColumns,
+                onAppSettingPhoneAppGridColumnsChange = params.settingsParams.onAppSettingPhoneAppGridColumnsChange,
                 showAllResults = context.showAllSettingsResults,
                 showExpandControls = context.showAppSettingsExpandControls,
                 onExpandClick = context.appSettingsExpandClick,

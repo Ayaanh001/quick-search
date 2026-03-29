@@ -1,5 +1,6 @@
 package com.tk.quicksearch.search.appSettings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -16,6 +17,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -65,6 +68,8 @@ fun AppSettingsResultsSection(
     onWebSuggestionsCountChange: (Int) -> Unit,
     isAppSettingToggleChecked: (AppSettingResult) -> Boolean,
     webSuggestionsCount: Int,
+    appSettingPhoneAppGridColumns: Int,
+    onAppSettingPhoneAppGridColumnsChange: (Int) -> Unit,
     showAllResults: Boolean,
     showExpandControls: Boolean,
     onExpandClick: () -> Unit,
@@ -143,6 +148,8 @@ fun AppSettingsResultsSection(
                         onWebSuggestionsCountChange = onWebSuggestionsCountChange,
                         onClick = onAppSettingClick,
                         webSuggestionsCount = webSuggestionsCount,
+                        appSettingPhoneAppGridColumns = appSettingPhoneAppGridColumns,
+                        onAppSettingPhoneAppGridColumnsChange = onAppSettingPhoneAppGridColumnsChange,
                         isPredicted = showPredictedOnRow,
                     )
 
@@ -176,6 +183,8 @@ internal fun AppSettingResultRow(
     onWebSuggestionsCountChange: (Int) -> Unit,
     onClick: (AppSettingResult) -> Unit,
     webSuggestionsCount: Int,
+    appSettingPhoneAppGridColumns: Int = 4,
+    onAppSettingPhoneAppGridColumnsChange: (Int) -> Unit = {},
     isPredicted: Boolean = false,
 ) {
     val view = LocalView.current
@@ -185,6 +194,7 @@ internal fun AppSettingResultRow(
             iconPackPackage = null,
         )
     val isWebSuggestionsToggle = setting.toggleKey == AppSettingsToggleKey.WEB_SUGGESTIONS
+    val isAppsPerRowSetting = setting.toggleKey == AppSettingsToggleKey.APPS_PER_ROW
 
     val rowModifier =
         Modifier.fillMaxWidth()
@@ -197,12 +207,12 @@ internal fun AppSettingResultRow(
                     if (setting.isNavigateAction) {
                         hapticConfirm(view)()
                         onClick(setting)
-                    } else {
+                    } else if (!isAppsPerRowSetting) {
                         hapticToggle(view)()
                         onToggle(setting, !checked)
                     }
                 },
-                role = if (setting.isToggleAction) Role.Switch else null,
+                role = if (setting.isToggleAction && !isAppsPerRowSetting) Role.Switch else null,
             )
 
     Row(
@@ -265,7 +275,41 @@ internal fun AppSettingResultRow(
             }
         }
 
-        if (setting.isToggleAction) {
+        if (isAppsPerRowSetting) {
+            val fourSelected = appSettingPhoneAppGridColumns == 4
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
+                modifier = Modifier.padding(end = 6.dp),
+            ) {
+                AssistChip(
+                    onClick = {
+                        hapticToggle(view)()
+                        onAppSettingPhoneAppGridColumnsChange(4)
+                    },
+                    label = { Text(stringResource(R.string.settings_app_columns_4)) },
+                    shape = DesignTokens.ShapeFull,
+                    border = if (fourSelected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = if (fourSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                        labelColor = if (fourSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+                    ),
+                )
+                val fiveSelected = !fourSelected
+                AssistChip(
+                    onClick = {
+                        hapticToggle(view)()
+                        onAppSettingPhoneAppGridColumnsChange(5)
+                    },
+                    label = { Text(stringResource(R.string.settings_app_columns_5)) },
+                    shape = DesignTokens.ShapeFull,
+                    border = if (fiveSelected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = if (fiveSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                        labelColor = if (fiveSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+                    ),
+                )
+            }
+        } else if (setting.isToggleAction) {
             Switch(
                 checked = checked,
                 onCheckedChange = { enabled ->

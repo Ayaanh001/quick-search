@@ -138,6 +138,12 @@ val LocalAppTheme = staticCompositionLocalOf { com.tk.quicksearch.search.core.Ap
 internal val LocalWallpaperDynamicAccentActive = staticCompositionLocalOf { false }
 
 /**
+ * True when the background source is the system wallpaper (not a custom image or app theme).
+ * Used to opt themed icons into system dynamic accent colors rather than our wallpaper-derived palette.
+ */
+val LocalIsSystemWallpaperActive = staticCompositionLocalOf { false }
+
+/**
  * Whether the current image background (custom image or system wallpaper) is dark.
  * `true` = dark image → use light (white) text on top.
  * `false` = light image → use dark text on top.

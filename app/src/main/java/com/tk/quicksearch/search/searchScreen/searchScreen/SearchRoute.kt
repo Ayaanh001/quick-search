@@ -311,6 +311,9 @@ fun SearchRoute(
             AppSettingsToggleKey.SEARCH_CALENDAR -> !uiState.disabledSections.contains(SearchSection.CALENDAR)
             AppSettingsToggleKey.SEARCH_APP_SETTINGS -> !uiState.disabledSections.contains(SearchSection.APP_SETTINGS)
             AppSettingsToggleKey.ASSISTANT_LAUNCH_VOICE_MODE -> uiState.assistantLaunchVoiceModeEnabled
+            AppSettingsToggleKey.WALLPAPER_ACCENT -> uiState.wallpaperAccentEnabled
+            AppSettingsToggleKey.THEMED_ICONS -> uiState.themedIconsEnabled
+            AppSettingsToggleKey.APPS_PER_ROW -> false
             null -> false
         }
     }
@@ -382,6 +385,9 @@ fun SearchRoute(
             AppSettingsToggleKey.SEARCH_CALENDAR -> viewModel.setSectionEnabled(SearchSection.CALENDAR, enabled)
             AppSettingsToggleKey.SEARCH_APP_SETTINGS -> viewModel.setSectionEnabled(SearchSection.APP_SETTINGS, enabled)
             AppSettingsToggleKey.ASSISTANT_LAUNCH_VOICE_MODE -> viewModel.setAssistantLaunchVoiceModeEnabled(enabled)
+            AppSettingsToggleKey.WALLPAPER_ACCENT -> viewModel.setWallpaperAccentEnabled(enabled)
+            AppSettingsToggleKey.THEMED_ICONS -> viewModel.setThemedIconsEnabled(enabled)
+            AppSettingsToggleKey.APPS_PER_ROW -> Unit
             null -> Unit
         }
     }
@@ -506,6 +512,8 @@ fun SearchRoute(
             onAppSettingWebSuggestionsCountChange = viewModel::setWebSuggestionsCount,
             isAppSettingToggleChecked = isAppSettingToggleChecked,
             appSettingWebSuggestionsCount = uiState.webSuggestionsCount,
+            appSettingPhoneAppGridColumns = uiState.phoneAppGridColumns,
+            onAppSettingPhoneAppGridColumnsChange = viewModel::setPhoneAppGridColumns,
             onPinSetting = viewModel::pinSetting,
             onUnpinSetting = viewModel::unpinSetting,
             onExcludeSetting = onExcludeSettingWithUndo,

@@ -69,6 +69,9 @@ enum class AppSettingsToggleKey {
     SEARCH_CALENDAR,
     SEARCH_APP_SETTINGS,
     ASSISTANT_LAUNCH_VOICE_MODE,
+    WALLPAPER_ACCENT,
+    THEMED_ICONS,
+    APPS_PER_ROW,
 }
 
 data class AppSettingResult(

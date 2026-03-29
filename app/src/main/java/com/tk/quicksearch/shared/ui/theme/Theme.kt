@@ -307,6 +307,7 @@ fun QuickSearchTheme(
         LocalAppIsDarkTheme provides useDarkTheme,
         LocalAppTheme provides appTheme,
         LocalWallpaperDynamicAccentActive provides (imageAccentSlots != null),
+        LocalIsSystemWallpaperActive provides (backgroundSource == BackgroundSource.SYSTEM_WALLPAPER),
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

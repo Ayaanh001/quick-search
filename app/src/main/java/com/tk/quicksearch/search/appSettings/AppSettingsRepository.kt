@@ -1,8 +1,10 @@
 package com.tk.quicksearch.search.appSettings
 
 import android.content.Context
+import android.os.Build
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.utils.SearchQueryContext
+import com.tk.quicksearch.shared.util.isTablet
 
 private val WHITESPACE_REGEX = "\\s+".toRegex()
 
@@ -398,6 +400,29 @@ class AppSettingsRepository(
                 toggleKey = AppSettingsToggleKey.SEARCH_APP_SETTINGS,
                 keywords = listOf("settings", "search"),
             )
+            addToggle(
+                id = "app_toggle_wallpaper_accent",
+                titleRes = R.string.settings_wallpaper_accent_title,
+                descriptionRes = R.string.settings_wallpaper_accent_desc,
+                toggleKey = AppSettingsToggleKey.WALLPAPER_ACCENT,
+                keywords = listOf("wallpaper", "accent", "color", "background"),
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                addToggle(
+                    id = "app_toggle_themed_icons",
+                    titleRes = R.string.settings_themed_icons_title,
+                    toggleKey = AppSettingsToggleKey.THEMED_ICONS,
+                    keywords = listOf("themed icons", "monochrome", "icon color"),
+                )
+            }
+            if (!isTablet(context)) {
+                addToggle(
+                    id = "app_setting_apps_per_row",
+                    titleRes = R.string.settings_app_columns_title,
+                    toggleKey = AppSettingsToggleKey.APPS_PER_ROW,
+                    keywords = listOf("columns", "apps per row", "grid", "layout"),
+                )
+            }
         }
     }
 

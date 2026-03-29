@@ -1,5 +1,6 @@
 package com.tk.quicksearch.search.appSettings
 
+import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.data.UserAppPreferences
 import com.tk.quicksearch.search.appSettings.AppSettingsDestination.EXCLUDED_ITEMS
 import com.tk.quicksearch.search.utils.RecentResultRankingUtils
@@ -59,13 +60,17 @@ class AppSettingsSearchHandler(
             .settingScores
 
     private fun getVisibleSettings(): List<AppSettingResult> {
+        val backgroundSource = userPreferences.getBackgroundSource()
         return availableSettings.filter { setting ->
             val shouldHideExcludedItems =
                 !hasExcludedItems() && setting.destination == EXCLUDED_ITEMS
             val shouldHideCircularAppIconsToggle =
                 setting.toggleKey == AppSettingsToggleKey.CIRCULAR_APP_ICONS &&
                     !userPreferences.getSelectedIconPackPackage().isNullOrBlank()
-            !shouldHideExcludedItems && !shouldHideCircularAppIconsToggle
+            val shouldHideWallpaperAccent =
+                setting.toggleKey == AppSettingsToggleKey.WALLPAPER_ACCENT &&
+                    backgroundSource == BackgroundSource.THEME
+            !shouldHideExcludedItems && !shouldHideCircularAppIconsToggle && !shouldHideWallpaperAccent
         }
     }
 
