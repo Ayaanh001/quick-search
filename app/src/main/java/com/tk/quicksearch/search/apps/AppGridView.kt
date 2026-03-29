@@ -188,6 +188,7 @@ fun AppGridView(
                                     packageName = app.packageName,
                                     iconPackPackage = iconPackPackage,
                                     userHandleId = app.userHandleId,
+                                    forceCircularMask = appIconShape == AppIconShape.CIRCLE,
                             )
                     iconResult.bitmap != null
                 }
@@ -459,6 +460,7 @@ private fun AppGridItem(
                     packageName = appInfo.packageName,
                     iconPackPackage = iconPackPackage,
                     userHandleId = appInfo.userHandleId,
+                    forceCircularMask = appIconShape == AppIconShape.CIRCLE,
             )
     var showOptions by remember { mutableStateOf(false) }
     val appIconSize =

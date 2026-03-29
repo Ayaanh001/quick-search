@@ -63,7 +63,11 @@ fun SearchTargetIcon(
             val targetEngine = target.engine
             val iconCandidates =
                 targetEngine.getAppPackageCandidates().map { packageName ->
-                    packageName to rememberAppIcon(packageName = packageName)
+                    packageName to
+                        rememberAppIcon(
+                            packageName = packageName,
+                            forceCircularMask = appIconShape == AppIconShape.CIRCLE,
+                        )
                 }
             val appIconBitmap = iconCandidates.firstOrNull { it.second.bitmap != null }?.second?.bitmap
 
@@ -182,7 +186,11 @@ fun SearchTargetIcon(
         }
 
         is SearchTarget.Browser -> {
-            val iconResult = rememberAppIcon(packageName = target.app.packageName)
+            val iconResult =
+                rememberAppIcon(
+                    packageName = target.app.packageName,
+                    forceCircularMask = appIconShape == AppIconShape.CIRCLE,
+                )
             if (iconResult.bitmap != null) {
                 Image(
                     bitmap = iconResult.bitmap!!,
