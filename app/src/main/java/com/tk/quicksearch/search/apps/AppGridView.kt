@@ -538,11 +538,7 @@ private fun AppIconSurface(
     val materialIconForeground = MaterialTheme.colorScheme.onPrimaryContainer
     val themedIconBackground = materialIconBackground
     val themedIconForeground = materialIconForeground
-    val themedIconContainerShape = if (appIconShape == AppIconShape.CIRCLE) {
-        CircleShape
-    } else {
-        DesignTokens.ShapeLarge
-    }
+    val themedIconContainerShape = CircleShape
 
     Surface(
             modifier = Modifier.requiredSize(DesignTokens.AppIconSize),
