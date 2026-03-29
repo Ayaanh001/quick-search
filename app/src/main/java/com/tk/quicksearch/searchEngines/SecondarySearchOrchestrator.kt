@@ -233,7 +233,11 @@ class SecondarySearchOrchestrator(
                             lastQueryWithNoAppSettings = null
                         }
 
-                        if (shouldSearchAppShortcuts && unifiedResults.appShortcutResults.isEmpty()) {
+                        if (
+                            shouldSearchAppShortcuts &&
+                                !isSingleCharacterQuery &&
+                                unifiedResults.appShortcutResults.isEmpty()
+                        ) {
                             lastQueryWithNoAppShortcuts = trimmedQuery
                         } else if (shouldSearchAppShortcuts &&
                             unifiedResults.appShortcutResults.isNotEmpty()

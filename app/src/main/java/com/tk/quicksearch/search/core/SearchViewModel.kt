@@ -2558,6 +2558,12 @@ class SearchViewModel(
 
         val shouldSkipSearch = appSearchManager.shouldSkipDueToNoMatchPrefix(normalizedQuery)
 
+        if (trimmedQuery.isNotBlank() && appShortcutSearchHandler.getAvailableShortcuts().isEmpty()) {
+            // If shortcut loading is still racing startup, kick off cache-first hydration
+            // so first-key queries do not stay empty.
+            loadAppShortcuts()
+        }
+
         // Cancel any in-flight app search for the previous query.
         appSearchJob?.cancel()
 
@@ -2630,7 +2636,7 @@ class SearchViewModel(
         ) {
             // Snapshot the list reference so the background coroutine isn't racing
             // with a potential cachedAllSearchableApps reassignment.
-            val appsSnapshot = cachedAllSearchableApps
+            val appsSnapshot = getSearchableAppsSnapshot()
             val gridLimit = getGridItemCount()
             val currentVersion = ++appSearchQueryVersion
 
@@ -2653,8 +2659,10 @@ class SearchViewModel(
                         // Drop stale results if a newer query has already started.
                         if (currentVersion != appSearchQueryVersion) return@launch
 
-                        if (results.isEmpty()) {
+                        if (results.isEmpty() && normalizedQuery.length > 1) {
                             appSearchManager.setNoMatchPrefix(normalizedQuery)
+                        } else if (normalizedQuery.length <= 1) {
+                            appSearchManager.setNoMatchPrefix(null)
                         }
 
                         updateResultsState { state -> state.copy(searchResults = results) }
@@ -4122,6 +4130,19 @@ class SearchViewModel(
 
     private fun getGridItemCount(): Int =
             SearchScreenConstants.ROW_COUNT * getAppGridColumns(getApplication(), phoneAppGridColumns)
+
+    private fun getSearchableAppsSnapshot(): List<AppInfo> {
+        if (cachedAllSearchableApps.isNotEmpty()) return cachedAllSearchableApps
+
+        val pinnedAppsForResults =
+                appSearchManager.computePinnedApps(userPreferences.getResultHiddenPackages())
+        val nonPinnedApps = appSearchManager.searchSourceApps()
+        val fallback = (pinnedAppsForResults + nonPinnedApps).distinctBy { it.launchCountKey() }
+        if (fallback.isNotEmpty()) {
+            cachedAllSearchableApps = fallback
+        }
+        return fallback
+    }
 
     /**
      * Recomputes only the app-suggestions / app-search part of derived state: nickname cache,
