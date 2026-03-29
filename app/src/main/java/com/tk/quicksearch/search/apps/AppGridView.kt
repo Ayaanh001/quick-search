@@ -65,6 +65,7 @@ import com.tk.quicksearch.shared.ui.theme.ForestThemeAccent
 import com.tk.quicksearch.shared.ui.theme.LocalAppIsDarkTheme
 import com.tk.quicksearch.shared.ui.theme.LocalAppTheme
 import com.tk.quicksearch.shared.ui.theme.LocalImageBackgroundIsDark
+import com.tk.quicksearch.shared.ui.theme.LocalWallpaperDynamicAccentActive
 import com.tk.quicksearch.shared.ui.theme.MonochromeThemeAccent
 import com.tk.quicksearch.shared.ui.theme.SunsetThemeAccent
 import com.tk.quicksearch.shared.util.getAppGridColumns
@@ -97,23 +98,23 @@ private fun themedIconPaletteForLightMode(theme: AppTheme): LightModeThemedIconP
         when (theme) {
             AppTheme.FOREST ->
                     LightModeThemedIconPalette(
-                            background = Color(0xFFDDF3D9),
-                            foreground = Color(0xFF1F6A31),
+                            background = Color(0xFF1F6A31),
+                            foreground = Color(0xFFDDF3D9),
                     )
             AppTheme.AURORA ->
                     LightModeThemedIconPalette(
-                            background = Color(0xFFD9ECFF),
-                            foreground = Color(0xFF0E5AAE),
+                            background = Color(0xFF0E5AAE),
+                            foreground = Color(0xFFD9ECFF),
                     )
             AppTheme.SUNSET ->
                     LightModeThemedIconPalette(
-                            background = Color(0xFFFFE3D6),
-                            foreground = Color(0xFFAA3008),
+                            background = Color(0xFFAA3008),
+                            foreground = Color(0xFFFFE3D6),
                     )
             AppTheme.MONOCHROME ->
                     LightModeThemedIconPalette(
-                            background = Color(0xFFE8E6E2),
-                            foreground = Color(0xFF1F1F1F),
+                            background = Color(0xFF1F1F1F),
+                            foreground = Color(0xFFE8E6E2),
                     )
         }
 
@@ -570,9 +571,12 @@ private fun AppIconSurface(
         showWallpaperBackground: Boolean = false,
 ) {
     val view = LocalView.current
-    val useLightWallpaperShadow = showWallpaperBackground && !LocalAppIsDarkTheme.current
+    val isDarkTheme = LocalAppIsDarkTheme.current
+    val useLightWallpaperShadow = showWallpaperBackground && !isDarkTheme
     val showThemedIcon = themedIconsEnabled && !hasCustomIconPack &&
             android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
+    val useWallpaperDynamicAccentForIcons =
+            showWallpaperBackground && LocalWallpaperDynamicAccentActive.current
     val appTheme = LocalAppTheme.current
     val lightModePalette = themedIconPaletteForLightMode(appTheme)
     val themeAccent =
@@ -582,16 +586,20 @@ private fun AppIconSurface(
                 AppTheme.SUNSET -> SunsetThemeAccent
                 AppTheme.MONOCHROME -> MonochromeThemeAccent
             }
-    // Keep dark mode tied to existing theme accent tokens; apply a custom per-theme palette
-    // only for light mode so icons read clearer over bright surfaces.
+    // Use image-derived dynamic accents for themed icons when wallpaper accent is active.
+    // Otherwise keep existing theme-based icon colors.
     val themedIconBackground =
-            if (LocalAppIsDarkTheme.current) {
+            if (useWallpaperDynamicAccentForIcons) {
+                MaterialTheme.colorScheme.onPrimaryContainer
+            } else if (isDarkTheme) {
                 themeAccent.lightPrimaryContainer
             } else {
                 lightModePalette.background
             }
     val themedIconForeground =
-            if (LocalAppIsDarkTheme.current) {
+            if (useWallpaperDynamicAccentForIcons) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else if (isDarkTheme) {
                 themeAccent.lightOnPrimaryContainer
             } else {
                 lightModePalette.foreground

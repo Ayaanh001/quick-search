@@ -224,7 +224,7 @@ private fun CalendarEventRow(
             imageVector = Icons.Rounded.CalendarMonth,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.padding(start = 7.dp).size(24.dp),
         )
         Column(
             modifier = Modifier.weight(1f),
