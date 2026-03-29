@@ -4,6 +4,7 @@ import android.content.Context
 import com.tk.quicksearch.search.core.AppIconShape
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.CallingApp
+import com.tk.quicksearch.search.core.LauncherAppIcon
 import com.tk.quicksearch.search.core.MessagingApp
 import com.tk.quicksearch.search.core.AppTheme
 
@@ -264,6 +265,16 @@ class UiPreferences(
 
     fun setAppIconShape(shape: AppIconShape) {
         prefs.edit().putString(KEY_APP_ICON_SHAPE, shape.name).apply()
+    }
+
+    fun getLauncherAppIcon(): LauncherAppIcon {
+        val saved = prefs.getString(KEY_LAUNCHER_APP_ICON, null)
+        return saved?.let { runCatching { LauncherAppIcon.valueOf(it) }.getOrNull() }
+                ?: LauncherAppIcon.AUTO
+    }
+
+    fun setLauncherAppIcon(selection: LauncherAppIcon) {
+        prefs.edit().putString(KEY_LAUNCHER_APP_ICON, selection.name).apply()
     }
 
     fun isThemedIconsEnabled(): Boolean = getBooleanPref(KEY_THEMED_ICONS_ENABLED, false)
@@ -652,6 +663,7 @@ class UiPreferences(
         const val KEY_OVERLAY_CUSTOM_IMAGE_URI = "overlay_custom_image_uri" // Legacy only.
         const val KEY_SELECTED_ICON_PACK = "selected_icon_pack"
         const val KEY_APP_ICON_SHAPE = "app_icon_shape"
+        const val KEY_LAUNCHER_APP_ICON = "launcher_app_icon"
         const val KEY_THEMED_ICONS_ENABLED = "themed_icons_enabled"
         const val KEY_WALLPAPER_ACCENT_ENABLED = "wallpaper_accent_enabled"
         const val KEY_SHOW_APP_LABELS = "show_app_labels"

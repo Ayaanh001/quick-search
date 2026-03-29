@@ -196,6 +196,7 @@ class SearchViewModel(
                                     startupSnapshot?.fontScaleMultiplier
                                             ?: startupPreferencesReader.getFontScaleMultiplier(),
                             ),
+                    launcherAppIcon = startupPreferencesReader.getLauncherAppIcon(),
                     showAppLabels =
                             startupSnapshot?.showAppLabels
                                     ?: startupPreferencesReader.shouldShowAppLabels(),
@@ -221,6 +222,7 @@ class SearchViewModel(
         AppSettingsRepository(appContext)
     }
     private val userPreferences by lazy { UserAppPreferences(appContext) }
+    private val launcherIconManager by lazy { LauncherIconManager(appContext) }
     private val contactPreferences by lazy {
         com.tk.quicksearch.search.data.preferences.ContactPreferences(
                 appContext,
@@ -554,6 +556,7 @@ class SearchViewModel(
                     showAppLabels = s.showAppLabels,
                     phoneAppGridColumns = s.phoneAppGridColumns,
                     appIconShape = s.appIconShape,
+                    launcherAppIcon = s.launcherAppIcon,
                     themedIconsEnabled = s.themedIconsEnabled,
                     appSuggestionsEnabled = s.appSuggestionsEnabled,
                     selectedIconPackPackage = s.selectedIconPackPackage,
@@ -815,6 +818,7 @@ class SearchViewModel(
     private var showAppLabels: Boolean = true
     private var phoneAppGridColumns: Int = com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_PHONE_APP_GRID_COLUMNS
     private var appIconShape: AppIconShape = AppIconShape.DEFAULT
+    private var launcherAppIcon: LauncherAppIcon = LauncherAppIcon.AUTO
     private var themedIconsEnabled: Boolean = false
     private var wallpaperBackgroundAlpha: Float = UiPreferences.DEFAULT_WALLPAPER_BACKGROUND_ALPHA
     private var wallpaperBlurRadius: Float = UiPreferences.DEFAULT_WALLPAPER_BLUR_RADIUS
@@ -1022,6 +1026,7 @@ class SearchViewModel(
         backgroundSource = startupPrefs.backgroundSource
         customImageUri = startupPrefs.customImageUri
         appIconShape = startupPrefs.appIconShape
+        launcherAppIcon = startupPrefs.launcherAppIcon
         themedIconsEnabled = startupPrefs.themedIconsEnabled
 
         // Load cached data - this is the critical path for content
@@ -1053,6 +1058,7 @@ class SearchViewModel(
                         backgroundSource = backgroundSource,
                         customImageUri = customImageUri,
                         appIconShape = appIconShape,
+                        launcherAppIcon = launcherAppIcon,
                         themedIconsEnabled = themedIconsEnabled,
                         // We don't have full prefs yet, so keep initializing flag true
                         // but show the apps we found in cache
@@ -1078,6 +1084,7 @@ class SearchViewModel(
 
         // Store the full startup config for Phase 2
         this.startupConfig = startupConfig
+        applyLauncherIconSelection()
 
         // Prefetch icons in background (non-blocking) after UI is shown
         // Icons will lazy-load via rememberAppIcon() with placeholders until ready
@@ -1145,6 +1152,7 @@ class SearchViewModel(
         showAppLabels = prefs.showAppLabels
         phoneAppGridColumns = prefs.phoneAppGridColumns
         appIconShape = prefs.appIconShape
+        launcherAppIcon = prefs.launcherAppIcon
         themedIconsEnabled = prefs.themedIconsEnabled
         wallpaperBackgroundAlpha = prefs.wallpaperBackgroundAlpha
         wallpaperBlurRadius = prefs.wallpaperBlurRadius
@@ -1169,6 +1177,7 @@ class SearchViewModel(
                     showAppLabels = showAppLabels,
                     phoneAppGridColumns = phoneAppGridColumns,
                     appIconShape = appIconShape,
+                    launcherAppIcon = launcherAppIcon,
                     themedIconsEnabled = themedIconsEnabled,
                     showWallpaperBackground = backgroundSource != BackgroundSource.THEME,
                     wallpaperBackgroundAlpha = wallpaperBackgroundAlpha,
@@ -1203,6 +1212,8 @@ class SearchViewModel(
         if (!prefs.searchHistoryEnabled) {
             userPreferences.clearRecentQueries()
         }
+
+        applyLauncherIconSelection()
 
         // Load recent queries on startup if enabled
         refreshRecentItems()
@@ -3329,6 +3340,7 @@ class SearchViewModel(
             userPreferences.setAppTheme(theme)
             appTheme = theme
             updateConfigState { it.copy(appTheme = theme) }
+            applyLauncherIconSelection()
             saveStartupSurfaceSnapshotAsync(allowDuringQuery = true)
         }
     }
@@ -3356,8 +3368,11 @@ class SearchViewModel(
                 updateConfigState {
                     it.copy(wallpaperBackgroundAlpha = newAlpha, wallpaperBlurRadius = newBlur)
                 }
+                applyLauncherIconSelection()
                 saveStartupSurfaceSnapshotAsync(allowDuringQuery = true)
             }
+        } else {
+            viewModelScope.launch(Dispatchers.IO) { applyLauncherIconSelection() }
         }
     }
 
@@ -3454,6 +3469,28 @@ class SearchViewModel(
         }
     }
 
+    fun setLauncherAppIcon(selection: LauncherAppIcon) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (launcherAppIcon == selection) return@launch
+            userPreferences.setLauncherAppIcon(selection)
+            launcherAppIcon = selection
+            updateConfigState { it.copy(launcherAppIcon = selection) }
+            applyLauncherIconSelection(selection)
+        }
+    }
+
+    fun onSystemDarkModeChanged(isDarkMode: Boolean) {
+        if (_configState.value.appThemeMode != AppThemeMode.SYSTEM) return
+        if (launcherAppIcon != LauncherAppIcon.AUTO) return
+        viewModelScope.launch(Dispatchers.IO) {
+            launcherIconManager.applySelection(
+                    selection = launcherAppIcon,
+                    appTheme = appTheme,
+                    isDarkMode = isDarkMode,
+            )
+        }
+    }
+
     fun setThemedIconsEnabled(enabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             if (themedIconsEnabled == enabled) return@launch
@@ -3461,6 +3498,14 @@ class SearchViewModel(
             themedIconsEnabled = enabled
             updateConfigState { it.copy(themedIconsEnabled = enabled) }
         }
+    }
+
+    private fun applyLauncherIconSelection(selection: LauncherAppIcon = launcherAppIcon) {
+        launcherIconManager.applySelection(
+                selection = selection,
+                appTheme = appTheme,
+                isDarkMode = computeEffectiveIsDarkMode(),
+        )
     }
 
     // Aliases

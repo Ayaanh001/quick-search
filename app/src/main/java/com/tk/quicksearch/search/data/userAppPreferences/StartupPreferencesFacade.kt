@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import com.tk.quicksearch.search.core.AppIconShape
 import com.tk.quicksearch.search.core.AppThemeMode
 import com.tk.quicksearch.search.core.BackgroundSource
+import com.tk.quicksearch.search.core.LauncherAppIcon
 import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.search.models.FileType
 import com.tk.quicksearch.search.data.UserAppPreferences
@@ -52,6 +53,7 @@ class StartupPreferencesFacade(
             val appSuggestionsEnabled: Boolean,
             val showAppLabels: Boolean,
             val appIconShape: AppIconShape,
+            val launcherAppIcon: LauncherAppIcon = LauncherAppIcon.AUTO,
             val themedIconsEnabled: Boolean = true,
             val phoneAppGridColumns: Int = com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_PHONE_APP_GRID_COLUMNS,
     )
@@ -388,6 +390,18 @@ class StartupPreferencesFacade(
                                     runCatching { AppIconShape.valueOf(value) }.getOrNull()
                                 }
                                 ?: AppIconShape.DEFAULT,
+                launcherAppIcon =
+                        (
+                                allPrefs[
+                                        com.tk.quicksearch.search.data.preferences.UiPreferences
+                                                .KEY_LAUNCHER_APP_ICON,
+                                ] as?
+                                        String
+                                )
+                                ?.let { value ->
+                                    runCatching { LauncherAppIcon.valueOf(value) }.getOrNull()
+                                }
+                                ?: LauncherAppIcon.AUTO,
                 themedIconsEnabled =
                         allPrefs[
                                 com.tk.quicksearch.search.data.preferences.UiPreferences
@@ -715,6 +729,18 @@ class StartupPreferencesFacade(
                                             runCatching { AppIconShape.valueOf(value) }.getOrNull()
                                         }
                                         ?: AppIconShape.DEFAULT,
+                        launcherAppIcon =
+                                (
+                                        allPrefs[
+                                                com.tk.quicksearch.search.data.preferences.UiPreferences
+                                                        .KEY_LAUNCHER_APP_ICON,
+                                        ] as?
+                                                String
+                                        )
+                                        ?.let { value ->
+                                            runCatching { LauncherAppIcon.valueOf(value) }.getOrNull()
+                                        }
+                                        ?: LauncherAppIcon.AUTO,
                         themedIconsEnabled =
                                 allPrefs[
                                         com.tk.quicksearch.search.data.preferences.UiPreferences

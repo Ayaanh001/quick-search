@@ -436,6 +436,7 @@ data class SearchUiState(
         val showAppLabels: Boolean = true,
         val phoneAppGridColumns: Int = com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_PHONE_APP_GRID_COLUMNS,
         val appIconShape: AppIconShape = AppIconShape.DEFAULT,
+        val launcherAppIcon: LauncherAppIcon = LauncherAppIcon.AUTO,
         val themedIconsEnabled: Boolean = true,
         val appSuggestionsEnabled: Boolean = true,
         // Section visibility preferences
@@ -616,6 +617,7 @@ fun SearchUiState(
                 showAppLabels = config.showAppLabels,
                 phoneAppGridColumns = config.phoneAppGridColumns,
                 appIconShape = config.appIconShape,
+                launcherAppIcon = config.launcherAppIcon,
                 themedIconsEnabled = config.themedIconsEnabled,
                 appSuggestionsEnabled = config.appSuggestionsEnabled,
                 selectedIconPackPackage = config.selectedIconPackPackage,

@@ -2,6 +2,7 @@ package com.tk.quicksearch.settings.shared
 
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.search.core.AppIconShape
+import com.tk.quicksearch.search.core.LauncherAppIcon
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.CallingApp
 import com.tk.quicksearch.search.core.MessagingApp
@@ -69,6 +70,7 @@ data class SettingsScreenState(
     val showAppLabels: Boolean = true,
     val phoneAppGridColumns: Int = com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_PHONE_APP_GRID_COLUMNS,
     val appIconShape: AppIconShape = AppIconShape.DEFAULT,
+    val launcherAppIcon: LauncherAppIcon = LauncherAppIcon.AUTO,
     val themedIconsEnabled: Boolean = true,
     val directDialEnabled: Boolean,
     val disabledSections: Set<SearchSection>,
@@ -141,6 +143,7 @@ data class SettingsScreenCallbacks(
     val onToggleAppLabels: (Boolean) -> Unit,
     val onSetPhoneAppGridColumns: (Int) -> Unit,
     val onSetAppIconShape: (AppIconShape) -> Unit,
+    val onSetLauncherAppIcon: (LauncherAppIcon) -> Unit,
     val onToggleThemedIcons: (Boolean) -> Unit,
     val onToggleDirectDial: (Boolean) -> Unit,
     val onToggleSection: (SearchSection, Boolean) -> Unit,

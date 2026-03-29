@@ -17,10 +17,12 @@ import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.AppIconShape
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.IconPackInfo
+import com.tk.quicksearch.search.core.LauncherAppIcon
 import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.settings.AppearanceSettings.FontSizeCard
 import com.tk.quicksearch.settings.AppearanceSettings.IconPackPickerDialog
 import com.tk.quicksearch.settings.AppearanceSettings.AppIconCard
+import com.tk.quicksearch.settings.AppearanceSettings.AppLauncherIconCard
 import com.tk.quicksearch.settings.AppearanceSettings.AppThemeCard
 import com.tk.quicksearch.settings.AppearanceSettings.WallpaperCard
 import com.tk.quicksearch.settings.shared.SettingsCard
@@ -67,6 +69,8 @@ fun AppearanceSettingsSection(
         onSearchIconPacks: () -> Unit,
         appIconShape: AppIconShape,
         onSetAppIconShape: (AppIconShape) -> Unit,
+        launcherAppIcon: LauncherAppIcon,
+        onSetLauncherAppIcon: (LauncherAppIcon) -> Unit,
         themedIconsEnabled: Boolean,
         onThemedIconsToggle: (Boolean) -> Unit,
         wallpaperAccentEnabled: Boolean,
@@ -105,6 +109,14 @@ fun AppearanceSettingsSection(
                 hasWallpaperPermission = hasWallpaperPermission,
                 themedIconsEnabled = themedIconsEnabled,
                 onThemedIconsToggle = onThemedIconsToggle,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        AppLauncherIconCard(
+                launcherAppIcon = launcherAppIcon,
+                onSetLauncherAppIcon = onSetLauncherAppIcon,
+                appTheme = appTheme,
         )
 
         Spacer(modifier = Modifier.height(16.dp))

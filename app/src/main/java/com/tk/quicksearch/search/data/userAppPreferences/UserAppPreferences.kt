@@ -641,6 +641,12 @@ class UserAppPreferences(
     fun setAppIconShape(shape: com.tk.quicksearch.search.core.AppIconShape) =
             uiPreferences.setAppIconShape(shape)
 
+    fun getLauncherAppIcon(): com.tk.quicksearch.search.core.LauncherAppIcon =
+            uiPreferences.getLauncherAppIcon()
+
+    fun setLauncherAppIcon(selection: com.tk.quicksearch.search.core.LauncherAppIcon) =
+            uiPreferences.setLauncherAppIcon(selection)
+
     fun isThemedIconsEnabled(): Boolean = uiPreferences.isThemedIconsEnabled()
 
     fun setThemedIconsEnabled(enabled: Boolean) = uiPreferences.setThemedIconsEnabled(enabled)

@@ -265,6 +265,8 @@ internal fun SettingsDetailLevel1Screen(
                             onSearchIconPacks = callbacks.onSearchIconPacks,
                             appIconShape = state.appIconShape,
                             onSetAppIconShape = callbacks.onSetAppIconShape,
+                            launcherAppIcon = state.launcherAppIcon,
+                            onSetLauncherAppIcon = callbacks.onSetLauncherAppIcon,
                             themedIconsEnabled = state.themedIconsEnabled,
                             onThemedIconsToggle = callbacks.onToggleThemedIcons,
                             wallpaperAccentEnabled = state.wallpaperAccentEnabled,

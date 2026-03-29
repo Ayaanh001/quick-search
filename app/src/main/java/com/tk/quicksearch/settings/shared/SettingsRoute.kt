@@ -331,6 +331,7 @@ fun SettingsRoute(
             onToggleAppLabels = viewModel::setShowAppLabels,
             onSetPhoneAppGridColumns = viewModel::setPhoneAppGridColumns,
             onSetAppIconShape = viewModel::setAppIconShape,
+            onSetLauncherAppIcon = viewModel::setLauncherAppIcon,
             onToggleThemedIcons = viewModel::setThemedIconsEnabled,
             onToggleDirectDial = onToggleDirectDial,
             onToggleSection = onToggleSection,
