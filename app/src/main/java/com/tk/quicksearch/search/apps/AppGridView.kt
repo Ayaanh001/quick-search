@@ -98,23 +98,23 @@ private fun themedIconPaletteForLightMode(theme: AppTheme): LightModeThemedIconP
         when (theme) {
             AppTheme.FOREST ->
                     LightModeThemedIconPalette(
-                            background = Color(0xFF1F6A31),
-                            foreground = Color(0xFFDDF3D9),
+                            background = Color(0xFFDDF3D9),
+                            foreground = Color(0xFF1F6A31),
                     )
             AppTheme.AURORA ->
                     LightModeThemedIconPalette(
-                            background = Color(0xFF0E5AAE),
-                            foreground = Color(0xFFD9ECFF),
+                            background = Color(0xFFD9ECFF),
+                            foreground = Color(0xFF0E5AAE),
                     )
             AppTheme.SUNSET ->
                     LightModeThemedIconPalette(
-                            background = Color(0xFFAA3008),
-                            foreground = Color(0xFFFFE3D6),
+                            background = Color(0xFFFFE3D6),
+                            foreground = Color(0xFFAA3008),
                     )
             AppTheme.MONOCHROME ->
                     LightModeThemedIconPalette(
-                            background = Color(0xFF1F1F1F),
-                            foreground = Color(0xFFE8E6E2),
+                            background = Color(0xFFE8E6E2),
+                            foreground = Color(0xFF1F1F1F),
                     )
         }
 
@@ -590,15 +590,23 @@ private fun AppIconSurface(
     // Otherwise keep existing theme-based icon colors.
     val themedIconBackground =
             if (useWallpaperDynamicAccentForIcons) {
-                MaterialTheme.colorScheme.onPrimaryContainer
+                if (isDarkTheme) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    Color.White
+                }
             } else if (isDarkTheme) {
                 themeAccent.lightPrimaryContainer
             } else {
-                lightModePalette.background
+                Color.White
             }
     val themedIconForeground =
             if (useWallpaperDynamicAccentForIcons) {
-                MaterialTheme.colorScheme.primaryContainer
+                if (isDarkTheme) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.primary
+                }
             } else if (isDarkTheme) {
                 themeAccent.lightOnPrimaryContainer
             } else {
