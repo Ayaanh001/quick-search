@@ -99,7 +99,8 @@ Long-press on most results to open a context menu with quick actions.
 - **Overlay Mode** - Enable to make the search bar appear over other apps anywhere in the system. This defines the main experience: search from any screen without leaving what you're doing.
 - **Font Size** - Choose between small, medium, and large font sizes for all in-app text.
 - **Theme** - Set base theme to Light, Dark or System (follows system theme). Then, pick among the available themes - Mono, Forest, Aurora, Sunset - and adjust their intensity. These themes will adapt to light and dark mode seamlessly.
-- **Wallpaper Background** - Use your wallpaper or any custom image as your search screen background, you can also tune transparency and blur to keep content readable.
+- **Themed App Icons** - Enable or disable themed app icons.
+- **Wallpaper Background** - Use your wallpaper or any custom image as your search screen background, you can also tune transparency and blur to keep content readable. Choose whether to derive accent colors from wallpaper.
 - **Search Engine Style** - Choose between:
   - **Inline Mode**: Search engines scroll with the content
   - **Compact Mode**: Search engines stay fixed at the bottom of the screen above the keyboard for quick access, with support for one or two rows of engines.
@@ -107,6 +108,7 @@ Long-press on most results to open a context menu with quick actions.
 - **Bottom Searchbar** - You can choose to move the search bar to the bottom.
 - **Apps Per Row** - Choose no. of apps displayed per row in results and suggestions.
 - **App Labels** - You can choose to hide app labels.
+- **Circular App icons** - Option to force circular app icons
 - **Icon Packs** - Select an installed icon pack. If none of them are installed, tapping on the card will open the Play Store and search for icon packs. Once installed, come back to the app and hit the refresh button on the icon packs option to refresh the icon packs list.
 
 ---
@@ -196,11 +198,10 @@ Long-press on most results to open a context menu with quick actions.
 
 ### More Options
 
-- **Auto-Close App** - Option to toggle auto-close app after any action
 - **Top Result Indicator Toggle** - Option to hide the top result indicator for top results that can be opened with the keyboard.
 - **Open Keyboard Toggle** - Choose to disable automatic keyboard opening during app launch. This is useful if you want to use this app just to quickly access pinned items.
 - **Clear Query** - The app clears your query by default when you reopen the app; you can choose to keep the query by disabling this toggle.
-- **Circular App icons** - Option to force circular app icons
+- **Auto-Close App** - Option to toggle auto-close app after any action
 
 ---
 

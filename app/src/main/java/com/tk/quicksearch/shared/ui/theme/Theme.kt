@@ -176,6 +176,7 @@ fun QuickSearchTheme(
         LocalQuickSearchAppColorPalette provides appPalette,
         LocalAppIsDarkTheme provides useDarkTheme,
         LocalAppTheme provides appTheme,
+        LocalWallpaperDynamicAccentActive provides useDynamicColors,
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
