@@ -425,6 +425,7 @@ data class SearchUiState(
         val appThemeMode: AppThemeMode = AppThemeMode.SYSTEM,
         val fontScaleMultiplier: Float = UiPreferences.DEFAULT_FONT_SCALE_MULTIPLIER,
         val backgroundSource: BackgroundSource = BackgroundSource.THEME,
+        val wallpaperAccentEnabled: Boolean = true,
         val customImageUri: String? = null,
         val startupBackgroundPreviewPath: String? = null,
         // Icon pack
@@ -434,6 +435,7 @@ data class SearchUiState(
         val showAppLabels: Boolean = true,
         val phoneAppGridColumns: Int = com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_PHONE_APP_GRID_COLUMNS,
         val appIconShape: AppIconShape = AppIconShape.DEFAULT,
+        val themedIconsEnabled: Boolean = true,
         val appSuggestionsEnabled: Boolean = true,
         // Section visibility preferences
         val disabledSections: Set<SearchSection> = emptySet(),
@@ -602,6 +604,7 @@ fun SearchUiState(
                 oneHandedMode = config.oneHandedMode,
                 bottomSearchBarEnabled = config.bottomSearchBarEnabled,
                 topResultIndicatorEnabled = config.topResultIndicatorEnabled,
+                wallpaperAccentEnabled = config.wallpaperAccentEnabled,
                 openKeyboardOnLaunch = config.openKeyboardOnLaunch,
                 clearQueryOnLaunch = config.clearQueryOnLaunch,
                 autoCloseOverlay = config.autoCloseOverlay,
@@ -610,6 +613,7 @@ fun SearchUiState(
                 showAppLabels = config.showAppLabels,
                 phoneAppGridColumns = config.phoneAppGridColumns,
                 appIconShape = config.appIconShape,
+                themedIconsEnabled = config.themedIconsEnabled,
                 appSuggestionsEnabled = config.appSuggestionsEnabled,
                 selectedIconPackPackage = config.selectedIconPackPackage,
                 availableIconPacks = config.availableIconPacks,

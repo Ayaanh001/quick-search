@@ -12,6 +12,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -121,6 +122,7 @@ fun AppGridView(
         startupPhase: StartupPhase = StartupPhase.COMPLETE,
         predictedTarget: PredictedSubmitTarget? = null,
         appIconShape: AppIconShape = AppIconShape.DEFAULT,
+        themedIconsEnabled: Boolean = true,
 ) {
     val context = LocalContext.current
     val shortcutsByPackage =
@@ -177,6 +179,7 @@ fun AppGridView(
                         isOverlayPresentation = isOverlayPresentation,
                         predictedTarget = predictedTarget,
                         appIconShape = appIconShape,
+                        themedIconsEnabled = themedIconsEnabled,
                 )
             }
         } else {
@@ -218,6 +221,7 @@ fun AppGridView(
                         isOverlayPresentation = isOverlayPresentation,
                         predictedTarget = predictedTarget,
                         appIconShape = appIconShape,
+                        themedIconsEnabled = themedIconsEnabled,
                 )
             }
         }
@@ -246,6 +250,7 @@ private fun AppGrid(
         isOverlayPresentation: Boolean,
         predictedTarget: PredictedSubmitTarget?,
         appIconShape: AppIconShape,
+        themedIconsEnabled: Boolean = true,
 ) {
     val maxVisibleColumns = getAppGridColumns(phoneColumnOverride)
     val columns =
@@ -326,6 +331,7 @@ private fun AppGrid(
                         createAppState = createAppState,
                         predictedTarget = predictedTarget,
                         appIconShape = appIconShape,
+                        themedIconsEnabled = themedIconsEnabled,
                 )
             }
         }
@@ -342,6 +348,7 @@ private fun AppGridRow(
         createAppState: (AppInfo) -> AppState,
         predictedTarget: PredictedSubmitTarget?,
         appIconShape: AppIconShape,
+        themedIconsEnabled: Boolean = true,
 ) {
     Row(
             modifier = Modifier.fillMaxWidth(),
@@ -363,6 +370,7 @@ private fun AppGridRow(
                                             it.userHandleId == app.userHandleId
                                 } == true,
                         appIconShape = appIconShape,
+                        themedIconsEnabled = themedIconsEnabled,
                 )
             }
         }
@@ -380,6 +388,7 @@ private fun AppGridItem(
         iconPackPackage: String?,
         isPredicted: Boolean = false,
         appIconShape: AppIconShape = AppIconShape.DEFAULT,
+        themedIconsEnabled: Boolean = true,
 ) {
     val context = LocalContext.current
     val isDarkTheme = LocalAppIsDarkTheme.current
@@ -437,12 +446,14 @@ private fun AppGridItem(
             AppIconSurface(
                     iconBitmap = iconResult.bitmap,
                     iconIsLegacy = iconResult.isLegacy,
+                    monochromeData = iconResult.monochromeData,
                     appName = appInfo.appName,
                     onClick = appActions.onClick,
                     onLongClick = { showOptions = true },
                     appIconSize = appIconSize,
                     appIconShape = appIconShape,
                     hasCustomIconPack = iconPackPackage != null,
+                    themedIconsEnabled = themedIconsEnabled,
             )
             if (appState.showAppLabel) {
                 AppLabelText(
@@ -476,14 +487,21 @@ private fun AppGridItem(
 private fun AppIconSurface(
         iconBitmap: androidx.compose.ui.graphics.ImageBitmap?,
         iconIsLegacy: Boolean,
+        monochromeData: androidx.compose.ui.graphics.ImageBitmap? = null,
         appName: String,
         onClick: () -> Unit,
         onLongClick: () -> Unit,
         appIconSize: Dp,
         appIconShape: AppIconShape = AppIconShape.DEFAULT,
         hasCustomIconPack: Boolean = false,
+        themedIconsEnabled: Boolean = true,
 ) {
     val view = LocalView.current
+    val showThemedIcon = themedIconsEnabled && monochromeData != null && !hasCustomIconPack &&
+            android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
+    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
+    val onPrimaryContainer = MaterialTheme.colorScheme.onPrimaryContainer
+
     Surface(
             modifier = Modifier.requiredSize(DesignTokens.AppIconSize),
             color = Color.Transparent,
@@ -502,7 +520,22 @@ private fun AppIconSurface(
                                 ),
                 contentAlignment = Alignment.Center,
         ) {
-            if (iconBitmap != null) {
+            if (showThemedIcon && monochromeData != null) {
+                Box(
+                        modifier = Modifier
+                                .size(appIconSize)
+                                .clip(androidx.compose.foundation.shape.CircleShape)
+                                .background(primaryContainer),
+                        contentAlignment = Alignment.Center,
+                ) {
+                    Image(
+                            bitmap = monochromeData,
+                            contentDescription = stringResource(R.string.desc_launch_app, appName),
+                            modifier = Modifier.size(appIconSize * 1f),
+                            colorFilter = ColorFilter.tint(onPrimaryContainer),
+                    )
+                }
+            } else if (iconBitmap != null) {
                 val clipModifier =
                         when {
                             appIconShape == AppIconShape.CIRCLE ->

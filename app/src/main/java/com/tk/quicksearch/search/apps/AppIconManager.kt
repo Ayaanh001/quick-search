@@ -2,8 +2,12 @@ package com.tk.quicksearch.search.apps
 
 import android.content.Context
 import android.content.pm.LauncherApps
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
+import android.os.Build
 import android.util.LruCache
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -20,6 +24,7 @@ import java.util.concurrent.atomic.AtomicLong
 private data class AppIconEntry(
     val bitmap: ImageBitmap,
     val isLegacy: Boolean,
+    val monochromeData: ImageBitmap? = null,
 )
 
 private val appIconCacheEpoch = AtomicLong(0L)
@@ -65,6 +70,7 @@ fun invalidateAppIconCache() {
 data class AppIconResult(
     val bitmap: ImageBitmap?,
     val isLegacy: Boolean,
+    val monochromeData: ImageBitmap? = null,
 )
 
 /**
@@ -92,13 +98,13 @@ fun rememberAppIcon(
             key1 = cacheKey,
         ) {
             if (cachedInitial != null) {
-                value = AppIconResult(cachedInitial.bitmap, cachedInitial.isLegacy)
+                value = AppIconResult(cachedInitial.bitmap, cachedInitial.isLegacy, cachedInitial.monochromeData)
                 return@produceState
             }
 
             val cached = AppIconCache.get(cacheKey)
             if (cached != null) {
-                value = AppIconResult(cached.bitmap, cached.isLegacy)
+                value = AppIconResult(cached.bitmap, cached.isLegacy, cached.monochromeData)
                 return@produceState
             }
 
@@ -121,13 +127,16 @@ fun rememberAppIcon(
                         } else {
                             runCatching {
                                 val drawable = context.packageManager.getApplicationIcon(packageName)
-                                val isLegacy = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                    drawable !is AdaptiveIconDrawable
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && drawable is AdaptiveIconDrawable) {
+                                    val bitmap = drawable.toBitmap().asImageBitmap()
+                                    val monochromeData = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        extractMonochromeBitmap(drawable)?.asImageBitmap()
+                                    } else null
+                                    AppIconEntry(bitmap, isLegacy = false, monochromeData = monochromeData)
                                 } else {
-                                    true // All icons are legacy on API < 26
+                                    val bitmap = drawable.toBitmap().asImageBitmap()
+                                    AppIconEntry(bitmap, isLegacy = Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
                                 }
-                                val bitmap = drawable.toBitmap().asImageBitmap()
-                                AppIconEntry(bitmap, isLegacy)
                             }.getOrNull()
                         }
                     }
@@ -135,7 +144,7 @@ fun rememberAppIcon(
 
             if (entry != null) {
                 AppIconCache.put(cacheKey, entry)
-                value = AppIconResult(entry.bitmap, entry.isLegacy)
+                value = AppIconResult(entry.bitmap, entry.isLegacy, entry.monochromeData)
             }
         }
 
@@ -159,13 +168,26 @@ private fun loadWorkProfileBadgedIcon(
     }.getOrNull() ?: return null
     return runCatching {
         val drawable = activityInfo.getBadgedIcon(densityDpi)
-        val isLegacy = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        val isLegacy = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             drawable !is AdaptiveIconDrawable
         } else {
             true // All icons are legacy on API < 26
         }
         val bitmap = drawable.toBitmap().asImageBitmap()
         AppIconEntry(bitmap, isLegacy)
+    }.getOrNull()
+}
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+private fun extractMonochromeBitmap(drawable: AdaptiveIconDrawable): Bitmap? {
+    val monochrome = drawable.monochrome ?: return null
+    val size = 108 // Standard adaptive icon grid size in dp units
+    return runCatching {
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        monochrome.setBounds(0, 0, size, size)
+        monochrome.draw(canvas)
+        bitmap
     }.getOrNull()
 }
 
@@ -211,13 +233,16 @@ suspend fun prefetchAppIcons(
                 } else {
                     runCatching {
                         val drawable = context.packageManager.getApplicationIcon(packageName)
-                        val isLegacy = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                            drawable !is AdaptiveIconDrawable
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && drawable is AdaptiveIconDrawable) {
+                            val bitmap = drawable.toBitmap().asImageBitmap()
+                            val monochromeData = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                extractMonochromeBitmap(drawable)?.asImageBitmap()
+                            } else null
+                            AppIconEntry(bitmap, isLegacy = false, monochromeData = monochromeData)
                         } else {
-                            true // All icons are legacy on API < 26
+                            val bitmap = drawable.toBitmap().asImageBitmap()
+                            AppIconEntry(bitmap, isLegacy = Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
                         }
-                        val bitmap = drawable.toBitmap().asImageBitmap()
-                        AppIconEntry(bitmap, isLegacy)
                     }.getOrNull()
                 }
 

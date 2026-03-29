@@ -630,6 +630,14 @@ class UserAppPreferences(
     fun setAppIconShape(shape: com.tk.quicksearch.search.core.AppIconShape) =
             uiPreferences.setAppIconShape(shape)
 
+    fun isThemedIconsEnabled(): Boolean = uiPreferences.isThemedIconsEnabled()
+
+    fun setThemedIconsEnabled(enabled: Boolean) = uiPreferences.setThemedIconsEnabled(enabled)
+
+    fun isWallpaperAccentEnabled(): Boolean = uiPreferences.isWallpaperAccentEnabled()
+
+    fun setWallpaperAccentEnabled(enabled: Boolean) = uiPreferences.setWallpaperAccentEnabled(enabled)
+
     fun isDirectSearchSetupExpanded(): Boolean = uiPreferences.isDirectSearchSetupExpanded()
 
     fun setDirectSearchSetupExpanded(expanded: Boolean) =

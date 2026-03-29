@@ -545,6 +545,7 @@ class SearchViewModel(
                     oneHandedMode = s.oneHandedMode,
                     bottomSearchBarEnabled = s.bottomSearchBarEnabled,
                     topResultIndicatorEnabled = s.topResultIndicatorEnabled,
+                    wallpaperAccentEnabled = s.wallpaperAccentEnabled,
                     openKeyboardOnLaunch = s.openKeyboardOnLaunch,
                     clearQueryOnLaunch = s.clearQueryOnLaunch,
                     autoCloseOverlay = s.autoCloseOverlay,
@@ -552,6 +553,7 @@ class SearchViewModel(
                     showAppLabels = s.showAppLabels,
                     phoneAppGridColumns = s.phoneAppGridColumns,
                     appIconShape = s.appIconShape,
+                    themedIconsEnabled = s.themedIconsEnabled,
                     appSuggestionsEnabled = s.appSuggestionsEnabled,
                     selectedIconPackPackage = s.selectedIconPackPackage,
                     availableIconPacks = s.availableIconPacks,
@@ -801,6 +803,7 @@ class SearchViewModel(
     private var oneHandedMode: Boolean = false
     private var bottomSearchBarEnabled: Boolean = false
     private var topResultIndicatorEnabled: Boolean = true
+    private var wallpaperAccentEnabled: Boolean = true
     private var openKeyboardOnLaunch: Boolean = true
     private var overlayModeEnabled: Boolean = false
     private var autoCloseOverlay: Boolean = true
@@ -811,6 +814,7 @@ class SearchViewModel(
     private var showAppLabels: Boolean = true
     private var phoneAppGridColumns: Int = com.tk.quicksearch.search.data.preferences.UiPreferences.DEFAULT_PHONE_APP_GRID_COLUMNS
     private var appIconShape: AppIconShape = AppIconShape.DEFAULT
+    private var themedIconsEnabled: Boolean = false
     private var wallpaperBackgroundAlpha: Float = UiPreferences.DEFAULT_WALLPAPER_BACKGROUND_ALPHA
     private var wallpaperBlurRadius: Float = UiPreferences.DEFAULT_WALLPAPER_BLUR_RADIUS
     private var appTheme: AppTheme = AppTheme.MONOCHROME
@@ -1006,6 +1010,7 @@ class SearchViewModel(
         oneHandedMode = startupConfig.oneHandedMode
         bottomSearchBarEnabled = startupPrefs.bottomSearchBarEnabled
         topResultIndicatorEnabled = startupPrefs.topResultIndicatorEnabled
+        wallpaperAccentEnabled = userPreferences.isWallpaperAccentEnabled()
         openKeyboardOnLaunch = startupPrefs.openKeyboardOnLaunch
         clearQueryOnLaunch = startupPrefs.clearQueryOnLaunch
         autoCloseOverlay = startupPrefs.autoCloseOverlay
@@ -1016,6 +1021,7 @@ class SearchViewModel(
         backgroundSource = startupPrefs.backgroundSource
         customImageUri = startupPrefs.customImageUri
         appIconShape = startupPrefs.appIconShape
+        themedIconsEnabled = startupPrefs.themedIconsEnabled
 
         // Load cached data - this is the critical path for content
         // This is just a fast JSON parse
@@ -1034,6 +1040,7 @@ class SearchViewModel(
                         oneHandedMode = oneHandedMode,
                         bottomSearchBarEnabled = bottomSearchBarEnabled,
                         topResultIndicatorEnabled = topResultIndicatorEnabled,
+                        wallpaperAccentEnabled = wallpaperAccentEnabled,
                         openKeyboardOnLaunch = openKeyboardOnLaunch,
                         clearQueryOnLaunch = clearQueryOnLaunch,
                         autoCloseOverlay = autoCloseOverlay,
@@ -1045,6 +1052,7 @@ class SearchViewModel(
                         backgroundSource = backgroundSource,
                         customImageUri = customImageUri,
                         appIconShape = appIconShape,
+                        themedIconsEnabled = themedIconsEnabled,
                         // We don't have full prefs yet, so keep initializing flag true
                         // but show the apps we found in cache
                         isInitializing = true,
@@ -1124,6 +1132,7 @@ class SearchViewModel(
         oneHandedMode = prefs.oneHandedMode
         bottomSearchBarEnabled = prefs.bottomSearchBarEnabled
         topResultIndicatorEnabled = prefs.topResultIndicatorEnabled
+        wallpaperAccentEnabled = userPreferences.isWallpaperAccentEnabled()
         openKeyboardOnLaunch = prefs.openKeyboardOnLaunch
         clearQueryOnLaunch = prefs.clearQueryOnLaunch
         autoCloseOverlay = prefs.autoCloseOverlay
@@ -1135,6 +1144,7 @@ class SearchViewModel(
         showAppLabels = prefs.showAppLabels
         phoneAppGridColumns = prefs.phoneAppGridColumns
         appIconShape = prefs.appIconShape
+        themedIconsEnabled = prefs.themedIconsEnabled
         wallpaperBackgroundAlpha = prefs.wallpaperBackgroundAlpha
         wallpaperBlurRadius = prefs.wallpaperBlurRadius
         appTheme = prefs.appTheme
@@ -1158,6 +1168,7 @@ class SearchViewModel(
                     showAppLabels = showAppLabels,
                     phoneAppGridColumns = phoneAppGridColumns,
                     appIconShape = appIconShape,
+                    themedIconsEnabled = themedIconsEnabled,
                     showWallpaperBackground = backgroundSource != BackgroundSource.THEME,
                     wallpaperBackgroundAlpha = wallpaperBackgroundAlpha,
                     wallpaperBlurRadius = wallpaperBlurRadius,
@@ -3366,6 +3377,15 @@ class SearchViewModel(
         }
     }
 
+    fun setThemedIconsEnabled(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (themedIconsEnabled == enabled) return@launch
+            userPreferences.setThemedIconsEnabled(enabled)
+            themedIconsEnabled = enabled
+            updateConfigState { it.copy(themedIconsEnabled = enabled) }
+        }
+    }
+
     // Aliases
     fun setAliasesEnabled(enabled: Boolean) = aliasHandler.setAliasesEnabled(enabled)
 
@@ -3667,6 +3687,17 @@ class SearchViewModel(
                     topResultIndicatorEnabled = it
                     updateUiState { state -> state.copy(topResultIndicatorEnabled = it) }
                     saveStartupSurfaceSnapshotAsync(allowDuringQuery = true)
+                },
+        )
+    }
+
+    fun setWallpaperAccentEnabled(enabled: Boolean) {
+        updateBooleanPreference(
+                value = enabled,
+                preferenceSetter = userPreferences::setWallpaperAccentEnabled,
+                stateUpdater = {
+                    wallpaperAccentEnabled = it
+                    updateUiState { state -> state.copy(wallpaperAccentEnabled = it) }
                 },
         )
     }

@@ -266,6 +266,18 @@ class UiPreferences(
         prefs.edit().putString(KEY_APP_ICON_SHAPE, shape.name).apply()
     }
 
+    fun isThemedIconsEnabled(): Boolean = getBooleanPref(KEY_THEMED_ICONS_ENABLED, false)
+
+    fun setThemedIconsEnabled(enabled: Boolean) {
+        setBooleanPref(KEY_THEMED_ICONS_ENABLED, enabled)
+    }
+
+    fun isWallpaperAccentEnabled(): Boolean = getBooleanPref(KEY_WALLPAPER_ACCENT_ENABLED, true)
+
+    fun setWallpaperAccentEnabled(enabled: Boolean) {
+        setBooleanPref(KEY_WALLPAPER_ACCENT_ENABLED, enabled)
+    }
+
     fun shouldShowAppLabels(): Boolean = getBooleanPref(KEY_SHOW_APP_LABELS, true)
 
     fun setShowAppLabels(show: Boolean) {
@@ -629,6 +641,8 @@ class UiPreferences(
         const val KEY_OVERLAY_CUSTOM_IMAGE_URI = "overlay_custom_image_uri" // Legacy only.
         const val KEY_SELECTED_ICON_PACK = "selected_icon_pack"
         const val KEY_APP_ICON_SHAPE = "app_icon_shape"
+        const val KEY_THEMED_ICONS_ENABLED = "themed_icons_enabled"
+        const val KEY_WALLPAPER_ACCENT_ENABLED = "wallpaper_accent_enabled"
         const val KEY_SHOW_APP_LABELS = "show_app_labels"
         const val KEY_PHONE_APP_GRID_COLUMNS = "phone_app_grid_columns"
         const val DEFAULT_PHONE_APP_GRID_COLUMNS = 4

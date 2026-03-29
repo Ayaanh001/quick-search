@@ -227,6 +227,8 @@ class MainActivity : ComponentActivity() {
                 fontScaleMultiplier = uiState.fontScaleMultiplier,
                 appTheme = uiState.appTheme,
                 appThemeMode = uiState.appThemeMode,
+                backgroundSource = uiState.backgroundSource,
+                wallpaperAccentEnabled = uiState.wallpaperAccentEnabled,
             ) {
                 Box(
                     modifier =

@@ -1,11 +1,15 @@
 package com.tk.quicksearch.shared.ui.theme
 
+import android.os.Build
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 
@@ -83,8 +87,9 @@ private fun accentForTheme(appTheme: com.tk.quicksearch.search.core.AppTheme): T
  * QuickSearch application theme composable.
  *
  * Provides Material 3 color schemes and app-specific semantic color tokens.
+ * When [backgroundSource] is [com.tk.quicksearch.search.core.BackgroundSource.SYSTEM_WALLPAPER]
+ * and the device runs API 31+, Material You dynamic colors are used automatically.
  *
- * @param useDarkTheme Whether dark colors should be used. Defaults to `true` to preserve current behavior.
  * @param content The composable content to be themed.
  */
 @Composable
@@ -92,6 +97,8 @@ fun QuickSearchTheme(
     fontScaleMultiplier: Float = 1f,
     appTheme: com.tk.quicksearch.search.core.AppTheme = com.tk.quicksearch.search.core.AppTheme.MONOCHROME,
     appThemeMode: com.tk.quicksearch.search.core.AppThemeMode = com.tk.quicksearch.search.core.AppThemeMode.SYSTEM,
+    backgroundSource: com.tk.quicksearch.search.core.BackgroundSource = com.tk.quicksearch.search.core.BackgroundSource.THEME,
+    wallpaperAccentEnabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val baseDensity = LocalDensity.current
@@ -108,25 +115,54 @@ fun QuickSearchTheme(
         com.tk.quicksearch.search.core.AppThemeMode.DARK -> true
         com.tk.quicksearch.search.core.AppThemeMode.SYSTEM -> isSystemDarkTheme
     }
-    val accent = accentForTheme(appTheme)
-    val colorScheme = if (useDarkTheme) {
-        DarkColorScheme.copy(
-            primary = accent.darkPrimary,
-            onPrimary = accent.darkOnPrimary,
-            primaryContainer = accent.darkPrimaryContainer,
-            onPrimaryContainer = accent.darkOnPrimaryContainer,
-            secondaryContainer = accent.darkSecondaryContainer,
-            onSecondaryContainer = accent.darkOnSecondaryContainer,
-        )
+    val context = LocalContext.current
+    val useDynamicColors = backgroundSource == com.tk.quicksearch.search.core.BackgroundSource.SYSTEM_WALLPAPER &&
+        wallpaperAccentEnabled &&
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val colorScheme = if (useDynamicColors) {
+        // Use only the OS accent colors; keep the rest from the monochrome base scheme
+        // so backgrounds, surfaces, and text remain neutral.
+        val dynamic = if (useDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        if (useDarkTheme) {
+            DarkColorScheme.copy(
+                primary = dynamic.primary,
+                onPrimary = dynamic.onPrimary,
+                primaryContainer = dynamic.primaryContainer,
+                onPrimaryContainer = dynamic.onPrimaryContainer,
+                secondaryContainer = dynamic.secondaryContainer,
+                onSecondaryContainer = dynamic.onSecondaryContainer,
+            )
+        } else {
+            LightColorScheme.copy(
+                primary = dynamic.primary,
+                onPrimary = dynamic.onPrimary,
+                primaryContainer = dynamic.primaryContainer,
+                onPrimaryContainer = dynamic.onPrimaryContainer,
+                secondaryContainer = dynamic.secondaryContainer,
+                onSecondaryContainer = dynamic.onSecondaryContainer,
+            )
+        }
     } else {
-        LightColorScheme.copy(
-            primary = accent.lightPrimary,
-            onPrimary = accent.lightOnPrimary,
-            primaryContainer = accent.lightPrimaryContainer,
-            onPrimaryContainer = accent.lightOnPrimaryContainer,
-            secondaryContainer = accent.lightSecondaryContainer,
-            onSecondaryContainer = accent.lightOnSecondaryContainer,
-        )
+        val accent = accentForTheme(appTheme)
+        if (useDarkTheme) {
+            DarkColorScheme.copy(
+                primary = accent.darkPrimary,
+                onPrimary = accent.darkOnPrimary,
+                primaryContainer = accent.darkPrimaryContainer,
+                onPrimaryContainer = accent.darkOnPrimaryContainer,
+                secondaryContainer = accent.darkSecondaryContainer,
+                onSecondaryContainer = accent.darkOnSecondaryContainer,
+            )
+        } else {
+            LightColorScheme.copy(
+                primary = accent.lightPrimary,
+                onPrimary = accent.lightOnPrimary,
+                primaryContainer = accent.lightPrimaryContainer,
+                onPrimaryContainer = accent.lightOnPrimaryContainer,
+                secondaryContainer = accent.lightSecondaryContainer,
+                onSecondaryContainer = accent.lightOnSecondaryContainer,
+            )
+        }
     }
     val appPalette =
         if (useDarkTheme) {
