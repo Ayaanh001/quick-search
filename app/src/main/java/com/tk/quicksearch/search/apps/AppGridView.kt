@@ -38,9 +38,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -69,6 +72,9 @@ private val RegularAppIconSize = DesignTokens.IconSizeXLarge - DesignTokens.Spac
 private val TopResultIndicatorTopPadding = 0.dp
 private val TopResultIndicatorBottomPadding = DesignTokens.SpacingSmall
 private val TopResultIndicatorHorizontalPadding = DesignTokens.SpacingSmall
+private const val TopResultIndicatorBackgroundAlpha = 0.12f
+private const val LightWallpaperAppIconShadowAmbientAlpha = 0.28f
+private const val LightWallpaperAppIconShadowSpotAlpha = 0.45f
 private enum class AppIconDisplayMode {
     OVERLAY,
     REGULAR,
@@ -123,6 +129,7 @@ fun AppGridView(
         predictedTarget: PredictedSubmitTarget? = null,
         appIconShape: AppIconShape = AppIconShape.DEFAULT,
         themedIconsEnabled: Boolean = true,
+        showWallpaperBackground: Boolean = false,
 ) {
     val context = LocalContext.current
     val shortcutsByPackage =
@@ -180,6 +187,7 @@ fun AppGridView(
                         predictedTarget = predictedTarget,
                         appIconShape = appIconShape,
                         themedIconsEnabled = themedIconsEnabled,
+                        showWallpaperBackground = showWallpaperBackground,
                 )
             }
         } else {
@@ -222,6 +230,7 @@ fun AppGridView(
                         predictedTarget = predictedTarget,
                         appIconShape = appIconShape,
                         themedIconsEnabled = themedIconsEnabled,
+                        showWallpaperBackground = showWallpaperBackground,
                 )
             }
         }
@@ -251,6 +260,7 @@ private fun AppGrid(
         predictedTarget: PredictedSubmitTarget?,
         appIconShape: AppIconShape,
         themedIconsEnabled: Boolean = true,
+        showWallpaperBackground: Boolean = false,
 ) {
     val maxVisibleColumns = getAppGridColumns(phoneColumnOverride)
     val columns =
@@ -332,6 +342,7 @@ private fun AppGrid(
                         predictedTarget = predictedTarget,
                         appIconShape = appIconShape,
                         themedIconsEnabled = themedIconsEnabled,
+                        showWallpaperBackground = showWallpaperBackground,
                 )
             }
         }
@@ -349,6 +360,7 @@ private fun AppGridRow(
         predictedTarget: PredictedSubmitTarget?,
         appIconShape: AppIconShape,
         themedIconsEnabled: Boolean = true,
+        showWallpaperBackground: Boolean = false,
 ) {
     Row(
             modifier = Modifier.fillMaxWidth(),
@@ -371,6 +383,7 @@ private fun AppGridRow(
                                 } == true,
                         appIconShape = appIconShape,
                         themedIconsEnabled = themedIconsEnabled,
+                        showWallpaperBackground = showWallpaperBackground,
                 )
             }
         }
@@ -389,9 +402,23 @@ private fun AppGridItem(
         isPredicted: Boolean = false,
         appIconShape: AppIconShape = AppIconShape.DEFAULT,
         themedIconsEnabled: Boolean = true,
+        showWallpaperBackground: Boolean = false,
 ) {
     val context = LocalContext.current
-    val isDarkTheme = LocalAppIsDarkTheme.current
+    val imageBackgroundIsDark = LocalImageBackgroundIsDark.current
+    val indicatorUseLightFill =
+            if (showWallpaperBackground && imageBackgroundIsDark != null) {
+                imageBackgroundIsDark
+            } else {
+                LocalAppIsDarkTheme.current
+            }
+    val primary = MaterialTheme.colorScheme.primary
+    val indicatorFillBase =
+            if (indicatorUseLightFill) {
+                lerp(Color.White, primary, DesignTokens.PredictedSubmitHighlightAccentBlend)
+            } else {
+                lerp(Color.Black, primary, DesignTokens.PredictedSubmitHighlightAccentBlend)
+            }
     val iconResult =
             rememberAppIcon(
                     packageName = appInfo.packageName,
@@ -427,11 +454,10 @@ private fun AppGridItem(
                     .fillMaxWidth()
                     .background(
                         color =
-                                if (isDarkTheme) {
-                                    Color.White.copy(alpha = 0.1f * indicatorAlpha)
-                                } else {
-                                    Color.Black.copy(alpha = 0.1f * indicatorAlpha)
-                                },
+                                indicatorFillBase.copy(
+                                        alpha =
+                                                TopResultIndicatorBackgroundAlpha * indicatorAlpha,
+                                ),
                         shape = DesignTokens.ShapeLarge,
                     )
                     .padding(
@@ -454,6 +480,7 @@ private fun AppGridItem(
                     appIconShape = appIconShape,
                     hasCustomIconPack = iconPackPackage != null,
                     themedIconsEnabled = themedIconsEnabled,
+                    showWallpaperBackground = showWallpaperBackground,
             )
             if (appState.showAppLabel) {
                 AppLabelText(
@@ -495,8 +522,10 @@ private fun AppIconSurface(
         appIconShape: AppIconShape = AppIconShape.DEFAULT,
         hasCustomIconPack: Boolean = false,
         themedIconsEnabled: Boolean = true,
+        showWallpaperBackground: Boolean = false,
 ) {
     val view = LocalView.current
+    val useLightWallpaperShadow = showWallpaperBackground && !LocalAppIsDarkTheme.current
     val showThemedIcon = themedIconsEnabled && monochromeData != null && !hasCustomIconPack &&
             android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
     // Material 3-compliant themed icon roles: container/content pair from the active color scheme.
@@ -506,7 +535,7 @@ private fun AppIconSurface(
     val themedIconBackground = materialIconBackground
     val themedIconForeground = materialIconForeground
     val themedIconContainerShape = if (appIconShape == AppIconShape.CIRCLE) {
-        androidx.compose.foundation.shape.CircleShape
+        CircleShape
     } else {
         DesignTokens.ShapeXLarge
     }
@@ -532,6 +561,24 @@ private fun AppIconSurface(
             if (showThemedIcon && monochromeData != null) {
                 Box(
                         modifier = Modifier
+                                .then(
+                                        if (useLightWallpaperShadow) {
+                                            Modifier.shadow(
+                                                    elevation = DesignTokens.ElevationLevel2,
+                                                    shape = themedIconContainerShape,
+                                                    ambientColor =
+                                                            Color.Black.copy(
+                                                                    alpha = LightWallpaperAppIconShadowAmbientAlpha,
+                                                            ),
+                                                    spotColor =
+                                                            Color.Black.copy(
+                                                                    alpha = LightWallpaperAppIconShadowSpotAlpha,
+                                                            ),
+                                            )
+                                        } else {
+                                            Modifier
+                                        },
+                                )
                                 .size(appIconSize)
                                 .clip(themedIconContainerShape)
                                 .background(themedIconBackground),
@@ -548,9 +595,15 @@ private fun AppIconSurface(
                 val clipModifier =
                         when {
                             appIconShape == AppIconShape.CIRCLE ->
-                                    Modifier.clip(androidx.compose.foundation.shape.CircleShape)
+                                    Modifier.clip(CircleShape)
                             iconIsLegacy -> Modifier.clip(DesignTokens.ShapeLarge)
                             else -> Modifier
+                        }
+                val bitmapShadowShape =
+                        when {
+                            appIconShape == AppIconShape.CIRCLE -> CircleShape
+                            iconIsLegacy -> DesignTokens.ShapeLarge
+                            else -> DesignTokens.ShapeXLarge
                         }
                 Image(
                         bitmap = iconBitmap,
@@ -559,7 +612,29 @@ private fun AppIconSurface(
                                         R.string.desc_launch_app,
                                         appName,
                                 ),
-                        modifier = Modifier.size(appIconSize).then(clipModifier),
+                        modifier =
+                                Modifier.then(
+                                                if (useLightWallpaperShadow) {
+                                                    Modifier.shadow(
+                                                            elevation = DesignTokens.ElevationLevel2,
+                                                            shape = bitmapShadowShape,
+                                                            ambientColor =
+                                                                    Color.Black.copy(
+                                                                            alpha =
+                                                                                    LightWallpaperAppIconShadowAmbientAlpha,
+                                                                    ),
+                                                            spotColor =
+                                                                    Color.Black.copy(
+                                                                            alpha =
+                                                                                    LightWallpaperAppIconShadowSpotAlpha,
+                                                                    ),
+                                                    )
+                                                } else {
+                                                    Modifier
+                                                },
+                                        )
+                                        .size(appIconSize)
+                                        .then(clipModifier),
                 )
             }
         }

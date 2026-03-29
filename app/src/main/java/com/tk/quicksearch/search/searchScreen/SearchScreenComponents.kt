@@ -16,7 +16,8 @@ import com.tk.quicksearch.search.searchScreen.components.predictedSubmitCardBord
 internal fun Modifier.predictedSubmitHighlight(
     isPredicted: Boolean,
     shape: Shape = DesignTokens.CardShape,
-): Modifier = componentsPredictedSubmitHighlight(isPredicted, shape)
+    opaqueCardTopResultBorder: Boolean = false,
+): Modifier = componentsPredictedSubmitHighlight(isPredicted, shape, opaqueCardTopResultBorder)
 
 internal fun Modifier.predictedSubmitCardBorder(
     isPredicted: Boolean,
@@ -88,6 +89,7 @@ internal fun PersistentSearchBar(
     isCalculatorMode: Boolean = false,
     placeholderText: String,
     showWelcomeAnimation: Boolean = false,
+    showWallpaperBackground: Boolean = false,
     opaqueBackground: Boolean = false,
     autoFocusOnStart: Boolean = false,
     onClearDetectedShortcut: () -> Unit = {},
@@ -113,6 +115,7 @@ internal fun PersistentSearchBar(
     isCalculatorMode = isCalculatorMode,
     placeholderText = placeholderText,
     showWelcomeAnimation = showWelcomeAnimation,
+    showWallpaperBackground = showWallpaperBackground,
     opaqueBackground = opaqueBackground,
     autoFocusOnStart = autoFocusOnStart,
     onClearDetectedShortcut = onClearDetectedShortcut,
@@ -161,11 +164,13 @@ internal fun NumberKeyboardOperatorPills(
     onOperatorClick: (String) -> Unit,
     isOverlayPresentation: Boolean = false,
     extendToScreenEdges: Boolean = true,
+    showWallpaperBackground: Boolean = false,
     modifier: Modifier = Modifier,
 ) = com.tk.quicksearch.search.searchScreen.components.NumberKeyboardOperatorPills(
     onOperatorClick = onOperatorClick,
     isOverlayPresentation = isOverlayPresentation,
     extendToScreenEdges = extendToScreenEdges,
+    showWallpaperBackground = showWallpaperBackground,
     modifier = modifier,
 )
 

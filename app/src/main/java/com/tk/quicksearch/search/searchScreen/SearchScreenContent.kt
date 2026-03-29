@@ -355,6 +355,7 @@ internal fun SearchScreenContent(
                 isCalculatorMode = isCalculatorMode,
                 placeholderText = searchHintText,
                 showWelcomeAnimation = state.showSearchBarWelcomeAnimation,
+                showWallpaperBackground = state.showWallpaperBackground,
                 autoFocusOnStart = state.openKeyboardOnLaunch,
                 onClearDetectedShortcut = onClearDetectedShortcut,
                 onWelcomeAnimationCompleted = onWelcomeAnimationCompleted,
@@ -557,9 +558,6 @@ internal fun SearchScreenContent(
                                         detectedShortcutTarget = state.detectedShortcutTarget,
                                         onClearDetectedShortcut = onClearDetectedShortcut,
                                         showWallpaperBackground = state.showWallpaperBackground,
-                                        isOverlayPresentation = isOverlayPresentation,
-                                        hasBottomSearchBar = showBottomSearchBar,
-                                        removeBottomCornerRadiusInOverlay = isOverlayPresentation && showOpenKeyboardAction,
                                         compactRowCount = state.searchEngineCompactRowCount,
                                         predictedTarget = predictedTargetForIndicator,
                                         appIconShape = state.appIconShape,
@@ -576,9 +574,6 @@ internal fun SearchScreenContent(
                                         detectedShortcutTarget = state.detectedShortcutTarget,
                                         onClearDetectedShortcut = onClearDetectedShortcut,
                                         showWallpaperBackground = state.showWallpaperBackground,
-                                        isOverlayPresentation = isOverlayPresentation,
-                                        hasBottomSearchBar = showBottomSearchBar,
-                                        removeBottomCornerRadiusInOverlay = false,
                                         compactRowCount = 1,
                                         predictedTarget = predictedTargetForIndicator,
                                         appIconShape = state.appIconShape,
@@ -595,9 +590,6 @@ internal fun SearchScreenContent(
                                         detectedShortcutTarget = target,
                                         onClearDetectedShortcut = onClearDetectedShortcut,
                                         showWallpaperBackground = state.showWallpaperBackground,
-                                        isOverlayPresentation = isOverlayPresentation,
-                                        hasBottomSearchBar = showBottomSearchBar,
-                                        removeBottomCornerRadiusInOverlay = false,
                                         compactRowCount = 1,
                                         predictedTarget = predictedTargetForIndicator,
                                         appIconShape = state.appIconShape,
@@ -633,6 +625,7 @@ internal fun SearchScreenContent(
                             modifier = Modifier.imePadding(),
                             isOverlayPresentation = isOverlayPresentation,
                             extendToScreenEdges = false,
+                            showWallpaperBackground = state.showWallpaperBackground,
                             onOperatorClick = { operator ->
                                 onQueryChanged(state.query + operator)
                             },
@@ -707,6 +700,7 @@ internal fun SearchScreenContent(
                             modifier = Modifier.imePadding(),
                             isOverlayPresentation = isOverlayPresentation,
                             extendToScreenEdges = false,
+                            showWallpaperBackground = state.showWallpaperBackground,
                             onOperatorClick = { operator ->
                                 onQueryChanged(state.query + operator)
                             },

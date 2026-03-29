@@ -45,13 +45,18 @@ internal fun KeyboardSwitchPill(
     val backgroundColor = if (isDarkTheme) Color.Black else Color.White
     val labelColor = if (isDarkTheme) Color.White else Color.Black
     val interactionSource = remember { MutableInteractionSource() }
-    val borderColor = if (isDarkTheme) Color.White.copy(alpha = 0.15f) else Color.Black.copy(alpha = 0.1f)
+    val borderColor =
+        if (isDarkTheme) {
+            AppColors.Accent.copy(alpha = 0.22f)
+        } else {
+            Color.Black.copy(alpha = 0.1f)
+        }
     Surface(
         onClick = onClick,
         interactionSource = interactionSource,
         shape = DesignTokens.ShapeFull,
         color = backgroundColor,
-        border = BorderStroke(0.8.dp, borderColor),
+        border = BorderStroke(DesignTokens.KeyboardPillBorderStrokeWidth, borderColor),
         tonalElevation = DesignTokens.ElevationLevel0,
     ) {
         Row(
@@ -159,25 +164,26 @@ internal fun NumberKeyboardOperatorPills(
     onOperatorClick: (String) -> Unit,
     isOverlayPresentation: Boolean = false,
     extendToScreenEdges: Boolean = true,
+    showWallpaperBackground: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val operators = remember { listOf("+", "-", "*", "/", "(", ")") }
+    val isDarkTheme = LocalAppIsDarkTheme.current
     val containerBackgroundColor =
-        if (isOverlayPresentation) {
-            MaterialTheme.colorScheme.surface
-        } else if (
+        when {
+            showWallpaperBackground ->
+                if (isDarkTheme) Color.Black else Color.White
+            isOverlayPresentation -> MaterialTheme.colorScheme.surface
             MaterialTheme.colorScheme.surface == MaterialTheme.colorScheme.background &&
                 MaterialTheme.colorScheme.background.red < 0.1f &&
                 MaterialTheme.colorScheme.background.green < 0.1f &&
-                MaterialTheme.colorScheme.background.blue < 0.1f
-        ) {
-            AppColors.SearchBarBackground
-        } else {
-            MaterialTheme.colorScheme.surface
+                MaterialTheme.colorScheme.background.blue < 0.1f ->
+                AppColors.SearchBarBackground
+            else -> MaterialTheme.colorScheme.surface
         }
     val operatorChipColor = AppColors.KeyboardPillBackground
     val operatorChipTextColor = AppColors.KeyboardPillText
-    val operatorChipBorderColor = AppColors.KeyboardPillBorder
+    val operatorChipBorderColor = AppColors.SearchChromeOutlineBorder
 
     Surface(
         modifier = if (extendToScreenEdges) modifier.extendToScreenEdges() else modifier,
@@ -203,7 +209,7 @@ internal fun NumberKeyboardOperatorPills(
                         Modifier.weight(1f).clickable { onOperatorClick(operator) },
                     shape = DesignTokens.ShapeFull,
                     color = operatorChipColor,
-                    border = BorderStroke(0.5.dp, operatorChipBorderColor),
+                    border = BorderStroke(DesignTokens.KeyboardPillBorderStrokeWidth, operatorChipBorderColor),
                     tonalElevation = DesignTokens.ElevationLevel0,
                 ) {
                     Box(

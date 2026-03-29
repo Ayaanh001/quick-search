@@ -8,11 +8,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.dp 
 import com.tk.quicksearch.search.core.AppTheme
 
-/** Frosted card fill in light mode (wallpaper / theme), mirrors dark mode's ~0.4f black scrim. */
+/** Frosted card fill for light app-theme (gradient) result surfaces; mirrors dark wallpaper scrim alpha. */
 internal const val LightResultCardFrostAlpha = 0.72f
+
+/** Search result card scrim over wallpaper / custom image background in light mode. */
+internal const val LightWallpaperSearchResultCardAlpha = 0.9f
+
+/** Result cards, compact engine strip, and search color theme surfaces over wallpaper / custom image in dark mode. */
+internal const val DarkWallpaperSearchSurfaceAlpha = 0.70f
+
+/** Search bar scrim fill alpha for the dark palette (black). */
+internal const val SearchBarBackgroundAlphaDark = 0.65f
+
+/** Search bar scrim fill alpha for the light palette (white). */
+internal const val SearchBarBackgroundAlphaLight = 0.9f
 
 /**
  * Base alpha for THEME-mode fallback background layers.
@@ -60,7 +72,7 @@ internal data class QuickSearchAppColorPalette(
 
 internal val DarkQuickSearchAppColorPalette =
     QuickSearchAppColorPalette(
-        searchBarBackground = Color.Black.copy(alpha = 0.5f),
+        searchBarBackground = Color.Black.copy(alpha = SearchBarBackgroundAlphaDark),
         searchBarBorder = Color.White.copy(alpha = 0.3f),
         searchBarTextAndIcon = Color(0xFFE0E0E0),
         settingsCardBackground = Color.Black.copy(alpha = 0.4f),
@@ -86,14 +98,14 @@ internal val DarkQuickSearchAppColorPalette =
         actionCustom = Color(0xFF607D8B),
         actionView = Color(0xFF9E9E9E),
         wallpaperOverlayTint = Color.Black,
-        resultCardWallpaperBackground = Color.Black.copy(alpha = 0.4f),
-        compactSectionBackground = Color.Black.copy(alpha = 0.5f),
+        resultCardWallpaperBackground = Color.Black.copy(alpha = DarkWallpaperSearchSurfaceAlpha),
+        compactSectionBackground = Color.Black.copy(alpha = DarkWallpaperSearchSurfaceAlpha),
     )
 
 internal val LightQuickSearchAppColorPalette =
     QuickSearchAppColorPalette(
-        searchBarBackground = Color.White,
-        searchBarBorder = Color.White,
+        searchBarBackground = Color.White.copy(alpha = SearchBarBackgroundAlphaLight),
+        searchBarBorder = Color.Black.copy(alpha = 0.3f),
         searchBarTextAndIcon = Color(0xFF1F1B24),
         settingsCardBackground = Color.Black.copy(alpha = 0.06f),
         settingsText = Color(0xFF1F1B24),
@@ -118,8 +130,8 @@ internal val LightQuickSearchAppColorPalette =
         actionCustom = Color(0xFF607D8B),
         actionView = Color(0xFF9E9E9E),
         wallpaperOverlayTint = Color.White,
-        resultCardWallpaperBackground = Color.White.copy(alpha = LightResultCardFrostAlpha),
-        compactSectionBackground = Color.White.copy(alpha = 0.5f),
+        resultCardWallpaperBackground = Color.White.copy(alpha = LightWallpaperSearchResultCardAlpha),
+        compactSectionBackground = Color.White.copy(alpha = LightWallpaperSearchResultCardAlpha),
     )
 
 internal val LocalQuickSearchAppColorPalette =
@@ -371,7 +383,7 @@ object AppColors {
 
     // Compact section (search engine strip) ------------------------------------------------
 
-    /** Background for the compact search engine section strip. */
+    /** Compact search engine strip when wallpaper scrim is on; light theme matches result card frost. */
     val CompactSectionBackground: Color
         @Composable
         get() = current.compactSectionBackground
@@ -449,6 +461,20 @@ object AppColors {
     val KeyboardPillBorder: Color
         @Composable
         get() = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+
+    /**
+     * Outline for the persistent search bar and number-keyboard operator pills.
+     * In dark mode uses [Accent] at the same alpha as [KeyboardPillBorder] so the stroke reads as
+     * on-brand accent; in light mode matches [KeyboardPillBorder].
+     */
+    val SearchChromeOutlineBorder: Color
+        @Composable
+        get() =
+            if (LocalAppIsDarkTheme.current) {
+                Accent.copy(alpha = 0.22f)
+            } else {
+                KeyboardPillBorder
+            }
 
     // Shared/static tokens -----------------------------------------------------------------
 
@@ -673,14 +699,15 @@ object AppColors {
      */
     /**
      * Returns the background color for the compact search engine section strip.
-     * In light mode with wallpaper, uses white with transparency; otherwise uses black with transparency.
+     * With wallpaper: palette scrim (matches [ResultCardWallpaperBackground]); solid white (light) or
+     * black (dark) otherwise.
      */
     @Composable
     fun getCompactSectionBackground(showWallpaperBackground: Boolean): Color =
         when {
             showWallpaperBackground -> CompactSectionBackground
-            !LocalAppIsDarkTheme.current -> Color.White.copy(alpha = 0.5f)
-            else -> Color.Black.copy(alpha = 0.5f)
+            !LocalAppIsDarkTheme.current -> Color.White
+            else -> Color.Black
         }
 
     /**

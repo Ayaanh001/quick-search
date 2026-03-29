@@ -191,6 +191,12 @@ object DesignTokens {
     val SearchResultCardShape: Shape = ExtraLargeCardShape
 
     /**
+     * Mix factor for [androidx.compose.material3.MaterialTheme.colorScheme] `primary` into the
+     * neutral top-result highlight (wallpaper-aware white/black and elevated cards).
+     */
+    const val PredictedSubmitHighlightAccentBlend = 0.4f
+
+    /**
      * Button corner radius - 24dp Note: M3 buttons often use full circle height (e.g. 40dp
      * height -> 20dp radius). 24dp radius suitable for 48dp height buttons.
      */
@@ -295,8 +301,17 @@ object DesignTokens {
     /** Border width for the animated search field border */
     val SearchFieldBorderWidth = 2.dp
 
+    /** Resting outline around the search field when not using light-wallpaper styling */
+    val SearchFieldRestingOutlineWidth = 1.dp
+
+    /** Peak opacity for the accent resting search field outline (multiplied by welcome fade 0–1) */
+    const val SearchFieldAccentOutlineAlpha = 0.4f
+
     /** Default resting alpha of the search field border */
     const val SearchFieldBorderAlphaDefault = 0.3f
+
+    /** Border stroke for keyboard operator pills */
+    val KeyboardPillBorderStrokeWidth = 0.75.dp
 
     /** Placeholder alpha for search field hint text */
     const val SearchFieldPlaceholderAlpha = 0.6f

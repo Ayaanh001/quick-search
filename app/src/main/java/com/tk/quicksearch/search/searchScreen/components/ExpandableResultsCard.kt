@@ -65,6 +65,7 @@ internal fun ExpandableResultsCard(
             .predictedSubmitHighlight(
                 isPredicted = isTopPredicted,
                 shape = DesignTokens.SearchResultCardShape,
+                opaqueCardTopResultBorder = true,
             )
 
     SearchResultCard(

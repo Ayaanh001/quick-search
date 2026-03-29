@@ -259,7 +259,7 @@ fun OverlayRoot(
                                 uiState.backgroundSource != BackgroundSource.THEME &&
                                         overlayImageBitmap != null
                         val useMonoThemeFallback =
-                                uiState.backgroundSource == BackgroundSource.SYSTEM_WALLPAPER &&
+                                uiState.backgroundSource != BackgroundSource.THEME &&
                                         overlayImageBitmap == null
 
                         val overlayEntryProgress by animateFloatAsState(
@@ -450,6 +450,7 @@ fun OverlayRoot(
                                         },
                                         isOverlayPresentation = true,
                                         extendToScreenEdges = false,
+                                        showWallpaperBackground = uiState.showWallpaperBackground,
                                 )
                         }
 

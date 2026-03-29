@@ -5,7 +5,9 @@ import androidx.compose.ui.graphics.lerp
 import com.tk.quicksearch.search.core.BackgroundSource
 import com.tk.quicksearch.search.core.AppTheme
 import com.tk.quicksearch.shared.ui.theme.AppColors
+import com.tk.quicksearch.shared.ui.theme.DarkWallpaperSearchSurfaceAlpha
 import com.tk.quicksearch.shared.ui.theme.LightResultCardFrostAlpha
+import com.tk.quicksearch.shared.ui.theme.LightWallpaperSearchResultCardAlpha
 import com.tk.quicksearch.shared.ui.theme.SearchColorTheme
 
 private const val NEUTRAL_APP_THEME_INTENSITY = 0.5f
@@ -116,15 +118,19 @@ internal fun resolveSearchColorTheme(
         BackgroundSource.CUSTOM_IMAGE -> {
             val cardBg =
                 if (isDarkMode) {
-                    Color.Black.copy(alpha = 0.4f)
+                    Color.Black.copy(alpha = DarkWallpaperSearchSurfaceAlpha)
                 } else {
-                    Color.White.copy(alpha = LightResultCardFrostAlpha)
+                    Color.White.copy(alpha = LightWallpaperSearchResultCardAlpha)
                 }
             SearchColorTheme(
                 background = Color.Transparent,
                 cardBackground = cardBg,
                 keyboardButtonBackground =
-                    if (isDarkMode) Color.Black.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.5f),
+                    if (isDarkMode) {
+                        Color.Black.copy(alpha = DarkWallpaperSearchSurfaceAlpha)
+                    } else {
+                        Color.White.copy(alpha = 0.5f)
+                    },
             )
         }
     }

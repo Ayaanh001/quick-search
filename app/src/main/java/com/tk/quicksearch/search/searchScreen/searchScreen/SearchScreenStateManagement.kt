@@ -325,7 +325,10 @@ internal fun SearchScreenStateManagement(
         isOverlayPresentation = isOverlayPresentation,
     )
 
-    val effectiveStateForCards = state.copy(showWallpaperBackground = useImageBackground)
+    val effectiveStateForCards =
+        state.copy(
+            showWallpaperBackground = state.backgroundSource != BackgroundSource.THEME,
+        )
 
     val sectionParams =
         buildSectionParams(

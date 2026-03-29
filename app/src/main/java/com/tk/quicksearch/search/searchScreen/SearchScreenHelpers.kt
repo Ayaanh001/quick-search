@@ -253,6 +253,7 @@ data class AppsSectionParams(
     val startupPhase: StartupPhase,
     val isOverlayPresentation: Boolean,
     val predictedTarget: PredictedSubmitTarget? = null,
+    val showWallpaperBackground: Boolean = false,
 )
 
 /** Data class for Calendar section parameters */
@@ -689,6 +690,7 @@ internal fun buildSectionParams(
             isInitializing = state.isInitializing,
             startupPhase = state.startupPhase,
             isOverlayPresentation = isOverlayPresentation,
+            showWallpaperBackground = state.showWallpaperBackground,
         )
 
     val calendarParams =

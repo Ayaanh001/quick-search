@@ -188,6 +188,7 @@ private fun renderAppsSection(
                 startupPhase = appsParams.startupPhase,
                 isOverlayPresentation = appsParams.isOverlayPresentation,
                 predictedTarget = appsParams.predictedTarget,
+                showWallpaperBackground = appsParams.showWallpaperBackground,
             )
         }
     } else if (context.shouldRenderApps) {
@@ -217,6 +218,7 @@ private fun renderAppsSection(
             startupPhase = appsParams.startupPhase,
             isOverlayPresentation = appsParams.isOverlayPresentation,
             predictedTarget = appsParams.predictedTarget,
+            showWallpaperBackground = appsParams.showWallpaperBackground,
         )
     }
 }

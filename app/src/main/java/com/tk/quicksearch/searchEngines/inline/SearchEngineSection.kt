@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items as rowItems
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
@@ -28,7 +27,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -39,7 +37,6 @@ import com.tk.quicksearch.searchEngines.getId
 import com.tk.quicksearch.searchEngines.compact.SearchEngineCard
 import com.tk.quicksearch.searchEngines.extendToScreenEdges
 import com.tk.quicksearch.searchEngines.shared.SearchTargetConstants
-import com.tk.quicksearch.search.searchScreen.LocalOverlayDividerColor
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
 import com.tk.quicksearch.shared.util.isLandscape
 import com.tk.quicksearch.shared.util.isTablet
@@ -55,6 +52,7 @@ private object SearchEngineSectionConstants {
     val PREDICTION_HIGHLIGHT_WIDTH_EXTRA = 8.dp
     val PREDICTION_HIGHLIGHT_CONTENT_PADDING =
         (PREDICTION_HIGHLIGHT_WIDTH_EXTRA / 2) + DesignTokens.BorderWidth
+    val COMPACT_TOP_DIVIDER_THICKNESS = DesignTokens.BorderWidth
     val SEARCH_ICON_SIZE = SearchTargetConstants.SEARCH_ICON_SIZE
     val HORIZONTAL_PADDING = SearchTargetConstants.HORIZONTAL_PADDING
     val VERTICAL_PADDING = SearchTargetConstants.VERTICAL_PADDING
@@ -85,12 +83,9 @@ fun SearchEngineIconsSection(
     detectedShortcutTarget: SearchTarget? = null,
     onClearDetectedShortcut: () -> Unit = {},
     showWallpaperBackground: Boolean = false,
-    isOverlayPresentation: Boolean = false,
-    hasBottomSearchBar: Boolean = false,
     showOverlayExpandChevron: Boolean = false,
     onOverlayExpandClick: (() -> Unit)? = null,
     isOverlayExpanded: Boolean = false,
-    removeBottomCornerRadiusInOverlay: Boolean = false,
     compactRowCount: Int = 1,
     predictedTarget: PredictedSubmitTarget? = null,
     appIconShape: AppIconShape = AppIconShape.DEFAULT,
@@ -101,17 +96,6 @@ fun SearchEngineIconsSection(
 
     // Match compact section background with the persistent search bar for visual consistency.
     val backgroundColor = AppColors.getCompactSectionBackground(showWallpaperBackground)
-    val compactSectionShape: Shape =
-        if (isOverlayPresentation && !hasBottomSearchBar) {
-            RoundedCornerShape(
-                topStart = 0.dp,
-                topEnd = 0.dp,
-                bottomStart = if (removeBottomCornerRadiusInOverlay) 0.dp else 28.dp,
-                bottomEnd = if (removeBottomCornerRadiusInOverlay) 0.dp else 28.dp,
-            )
-        } else {
-            RoundedCornerShape(0.dp)
-        }
 
     if (detectedShortcutTarget != null) {
         // Check if query starts with the shortcut and remove it
@@ -138,12 +122,11 @@ fun SearchEngineIconsSection(
         }
     } else {
         val compactTopDividerColor =
-            LocalOverlayDividerColor.current
-                ?: if (showWallpaperBackground) {
-                    AppColors.WallpaperDivider
-                } else {
-                    MaterialTheme.colorScheme.outlineVariant
-                }
+            if (showWallpaperBackground) {
+                AppColors.WallpaperDivider
+            } else {
+                AppColors.Accent.copy(alpha = 0.22f)
+            }
         Surface(
             modifier =
                 modifier
@@ -152,12 +135,11 @@ fun SearchEngineIconsSection(
                         shadowElevation = 0f
                     },
             color = backgroundColor,
-            shape = compactSectionShape,
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 HorizontalDivider(
                     color = compactTopDividerColor,
-                    thickness = DesignTokens.BorderWidth,
+                    thickness = SearchEngineSectionConstants.COMPACT_TOP_DIVIDER_THICKNESS,
                 )
                 SearchEngineContent(
                     query = query,

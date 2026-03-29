@@ -129,6 +129,7 @@ internal fun PersistentSearchBar(
     isCalculatorMode: Boolean = false,
     placeholderText: String,
     showWelcomeAnimation: Boolean = false,
+    showWallpaperBackground: Boolean = false,
     opaqueBackground: Boolean = false,
     autoFocusOnStart: Boolean = false,
     onClearDetectedShortcut: () -> Unit = {},
@@ -149,6 +150,7 @@ internal fun PersistentSearchBar(
     val accentColor = AppColors.Accent
     val iconAndTextColor = AppColors.SearchBarTextAndIcon
     val isDarkTheme = LocalAppIsDarkTheme.current
+    val lightWallpaperSearchBar = !isDarkTheme && showWallpaperBackground
     val searchBarIconColor = AppColors.SecondaryIconTint
     val isAliasDetected =
         detectedShortcutTarget != null || detectedAliasSearchSection != null || activeToolType != null
@@ -261,11 +263,10 @@ internal fun PersistentSearchBar(
     val animationProgress = remember { Animatable(0f) }
 
     val glowAlpha = remember { Animatable(0f) }
-    // If we aren't showing the welcome animation, start with the standard UI (0.3f alpha)
     val borderAlpha =
         remember {
             Animatable(
-                if (showWelcomeAnimation) 0f else DesignTokens.SearchFieldBorderAlphaDefault,
+                if (showWelcomeAnimation) 0f else 1f,
             )
         }
 
@@ -302,7 +303,7 @@ internal fun PersistentSearchBar(
             }
             launch {
                 borderAlpha.animateTo(
-                    targetValue = if (query.isEmpty()) 1f else DesignTokens.SearchFieldBorderAlphaDefault,
+                    targetValue = 1f,
                     animationSpec = tween(DesignTokens.AnimationDurationFast, easing = LinearOutSlowInEasing),
                 )
             }
@@ -322,10 +323,10 @@ internal fun PersistentSearchBar(
             //         animationSpec = tween(durationMillis = 2000, easing = LinearOutSlowInEasing)
             //     )
             // }
-            borderAlpha.snapTo(DesignTokens.SearchFieldBorderAlphaDefault)
+            borderAlpha.snapTo(1f)
         } else {
             borderAlpha.animateTo(
-                targetValue = DesignTokens.SearchFieldBorderAlphaDefault,
+                targetValue = 1f,
                 animationSpec = tween(durationMillis = DesignTokens.AnimationDurationFast, easing = LinearOutSlowInEasing)
             )
         }
@@ -341,9 +342,14 @@ internal fun PersistentSearchBar(
             modifier
                 .fillMaxWidth()
                 .graphicsLayer {
-                    // Keep the search bar elevated in light mode with an accent-tinted shadow.
                     if (!isDarkTheme) {
-                        shadowElevation = with(density) { DesignTokens.ElevationLevel4.toPx() }
+                        val elevationDp =
+                            if (lightWallpaperSearchBar) {
+                                DesignTokens.ElevationLevel5
+                            } else {
+                                DesignTokens.ElevationLevel4
+                            }
+                        shadowElevation = with(density) { elevationDp.toPx() }
                         shape = DesignTokens.ShapeXXLarge
                         ambientShadowColor = accentColor.copy(alpha = LightSearchBarShadowAmbientAlpha)
                         spotShadowColor = accentColor.copy(alpha = LightSearchBarShadowSpotAlpha)
@@ -430,10 +436,21 @@ internal fun PersistentSearchBar(
                             alpha = alpha,
                         )
                     }
-                }.border(
-                    width = DesignTokens.SearchFieldBorderWidth,
-                    color = AppColors.SearchBarBorder.copy(alpha = borderAlpha.value),
-                    shape = DesignTokens.ShapeXXLarge,
+                }.then(
+                    if (lightWallpaperSearchBar) {
+                        Modifier
+                    } else {
+                        Modifier.border(
+                            width = DesignTokens.SearchFieldRestingOutlineWidth,
+                            color =
+                                accentColor.copy(
+                                    alpha =
+                                        (borderAlpha.value * DesignTokens.SearchFieldAccentOutlineAlpha)
+                                            .coerceIn(0f, 1f),
+                                ),
+                            shape = DesignTokens.ShapeXXLarge,
+                        )
+                    },
                 ).clip(DesignTokens.ShapeXXLarge)
                 .background(searchBarBackground),
     ) {

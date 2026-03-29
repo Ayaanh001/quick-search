@@ -134,6 +134,7 @@ fun SearchEngineCard(
                 .predictedSubmitHighlight(
                     isPredicted = isPredicted,
                     shape = DesignTokens.SearchResultCardShape,
+                    opaqueCardTopResultBorder = true,
                 )
                 .combinedClickable(
                     onClick = {
@@ -218,6 +219,7 @@ private fun SearchTargetCard(
                 .predictedSubmitHighlight(
                     isPredicted = isPredicted,
                     shape = DesignTokens.SearchResultCardShape,
+                    opaqueCardTopResultBorder = true,
                 )
                 .combinedClickable(
                     onClick = {
