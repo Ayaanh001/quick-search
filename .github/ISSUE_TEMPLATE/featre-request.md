@@ -1,9 +1,10 @@
 ---
 name: Featre Request
-about: Suggest an idea for this project
+about: Suggest an idea for this project. Please note that issues containing multiple
+  unrelated items will be closed immediately
 title: "[Enhancement] "
 labels: enhancement
-assignees: ''
+assignees: teja2495
 
 ---
 
