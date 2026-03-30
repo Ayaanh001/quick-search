@@ -2,7 +2,7 @@
 
 This document highlights all the available features. It also includes details about hidden or non-obvious features that you might miss.
 
-**Version**: 3.0 (Updated March 28 2026)
+**Version**: 3.0 (Updated March 30 2026)
 
 ### Search
 
@@ -21,6 +21,7 @@ This document highlights all the available features. It also includes details ab
 
 - **Multi-App Search** - Type a query and tap any "search on" card to quickly search using that search engine. If compact mode is enabled, you can just tap on any icon in the search engine section above your keyboard.
 - **Browser Integration** - Installed browsers automatically appear as search engine options
+- **In-App Browser** - Option to open URLs inside the app instead of an external browser
 - **Supported Search Engines** (25 total): Direct Search, Google, ChatGPT, Gemini, Perplexity, Grok, Google Maps, Google Drive, Google Photos, Google Play, YouTube, YouTube Music, Spotify, Reddit, Amazon, X (Twitter), Facebook Marketplace, Bing, DuckDuckGo, Brave, Startpage, You.com, AI Mode, Claude, Wikipedia
 - **Direct Search (AI-Powered)** - Configure your Gemini API key to see answers directly within Quick Search. 
 - **Custom Search Engines** - Add your own search engines from the Search Engines settings screen.
@@ -99,7 +100,7 @@ Long-press on most results to open a context menu with quick actions.
 - **Overlay Mode** - Enable to make the search bar appear over other apps anywhere in the system. This defines the main experience: search from any screen without leaving what you're doing.
 - **Font Size** - Choose between small, medium, and large font sizes for all in-app text.
 - **Theme** - Set base theme to Light, Dark or System (follows system theme). Then, pick among the available themes - Mono, Forest, Aurora, Sunset - and adjust their intensity. These themes will adapt to light and dark mode seamlessly.
-- **Themed App Icons** - Enable or disable themed app icons.
+- **Themed App Icons** - Enable or disable themed app icons for app results and for the Quick Search launcher icon.
 - **Wallpaper Background** - Use your wallpaper or any custom image as your search screen background, you can also tune transparency and blur to keep content readable. Choose whether to derive accent colors from wallpaper.
 - **Search Engine Style** - Choose between:
   - **Inline Mode**: Search engines scroll with the content
@@ -130,7 +131,7 @@ Long-press on most results to open a context menu with quick actions.
 - **Aliases for Engines** - Assign or edit alias codes to search engines.
 - **Alias after Query** - You can choose to disable search engine alias triggers at the end of your query. Also, choose whether space is required for the trigger.
 - **Amazon Domain** - Select the Amazon region/domain used when searching via the Amazon engine. Updating this will open your Amazon queries within the installed app instead of the website.
-- **Custom Search Engines** - Add your own search engines by specifying a URL template with the {{query}} placeholder. The app automatically fetches the name and icon for the website, but you can choose to edit them if needed. Tapping on {{query}} in the error hint will add this string to your URL so that you don't have to type it.
+- **Custom Search Engines** - Add your own search engines by specifying a URL template with the {{query}} placeholder. The app automatically fetches the name and icon for the website, but you can choose to edit them if needed. Tapping on {{query}} in the error hint will add this string to your URL so that you don't have to type it. You can choose any installed browser to open custom search engine queries.
 - **Direct Search (AI)** - Connect a Gemini API key to enable AI answers directly in Quick Search, view if a key is configured, and open the dedicated Direct Search configuration screen. Gemini Flash Latest is the model which is chosen by default.
 
 ---
@@ -190,9 +191,10 @@ Long-press on most results to open a context menu with quick actions.
 - **Enable / Disable Shortcuts** - Turn individual shortcuts on or off while keeping them available on the device.
 - **Search & Filters** - Search within shortcuts and filter by all apps, apps with shortcuts only, search engines, or browsers, with expand/collapse all controls.
 - **Add Shortcuts from Apps** - Discover and add app-provided shortcuts directly from supported apps. (Example: Add Google Drive files as shortcuts to open them directly)
-- **Create Search & Browser Shortcuts** - Create query or URL shortcuts for search engines and browsers to instantly open them when needed.
+- **Create Search & Browser Shortcuts** - Create query or URL shortcuts for search engines and browsers—including the in-app browser—to instantly open them when needed.
 - **Custom Deep Link Shortcuts** - Add, edit, or delete your own deep-link shortcuts that jump straight into specific screens inside apps. (Example: Add YouTube Music playlists as deep links to open them directly.)
 - **Add App Activities as Shortcuts** - See and add available app activities as shortcuts. This is not a reliable feature; apps do not always provide useful activities, but when they do, you can add them here.
+- **Custom Icons for App Shortcuts** - Option to add custom icons for app shortcuts.
 
 ---
 
