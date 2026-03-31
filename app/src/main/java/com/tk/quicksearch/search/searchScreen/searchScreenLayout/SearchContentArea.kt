@@ -106,6 +106,8 @@ fun SearchContentArea(
     onSearchHistoryExpandedChange: (Boolean) -> Unit = {},
     showCalculator: Boolean = false,
     showCurrencyConverter: Boolean = false,
+    showWordClock: Boolean = false,
+    showDictionary: Boolean = false,
     showDirectSearch: Boolean = false,
     directSearchState: DirectSearchState? = null,
     isOverlayPresentation: Boolean = false,
@@ -116,9 +118,13 @@ fun SearchContentArea(
     val hideOtherResults =
                 showDirectSearch ||
                 showCalculator ||
+                showWordClock ||
+                showDictionary ||
                 (state.detectedShortcutTarget != null) ||
                 (state.detectedAliasSearchSection != null) ||
-                state.isCurrencyConverterAliasMode
+                state.isCurrencyConverterAliasMode ||
+                state.isWordClockAliasMode ||
+                state.isDictionaryAliasMode
     val hasQuery = state.query.isNotBlank()
     val isUrlQuery = remember(state.query) { isLikelyWebUrl(state.query) }
     val hasAnySearchContent =
@@ -132,7 +138,9 @@ fun SearchContentArea(
             useOneHandedMode &&
                     !showDirectSearch &&
                     !showCalculator &&
-                    !showCurrencyConverter
+                    !showCurrencyConverter &&
+                    !showWordClock &&
+                    !showDictionary
     val expandedSectionBottomInset = 80.dp
     val aliasExpandedSectionBottomInset = 12.dp
     val footerBottomPadding = 28.dp
@@ -147,6 +155,8 @@ fun SearchContentArea(
             state.detectedShortcutTarget,
             state.detectedAliasSearchSection,
             state.isCurrencyConverterAliasMode,
+            state.isWordClockAliasMode,
+            state.isDictionaryAliasMode,
         ) {
             computeShouldShowNoResults(state)
         }
@@ -214,6 +224,8 @@ fun SearchContentArea(
                 shouldShowNoResults &&
                         !showCalculator &&
                         !showCurrencyConverter &&
+                        !showWordClock &&
+                        !showDictionary &&
                         !showDirectSearch &&
                         !hasInlineSearchEngines
 
@@ -396,10 +408,16 @@ fun SearchContentArea(
                                 )
                                     .coerceAtLeast(220.dp),
                             isReversed =
-                                    useOneHandedMode && !showDirectSearch && !showCurrencyConverter,
+                                    useOneHandedMode &&
+                                            !showDirectSearch &&
+                                            !showCurrencyConverter &&
+                                            !showWordClock &&
+                                            !showDictionary,
                             hideResults = hideOtherResults,
                             showCalculator = showCalculator,
                             showCurrencyConverter = showCurrencyConverter,
+                            showWordClock = showWordClock,
+                            showDictionary = showDictionary,
                             showDirectSearch = showDirectSearch,
                             directSearchState = directSearchState,
                             isOverlayPresentation = isOverlayPresentation,

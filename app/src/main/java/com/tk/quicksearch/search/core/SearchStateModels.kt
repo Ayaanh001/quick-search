@@ -81,6 +81,8 @@ data class SearchResultsState(
         // Transient search state (calculator answer, direct search, web suggestions)
         val calculatorState: CalculatorState = CalculatorState(),
         val currencyConverterState: CurrencyConverterState = CurrencyConverterState(),
+        val wordClockState: WordClockState = WordClockState(),
+        val dictionaryState: DictionaryState = DictionaryState(),
         val DirectSearchState: DirectSearchState = DirectSearchState(),
         val webSuggestions: List<String> = emptyList(),
         val webSuggestionWasSelected: Boolean = false,
@@ -88,6 +90,8 @@ data class SearchResultsState(
         val detectedShortcutTarget: SearchTarget? = null,
         val detectedAliasSearchSection: SearchSection? = null,
         val isCurrencyConverterAliasMode: Boolean = false,
+        val isWordClockAliasMode: Boolean = false,
+        val isDictionaryAliasMode: Boolean = false,
         // Recent items (shown when query is blank)
         val recentItems: List<RecentSearchItem> = emptyList(),
         // Recently opened items filtered to the active alias section (shown when alias detected + query blank)
@@ -154,6 +158,8 @@ data class SearchFeatureState(
         val unitConverterEnabled: Boolean = true,
         val dateCalculatorEnabled: Boolean = true,
         val currencyConverterEnabled: Boolean = true,
+        val wordClockEnabled: Boolean = true,
+        val dictionaryEnabled: Boolean = true,
         // Search history
         val recentQueriesEnabled: Boolean = true,
         val hasDismissedSearchHistoryTip: Boolean = false,

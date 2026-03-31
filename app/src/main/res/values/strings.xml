@@ -853,9 +853,20 @@
     <string name="unit_converter_toggle_desc">Usage examples</string>
     <string name="unit_converter_toggle_title">Unit Converter</string>
     <string name="search_hint_currency_converter">Convert Currencies e.g. 100 USD to INR</string>
+    <string name="search_hint_word_clock">Convert time to words e.g. word clock for 3:45 PM</string>
+    <string name="search_hint_dictionary">Define words e.g. define serendipity</string>
     <string name="currency_converter_toggle_title">Currency Converter</string>
     <string name="currency_converter_toggle_desc">Example: 100 USD to INR</string>
     <string name="currency_converter_requires_gemini_key">Requires Gemini API key</string>
+    <string name="word_clock_toggle_title">Word Clock</string>
+    <string name="word_clock_toggle_desc">Example: word clock for 3:45 PM</string>
+    <string name="word_clock_requires_gemini_key">Requires Gemini API key</string>
+    <string name="word_clock_error_not_recognized">Couldn’t resolve that time request. Try a city, country, timezone, or explicit time.</string>
+    <string name="dictionary_toggle_title">Dictionary</string>
+    <string name="dictionary_toggle_desc">Example: define serendipity</string>
+    <string name="dictionary_requires_gemini_key">Requires Gemini API key</string>
+    <string name="dictionary_example_label">Example: %1$s</string>
+    <string name="dictionary_synonyms_label">Synonyms: %1$s</string>
     <string name="settings_tools_gemini_api_title">Setup Gemini API</string>
     <string name="settings_tools_gemini_api_desc">Setting up Gemini API key will enable more tools.</string>
     <!-- ============================================================================

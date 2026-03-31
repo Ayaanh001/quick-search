@@ -39,9 +39,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.CurrencyConverterStatus
+import com.tk.quicksearch.search.core.DictionaryStatus
 import com.tk.quicksearch.search.core.DirectSearchStatus
 import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.core.SearchTarget
+import com.tk.quicksearch.search.core.WordClockStatus
 import com.tk.quicksearch.search.core.SearchUiState
 import com.tk.quicksearch.search.core.isLikelyWebUrl
 import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
@@ -138,12 +140,16 @@ internal fun SearchScreenContent(
     val isUnitConverterMode = state.calculatorState.isUnitConverterMode
     val activeToolType = if (isToolMode) state.calculatorState.toolType else null
     val isCurrencyConverterAliasMode = state.isCurrencyConverterAliasMode
+    val isWordClockAliasMode = state.isWordClockAliasMode
+    val isDictionaryAliasMode = state.isDictionaryAliasMode
     val searchHintText =
             when {
                 isCalculatorMode -> stringResource(R.string.calculator_enter_math_expression_hint)
                 isUnitConverterMode -> stringResource(R.string.unit_converter_enter_conversion_hint)
                 isCurrencyConverterAliasMode ->
                         stringResource(R.string.search_hint_currency_converter)
+                isWordClockAliasMode -> stringResource(R.string.search_hint_word_clock)
+                isDictionaryAliasMode -> stringResource(R.string.search_hint_dictionary)
                 state.detectedAliasSearchSection != null -> when (state.detectedAliasSearchSection) {
                     SearchSection.APPS -> stringResource(R.string.search_hint_apps)
                     SearchSection.APP_SHORTCUTS -> stringResource(R.string.search_hint_app_shortcuts)
@@ -158,8 +164,20 @@ internal fun SearchScreenContent(
     val showCurrencyConverter =
             state.currencyConverterEnabled &&
                     state.currencyConverterState.status != CurrencyConverterStatus.Idle
+    val showWordClock =
+            state.wordClockEnabled &&
+                    state.wordClockState.status != WordClockStatus.Idle
+    val showDictionary =
+            state.dictionaryEnabled &&
+                    state.dictionaryState.status != DictionaryStatus.Idle
     val hideCompactSearchEnginesInToolMode =
-            (isToolMode || showCurrencyConverter || isCurrencyConverterAliasMode) &&
+            (isToolMode ||
+                    showCurrencyConverter ||
+                    showWordClock ||
+                    showDictionary ||
+                    isCurrencyConverterAliasMode ||
+                    isWordClockAliasMode ||
+                    isDictionaryAliasMode) &&
                     state.isSearchEngineCompactMode
     val shouldShowNumberKeyboardOperators =
             isImeVisible && (manuallySwitchedToNumberKeyboard || isCalculatorMode)
@@ -232,7 +250,9 @@ internal fun SearchScreenContent(
                             state.query.none { it.isLetter() } &&
                             state.detectedShortcutTarget == null &&
                             state.detectedAliasSearchSection == null &&
-                            !isCurrencyConverterAliasMode
+                            !isCurrencyConverterAliasMode &&
+                            !isWordClockAliasMode &&
+                            !isDictionaryAliasMode
             ) {
                 stringResource(R.string.keyboard_switch_to_number)
             } else {
@@ -387,6 +407,8 @@ internal fun SearchScreenContent(
                 detectedShortcutTarget = state.detectedShortcutTarget,
                 detectedAliasSearchSection = state.detectedAliasSearchSection,
                 isCurrencyConverterAliasMode = isCurrencyConverterAliasMode,
+                isWordClockAliasMode = isWordClockAliasMode,
+                isDictionaryAliasMode = isDictionaryAliasMode,
                 activeToolType = activeToolType,
                 isCalculatorMode = isCalculatorMode,
                 placeholderText = searchHintText,
@@ -543,6 +565,8 @@ internal fun SearchScreenContent(
                 onOpenPermissionsSettings = onOpenPermissionsSettings,
                 showCalculator = state.calculatorState.isToolMode || state.calculatorState.result != null || state.calculatorState.parsedDateMillis != null || state.calculatorState.dateDiffLabel != null || state.calculatorState.timeResultLabel != null,
                 showCurrencyConverter = showCurrencyConverter,
+                showWordClock = showWordClock,
+                showDictionary = showDictionary,
                 showDirectSearch = state.DirectSearchState.status != DirectSearchStatus.Idle,
                 directSearchState = state.DirectSearchState,
                 isOverlayPresentation = isOverlayPresentation,
@@ -682,7 +706,9 @@ internal fun SearchScreenContent(
                             !isSearchHistoryExpanded &&
                             state.detectedShortcutTarget == null &&
                             state.detectedAliasSearchSection == null &&
-                            !state.isCurrencyConverterAliasMode
+                            !state.isCurrencyConverterAliasMode &&
+                            !state.isWordClockAliasMode &&
+                            !state.isDictionaryAliasMode
 
             Box(
                     modifier =

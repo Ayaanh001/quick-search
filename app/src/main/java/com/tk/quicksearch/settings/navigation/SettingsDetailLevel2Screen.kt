@@ -186,15 +186,31 @@ internal fun SettingsDetailLevel2Screen(
                                             com.tk.quicksearch.searchEngines.AliasHandler
                                                     .CURRENCY_CONVERTER_ALIAS_FEATURE_ID
                                     ].orEmpty(),
+                            wordClockEnabled = state.wordClockEnabled,
+                            wordClockAlias =
+                                    state.shortcutCodes[
+                                            com.tk.quicksearch.searchEngines.AliasHandler
+                                                    .WORD_CLOCK_ALIAS_FEATURE_ID
+                                    ].orEmpty(),
+                            dictionaryEnabled = state.dictionaryEnabled,
+                            dictionaryAlias =
+                                    state.shortcutCodes[
+                                            com.tk.quicksearch.searchEngines.AliasHandler
+                                                    .DICTIONARY_ALIAS_FEATURE_ID
+                                    ].orEmpty(),
                             existingShortcuts = state.shortcutCodes,
                             onSetCalculatorAlias = callbacks.onSetCalculatorAlias,
                             onSetUnitConverterAlias = callbacks.onSetUnitConverterAlias,
                             onSetDateCalculatorAlias = callbacks.onSetDateCalculatorAlias,
                             onSetCurrencyConverterAlias = callbacks.onSetCurrencyConverterAlias,
+                            onSetWordClockAlias = callbacks.onSetWordClockAlias,
+                            onSetDictionaryAlias = callbacks.onSetDictionaryAlias,
                             onCalculatorToggle = callbacks.onToggleCalculator,
                             onUnitConverterToggle = callbacks.onToggleUnitConverter,
                             onDateCalculatorToggle = callbacks.onToggleDateCalculator,
                             onCurrencyConverterToggle = callbacks.onToggleCurrencyConverter,
+                            onWordClockToggle = callbacks.onToggleWordClock,
+                            onDictionaryToggle = callbacks.onToggleDictionary,
                             onNavigateToGeminiApiSetup = {
                                 onNavigateToDetail(SettingsDetailType.GEMINI_API_CONFIG)
                             },

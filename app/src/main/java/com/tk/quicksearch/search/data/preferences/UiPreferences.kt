@@ -510,6 +510,18 @@ class UiPreferences(
         setBooleanPref(UiPreferences.KEY_CURRENCY_CONVERTER_ENABLED, enabled)
     }
 
+    fun isWordClockEnabled(): Boolean = getBooleanPref(UiPreferences.KEY_WORD_CLOCK_ENABLED, true)
+
+    fun setWordClockEnabled(enabled: Boolean) {
+        setBooleanPref(UiPreferences.KEY_WORD_CLOCK_ENABLED, enabled)
+    }
+
+    fun isDictionaryEnabled(): Boolean = getBooleanPref(UiPreferences.KEY_DICTIONARY_ENABLED, true)
+
+    fun setDictionaryEnabled(enabled: Boolean) {
+        setBooleanPref(UiPreferences.KEY_DICTIONARY_ENABLED, enabled)
+    }
+
     fun getCurrencyConverterModel(): String {
         val stored = prefs.getString(UiPreferences.KEY_CURRENCY_CONVERTER_MODEL, null)
         if (stored != null) return stored
@@ -752,6 +764,8 @@ class UiPreferences(
         const val KEY_UNIT_CONVERTER_ENABLED = "unit_converter_enabled"
         const val KEY_DATE_CALCULATOR_ENABLED = "date_calculator_enabled"
         const val KEY_CURRENCY_CONVERTER_ENABLED = "currency_converter_enabled"
+        const val KEY_WORD_CLOCK_ENABLED = "word_clock_enabled"
+        const val KEY_DICTIONARY_ENABLED = "dictionary_enabled"
         const val KEY_CURRENCY_CONVERTER_MODEL = "currency_converter_model"
         /** Previous preference key; migrated automatically on read/write. */
         const val LEGACY_KEY_CURRENCY_CONVERTER_MODEL_PREF = "currency_converter_gemini_model"

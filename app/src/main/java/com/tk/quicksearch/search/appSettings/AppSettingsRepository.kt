@@ -46,14 +46,14 @@ class AppSettingsRepository(
                 titleRes = R.string.settings_search_engines_title,
                 descriptionRes = R.string.settings_search_engines_desc,
                 destination = AppSettingsDestination.SEARCH_ENGINES,
-                keywords = listOf("add", "engines", "gemini", "alias", "api", "gemini api key", "direct search"),
+                keywords = listOf("direct search", "alias"),
             )
             addNavigation(
                 id = "app_settings_tools",
                 titleRes = R.string.settings_tools_title,
                 descriptionRes = R.string.settings_tools_desc,
                 destination = AppSettingsDestination.TOOLS,
-                keywords = listOf("calculator", "unit converter", "conversion", "tools", "alias"),
+                keywords = listOf("calculator", "date", "time", "unit converter", "currency converter", "conversion", "tools", "alias"),
             )
             addNavigation(
                 id = "app_settings_launch_options",

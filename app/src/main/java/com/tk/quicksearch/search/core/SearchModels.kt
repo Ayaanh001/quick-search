@@ -140,6 +140,20 @@ enum class CurrencyConverterStatus {
         Error,
 }
 
+enum class WordClockStatus {
+        Idle,
+        Loading,
+        Success,
+        Error,
+}
+
+enum class DictionaryStatus {
+        Idle,
+        Loading,
+        Success,
+        Error,
+}
+
 enum class SearchToolType {
         CALCULATOR,
         UNIT_CONVERTER,
@@ -161,6 +175,27 @@ data class CurrencyConverterState(
         val targetCurrencyName: String? = null,
         val sourceAmount: String? = null,
         val sourceCurrencyCode: String? = null,
+        val activeQuery: String? = null,
+        val usedModelId: String? = null,
+        val errorMessage: String? = null,
+)
+
+data class WordClockState(
+        val status: WordClockStatus = WordClockStatus.Idle,
+        val wordClockText: String? = null,
+        val sourceTimeText: String? = null,
+        val activeQuery: String? = null,
+        val usedModelId: String? = null,
+        val errorMessage: String? = null,
+)
+
+data class DictionaryState(
+        val status: DictionaryStatus = DictionaryStatus.Idle,
+        val word: String? = null,
+        val partOfSpeech: String? = null,
+        val meaning: String? = null,
+        val example: String? = null,
+        val synonyms: List<String> = emptyList(),
         val activeQuery: String? = null,
         val usedModelId: String? = null,
         val errorMessage: String? = null,
@@ -468,6 +503,8 @@ data class SearchUiState(
         val unitConverterEnabled: Boolean = true,
         val dateCalculatorEnabled: Boolean = true,
         val currencyConverterEnabled: Boolean = true,
+        val wordClockEnabled: Boolean = true,
+        val dictionaryEnabled: Boolean = true,
         val DirectSearchState: DirectSearchState = DirectSearchState(),
         // Gemini
         val hasGeminiApiKey: Boolean = false,
@@ -483,11 +520,15 @@ data class SearchUiState(
         // Transient search state
         val calculatorState: CalculatorState = CalculatorState(),
         val currencyConverterState: CurrencyConverterState = CurrencyConverterState(),
+        val wordClockState: WordClockState = WordClockState(),
+        val dictionaryState: DictionaryState = DictionaryState(),
         val webSuggestions: List<String> = emptyList(),
         val isSecondarySearchInProgress: Boolean = false,
         val detectedShortcutTarget: SearchTarget? = null,
         val detectedAliasSearchSection: SearchSection? = null,
         val isCurrencyConverterAliasMode: Boolean = false,
+        val isWordClockAliasMode: Boolean = false,
+        val isDictionaryAliasMode: Boolean = false,
         val webSuggestionWasSelected: Boolean = false,
         // Onboarding / hints
         val showSearchEngineOnboarding: Boolean = false,
@@ -558,6 +599,8 @@ fun SearchUiState(
                 searchEnginesState = results.searchEnginesState,
                 calculatorState = results.calculatorState,
                 currencyConverterState = results.currencyConverterState,
+                wordClockState = results.wordClockState,
+                dictionaryState = results.dictionaryState,
                 DirectSearchState = results.DirectSearchState,
                 webSuggestions = results.webSuggestions,
                 isSecondarySearchInProgress = results.isSecondarySearchInProgress,
@@ -565,6 +608,8 @@ fun SearchUiState(
                 detectedShortcutTarget = results.detectedShortcutTarget,
                 detectedAliasSearchSection = results.detectedAliasSearchSection,
                 isCurrencyConverterAliasMode = results.isCurrencyConverterAliasMode,
+                isWordClockAliasMode = results.isWordClockAliasMode,
+                isDictionaryAliasMode = results.isDictionaryAliasMode,
                 recentItems = results.recentItems,
                 aliasRecentItems = results.aliasRecentItems,
                 nicknameUpdateVersion = results.nicknameUpdateVersion,
@@ -609,6 +654,8 @@ fun SearchUiState(
                 unitConverterEnabled = features.unitConverterEnabled,
                 dateCalculatorEnabled = features.dateCalculatorEnabled,
                 currencyConverterEnabled = features.currencyConverterEnabled,
+                wordClockEnabled = features.wordClockEnabled,
+                dictionaryEnabled = features.dictionaryEnabled,
                 recentQueriesEnabled = features.recentQueriesEnabled,
                 hasDismissedSearchHistoryTip = features.hasDismissedSearchHistoryTip,
                 directDialEnabled = features.directDialEnabled,

@@ -462,7 +462,9 @@ internal fun SearchScreenStateManagement(
             shortcutDetected =
                 state.detectedShortcutTarget != null ||
                     state.detectedAliasSearchSection != null ||
-                    state.isCurrencyConverterAliasMode,
+                    state.isCurrencyConverterAliasMode ||
+                    state.isWordClockAliasMode ||
+                    state.isDictionaryAliasMode,
         )
 
     return SearchScreenStateResult(

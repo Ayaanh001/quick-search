@@ -785,6 +785,14 @@ class UserAppPreferences(
 
     fun setCurrencyConverterEnabled(enabled: Boolean) = uiPreferences.setCurrencyConverterEnabled(enabled)
 
+    fun isWordClockEnabled(): Boolean = uiPreferences.isWordClockEnabled()
+
+    fun setWordClockEnabled(enabled: Boolean) = uiPreferences.setWordClockEnabled(enabled)
+
+    fun isDictionaryEnabled(): Boolean = uiPreferences.isDictionaryEnabled()
+
+    fun setDictionaryEnabled(enabled: Boolean) = uiPreferences.setDictionaryEnabled(enabled)
+
     fun getCurrencyConverterModel(): String = uiPreferences.getCurrencyConverterModel()
 
     // ============================================================================

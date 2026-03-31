@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.util.Locale
 import com.tk.quicksearch.search.calendar.calendarRelativeDateLabel
 import com.tk.quicksearch.search.calendar.formatAbsoluteDate
 import com.tk.quicksearch.search.calendar.getDayOfWeekName
@@ -59,6 +60,9 @@ import com.tk.quicksearch.shared.ui.theme.LocalImageBackgroundIsDark
 
 private val unitResultRegex = Regex("^([+-]?(?:\\d+(?:\\.\\d+)?|\\.\\d+))(?:\\s+(.+))?$")
 private val dateNumberRegex = Regex("(\\d+)")
+
+private fun String.capitalizeFirstCharacter(): String =
+        replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 
 /** Composable that displays direct search results with loading, success, and error states. */
 @Composable
@@ -238,6 +242,208 @@ fun CurrencyConverterResult(
             GeminiAttributionRow(
                     modifier = Modifier.fillMaxWidth(),
                     usedModelId = currencyConverterState.usedModelId,
+                    onClick = onGeminiModelInfoClick,
+                    onLongClick = {},
+            )
+        }
+    }
+}
+
+@Composable
+fun WordClockResult(
+        wordClockState: WordClockState,
+        showWallpaperBackground: Boolean = false,
+        onGeminiModelInfoClick: () -> Unit = {},
+) {
+    if (wordClockState.status == WordClockStatus.Idle) return
+
+    val showAttribution =
+            wordClockState.status == WordClockStatus.Success &&
+                    !wordClockState.wordClockText.isNullOrBlank()
+
+    @Suppress("DEPRECATION")
+    val clipboardManager = LocalClipboardManager.current
+    val content: @Composable () -> Unit = {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                    modifier = Modifier.fillMaxWidth().padding(DesignTokens.SpacingLarge),
+                    verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
+            ) {
+                when (wordClockState.status) {
+                    WordClockStatus.Loading -> {
+                        GeminiLoadingAnimation()
+                    }
+                    WordClockStatus.Success -> {
+                        val line1 = wordClockState.wordClockText.orEmpty()
+                        Column(
+                                modifier =
+                                        Modifier.fillMaxWidth().pointerInput(line1) {
+                                            detectTapGestures(
+                                                    onLongPress = {
+                                                        clipboardManager.setText(AnnotatedString(line1))
+                                                    },
+                                            )
+                                        },
+                        ) {
+                            Text(
+                                    text = line1,
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            wordClockState.sourceTimeText?.takeIf { it.isNotBlank() }?.let { source ->
+                                Text(
+                                        text = source,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                    WordClockStatus.Error -> {
+                        Text(
+                                text =
+                                        wordClockState.errorMessage
+                                                ?: stringResource(R.string.direct_search_error_generic),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                    WordClockStatus.Idle -> {}
+                }
+            }
+        }
+    }
+
+    Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
+    ) {
+        InformationCard(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 175.dp),
+                showWallpaperBackground = showWallpaperBackground,
+        ) { content() }
+
+        if (showAttribution) {
+            GeminiAttributionRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    usedModelId = wordClockState.usedModelId,
+                    onClick = onGeminiModelInfoClick,
+                    onLongClick = {},
+            )
+        }
+    }
+}
+
+@Composable
+fun DictionaryResult(
+        dictionaryState: DictionaryState,
+        showWallpaperBackground: Boolean = false,
+        onGeminiModelInfoClick: () -> Unit = {},
+) {
+    if (dictionaryState.status == DictionaryStatus.Idle) return
+
+    val showAttribution =
+            dictionaryState.status == DictionaryStatus.Success &&
+                    !dictionaryState.meaning.isNullOrBlank()
+
+    @Suppress("DEPRECATION")
+    val clipboardManager = LocalClipboardManager.current
+    val content: @Composable () -> Unit = {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                    modifier = Modifier.fillMaxWidth().padding(DesignTokens.SpacingLarge),
+                    verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
+            ) {
+                when (dictionaryState.status) {
+                    DictionaryStatus.Loading -> {
+                        GeminiLoadingAnimation()
+                    }
+                    DictionaryStatus.Success -> {
+                        val word = dictionaryState.word.orEmpty().capitalizeFirstCharacter()
+                        val part = dictionaryState.partOfSpeech.orEmpty()
+                        val meaning = dictionaryState.meaning.orEmpty()
+                        val example = dictionaryState.example.orEmpty()
+                        val synonyms =
+                                if (dictionaryState.synonyms.isEmpty()) {
+                                    ""
+                                } else {
+                                    dictionaryState.synonyms.joinToString(", ")
+                                }
+                        val copyText =
+                                buildString {
+                                    append(word)
+                                    if (part.isNotBlank()) append(" ($part)")
+                                    append('\n')
+                                    append(meaning)
+                                    if (example.isNotBlank()) append("\n\nExample: $example\n")
+                                    if (synonyms.isNotBlank()) append("\nSynonyms: $synonyms")
+                                }
+                        Column(
+                                modifier =
+                                        Modifier.fillMaxWidth().pointerInput(copyText) {
+                                            detectTapGestures(
+                                                    onLongPress = {
+                                                        clipboardManager.setText(AnnotatedString(copyText))
+                                                    },
+                                            )
+                                        },
+                                verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingXXSmall),
+                        ) {
+                            Text(
+                                    text = if (part.isBlank()) word else "$word ($part)",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                    text = meaning,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            if (example.isNotBlank()) {
+                                Text(
+                                        text =
+                                                "\n${stringResource(R.string.dictionary_example_label, example)}\n",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            if (synonyms.isNotBlank()) {
+                                Text(
+                                        text = stringResource(R.string.dictionary_synonyms_label, synonyms),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                    DictionaryStatus.Error -> {
+                        Text(
+                                text =
+                                        dictionaryState.errorMessage
+                                                ?: stringResource(R.string.direct_search_error_generic),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                    DictionaryStatus.Idle -> {}
+                }
+            }
+        }
+    }
+
+    Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
+    ) {
+        InformationCard(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 175.dp),
+                showWallpaperBackground = showWallpaperBackground,
+        ) { content() }
+
+        if (showAttribution) {
+            GeminiAttributionRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    usedModelId = dictionaryState.usedModelId,
                     onClick = onGeminiModelInfoClick,
                     onLongClick = {},
             )

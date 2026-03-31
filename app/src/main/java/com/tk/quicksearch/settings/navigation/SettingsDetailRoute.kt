@@ -341,6 +341,18 @@ fun SettingsDetailRoute(
                                 code,
                         )
                     },
+                    onSetWordClockAlias = { code ->
+                        viewModel.setAlias(
+                                com.tk.quicksearch.searchEngines.AliasHandler.WORD_CLOCK_ALIAS_FEATURE_ID,
+                                code,
+                        )
+                    },
+                    onSetDictionaryAlias = { code ->
+                        viewModel.setAlias(
+                                com.tk.quicksearch.searchEngines.AliasHandler.DICTIONARY_ALIAS_FEATURE_ID,
+                                code,
+                        )
+                    },
                     onSetSearchSectionAlias = { targetId, code ->
                         viewModel.setAlias(targetId, code)
                     },
@@ -348,6 +360,8 @@ fun SettingsDetailRoute(
                     onToggleUnitConverter = viewModel::setUnitConverterEnabled,
                     onToggleDateCalculator = viewModel::setDateCalculatorEnabled,
                     onToggleCurrencyConverter = viewModel::setCurrencyConverterEnabled,
+                    onToggleWordClock = viewModel::setWordClockEnabled,
+                    onToggleDictionary = viewModel::setDictionaryEnabled,
                     onToggleAppSuggestions = viewModel::setAppSuggestionsEnabled,
                     onToggleWebSuggestions = viewModel::setWebSuggestionsEnabled,
                     onWebSuggestionsCountChange = viewModel::setWebSuggestionsCount,

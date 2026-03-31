@@ -33,7 +33,9 @@ import com.tk.quicksearch.search.webSuggestions.WebSuggestionsSection
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.tools.directSearch.CurrencyConverterResult
 import com.tk.quicksearch.tools.directSearch.CalculatorResult
+import com.tk.quicksearch.tools.directSearch.DictionaryResult
 import com.tk.quicksearch.tools.directSearch.DirectSearchResult
+import com.tk.quicksearch.tools.directSearch.WordClockResult
 import com.tk.quicksearch.search.searchScreen.ExpandedSection
 import com.tk.quicksearch.search.searchScreen.InfoBanner
 import com.tk.quicksearch.search.searchScreen.PersonalContextHintBanner
@@ -71,6 +73,8 @@ fun ContentLayout(
     hideResults: Boolean,
     showCalculator: Boolean = false,
     showCurrencyConverter: Boolean = false,
+    showWordClock: Boolean = false,
+    showDictionary: Boolean = false,
     showDirectSearch: Boolean = false,
     directSearchState: DirectSearchState? = null,
     isOverlayPresentation: Boolean = false,
@@ -189,6 +193,8 @@ fun ContentLayout(
                 !showDirectSearch &&
                 !showCalculator &&
                 !showCurrencyConverter &&
+                !showWordClock &&
+                !showDictionary &&
                 suggestionsNotEmpty &&
                 suggestionsEnabled &&
                 !suggestionWasSelected
@@ -196,9 +202,11 @@ fun ContentLayout(
     // Recent Queries Logic (for App Open State mainly, but CONFIG has RECENT_QUERIES item)
     // Suppress regular history in alias mode — alias recent items are shown in the section slot instead.
     val showRecentItems =
-        !hasQuery &&
+            !hasQuery &&
             state.detectedAliasSearchSection == null &&
             !state.isCurrencyConverterAliasMode &&
+            !state.isWordClockAliasMode &&
+            !state.isDictionaryAliasMode &&
             state.recentQueriesEnabled &&
             state.recentItems.isNotEmpty()
 
@@ -272,6 +280,26 @@ fun ContentLayout(
                     if (showCurrencyConverter) {
                         CurrencyConverterResult(
                                 currencyConverterState = state.currencyConverterState,
+                                showWallpaperBackground = effectiveShowWallpaperBackground,
+                                onGeminiModelInfoClick = onGeminiModelInfoClick,
+                        )
+                    }
+                }
+
+                ItemPriorityConfig.ItemType.WORD_CLOCK_RESULT -> {
+                    if (showWordClock) {
+                        WordClockResult(
+                                wordClockState = state.wordClockState,
+                                showWallpaperBackground = effectiveShowWallpaperBackground,
+                                onGeminiModelInfoClick = onGeminiModelInfoClick,
+                        )
+                    }
+                }
+
+                ItemPriorityConfig.ItemType.DICTIONARY_RESULT -> {
+                    if (showDictionary) {
+                        DictionaryResult(
+                                dictionaryState = state.dictionaryState,
                                 showWallpaperBackground = effectiveShowWallpaperBackground,
                                 onGeminiModelInfoClick = onGeminiModelInfoClick,
                         )

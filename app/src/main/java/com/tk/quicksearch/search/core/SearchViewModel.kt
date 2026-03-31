@@ -75,6 +75,14 @@ import com.tk.quicksearch.shared.util.isLowRamDevice
 import com.tk.quicksearch.tools.aiTools.CurrencyConverterHandler
 import com.tk.quicksearch.tools.aiTools.CurrencyNotRecognizedException
 import com.tk.quicksearch.tools.aiTools.CurrencyConversionIntentParser
+import com.tk.quicksearch.tools.aiTools.DictionaryHandler
+import com.tk.quicksearch.tools.aiTools.ConfirmedDictionaryQuery
+import com.tk.quicksearch.tools.aiTools.ConfirmedWordClockQuery
+import com.tk.quicksearch.tools.aiTools.DictionaryIntentParser
+import com.tk.quicksearch.tools.aiTools.DictionaryNotRecognizedException
+import com.tk.quicksearch.tools.aiTools.WordClockHandler
+import com.tk.quicksearch.tools.aiTools.WordClockIntentParser
+import com.tk.quicksearch.tools.aiTools.WordClockNotRecognizedException
 import com.tk.quicksearch.tools.calculator.CalculatorHandler
 import com.tk.quicksearch.tools.dateCalculator.DateCalculatorHandler
 import com.tk.quicksearch.tools.directSearch.DirectSearchHandler
@@ -329,10 +337,16 @@ class SearchViewModel(
 
     private var currencyConversionJob: Job? = null
     private var currencyConversionQueryVersion: Long = 0L
+    private var wordClockJob: Job? = null
+    private var wordClockQueryVersion: Long = 0L
+    private var dictionaryJob: Job? = null
+    private var dictionaryQueryVersion: Long = 0L
 
     private val currencyConverterHandler by lazy {
         CurrencyConverterHandler(appContext, userPreferences)
     }
+    private val wordClockHandler by lazy { WordClockHandler(appContext, userPreferences) }
+    private val dictionaryHandler by lazy { DictionaryHandler(appContext, userPreferences) }
 
     // Consolidated startup configuration loaded in single batch operation
     @Volatile private var startupConfig: StartupPreferencesFacade.StartupConfig? = null
@@ -479,6 +493,8 @@ class SearchViewModel(
                     searchEnginesState = s.searchEnginesState,
                     calculatorState = s.calculatorState,
                     currencyConverterState = s.currencyConverterState,
+                    wordClockState = s.wordClockState,
+                    dictionaryState = s.dictionaryState,
                     DirectSearchState = s.DirectSearchState,
                     webSuggestions = s.webSuggestions,
                     webSuggestionWasSelected = s.webSuggestionWasSelected,
@@ -486,6 +502,8 @@ class SearchViewModel(
                     detectedShortcutTarget = s.detectedShortcutTarget,
                     detectedAliasSearchSection = s.detectedAliasSearchSection,
                     isCurrencyConverterAliasMode = s.isCurrencyConverterAliasMode,
+                    isWordClockAliasMode = s.isWordClockAliasMode,
+                    isDictionaryAliasMode = s.isDictionaryAliasMode,
                     recentItems = s.recentItems,
                     aliasRecentItems = s.aliasRecentItems,
                     nicknameUpdateVersion = s.nicknameUpdateVersion,
@@ -535,6 +553,8 @@ class SearchViewModel(
                     unitConverterEnabled = s.unitConverterEnabled,
                     dateCalculatorEnabled = s.dateCalculatorEnabled,
                     currencyConverterEnabled = s.currencyConverterEnabled,
+                    wordClockEnabled = s.wordClockEnabled,
+                    dictionaryEnabled = s.dictionaryEnabled,
                     recentQueriesEnabled = s.recentQueriesEnabled,
                     hasDismissedSearchHistoryTip = s.hasDismissedSearchHistoryTip,
                     directDialEnabled = s.directDialEnabled,
@@ -844,6 +864,8 @@ class SearchViewModel(
     private var lockedAliasSearchSection: SearchSection? = null
     private var lockedToolMode: SearchToolType? = null
     private var lockedCurrencyConverterAlias: Boolean = false
+    private var lockedWordClockAlias: Boolean = false
+    private var lockedDictionaryAlias: Boolean = false
     private var clearQueryOnLaunch: Boolean = initialConfigState.clearQueryOnLaunch
     private var amazonDomain: String? = null
     private var pendingNavigationClear: Boolean = false
@@ -1315,6 +1337,8 @@ class SearchViewModel(
                         unitConverterEnabled = userPreferences.isUnitConverterEnabled(),
                         dateCalculatorEnabled = userPreferences.isDateCalculatorEnabled(),
                         currencyConverterEnabled = userPreferences.isCurrencyConverterEnabled(),
+                        wordClockEnabled = userPreferences.isWordClockEnabled(),
+                        dictionaryEnabled = userPreferences.isDictionaryEnabled(),
                         hasGeminiApiKey = !directSearchHandler.getGeminiApiKey().isNullOrBlank(),
                         geminiApiKeyLast4 = directSearchHandler.getGeminiApiKey()?.takeLast(4),
                         personalContext = directSearchHandler.getPersonalContext(),
@@ -1587,6 +1611,26 @@ class SearchViewModel(
             updateFeatureState { it.copy(currencyConverterEnabled = enabled) }
             if (!enabled) {
                 updateResultsState { it.copy(currencyConverterState = CurrencyConverterState()) }
+            }
+        }
+    }
+
+    fun setWordClockEnabled(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            userPreferences.setWordClockEnabled(enabled)
+            updateFeatureState { it.copy(wordClockEnabled = enabled) }
+            if (!enabled) {
+                updateResultsState { it.copy(wordClockState = WordClockState()) }
+            }
+        }
+    }
+
+    fun setDictionaryEnabled(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            userPreferences.setDictionaryEnabled(enabled)
+            updateFeatureState { it.copy(dictionaryEnabled = enabled) }
+            if (!enabled) {
+                updateResultsState { it.copy(dictionaryState = DictionaryState()) }
             }
         }
     }
@@ -2311,6 +2355,8 @@ class SearchViewModel(
         lockedToolMode = toolMode
         if (shortcutTarget != null || section != null || toolMode != null) {
             lockedCurrencyConverterAlias = false
+            lockedWordClockAlias = false
+            lockedDictionaryAlias = false
         }
     }
 
@@ -2319,6 +2365,8 @@ class SearchViewModel(
         lockedAliasSearchSection = null
         lockedToolMode = null
         lockedCurrencyConverterAlias = false
+        lockedWordClockAlias = false
+        lockedDictionaryAlias = false
     }
 
     private fun resolveAliasQueryResolution(
@@ -2354,7 +2402,9 @@ class SearchViewModel(
         if (lockedToolMode != null ||
                         lockedAliasSearchSection != null ||
                         lockedShortcutTarget != null ||
-                        lockedCurrencyConverterAlias
+                        lockedCurrencyConverterAlias ||
+                        lockedWordClockAlias ||
+                        lockedDictionaryAlias
         ) {
             return AliasQueryResolution.None
         }
@@ -2369,20 +2419,56 @@ class SearchViewModel(
     }
 
     private fun applyFeatureAliasMode(featureId: String) {
-        if (featureId == AliasHandler.CURRENCY_CONVERTER_ALIAS_FEATURE_ID) {
-            if (!userPreferences.isCurrencyConverterEnabled() ||
-                            userPreferences.getGeminiApiKey().isNullOrBlank()
-            ) {
-                clearDetectedAliasMode()
+        when (featureId) {
+            AliasHandler.CURRENCY_CONVERTER_ALIAS_FEATURE_ID -> {
+                if (!userPreferences.isCurrencyConverterEnabled() ||
+                                userPreferences.getGeminiApiKey().isNullOrBlank()
+                ) {
+                    clearDetectedAliasMode()
+                    return
+                }
+                lockedShortcutTarget = null
+                lockedAliasSearchSection = null
+                lockedToolMode = null
+                lockedCurrencyConverterAlias = true
+                lockedWordClockAlias = false
+                lockedDictionaryAlias = false
                 return
             }
-            lockedShortcutTarget = null
-            lockedAliasSearchSection = null
-            lockedToolMode = null
-            lockedCurrencyConverterAlias = true
-            return
+            AliasHandler.WORD_CLOCK_ALIAS_FEATURE_ID -> {
+                if (!userPreferences.isWordClockEnabled() ||
+                                userPreferences.getGeminiApiKey().isNullOrBlank()
+                ) {
+                    clearDetectedAliasMode()
+                    return
+                }
+                lockedShortcutTarget = null
+                lockedAliasSearchSection = null
+                lockedToolMode = null
+                lockedCurrencyConverterAlias = false
+                lockedWordClockAlias = true
+                lockedDictionaryAlias = false
+                return
+            }
+            AliasHandler.DICTIONARY_ALIAS_FEATURE_ID -> {
+                if (!userPreferences.isDictionaryEnabled() ||
+                                userPreferences.getGeminiApiKey().isNullOrBlank()
+                ) {
+                    clearDetectedAliasMode()
+                    return
+                }
+                lockedShortcutTarget = null
+                lockedAliasSearchSection = null
+                lockedToolMode = null
+                lockedCurrencyConverterAlias = false
+                lockedWordClockAlias = false
+                lockedDictionaryAlias = true
+                return
+            }
         }
         lockedCurrencyConverterAlias = false
+        lockedWordClockAlias = false
+        lockedDictionaryAlias = false
         val toolMode =
                 when (featureId) {
                     AliasHandler.CALCULATOR_ALIAS_FEATURE_ID -> SearchToolType.CALCULATOR
@@ -2509,13 +2595,27 @@ class SearchViewModel(
         ) {
             updateResultsState { it.copy(currencyConverterState = CurrencyConverterState()) }
         }
+        val wordClockState = _resultsState.value.wordClockState
+        if (wordClockState.status != WordClockStatus.Idle &&
+                        (wordClockState.activeQuery == null || wordClockState.activeQuery != trimmedQuery)
+        ) {
+            updateResultsState { it.copy(wordClockState = WordClockState()) }
+        }
+        val dictionaryState = _resultsState.value.dictionaryState
+        if (dictionaryState.status != DictionaryStatus.Idle &&
+                        (dictionaryState.activeQuery == null || dictionaryState.activeQuery != trimmedQuery)
+        ) {
+            updateResultsState { it.copy(dictionaryState = DictionaryState()) }
+        }
 
         if (trimmedQuery.isBlank()) {
             val hasLockedAliasMode =
                     lockedShortcutTarget != null ||
                             lockedAliasSearchSection != null ||
                             lockedToolMode != null ||
-                            lockedCurrencyConverterAlias
+                            lockedCurrencyConverterAlias ||
+                            lockedWordClockAlias ||
+                            lockedDictionaryAlias
             if (clearShortcutWhenBlank && hasLockedAliasMode && newQuery.isNotEmpty()) {
                 appSearchJob?.cancel()
                 appSearchManager.setNoMatchPrefix(null)
@@ -2533,12 +2633,16 @@ class SearchViewModel(
                             calendarEvents = emptyList(),
                             DirectSearchState = DirectSearchState(),
                             currencyConverterState = CurrencyConverterState(),
+                            wordClockState = WordClockState(),
+                            dictionaryState = DictionaryState(),
                             calculatorState =
                                     lockedToolMode?.let(::createToolModeState) ?: CalculatorState(),
                             webSuggestions = emptyList(),
                             detectedShortcutTarget = lockedShortcutTarget,
                             detectedAliasSearchSection = lockedAliasSearchSection,
                             isCurrencyConverterAliasMode = lockedCurrencyConverterAlias,
+                            isWordClockAliasMode = lockedWordClockAlias,
+                            isDictionaryAliasMode = lockedDictionaryAlias,
                             webSuggestionWasSelected = false,
                     )
                 }
@@ -2564,6 +2668,8 @@ class SearchViewModel(
                         calendarEvents = emptyList(),
                         DirectSearchState = DirectSearchState(),
                         currencyConverterState = CurrencyConverterState(),
+                        wordClockState = WordClockState(),
+                        dictionaryState = DictionaryState(),
                         calculatorState =
                                 if (clearShortcutWhenBlank || lockedMode == null) {
                                     CalculatorState()
@@ -2577,6 +2683,8 @@ class SearchViewModel(
                                 if (clearShortcutWhenBlank) null else lockedAliasSearchSection,
                         isCurrencyConverterAliasMode =
                                 !clearShortcutWhenBlank && lockedCurrencyConverterAlias,
+                        isWordClockAliasMode = !clearShortcutWhenBlank && lockedWordClockAlias,
+                        isDictionaryAliasMode = !clearShortcutWhenBlank && lockedDictionaryAlias,
                         webSuggestionWasSelected = false,
                 )
             }
@@ -2621,7 +2729,10 @@ class SearchViewModel(
                         trimmedQuery = trimmedQuery,
                         detectedTarget = detectedTarget,
                         detectedAliasSearchSection = detectedAliasSearchSection,
-                        skipLocalTools = lockedCurrencyConverterAlias,
+                        skipLocalTools =
+                                lockedCurrencyConverterAlias ||
+                                        lockedWordClockAlias ||
+                                        lockedDictionaryAlias,
                 )
 
         val normalizedQuery = SearchTextNormalizer.normalizeForSearch(trimmedQuery)
@@ -2651,13 +2762,19 @@ class SearchViewModel(
         val shouldOnlySearchApps = detectedAliasSearchSection == SearchSection.APPS
         val shouldSkipAppSearchDueToAlias =
                 lockedCurrencyConverterAlias ||
+                        lockedWordClockAlias ||
+                        lockedDictionaryAlias ||
                         (detectedAliasSearchSection != null && !shouldOnlySearchApps)
         val shouldClearSecondaryResults =
                 lockedCurrencyConverterAlias ||
+                        lockedWordClockAlias ||
+                        lockedDictionaryAlias ||
                         detectedAliasSearchSection != null ||
                         _resultsState.value.query != newQuery
         val shouldClearAppShortcutResults =
                 lockedCurrencyConverterAlias ||
+                        lockedWordClockAlias ||
+                        lockedDictionaryAlias ||
                         detectedTarget != null ||
                         (detectedAliasSearchSection != null &&
                                 detectedAliasSearchSection != SearchSection.APP_SHORTCUTS)
@@ -2679,10 +2796,14 @@ class SearchViewModel(
                             !showingTool &&
                                     detectedTarget == null &&
                                     !lockedCurrencyConverterAlias &&
+                                    !lockedWordClockAlias &&
+                                    !lockedDictionaryAlias &&
                                     detectedAliasSearchSection != SearchSection.APPS,
                     detectedShortcutTarget = detectedTarget,
                     detectedAliasSearchSection = detectedAliasSearchSection,
                     isCurrencyConverterAliasMode = lockedCurrencyConverterAlias,
+                    isWordClockAliasMode = lockedWordClockAlias,
+                    isDictionaryAliasMode = lockedDictionaryAlias,
                     contactResults =
                             if (showingTool || shouldClearSecondaryResults) emptyList()
                             else state.contactResults,
@@ -2767,6 +2888,19 @@ class SearchViewModel(
                             webSuggestions = emptyList(),
                     )
                 }
+            } else if (lockedWordClockAlias || lockedDictionaryAlias) {
+                secondarySearchOrchestrator.cancel()
+                updateResultsState {
+                    it.copy(
+                            contactResults = emptyList(),
+                            fileResults = emptyList(),
+                            settingResults = emptyList(),
+                            appSettingResults = emptyList(),
+                            appShortcutResults = emptyList(),
+                            calendarEvents = emptyList(),
+                            webSuggestions = emptyList(),
+                    )
+                }
             } else if (detectedTarget != null) {
                 secondarySearchOrchestrator.performWebSuggestionsOnly(newQuery)
             } else if (detectedAliasSearchSection != null) {
@@ -2797,6 +2931,16 @@ class SearchViewModel(
         }
 
         scheduleCurrencyConversion(
+                trimmedQuery = trimmedQuery,
+                showingTool = showingTool,
+                hasGeminiApiKey = _featureState.value.hasGeminiApiKey,
+        )
+        scheduleWordClock(
+                trimmedQuery = trimmedQuery,
+                showingTool = showingTool,
+                hasGeminiApiKey = _featureState.value.hasGeminiApiKey,
+        )
+        scheduleDictionaryLookup(
                 trimmedQuery = trimmedQuery,
                 showingTool = showingTool,
                 hasGeminiApiKey = _featureState.value.hasGeminiApiKey,
@@ -2915,6 +3059,254 @@ class SearchViewModel(
                 }
     }
 
+    private fun scheduleWordClock(
+            trimmedQuery: String,
+            showingTool: Boolean,
+            hasGeminiApiKey: Boolean,
+    ) {
+        wordClockJob?.cancel()
+        if (!userPreferences.isWordClockEnabled() || !hasGeminiApiKey) {
+            updateResultsState { s ->
+                if (s.wordClockState.status == WordClockStatus.Idle) {
+                    s
+                } else {
+                    s.copy(wordClockState = WordClockState())
+                }
+            }
+            return
+        }
+        if (showingTool || trimmedQuery.isBlank()) {
+            updateResultsState { s ->
+                if (s.wordClockState.status == WordClockStatus.Idle) {
+                    s
+                } else {
+                    s.copy(wordClockState = WordClockState())
+                }
+            }
+            return
+        }
+        val matchesCandidate =
+                if (lockedWordClockAlias) {
+                    trimmedQuery.isNotBlank()
+                } else {
+                    WordClockIntentParser.isCandidate(trimmedQuery)
+                }
+        if (!matchesCandidate) {
+            updateResultsState { s ->
+                if (s.wordClockState.status == WordClockStatus.Idle) {
+                    s
+                } else {
+                    s.copy(wordClockState = WordClockState())
+                }
+            }
+            return
+        }
+        val version = ++wordClockQueryVersion
+        val capturedTrim = trimmedQuery
+        wordClockJob =
+                viewModelScope.launch(Dispatchers.Default) {
+                    delay(WORD_CLOCK_DEBOUNCE_MS)
+                    if (version != wordClockQueryVersion) return@launch
+                    val latestTrim = _resultsState.value.query.trim()
+                    if (latestTrim != capturedTrim) return@launch
+                    val confirmed =
+                            if (lockedWordClockAlias) {
+                                ConfirmedWordClockQuery(
+                                        timeExpression = latestTrim,
+                                        originalQuery = latestTrim,
+                                )
+                            } else {
+                                WordClockIntentParser.parseConfirmed(latestTrim)
+                            }
+                    if (confirmed == null) {
+                        updateResultsState { s ->
+                            s.copy(wordClockState = WordClockState())
+                        }
+                        return@launch
+                    }
+                    updateResultsState { s ->
+                        s.copy(
+                                wordClockState =
+                                        WordClockState(
+                                                status = WordClockStatus.Loading,
+                                                activeQuery = latestTrim,
+                                        ),
+                        )
+                    }
+                    val apiResult = wordClockHandler.convert(confirmed)
+                    if (version != wordClockQueryVersion) return@launch
+                    if (_resultsState.value.query.trim() != latestTrim) return@launch
+                    apiResult.fold(
+                            onSuccess = { (parsed, modelId) ->
+                                updateResultsState { s ->
+                                    s.copy(
+                                            wordClockState =
+                                                    WordClockState(
+                                                            status = WordClockStatus.Success,
+                                                            wordClockText = parsed.wordClockText,
+                                                            sourceTimeText = parsed.sourceTimeText,
+                                                            activeQuery = latestTrim,
+                                                            usedModelId = modelId,
+                                                    ),
+                                    )
+                                }
+                            },
+                            onFailure = { e ->
+                                if (e is WordClockNotRecognizedException) {
+                                    val msg =
+                                            appContext.getString(
+                                                    R.string.word_clock_error_not_recognized,
+                                            )
+                                    updateResultsState { s ->
+                                        s.copy(
+                                                wordClockState =
+                                                        WordClockState(
+                                                                status = WordClockStatus.Error,
+                                                                errorMessage = msg,
+                                                                activeQuery = latestTrim,
+                                                        ),
+                                        )
+                                    }
+                                    return@launch
+                                }
+                                val msg =
+                                        e.message
+                                                ?: appContext.getString(R.string.direct_search_error_generic)
+                                updateResultsState { s ->
+                                    s.copy(
+                                            wordClockState =
+                                                    WordClockState(
+                                                            status = WordClockStatus.Error,
+                                                            errorMessage = msg,
+                                                            activeQuery = latestTrim,
+                                                    ),
+                                    )
+                                }
+                            },
+                    )
+                }
+    }
+
+    private fun scheduleDictionaryLookup(
+            trimmedQuery: String,
+            showingTool: Boolean,
+            hasGeminiApiKey: Boolean,
+    ) {
+        dictionaryJob?.cancel()
+        if (!userPreferences.isDictionaryEnabled() || !hasGeminiApiKey) {
+            updateResultsState { s ->
+                if (s.dictionaryState.status == DictionaryStatus.Idle) {
+                    s
+                } else {
+                    s.copy(dictionaryState = DictionaryState())
+                }
+            }
+            return
+        }
+        if (showingTool || trimmedQuery.isBlank()) {
+            updateResultsState { s ->
+                if (s.dictionaryState.status == DictionaryStatus.Idle) {
+                    s
+                } else {
+                    s.copy(dictionaryState = DictionaryState())
+                }
+            }
+            return
+        }
+        val matchesCandidate =
+                if (lockedDictionaryAlias) {
+                    trimmedQuery.isNotBlank()
+                } else {
+                    DictionaryIntentParser.isCandidate(trimmedQuery)
+                }
+        if (!matchesCandidate) {
+            updateResultsState { s ->
+                if (s.dictionaryState.status == DictionaryStatus.Idle) {
+                    s
+                } else {
+                    s.copy(dictionaryState = DictionaryState())
+                }
+            }
+            return
+        }
+        val version = ++dictionaryQueryVersion
+        val capturedTrim = trimmedQuery
+        dictionaryJob =
+                viewModelScope.launch(Dispatchers.Default) {
+                    delay(DICTIONARY_DEBOUNCE_MS)
+                    if (version != dictionaryQueryVersion) return@launch
+                    val latestTrim = _resultsState.value.query.trim()
+                    if (latestTrim != capturedTrim) return@launch
+                    val confirmed =
+                            if (lockedDictionaryAlias) {
+                                ConfirmedDictionaryQuery(
+                                        term = latestTrim,
+                                        originalQuery = latestTrim,
+                                )
+                            } else {
+                                DictionaryIntentParser.parseConfirmed(latestTrim)
+                            }
+                    if (confirmed == null) {
+                        updateResultsState { s ->
+                            s.copy(dictionaryState = DictionaryState())
+                        }
+                        return@launch
+                    }
+                    updateResultsState { s ->
+                        s.copy(
+                                dictionaryState =
+                                        DictionaryState(
+                                                status = DictionaryStatus.Loading,
+                                                activeQuery = latestTrim,
+                                        ),
+                        )
+                    }
+                    val apiResult = dictionaryHandler.define(confirmed)
+                    if (version != dictionaryQueryVersion) return@launch
+                    if (_resultsState.value.query.trim() != latestTrim) return@launch
+                    apiResult.fold(
+                            onSuccess = { (parsed, modelId) ->
+                                updateResultsState { s ->
+                                    s.copy(
+                                            dictionaryState =
+                                                    DictionaryState(
+                                                            status = DictionaryStatus.Success,
+                                                            word = parsed.word,
+                                                            partOfSpeech = parsed.partOfSpeech,
+                                                            meaning = parsed.meaning,
+                                                            example = parsed.example,
+                                                            synonyms = parsed.synonyms,
+                                                            activeQuery = latestTrim,
+                                                            usedModelId = modelId,
+                                                    ),
+                                    )
+                                }
+                            },
+                            onFailure = { e ->
+                                if (e is DictionaryNotRecognizedException) {
+                                    updateResultsState { s ->
+                                        s.copy(dictionaryState = DictionaryState())
+                                    }
+                                    return@launch
+                                }
+                                val msg =
+                                        e.message
+                                                ?: appContext.getString(R.string.direct_search_error_generic)
+                                updateResultsState { s ->
+                                    s.copy(
+                                            dictionaryState =
+                                                    DictionaryState(
+                                                            status = DictionaryStatus.Error,
+                                                            errorMessage = msg,
+                                                            activeQuery = latestTrim,
+                                                    ),
+                                    )
+                                }
+                            },
+                    )
+                }
+    }
+
     fun activateSearchSectionFilter(section: SearchSection) {
         setDetectedAliasMode(shortcutTarget = null, section = section, toolMode = null)
         val currentQuery = _resultsState.value.query
@@ -2923,8 +3315,12 @@ class SearchViewModel(
                 detectedShortcutTarget = null,
                 detectedAliasSearchSection = section,
                 isCurrencyConverterAliasMode = false,
+                isWordClockAliasMode = false,
+                isDictionaryAliasMode = false,
                 calculatorState = CalculatorState(),
                 currencyConverterState = CurrencyConverterState(),
+                wordClockState = WordClockState(),
+                dictionaryState = DictionaryState(),
                 searchResults = emptyList(),
                 contactResults = emptyList(),
                 fileResults = emptyList(),
@@ -2951,8 +3347,12 @@ class SearchViewModel(
                     detectedShortcutTarget = null,
                     detectedAliasSearchSection = null,
                     isCurrencyConverterAliasMode = false,
+                    isWordClockAliasMode = false,
+                    isDictionaryAliasMode = false,
                     calculatorState = CalculatorState(),
                     currencyConverterState = CurrencyConverterState(),
+                    wordClockState = WordClockState(),
+                    dictionaryState = DictionaryState(),
             )
         }
     }
@@ -3007,6 +3407,8 @@ class SearchViewModel(
                             unitConverterEnabled = userPreferences.isUnitConverterEnabled(),
                             dateCalculatorEnabled = userPreferences.isDateCalculatorEnabled(),
                             currencyConverterEnabled = userPreferences.isCurrencyConverterEnabled(),
+                            wordClockEnabled = userPreferences.isWordClockEnabled(),
+                            dictionaryEnabled = userPreferences.isDictionaryEnabled(),
                             hasGeminiApiKey = hasGeminiApiKey,
                             geminiApiKeyLast4 = geminiApiKey?.takeLast(4),
                             personalContext = personalContext,
@@ -4353,6 +4755,12 @@ class SearchViewModel(
                 state.isCurrencyConverterAliasMode -> {
                     SearchEnginesVisibility.Hidden
                 }
+                state.isWordClockAliasMode -> {
+                    SearchEnginesVisibility.Hidden
+                }
+                state.isDictionaryAliasMode -> {
+                    SearchEnginesVisibility.Hidden
+                }
                 isLikelyWebUrl(state.query) -> {
                     SearchEnginesVisibility.Hidden
                 }
@@ -4403,6 +4811,8 @@ class SearchViewModel(
         // redundant mid-word searches that occur during rapid typing.
         private const val APP_SEARCH_DEBOUNCE_MS = 60L
         private const val CURRENCY_CONVERTER_DEBOUNCE_MS = 450L
+        private const val WORD_CLOCK_DEBOUNCE_MS = 450L
+        private const val DICTIONARY_DEBOUNCE_MS = 900L
         /** Minimum interval between browser-target refreshes triggered by onResume. */
         private const val BROWSER_REFRESH_INTERVAL_MS = 5 * 60 * 1_000L // 5 minutes
         private const val DEFERRED_APP_REFRESH_DELAY_MS = 2_000L

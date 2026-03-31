@@ -34,6 +34,8 @@ internal fun computeShouldShowNoResults(state: SearchUiState): Boolean {
         state.detectedShortcutTarget == null &&
         state.detectedAliasSearchSection == null &&
         !state.isCurrencyConverterAliasMode &&
+        !state.isWordClockAliasMode &&
+        !state.isDictionaryAliasMode &&
         (
             !state.webSuggestionsEnabled ||
                 (queryLength >= 2 && state.webSuggestions.isEmpty())
@@ -70,6 +72,8 @@ internal fun NoResultsMessage(state: SearchUiState) {
             state.detectedShortcutTarget,
             state.detectedAliasSearchSection,
             state.isCurrencyConverterAliasMode,
+            state.isWordClockAliasMode,
+            state.isDictionaryAliasMode,
         ) {
             computeShouldShowNoResults(state)
         }

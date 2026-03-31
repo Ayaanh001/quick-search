@@ -26,7 +26,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.automirrored.rounded.Shortcut
+import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.CalendarMonth
@@ -151,6 +153,8 @@ internal fun PersistentSearchBar(
     detectedShortcutTarget: SearchTarget? = null,
     detectedAliasSearchSection: SearchSection? = null,
     isCurrencyConverterAliasMode: Boolean = false,
+    isWordClockAliasMode: Boolean = false,
+    isDictionaryAliasMode: Boolean = false,
     activeToolType: SearchToolType? = null,
     isCalculatorMode: Boolean = false,
     placeholderText: String,
@@ -181,10 +185,12 @@ internal fun PersistentSearchBar(
     val lightWallpaperSearchBar = !isDarkTheme && showWallpaperBackground
     val searchBarIconColor = AppColors.SecondaryIconTint
     val isAliasDetected =
-        detectedShortcutTarget != null ||
+            detectedShortcutTarget != null ||
             detectedAliasSearchSection != null ||
             activeToolType != null ||
-            isCurrencyConverterAliasMode
+            isCurrencyConverterAliasMode ||
+            isWordClockAliasMode ||
+            isDictionaryAliasMode
     val aliasVisualTransformation =
         rememberAliasHighlightVisualTransformation(
             enabledTargets = enabledTargets,
@@ -198,6 +204,8 @@ internal fun PersistentSearchBar(
             activeToolType == SearchToolType.UNIT_CONVERTER -> LeadingIconState.UnitConverter
             activeToolType == SearchToolType.CALCULATOR || isCalculatorMode -> LeadingIconState.Calculator
             isCurrencyConverterAliasMode -> LeadingIconState.CurrencyConverter
+            isWordClockAliasMode -> LeadingIconState.WordClock
+            isDictionaryAliasMode -> LeadingIconState.Dictionary
             detectedShortcutTarget != null -> LeadingIconState.Shortcut(detectedShortcutTarget)
             detectedAliasSearchSection != null -> LeadingIconState.Section(detectedAliasSearchSection)
             else -> LeadingIconState.Search
@@ -510,6 +518,8 @@ internal fun PersistentSearchBar(
                                 (detectedShortcutTarget != null ||
                                     detectedAliasSearchSection != null ||
                                     isCurrencyConverterAliasMode ||
+                                    isWordClockAliasMode ||
+                                    isDictionaryAliasMode ||
                                     activeToolType != null ||
                                     isCalculatorMode) -> {
                                 onClearDetectedShortcut()
@@ -776,6 +786,24 @@ private fun SearchBarLeadingIcon(
             )
         }
 
+        LeadingIconState.WordClock -> {
+            Icon(
+                imageVector = Icons.Rounded.AccessTime,
+                contentDescription = stringResource(R.string.word_clock_toggle_title),
+                tint = iconTint,
+                modifier = Modifier.padding(start = DesignTokens.SpacingXSmall),
+            )
+        }
+
+        LeadingIconState.Dictionary -> {
+            Icon(
+                imageVector = Icons.AutoMirrored.Rounded.MenuBook,
+                contentDescription = stringResource(R.string.dictionary_toggle_title),
+                tint = iconTint,
+                modifier = Modifier.padding(start = DesignTokens.SpacingXSmall),
+            )
+        }
+
         is LeadingIconState.Shortcut -> {
             SearchTargetIcon(
                 target = iconState.target,
@@ -846,6 +874,10 @@ private sealed interface LeadingIconState {
     data object UnitConverter : LeadingIconState
 
     data object CurrencyConverter : LeadingIconState
+
+    data object WordClock : LeadingIconState
+
+    data object Dictionary : LeadingIconState
 
     data class Shortcut(
         val target: SearchTarget,

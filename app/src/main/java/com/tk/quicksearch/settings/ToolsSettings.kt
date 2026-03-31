@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.CurrencyExchange
@@ -39,15 +41,23 @@ fun ToolsSettingsSection(
         hasGeminiApiKey: Boolean,
         currencyConverterEnabled: Boolean,
         currencyConverterAlias: String,
+        wordClockEnabled: Boolean,
+        wordClockAlias: String,
+        dictionaryEnabled: Boolean,
+        dictionaryAlias: String,
         existingShortcuts: Map<String, String>,
         onSetCalculatorAlias: (String) -> Unit,
         onSetUnitConverterAlias: (String) -> Unit,
         onSetDateCalculatorAlias: (String) -> Unit,
         onSetCurrencyConverterAlias: (String) -> Unit,
+        onSetWordClockAlias: (String) -> Unit,
+        onSetDictionaryAlias: (String) -> Unit,
         onCalculatorToggle: (Boolean) -> Unit,
         onUnitConverterToggle: (Boolean) -> Unit,
         onDateCalculatorToggle: (Boolean) -> Unit,
         onCurrencyConverterToggle: (Boolean) -> Unit,
+        onWordClockToggle: (Boolean) -> Unit,
+        onDictionaryToggle: (Boolean) -> Unit,
         onNavigateToGeminiApiSetup: () -> Unit = {},
         onNavigateToUnitConverterInfo: () -> Unit = {},
         onNavigateToDateCalculatorInfo: () -> Unit = {},
@@ -67,24 +77,26 @@ fun ToolsSettingsSection(
                                 .padding(horizontal = DesignTokens.SpacingSmall),
                 verticalArrangement = Arrangement.spacedBy(DesignTokens.SpacingSmall),
         ) {
-            SettingsCard(modifier = Modifier.fillMaxWidth()) {
-                SettingsNavigationRow(
-                        item =
-                                SettingsCardItem(
-                                        title = stringResource(R.string.settings_tools_gemini_api_title),
-                                        description =
-                                                stringResource(
-                                                        R.string.settings_tools_gemini_api_desc
-                                                ),
-                                        iconResId = R.drawable.direct_search,
-                                        actionOnPress = onNavigateToGeminiApiSetup,
-                                ),
-                        contentPadding =
-                                PaddingValues(
-                                        horizontal = DesignTokens.CardHorizontalPadding,
-                                        vertical = DesignTokens.CardVerticalPadding,
-                                ),
-                )
+            if (!hasGeminiApiKey) {
+                SettingsCard(modifier = Modifier.fillMaxWidth()) {
+                    SettingsNavigationRow(
+                            item =
+                                    SettingsCardItem(
+                                            title = stringResource(R.string.settings_tools_gemini_api_title),
+                                            description =
+                                                    stringResource(
+                                                            R.string.settings_tools_gemini_api_desc
+                                                    ),
+                                            iconResId = R.drawable.direct_search,
+                                            actionOnPress = onNavigateToGeminiApiSetup,
+                                    ),
+                            contentPadding =
+                                    PaddingValues(
+                                            horizontal = DesignTokens.CardHorizontalPadding,
+                                            vertical = DesignTokens.CardVerticalPadding,
+                                    ),
+                    )
+                }
             }
             ToolToggleRows(
                     tools =
@@ -180,6 +192,58 @@ fun ToolsSettingsSection(
                                                 aliasFeatureId =
                                                         AliasHandler
                                                                 .CURRENCY_CONVERTER_ALIAS_FEATURE_ID,
+                                        ),
+                                )
+                                add(
+                                        ToolToggleCardModel(
+                                                title = stringResource(R.string.word_clock_toggle_title),
+                                                subtitle =
+                                                        stringResource(
+                                                                if (hasGeminiApiKey) {
+                                                                    R.string.word_clock_toggle_desc
+                                                                } else {
+                                                                    R.string.word_clock_requires_gemini_key
+                                                                }
+                                                        ),
+                                                enabled = hasGeminiApiKey,
+                                                checked = wordClockEnabled && hasGeminiApiKey,
+                                                onCheckedChange = onWordClockToggle,
+                                                leadingIcon = Icons.Rounded.AccessTime,
+                                                aliasCode =
+                                                        if (hasGeminiApiKey) {
+                                                            wordClockAlias
+                                                        } else {
+                                                            null
+                                                        },
+                                                onAliasCodeChange = onSetWordClockAlias,
+                                                existingShortcuts = existingShortcuts,
+                                                aliasFeatureId = AliasHandler.WORD_CLOCK_ALIAS_FEATURE_ID,
+                                        ),
+                                )
+                                add(
+                                        ToolToggleCardModel(
+                                                title = stringResource(R.string.dictionary_toggle_title),
+                                                subtitle =
+                                                        stringResource(
+                                                                if (hasGeminiApiKey) {
+                                                                    R.string.dictionary_toggle_desc
+                                                                } else {
+                                                                    R.string.dictionary_requires_gemini_key
+                                                                }
+                                                        ),
+                                                enabled = hasGeminiApiKey,
+                                                checked = dictionaryEnabled && hasGeminiApiKey,
+                                                onCheckedChange = onDictionaryToggle,
+                                                leadingIcon = Icons.AutoMirrored.Rounded.MenuBook,
+                                                aliasCode =
+                                                        if (hasGeminiApiKey) {
+                                                            dictionaryAlias
+                                                        } else {
+                                                            null
+                                                        },
+                                                onAliasCodeChange = onSetDictionaryAlias,
+                                                existingShortcuts = existingShortcuts,
+                                                aliasFeatureId = AliasHandler.DICTIONARY_ALIAS_FEATURE_ID,
                                         ),
                                 )
                             },

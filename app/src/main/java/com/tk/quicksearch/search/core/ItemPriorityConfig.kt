@@ -36,6 +36,8 @@ object ItemPriorityConfig {
         // Special result items (always evaluated first)
         CALCULATOR_RESULT,
         CURRENCY_CONVERTER_RESULT,
+        WORD_CLOCK_RESULT,
+        DICTIONARY_RESULT,
         DIRECT_SEARCH_RESULT,
 
         // Section groups (contain multiple search results)
@@ -78,6 +80,8 @@ object ItemPriorityConfig {
             ItemType.ERROR_BANNER,
             ItemType.CALCULATOR_RESULT,
             ItemType.CURRENCY_CONVERTER_RESULT,
+            ItemType.WORD_CLOCK_RESULT,
+            ItemType.DICTIONARY_RESULT,
             ItemType.DIRECT_SEARCH_RESULT,
             // Search result sections (sub-ordered by section priority)
             ItemType.APPS_SECTION,
