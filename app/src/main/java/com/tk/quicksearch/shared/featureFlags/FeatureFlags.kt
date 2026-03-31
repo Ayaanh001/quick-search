@@ -5,7 +5,10 @@ import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.data.preferences.BasePreferences
 import java.util.EnumMap
 
-enum class FeatureFlag
+enum class FeatureFlag {
+    CURRENCY_CONVERTER,
+    WORLD_CLOCK,
+}
 
 private data class FeatureFlagDefinition(
     val enabledByDefault: Boolean,
@@ -24,7 +27,16 @@ private data class FeatureFlagDefinition(
 object FeatureFlags {
     const val PREFERENCE_KEY_PREFIX = "feature_flag_"
 
-    private val definitions: Map<FeatureFlag, FeatureFlagDefinition> = emptyMap()
+    private val definitions: Map<FeatureFlag, FeatureFlagDefinition> = mapOf(
+        FeatureFlag.CURRENCY_CONVERTER to FeatureFlagDefinition(
+            enabledByDefault = false,
+            exportExcludedKeys = setOf("currency_converter_enabled"),
+        ),
+        FeatureFlag.WORLD_CLOCK to FeatureFlagDefinition(
+            enabledByDefault = false,
+            exportExcludedKeys = setOf("word_clock_enabled"),
+        ),
+    )
 
     @Volatile
     private var initialized = false

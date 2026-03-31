@@ -39,8 +39,10 @@ fun ToolsSettingsSection(
         dateCalculatorEnabled: Boolean,
         dateCalculatorAlias: String,
         hasGeminiApiKey: Boolean,
+        currencyConverterFeatureFlagEnabled: Boolean,
         currencyConverterEnabled: Boolean,
         currencyConverterAlias: String,
+        worldClockFeatureFlagEnabled: Boolean,
         wordClockEnabled: Boolean,
         wordClockAlias: String,
         dictionaryEnabled: Boolean,
@@ -163,63 +165,71 @@ fun ToolsSettingsSection(
                                                 onRowClick = onNavigateToDateCalculatorInfo,
                                         ),
                                 )
-                                add(
-                                        ToolToggleCardModel(
-                                                title =
-                                                        stringResource(
-                                                                R.string.currency_converter_toggle_title
-                                                        ),
-                                                subtitle =
-                                                        stringResource(
-                                                                if (hasGeminiApiKey) {
-                                                                    R.string.currency_converter_toggle_desc
-                                                                } else {
-                                                                    R.string.currency_converter_requires_gemini_key
-                                                                }
-                                                        ),
-                                                enabled = hasGeminiApiKey,
-                                                checked = currencyConverterEnabled && hasGeminiApiKey,
-                                                onCheckedChange = onCurrencyConverterToggle,
-                                                leadingIcon = Icons.Rounded.CurrencyExchange,
-                                                aliasCode =
-                                                        if (hasGeminiApiKey) {
-                                                            currencyConverterAlias
-                                                        } else {
-                                                            null
-                                                        },
-                                                onAliasCodeChange = onSetCurrencyConverterAlias,
-                                                existingShortcuts = existingShortcuts,
-                                                aliasFeatureId =
-                                                        AliasHandler
-                                                                .CURRENCY_CONVERTER_ALIAS_FEATURE_ID,
-                                        ),
-                                )
-                                add(
-                                        ToolToggleCardModel(
-                                                title = stringResource(R.string.word_clock_toggle_title),
-                                                subtitle =
-                                                        stringResource(
-                                                                if (hasGeminiApiKey) {
-                                                                    R.string.word_clock_toggle_desc
-                                                                } else {
-                                                                    R.string.word_clock_requires_gemini_key
-                                                                }
-                                                        ),
-                                                enabled = hasGeminiApiKey,
-                                                checked = wordClockEnabled && hasGeminiApiKey,
-                                                onCheckedChange = onWordClockToggle,
-                                                leadingIcon = Icons.Rounded.AccessTime,
-                                                aliasCode =
-                                                        if (hasGeminiApiKey) {
-                                                            wordClockAlias
-                                                        } else {
-                                                            null
-                                                        },
-                                                onAliasCodeChange = onSetWordClockAlias,
-                                                existingShortcuts = existingShortcuts,
-                                                aliasFeatureId = AliasHandler.WORD_CLOCK_ALIAS_FEATURE_ID,
-                                        ),
-                                )
+                                if (currencyConverterFeatureFlagEnabled) {
+                                    add(
+                                            ToolToggleCardModel(
+                                                    title =
+                                                            stringResource(
+                                                                    R.string.currency_converter_toggle_title
+                                                            ),
+                                                    subtitle =
+                                                            stringResource(
+                                                                    if (hasGeminiApiKey) {
+                                                                        R.string.currency_converter_toggle_desc
+                                                                    } else {
+                                                                        R.string.currency_converter_requires_gemini_key
+                                                                    }
+                                                            ),
+                                                    enabled = hasGeminiApiKey,
+                                                    checked = currencyConverterEnabled && hasGeminiApiKey,
+                                                    onCheckedChange = onCurrencyConverterToggle,
+                                                    leadingIcon = Icons.Rounded.CurrencyExchange,
+                                                    aliasCode =
+                                                            if (hasGeminiApiKey) {
+                                                                currencyConverterAlias
+                                                            } else {
+                                                                null
+                                                            },
+                                                    onAliasCodeChange = onSetCurrencyConverterAlias,
+                                                    existingShortcuts = existingShortcuts,
+                                                    aliasFeatureId =
+                                                            AliasHandler
+                                                                    .CURRENCY_CONVERTER_ALIAS_FEATURE_ID,
+                                            ),
+                                    )
+                                }
+                                if (worldClockFeatureFlagEnabled) {
+                                    add(
+                                            ToolToggleCardModel(
+                                                    title =
+                                                            stringResource(
+                                                                    R.string.word_clock_toggle_title
+                                                            ),
+                                                    subtitle =
+                                                            stringResource(
+                                                                    if (hasGeminiApiKey) {
+                                                                        R.string.word_clock_toggle_desc
+                                                                    } else {
+                                                                        R.string.word_clock_requires_gemini_key
+                                                                    }
+                                                            ),
+                                                    enabled = hasGeminiApiKey,
+                                                    checked = wordClockEnabled && hasGeminiApiKey,
+                                                    onCheckedChange = onWordClockToggle,
+                                                    leadingIcon = Icons.Rounded.AccessTime,
+                                                    aliasCode =
+                                                            if (hasGeminiApiKey) {
+                                                                wordClockAlias
+                                                            } else {
+                                                                null
+                                                            },
+                                                    onAliasCodeChange = onSetWordClockAlias,
+                                                    existingShortcuts = existingShortcuts,
+                                                    aliasFeatureId =
+                                                            AliasHandler.WORD_CLOCK_ALIAS_FEATURE_ID,
+                                            ),
+                                    )
+                                }
                                 add(
                                         ToolToggleCardModel(
                                                 title = stringResource(R.string.dictionary_toggle_title),

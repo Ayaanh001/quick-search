@@ -504,13 +504,18 @@ class UiPreferences(
     }
 
     fun isCurrencyConverterEnabled(): Boolean =
-            getBooleanPref(UiPreferences.KEY_CURRENCY_CONVERTER_ENABLED, true)
+            com.tk.quicksearch.shared.featureFlags.FeatureFlags.isEnabled(
+                    com.tk.quicksearch.shared.featureFlags.FeatureFlag.CURRENCY_CONVERTER
+            ) && getBooleanPref(UiPreferences.KEY_CURRENCY_CONVERTER_ENABLED, true)
 
     fun setCurrencyConverterEnabled(enabled: Boolean) {
         setBooleanPref(UiPreferences.KEY_CURRENCY_CONVERTER_ENABLED, enabled)
     }
 
-    fun isWordClockEnabled(): Boolean = getBooleanPref(UiPreferences.KEY_WORD_CLOCK_ENABLED, true)
+    fun isWordClockEnabled(): Boolean =
+            com.tk.quicksearch.shared.featureFlags.FeatureFlags.isEnabled(
+                    com.tk.quicksearch.shared.featureFlags.FeatureFlag.WORLD_CLOCK
+            ) && getBooleanPref(UiPreferences.KEY_WORD_CLOCK_ENABLED, true)
 
     fun setWordClockEnabled(enabled: Boolean) {
         setBooleanPref(UiPreferences.KEY_WORD_CLOCK_ENABLED, enabled)
