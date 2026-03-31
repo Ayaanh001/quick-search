@@ -477,11 +477,17 @@ object IconPackManager {
 private fun Drawable.toBitmapSafely(): ImageBitmap? =
     runCatching {
         when (this) {
-            is BitmapDrawable -> bitmap?.asImageBitmap()
+            is BitmapDrawable -> bitmap?.toStableImageBitmap()
             else -> if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && this is AdaptiveIconDrawable) {
-                toBitmap().asImageBitmap()
+                toBitmap().toStableImageBitmap()
             } else {
-                toBitmap().asImageBitmap()
+                toBitmap().toStableImageBitmap()
             }
         }
     }.getOrNull()
+
+private fun Bitmap.toStableImageBitmap(): ImageBitmap? {
+    if (isRecycled || width <= 0 || height <= 0) return null
+    val stableBitmap = copy(Bitmap.Config.ARGB_8888, false) ?: return null
+    return stableBitmap.asImageBitmap()
+}
