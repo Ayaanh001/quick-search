@@ -64,13 +64,10 @@ class AppSettingsSearchHandler(
         return availableSettings.filter { setting ->
             val shouldHideExcludedItems =
                 !hasExcludedItems() && setting.destination == EXCLUDED_ITEMS
-            val shouldHideCircularAppIconsToggle =
-                setting.toggleKey == AppSettingsToggleKey.CIRCULAR_APP_ICONS &&
-                    !userPreferences.getSelectedIconPackPackage().isNullOrBlank()
             val shouldHideWallpaperAccent =
                 setting.toggleKey == AppSettingsToggleKey.WALLPAPER_ACCENT &&
                     backgroundSource == BackgroundSource.THEME
-            !shouldHideExcludedItems && !shouldHideCircularAppIconsToggle && !shouldHideWallpaperAccent
+            !shouldHideExcludedItems && !shouldHideWallpaperAccent
         }
     }
 
