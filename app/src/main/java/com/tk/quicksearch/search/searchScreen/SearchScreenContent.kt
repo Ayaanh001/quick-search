@@ -59,8 +59,10 @@ import com.tk.quicksearch.search.searchScreen.searchScreenLayout.SearchContentAr
 import com.tk.quicksearch.search.searchScreen.appThemeActionColor
 import com.tk.quicksearch.search.searchScreen.appThemeDividerColor
 import com.tk.quicksearch.search.searchScreen.appThemeResultCardColor
+import com.tk.quicksearch.search.searchScreen.components.DictionarySearchCard
 import com.tk.quicksearch.search.searchScreen.resolveSearchColorTheme
 import com.tk.quicksearch.shared.ui.theme.LocalSearchColorTheme
+import com.tk.quicksearch.tools.aiTools.DictionaryIntentParser
 import kotlinx.coroutines.delay
 
 private const val OPEN_KEYBOARD_ACTION_APPEAR_DELAY_MS = 500L
@@ -93,6 +95,7 @@ internal fun SearchScreenContent(
         onOpenSearchHistorySettings: () -> Unit = {},
         onDismissSearchHistoryTip: () -> Unit = {},
         onGeminiModelInfoClick: () -> Unit = {},
+        onDictionarySearchClick: () -> Unit = {},
         onKeyboardSwitchToggle: () -> Unit,
         onOverlayNumberKeyboardUiChanged: ((Boolean, Boolean) -> Unit)? = null,
         onOverlayExpandRequest: () -> Unit = {},
@@ -169,14 +172,33 @@ internal fun SearchScreenContent(
     val showDictionary =
             state.dictionaryEnabled &&
                     state.dictionaryState.status != DictionaryStatus.Idle
+    val showCalculatorResult =
+            state.calculatorState.isToolMode ||
+                    state.calculatorState.result != null ||
+                    state.calculatorState.parsedDateMillis != null ||
+                    state.calculatorState.dateDiffLabel != null ||
+                    state.calculatorState.timeResultLabel != null
+    val trimmedQuery = state.query.trim()
+    val showDictionarySearchCard =
+            state.dictionaryEnabled &&
+                    state.hasGeminiApiKey &&
+                    trimmedQuery.isNotBlank() &&
+                    !showCalculatorResult &&
+                    !showCurrencyConverter &&
+                    !showWordClock &&
+                    !showDictionary &&
+                    if (isDictionaryAliasMode) {
+                        true
+                    } else {
+                        DictionaryIntentParser.parseConfirmed(trimmedQuery) != null
+                    }
     val hideCompactSearchEnginesInToolMode =
             (isToolMode ||
                     showCurrencyConverter ||
                     showWordClock ||
                     showDictionary ||
                     isCurrencyConverterAliasMode ||
-                    isWordClockAliasMode ||
-                    isDictionaryAliasMode) &&
+                    isWordClockAliasMode) &&
                     state.isSearchEngineCompactMode
     val shouldShowNumberKeyboardOperators =
             isImeVisible && (manuallySwitchedToNumberKeyboard || isCalculatorMode)
@@ -601,6 +623,20 @@ internal fun SearchScreenContent(
             }
 
             if (!hideCompactSearchEnginesInToolMode && !isSearchHistoryExpanded) {
+                AnimatedVisibility(
+                        visible = showDictionarySearchCard,
+                        enter = fadeIn(animationSpec = tween(durationMillis = 140, delayMillis = 50)),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 100)),
+                ) {
+                    DictionarySearchCard(
+                            modifier =
+                                    Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = DesignTokens.SpacingXSmall),
+                            onClick = onDictionarySearchClick,
+                            showWallpaperBackground = state.showWallpaperBackground,
+                    )
+                }
                 CompositionLocalProvider(
                         LocalOverlayResultCardColor provides overlayCardColor,
                         LocalOverlayDividerColor provides overlayDividerTint,
@@ -705,8 +741,7 @@ internal fun SearchScreenContent(
                             state.detectedShortcutTarget == null &&
                             state.detectedAliasSearchSection == null &&
                             !state.isCurrencyConverterAliasMode &&
-                            !state.isWordClockAliasMode &&
-                            !state.isDictionaryAliasMode
+                            !state.isWordClockAliasMode
 
             Box(
                     modifier =

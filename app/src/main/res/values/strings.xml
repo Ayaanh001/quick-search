@@ -867,6 +867,7 @@
     <string name="dictionary_toggle_title">Dictionary</string>
     <string name="dictionary_toggle_desc">Example: define serendipity</string>
     <string name="dictionary_requires_gemini_key">Requires Gemini API key</string>
+    <string name="search_in_dictionary">Search in Dictionary</string>
     <string name="dictionary_example_label">Example: %1$s</string>
     <string name="dictionary_synonyms_label">Synonyms: %1$s</string>
     <string name="settings_tools_gemini_api_title">Setup Gemini API</string>

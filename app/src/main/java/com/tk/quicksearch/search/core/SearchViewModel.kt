@@ -3225,82 +3225,83 @@ class SearchViewModel(
             }
             return
         }
+        // Candidate detected: wait for explicit user action from the UI card.
+    }
+
+    fun executeDictionaryLookup() {
+        val trimmedQuery = _resultsState.value.query.trim()
+        if (trimmedQuery.isBlank()) return
+        if (!userPreferences.isDictionaryEnabled() || !_featureState.value.hasGeminiApiKey) return
+
+        val confirmed =
+            if (lockedDictionaryAlias) {
+                ConfirmedDictionaryQuery(
+                    term = trimmedQuery,
+                    originalQuery = trimmedQuery,
+                )
+            } else {
+                DictionaryIntentParser.parseConfirmed(trimmedQuery)
+            } ?: run {
+                updateResultsState { s -> s.copy(dictionaryState = DictionaryState()) }
+                return
+            }
+
         val version = ++dictionaryQueryVersion
-        val capturedTrim = trimmedQuery
+        dictionaryJob?.cancel()
         dictionaryJob =
-                viewModelScope.launch(Dispatchers.Default) {
-                    delay(DICTIONARY_DEBOUNCE_MS)
-                    if (version != dictionaryQueryVersion) return@launch
-                    val latestTrim = _resultsState.value.query.trim()
-                    if (latestTrim != capturedTrim) return@launch
-                    val confirmed =
-                            if (lockedDictionaryAlias) {
-                                ConfirmedDictionaryQuery(
-                                        term = latestTrim,
-                                        originalQuery = latestTrim,
-                                )
-                            } else {
-                                DictionaryIntentParser.parseConfirmed(latestTrim)
-                            }
-                    if (confirmed == null) {
-                        updateResultsState { s ->
-                            s.copy(dictionaryState = DictionaryState())
-                        }
-                        return@launch
-                    }
-                    updateResultsState { s ->
-                        s.copy(
-                                dictionaryState =
-                                        DictionaryState(
-                                                status = DictionaryStatus.Loading,
-                                                activeQuery = latestTrim,
-                                        ),
-                        )
-                    }
-                    val apiResult = dictionaryHandler.define(confirmed)
-                    if (version != dictionaryQueryVersion) return@launch
-                    if (_resultsState.value.query.trim() != latestTrim) return@launch
-                    apiResult.fold(
-                            onSuccess = { (parsed, modelId) ->
-                                updateResultsState { s ->
-                                    s.copy(
-                                            dictionaryState =
-                                                    DictionaryState(
-                                                            status = DictionaryStatus.Success,
-                                                            word = parsed.word,
-                                                            partOfSpeech = parsed.partOfSpeech,
-                                                            meaning = parsed.meaning,
-                                                            example = parsed.example,
-                                                            synonyms = parsed.synonyms,
-                                                            activeQuery = latestTrim,
-                                                            usedModelId = modelId,
-                                                    ),
-                                    )
-                                }
-                            },
-                            onFailure = { e ->
-                                if (e is DictionaryNotRecognizedException) {
-                                    updateResultsState { s ->
-                                        s.copy(dictionaryState = DictionaryState())
-                                    }
-                                    return@launch
-                                }
-                                val msg =
-                                        e.message
-                                                ?: appContext.getString(R.string.direct_search_error_generic)
-                                updateResultsState { s ->
-                                    s.copy(
-                                            dictionaryState =
-                                                    DictionaryState(
-                                                            status = DictionaryStatus.Error,
-                                                            errorMessage = msg,
-                                                            activeQuery = latestTrim,
-                                                    ),
-                                    )
-                                }
-                            },
+            viewModelScope.launch(Dispatchers.Default) {
+                updateResultsState { s ->
+                    s.copy(
+                        dictionaryState =
+                            DictionaryState(
+                                status = DictionaryStatus.Loading,
+                                activeQuery = trimmedQuery,
+                            ),
                     )
                 }
+                val apiResult = dictionaryHandler.define(confirmed)
+                if (version != dictionaryQueryVersion) return@launch
+                if (_resultsState.value.query.trim() != trimmedQuery) return@launch
+                apiResult.fold(
+                    onSuccess = { (parsed, modelId) ->
+                        updateResultsState { s ->
+                            s.copy(
+                                dictionaryState =
+                                    DictionaryState(
+                                        status = DictionaryStatus.Success,
+                                        word = parsed.word,
+                                        partOfSpeech = parsed.partOfSpeech,
+                                        meaning = parsed.meaning,
+                                        example = parsed.example,
+                                        synonyms = parsed.synonyms,
+                                        activeQuery = trimmedQuery,
+                                        usedModelId = modelId,
+                                    ),
+                            )
+                        }
+                    },
+                    onFailure = { e ->
+                        if (e is DictionaryNotRecognizedException) {
+                            updateResultsState { s ->
+                                s.copy(dictionaryState = DictionaryState())
+                            }
+                            return@fold
+                        }
+                        val msg =
+                            e.message ?: appContext.getString(R.string.direct_search_error_generic)
+                        updateResultsState { s ->
+                            s.copy(
+                                dictionaryState =
+                                    DictionaryState(
+                                        status = DictionaryStatus.Error,
+                                        errorMessage = msg,
+                                        activeQuery = trimmedQuery,
+                                    ),
+                            )
+                        }
+                    },
+                )
+            }
     }
 
     fun activateSearchSectionFilter(section: SearchSection) {
@@ -4746,9 +4747,6 @@ class SearchViewModel(
                 state.isWordClockAliasMode -> {
                     SearchEnginesVisibility.Hidden
                 }
-                state.isDictionaryAliasMode -> {
-                    SearchEnginesVisibility.Hidden
-                }
                 isLikelyWebUrl(state.query) -> {
                     SearchEnginesVisibility.Hidden
                 }
@@ -4800,7 +4798,6 @@ class SearchViewModel(
         private const val APP_SEARCH_DEBOUNCE_MS = 60L
         private const val CURRENCY_CONVERTER_DEBOUNCE_MS = 450L
         private const val WORD_CLOCK_DEBOUNCE_MS = 450L
-        private const val DICTIONARY_DEBOUNCE_MS = 900L
         /** Minimum interval between browser-target refreshes triggered by onResume. */
         private const val BROWSER_REFRESH_INTERVAL_MS = 5 * 60 * 1_000L // 5 minutes
         private const val DEFERRED_APP_REFRESH_DELAY_MS = 2_000L

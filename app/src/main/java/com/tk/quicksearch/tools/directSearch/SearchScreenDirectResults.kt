@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Straighten
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -393,6 +394,10 @@ fun DictionaryResult(
                                     text = if (part.isBlank()) word else "$word ($part)",
                                     style = MaterialTheme.typography.titleLarge,
                                     color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = DesignTokens.SpacingXXSmall),
+                                    color = MaterialTheme.colorScheme.outlineVariant,
                             )
                             Text(
                                     text = meaning,

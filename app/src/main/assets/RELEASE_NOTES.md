@@ -1,5 +1,6 @@
 - UI redesign and new light themes
 - Themed app icons - both for app results and quick search launcher icon
+- New Tool: Dictionary
 - Change no. of apps per row
 - In-App Browser - open URLs inside the app
 - Choose browser for custom search engines

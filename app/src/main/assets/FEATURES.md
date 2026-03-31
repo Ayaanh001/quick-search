@@ -55,6 +55,7 @@ This document highlights all the available features. It also includes details ab
   - **Time ranges** — e.g. 9am to 5pm, 14:00 to 17:30, 8:30am to 12:00pm
   - **Absolute time** — e.g. 5pm, 14:30, 9am
   - **Time offset from a time** — e.g. 3 hours after 5pm, 30 minutes before 9am, 1 hour after 14:00
+- **Dictionary** - Example usage: "define serendipity" or "serendipity meaning", to see search dictionary card, tapping on which will show dictionary result. This requires Gemini API key configuration.
 
 ---
 
@@ -137,7 +138,7 @@ Long-press on most results to open a context menu with quick actions.
 
 ---
 
-### Direct Search Configuration
+### Gemini API configuration
 
 - **Gemini API Key** - Use the "Get Free API Key" button to see a guide on how to set up your Gemini API key for free. 
 - **Personal Context** - Provide optional personal context so AI results can be better tailored to you (kept on-device within Quick Search).
@@ -233,6 +234,7 @@ Long-press on most results to open a context menu with quick actions.
 
 ### Hidden / Non-Obvious Features
 
+- **Search Icon tap behavior** - Tap on the Search icon in search bar to narrow down your search to a specific type. 
 - **URL Detection in Search Bar** - Paste or type a URL in the search bar to open it quickly in your installed browsers of your choice.
 - **App Search** - Acronym matching is supported for app search. For example, you can search for "yt" to find "YouTube."
 - **Direct Search (Gemini API)**

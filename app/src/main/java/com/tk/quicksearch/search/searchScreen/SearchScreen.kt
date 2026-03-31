@@ -151,6 +151,7 @@ fun SearchScreen(
     onDeleteRecentItem: (RecentSearchEntry) -> Unit = {},
     onOpenSearchHistorySettings: () -> Unit = {},
     onDismissSearchHistoryTip: () -> Unit = {},
+    onDictionarySearchClick: () -> Unit = {},
     onCustomAction: (ContactInfo, ContactCardAction) -> Unit,
     getPrimaryContactCardAction: (Long) -> ContactCardAction?,
     getSecondaryContactCardAction: (Long) -> ContactCardAction?,
@@ -402,6 +403,7 @@ fun SearchScreen(
             onOpenSearchHistorySettings = onOpenSearchHistorySettings,
             onDismissSearchHistoryTip = onDismissSearchHistoryTip,
             onGeminiModelInfoClick = { stateResult.setShowGeminiModelDialog(true) },
+            onDictionarySearchClick = onDictionarySearchClick,
             onKeyboardSwitchToggle = {
                 stateResult.setManuallySwitchedToNumberKeyboard(!stateResult.manuallySwitchedToNumberKeyboard)
             },
