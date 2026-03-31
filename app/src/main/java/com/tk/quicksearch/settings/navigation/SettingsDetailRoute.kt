@@ -39,6 +39,7 @@ fun SettingsDetailRoute(
         onBack: () -> Unit,
         viewModel: SearchViewModel,
         detailType: SettingsDetailType,
+        sourceDetailType: SettingsDetailType? = null,
         onNavigateToDetail: (SettingsDetailType) -> Unit = {},
         onRequestUsagePermission: () -> Unit = {},
         onRequestContactPermission: () -> Unit = {},
@@ -238,10 +239,17 @@ fun SettingsDetailRoute(
                 {
                     when (detailType) {
                         SettingsDetailType.DIRECT_SEARCH_CONFIGURE -> {
-                            onNavigateToDetail(SettingsDetailType.SEARCH_ENGINES)
+                            onNavigateToDetail(SettingsDetailType.GEMINI_API_CONFIG)
                         }
                         SettingsDetailType.TOOLS -> {
                             onBack()
+                        }
+                        SettingsDetailType.GEMINI_API_CONFIG -> {
+                            if (sourceDetailType == null) {
+                                onBack()
+                            } else {
+                                onNavigateToDetail(SettingsDetailType.SEARCH_ENGINES)
+                            }
                         }
                         SettingsDetailType.UNIT_CONVERTER_INFO,
                         SettingsDetailType.DATE_CALCULATOR_INFO -> {
@@ -351,7 +359,7 @@ fun SettingsDetailRoute(
                     onSetGeminiGroundingEnabled = viewModel::setGeminiGroundingEnabled,
                     onRefreshAvailableGeminiModels = viewModel::refreshAvailableGeminiModels,
                     onOpenDirectSearchConfigure = {
-                        onNavigateToDetail(SettingsDetailType.DIRECT_SEARCH_CONFIGURE)
+                        onNavigateToDetail(SettingsDetailType.GEMINI_API_CONFIG)
                     },
                     onToggleAppShortcutEnabled = viewModel::setAppShortcutEnabled,
                     onLaunchAppShortcut = viewModel::launchAppShortcut,

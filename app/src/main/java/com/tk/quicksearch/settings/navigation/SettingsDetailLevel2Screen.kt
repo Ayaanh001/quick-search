@@ -39,6 +39,7 @@ import com.tk.quicksearch.settings.shared.SettingsScreenState
 import com.tk.quicksearch.settings.shared.SettingsManagementSearchBar
 import com.tk.quicksearch.settings.shared.settingsContentWidth
 import com.tk.quicksearch.settings.AppShortcutsSettings.AppShortcutsSettingsSection
+import com.tk.quicksearch.settings.searchEnginesScreen.DirectSearchSetupCard
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
@@ -249,7 +250,7 @@ internal fun SettingsDetailLevel2Screen(
                         }
 
                         SettingsDetailType.DIRECT_SEARCH_CONFIGURE -> {
-                            DirectSearchConfigureSettingsSection(
+                            APIKeySettingsSection(
                                 personalContext = state.personalContext,
                                 geminiModel = state.geminiModel,
                                 geminiGroundingEnabled = state.geminiGroundingEnabled,
@@ -260,6 +261,29 @@ internal fun SettingsDetailLevel2Screen(
                                 onRefreshAvailableGeminiModels = callbacks.onRefreshAvailableGeminiModels,
                                 modifier = Modifier.fillMaxWidth(),
                             )
+                        }
+
+                        SettingsDetailType.GEMINI_API_CONFIG -> {
+                            DirectSearchSetupCard(
+                                directSearchEnabled = state.hasGeminiApiKey,
+                                onSetGeminiApiKey = callbacks.onSetGeminiApiKey,
+                                geminiApiKeyLast4 = state.geminiApiKeyLast4,
+                                isSavingGeminiApiKey = state.isSavingGeminiApiKey,
+                                onOpenDirectSearchConfigure = null,
+                            )
+                            if (state.hasGeminiApiKey) {
+                                APIKeySettingsSection(
+                                    personalContext = state.personalContext,
+                                    geminiModel = state.geminiModel,
+                                    geminiGroundingEnabled = state.geminiGroundingEnabled,
+                                    availableGeminiModels = state.availableGeminiModels,
+                                    onSetPersonalContext = callbacks.onSetPersonalContext,
+                                    onSetGeminiModel = callbacks.onSetGeminiModel,
+                                    onSetGeminiGroundingEnabled = callbacks.onSetGeminiGroundingEnabled,
+                                    onRefreshAvailableGeminiModels = callbacks.onRefreshAvailableGeminiModels,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            }
                         }
 
                         SettingsDetailType.TOOLS -> {

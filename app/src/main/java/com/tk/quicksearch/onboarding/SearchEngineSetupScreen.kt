@@ -134,19 +134,9 @@ fun SearchEngineSetupScreen(
                 },
                 showTitle = false, // We have our own title
                 showAddSearchEngineButton = false,
-                onSetGeminiApiKey = viewModel::setGeminiApiKey,
-                geminiApiKeyLast4 = uiState.geminiApiKeyLast4,
-                isSavingGeminiApiKey = uiState.isSavingGeminiApiKey,
-                personalContext = uiState.personalContext,
-                onSetPersonalContext = viewModel::setPersonalContext,
                 geminiModel = uiState.geminiModel,
                 geminiGroundingEnabled = uiState.geminiGroundingEnabled,
                 availableGeminiModels = uiState.availableGeminiModels,
-                onSetGeminiModel = viewModel::setGeminiModel,
-                onSetGeminiGroundingEnabled = viewModel::setGeminiGroundingEnabled,
-                onRefreshAvailableGeminiModels = viewModel::refreshAvailableGeminiModels,
-                directSearchAvailable = true,
-                showDirectSearchAtTop = false,
                 modifier = Modifier.fillMaxWidth(),
             )
 

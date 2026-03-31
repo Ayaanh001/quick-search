@@ -309,6 +309,16 @@ fun SettingsScreen(
                             },
                         ),
                     )
+                    add(
+                        SettingsCardItem(
+                            title = stringResource(R.string.settings_gemini_api_config_title),
+                            description = stringResource(R.string.settings_gemini_api_config_desc),
+                            iconResId = R.drawable.direct_search,
+                            actionOnPress = {
+                                onNavigateToDetail(SettingsDetailType.GEMINI_API_CONFIG)
+                            },
+                        ),
+                    )
                 }
 
             SettingsCard(

@@ -87,6 +87,7 @@ fun MainContent(
     val initialSettingsDetailType = navigationRequest?.settingsDetailType
     var destination by rememberSaveable { mutableStateOf(initialDestination) }
     var settingsDetailType by rememberSaveable { mutableStateOf(initialSettingsDetailType) }
+    var previousSettingsDetailType by remember { mutableStateOf<SettingsDetailType?>(null) }
     val uiState by searchViewModel.uiState.collectAsState()
 
     LaunchedEffect(navigationRequest) {
@@ -329,7 +330,11 @@ fun MainContent(
                     destination = destination,
                     onDestinationChange = { destination = it },
                     settingsDetailType = settingsDetailType,
-                    onSettingsDetailTypeChange = { settingsDetailType = it },
+                    previousSettingsDetailType = previousSettingsDetailType,
+                    onSettingsDetailTypeChange = {
+                        previousSettingsDetailType = settingsDetailType
+                        settingsDetailType = it
+                    },
                     viewModel = searchViewModel,
                     onSearchBackPressed = onSearchBackPressed,
                     onFinishActivity = onFinishActivity,
@@ -344,6 +349,7 @@ private fun NavigationContent(
     destination: RootDestination,
     onDestinationChange: (RootDestination) -> Unit,
     settingsDetailType: SettingsDetailType?,
+    previousSettingsDetailType: SettingsDetailType?,
     onSettingsDetailTypeChange: (SettingsDetailType?) -> Unit,
     viewModel: SearchViewModel,
     onSearchBackPressed: () -> Unit,
@@ -446,6 +452,7 @@ private fun NavigationContent(
                             onBack = { onSettingsDetailTypeChange(null) },
                             viewModel = viewModel,
                             detailType = currentDetailType,
+                            sourceDetailType = previousSettingsDetailType,
                             onNavigateToDetail = onSettingsDetailTypeChange,
                             onRequestUsagePermission = {
                                 PermissionHelper.launchUsageAccessRequest(context)

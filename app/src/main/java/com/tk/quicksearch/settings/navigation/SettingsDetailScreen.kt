@@ -343,6 +343,7 @@ internal fun SettingsDetailLevel1Screen(
                     SettingsDetailType.FILES,
                     SettingsDetailType.DIRECT_SEARCH_CONFIGURE,
                     SettingsDetailType.TOOLS,
+                    SettingsDetailType.GEMINI_API_CONFIG,
                     SettingsDetailType.UNIT_CONVERTER_INFO,
                     SettingsDetailType.DATE_CALCULATOR_INFO,
                     -> Unit
@@ -443,6 +444,7 @@ internal fun SettingsDetailType.titleResId(): Int =
         SettingsDetailType.PERMISSIONS -> R.string.settings_permissions_title
         SettingsDetailType.DIRECT_SEARCH_CONFIGURE -> R.string.settings_direct_search_configure_title
         SettingsDetailType.TOOLS -> R.string.settings_tools_title
+        SettingsDetailType.GEMINI_API_CONFIG -> R.string.settings_gemini_api_config_title
         SettingsDetailType.FEATURES_LIST -> R.string.settings_all_quick_search_features
         SettingsDetailType.OPEN_SOURCE_LICENSES -> R.string.settings_open_source_licenses_title
         SettingsDetailType.UNIT_CONVERTER_INFO -> R.string.unit_converter_info_title
@@ -459,12 +461,14 @@ internal fun SettingsDetailType.isLevel2(): Boolean =
         this == SettingsDetailType.FILES ||
         this == SettingsDetailType.DIRECT_SEARCH_CONFIGURE ||
         this == SettingsDetailType.TOOLS ||
+        this == SettingsDetailType.GEMINI_API_CONFIG ||
         this == SettingsDetailType.UNIT_CONVERTER_INFO ||
         this == SettingsDetailType.DATE_CALCULATOR_INFO
 
 internal fun SettingsDetailType.level(): Int = when (this) {
     SettingsDetailType.UNIT_CONVERTER_INFO,
-    SettingsDetailType.DATE_CALCULATOR_INFO -> 3
+    SettingsDetailType.DATE_CALCULATOR_INFO,
+    SettingsDetailType.GEMINI_API_CONFIG -> 3
     else -> if (isLevel2()) 2 else 1
 }
 
@@ -487,6 +491,7 @@ enum class SettingsDetailType {
     PERMISSIONS,
     DIRECT_SEARCH_CONFIGURE,
     TOOLS,
+    GEMINI_API_CONFIG,
     FEATURES_LIST,
     OPEN_SOURCE_LICENSES,
     UNIT_CONVERTER_INFO,

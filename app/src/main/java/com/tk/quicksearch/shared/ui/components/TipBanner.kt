@@ -6,6 +6,9 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -19,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -33,6 +37,7 @@ import com.tk.quicksearch.shared.ui.theme.DesignTokens
  *
  * @param text The text content to display
  * @param annotatedText Optional annotated text with styling/links (takes precedence over text if provided)
+ * @param icon Optional leading icon to display before the text
  * @param onContentClick Optional click handler for the content area (for plain text)
  * @param onContentLongClick Optional long-press handler for the content area
  * @param onTextClick Optional click handler for annotated text (receives click offset)
@@ -44,6 +49,7 @@ import com.tk.quicksearch.shared.ui.theme.DesignTokens
 fun TipBanner(
     text: String? = null,
     annotatedText: AnnotatedString? = null,
+    icon: ImageVector? = null,
     onContentClick: (() -> Unit)? = null,
     onContentLongClick: (() -> Unit)? = null,
     onTextClick: ((Int) -> Unit)? = null,
@@ -72,6 +78,16 @@ fun TipBanner(
                     .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+
             val contentModifier =
                 Modifier.weight(1f).let { mod ->
                     val withLongClick =

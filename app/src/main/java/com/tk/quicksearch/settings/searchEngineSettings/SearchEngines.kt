@@ -1,5 +1,6 @@
 package com.tk.quicksearch.settings.searchEnginesScreen
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,12 +19,15 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
 import com.tk.quicksearch.settings.shared.SettingsCard
+import com.tk.quicksearch.settings.shared.SettingsCardItem
+import com.tk.quicksearch.settings.shared.SettingsNavigationRow
 import com.tk.quicksearch.shared.ui.theme.AppColors
 import com.tk.quicksearch.search.core.SearchEngine
 import com.tk.quicksearch.search.core.SearchTarget
 import com.tk.quicksearch.settings.shared.SettingsToggleRow
 import com.tk.quicksearch.tools.directSearch.GeminiTextModel
 import com.tk.quicksearch.searchEngines.getId
+import com.tk.quicksearch.searchEngines.isInAppBrowserPackage
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 /**
@@ -99,37 +103,46 @@ fun SearchEngines(
         }
     }
 
-    // Show Direct Search card at top or bottom based on the showDirectSearchAtTop parameter
-
-    if (showDirectSearchAtTop && onSetGeminiApiKey != null) {
-        DirectSearchSetupCard(
-            directSearchEnabled = directSearchAvailable,
-            onSetGeminiApiKey = onSetGeminiApiKey,
-            geminiApiKeyLast4 = geminiApiKeyLast4,
-            isSavingGeminiApiKey = isSavingGeminiApiKey,
-            onOpenDirectSearchConfigure = onOpenDirectSearchConfigure,
-            isExpanded = directSearchSetupExpanded,
-            onToggleExpanded = onToggleDirectSearchSetupExpanded,
+    if (showDirectSearchAtTop && onToggleSearchEngineAliasSuffixEnabled != null) {
+        SearchEngineAliasSuffixCard(
+            enabled = isSearchEngineAliasSuffixEnabled,
+            onToggle = onToggleSearchEngineAliasSuffixEnabled,
+            triggerAfterSpaceEnabled = isAliasTriggerAfterSpaceEnabled,
+            onToggleTriggerAfterSpace = onToggleAliasTriggerAfterSpaceEnabled,
         )
         Spacer(modifier = Modifier.height(6.dp))
-        if (onToggleSearchEngineAliasSuffixEnabled != null) {
-            SearchEngineAliasSuffixCard(
-                enabled = isSearchEngineAliasSuffixEnabled,
-                onToggle = onToggleSearchEngineAliasSuffixEnabled,
-                triggerAfterSpaceEnabled = isAliasTriggerAfterSpaceEnabled,
-                onToggleTriggerAfterSpace = onToggleAliasTriggerAfterSpaceEnabled,
+    }
+
+    if (!directSearchAvailable && onOpenDirectSearchConfigure != null) {
+        SettingsCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = DesignTokens.SectionTopPadding),
+        ) {
+            SettingsNavigationRow(
+                item = SettingsCardItem(
+                    title = stringResource(R.string.settings_direct_search_setup_nav_title),
+                    description = stringResource(R.string.settings_direct_search_setup_nav_desc),
+                    iconResId = R.drawable.direct_search,
+                    actionOnPress = onOpenDirectSearchConfigure,
+                ),
+                contentPadding = PaddingValues(
+                    horizontal = DesignTokens.SpacingXXLarge,
+                    vertical = DesignTokens.SpacingLarge,
+                ),
             )
-            Spacer(modifier = Modifier.height(6.dp))
         }
     }
 
     val enginesToDisplay =
-        if (directSearchAvailable) {
+        (if (directSearchAvailable) {
             searchEngineOrder
         } else {
             searchEngineOrder.filterNot {
                 it is SearchTarget.Engine && it.engine == SearchEngine.DIRECT_SEARCH
             }
+        }).filterNot {
+            it is SearchTarget.Browser && isInAppBrowserPackage(it.app.packageName)
         }
     SearchEngineListCard(
         searchEngineOrder = enginesToDisplay,
@@ -152,26 +165,14 @@ fun SearchEngines(
         onDeleteCustomSearchEngine = onDeleteCustomSearchEngine,
     )
 
-    // Show Direct Search card at bottom if not shown at top
-    if (!showDirectSearchAtTop && onSetGeminiApiKey != null) {
+    if (!showDirectSearchAtTop && onToggleSearchEngineAliasSuffixEnabled != null) {
         Spacer(modifier = Modifier.height(16.dp))
-        DirectSearchSetupCard(
-            directSearchEnabled = directSearchAvailable,
-            onSetGeminiApiKey = onSetGeminiApiKey,
-            geminiApiKeyLast4 = geminiApiKeyLast4,
-            isSavingGeminiApiKey = isSavingGeminiApiKey,
-            onOpenDirectSearchConfigure = onOpenDirectSearchConfigure,
-            isExpanded = directSearchSetupExpanded,
-            onToggleExpanded = onToggleDirectSearchSetupExpanded,
+        SearchEngineAliasSuffixCard(
+            enabled = isSearchEngineAliasSuffixEnabled,
+            onToggle = onToggleSearchEngineAliasSuffixEnabled,
+            triggerAfterSpaceEnabled = isAliasTriggerAfterSpaceEnabled,
+            onToggleTriggerAfterSpace = onToggleAliasTriggerAfterSpaceEnabled,
         )
-        if (onToggleSearchEngineAliasSuffixEnabled != null) {
-            SearchEngineAliasSuffixCard(
-                enabled = isSearchEngineAliasSuffixEnabled,
-                onToggle = onToggleSearchEngineAliasSuffixEnabled,
-                triggerAfterSpaceEnabled = isAliasTriggerAfterSpaceEnabled,
-                onToggleTriggerAfterSpace = onToggleAliasTriggerAfterSpaceEnabled,
-            )
-        }
     }
 }
 
