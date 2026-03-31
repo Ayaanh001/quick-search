@@ -101,8 +101,7 @@
     <string name="contacts_action_telegram">Telegram contact</string>
     <string name="contacts_action_whatsapp">WhatsApp contact</string>
     <string name="contacts_no_methods_available">No contact methods available</string>
-    <string name="contacts_permission_subtitle">Grant Contacts permission to quickly search and act on people.</string>
-    <string name="contacts_permission_title">Contacts search disabled</string>
+    <string name="contacts_section_permission_subtitle">Contacts permission is required to perform contact search</string>
     <string name="dialog_choose_contact_action_title">Choose an Action to Replace %1$s</string>
     <string name="direct_search_personal_context_tip">Tip: Add details to your %1$s for personalized results.</string>
     <string name="error_call_permission_required">Phone permission is required for this action</string>
@@ -130,16 +129,15 @@
          ============================================================================ -->
     <string name="action_file_info">File Info</string>
     <string name="action_open_folder">Open Folder</string>
-    <string name="calendar_permission_subtitle">Grant Calendar permission to search upcoming events.</string>
-    <string name="calendar_permission_title">Calendar search disabled</string>
+    <string name="calendar_section_permission_subtitle">Calendar permission is required to perform calendar search</string>
     <string name="file_extension_label">.%s files</string>
     <string name="file_info_file_type">File type</string>
     <string name="file_info_modified">Modified</string>
     <string name="file_info_path">Path</string>
     <string name="file_info_size">Size</string>
     <string name="file_info_type">Type</string>
-    <string name="files_permission_subtitle">Grant full file system access so Quick Search can index documents, downloads, and media.</string>
-    <string name="files_permission_title">File search disabled</string>
+    <string name="files_section_permission_subtitle">Files permission is required to perform file search</string>
+    <string name="permission_required_title">Permission required</string>
     <!-- ============================================================================
          Device Settings Categories
          ============================================================================ -->

@@ -614,6 +614,9 @@ fun SearchRoute(
             isOverlayExpanded = isOverlayExpanded,
             onOverlayNumberKeyboardUiChanged = onOverlayNumberKeyboardUiChanged,
             onOverlayScrollableContentChanged = onOverlayScrollableContentChanged,
+            onOpenPermissionsSettings = {
+                onOpenAppSettingDestination(AppSettingsDestination.PERMISSIONS)
+            },
         )
 
         if (overlaySnackbarHostState == null) {

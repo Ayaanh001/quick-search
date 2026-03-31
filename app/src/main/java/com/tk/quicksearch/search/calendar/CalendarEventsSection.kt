@@ -93,8 +93,8 @@ fun CalendarEventsSection(
 ) {
     if (!hasPermission) {
         permissionDisabledCard(
-            stringResource(R.string.calendar_permission_title),
-            stringResource(R.string.calendar_permission_subtitle),
+            stringResource(R.string.permission_required_title),
+            stringResource(R.string.calendar_section_permission_subtitle),
             stringResource(R.string.permission_action_manage_android),
             onRequestPermission,
         )

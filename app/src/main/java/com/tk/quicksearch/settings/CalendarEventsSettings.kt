@@ -159,7 +159,7 @@ fun CalendarEventsSettingsSection(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = stringResource(R.string.calendar_permission_subtitle),
+                        text = stringResource(R.string.calendar_section_permission_subtitle),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

@@ -45,6 +45,9 @@ import com.tk.quicksearch.search.searchScreen.SettingsSectionParams
 import com.tk.quicksearch.search.searchScreen.AppsSectionParams
 import com.tk.quicksearch.search.searchScreen.CalendarSectionParams
 import com.tk.quicksearch.search.searchScreen.PredictedSubmitTarget
+import com.tk.quicksearch.search.searchScreen.components.SectionPermissionResultCard
+import com.tk.quicksearch.R
+import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.delay
 
 /** Unified content layout that handles both one-handed mode and top-aligned layouts. */
@@ -83,6 +86,7 @@ fun ContentLayout(
     onDismissSearchHistoryTip: () -> Unit = {},
     onGeminiModelInfoClick: () -> Unit = {},
     onSearchHistoryExpandedChange: (Boolean) -> Unit = {},
+    onOpenPermissionsSettings: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val effectiveContactsParams =
@@ -379,6 +383,13 @@ fun ContentLayout(
                                 showWallpaperBackground = effectiveShowWallpaperBackground,
                                 isOverlayPresentation = isOverlayPresentation,
                             )
+                        } else if (isSectionAliasMode && state.filesSectionState is FilesSectionVisibility.NoPermission) {
+                            SectionPermissionResultCard(
+                                title = stringResource(R.string.permission_required_title),
+                                message = stringResource(R.string.files_section_permission_subtitle),
+                                showWallpaperBackground = effectiveShowWallpaperBackground,
+                                onActionClick = onOpenPermissionsSettings,
+                            )
                         } else {
                             renderSection(SearchSection.FILES, sectionParams, sectionContext)
                         }
@@ -399,6 +410,13 @@ fun ContentLayout(
                                 expandedCardMaxHeight = expandedCardMaxHeight,
                                 showWallpaperBackground = effectiveShowWallpaperBackground,
                                 isOverlayPresentation = isOverlayPresentation,
+                            )
+                        } else if (isSectionAliasMode && state.contactsSectionState is ContactsSectionVisibility.NoPermission) {
+                            SectionPermissionResultCard(
+                                title = stringResource(R.string.permission_required_title),
+                                message = stringResource(R.string.contacts_section_permission_subtitle),
+                                showWallpaperBackground = effectiveShowWallpaperBackground,
+                                onActionClick = onOpenPermissionsSettings,
                             )
                         } else {
                             renderSection(SearchSection.CONTACTS, sectionParams, sectionContext)
@@ -429,11 +447,20 @@ fun ContentLayout(
 
                 ItemPriorityConfig.ItemType.CALENDAR_SECTION -> {
                     if (shouldRenderSection(SearchSection.CALENDAR)) {
-                        renderSection(
-                            SearchSection.CALENDAR,
-                            sectionParams,
-                            sectionContext,
-                        )
+                        if (isSectionAliasMode && state.calendarSectionState is CalendarSectionVisibility.NoPermission) {
+                            SectionPermissionResultCard(
+                                title = stringResource(R.string.permission_required_title),
+                                message = stringResource(R.string.calendar_section_permission_subtitle),
+                                showWallpaperBackground = effectiveShowWallpaperBackground,
+                                onActionClick = onOpenPermissionsSettings,
+                            )
+                        } else {
+                            renderSection(
+                                SearchSection.CALENDAR,
+                                sectionParams,
+                                sectionContext,
+                            )
+                        }
                     }
                 }
 

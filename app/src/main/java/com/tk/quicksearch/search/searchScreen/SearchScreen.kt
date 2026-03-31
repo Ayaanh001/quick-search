@@ -161,6 +161,7 @@ fun SearchScreen(
     isOverlayExpanded: Boolean = false,
     onOverlayNumberKeyboardUiChanged: ((Boolean, Boolean) -> Unit)? = null,
     onOverlayScrollableContentChanged: ((Boolean) -> Unit)? = null,
+    onOpenPermissionsSettings: () -> Unit = {},
 ) {
     val directAnswerContactName = stringResource(R.string.direct_answer_contact_name)
 
@@ -417,6 +418,7 @@ fun SearchScreen(
             onSectionSelected = onSectionSelected,
             isOverlayPresentation = isOverlayPresentation,
             showSearchField = true,
+            onOpenPermissionsSettings = onOpenPermissionsSettings,
         )
 
         // Search engine onboarding overlay

@@ -104,6 +104,7 @@ internal fun SearchScreenContent(
         modifier: Modifier = Modifier,
         isOverlayPresentation: Boolean = false,
         showSearchField: Boolean = true,
+        onOpenPermissionsSettings: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -529,6 +530,7 @@ internal fun SearchScreenContent(
                 onDismissSearchHistoryTip = onDismissSearchHistoryTip,
                 onGeminiModelInfoClick = onGeminiModelInfoClick,
                 onSearchHistoryExpandedChange = { isSearchHistoryExpanded = it },
+                onOpenPermissionsSettings = onOpenPermissionsSettings,
                 showCalculator = state.calculatorState.isToolMode || state.calculatorState.result != null || state.calculatorState.parsedDateMillis != null || state.calculatorState.dateDiffLabel != null || state.calculatorState.timeResultLabel != null,
                 showDirectSearch = state.DirectSearchState.status != DirectSearchStatus.Idle,
                 directSearchState = state.DirectSearchState,

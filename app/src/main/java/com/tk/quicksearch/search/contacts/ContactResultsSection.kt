@@ -141,8 +141,8 @@ fun ContactResultsSection(
 
             !hasPermission -> {
                 permissionDisabledCard(
-                    stringResource(R.string.contacts_permission_title),
-                    stringResource(R.string.contacts_permission_subtitle),
+                    stringResource(R.string.permission_required_title),
+                    stringResource(R.string.contacts_section_permission_subtitle),
                     stringResource(R.string.permission_action_manage_android),
                     onOpenAppSettings,
                 )

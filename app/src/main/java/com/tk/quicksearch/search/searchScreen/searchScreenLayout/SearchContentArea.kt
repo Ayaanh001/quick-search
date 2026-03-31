@@ -108,6 +108,7 @@ fun SearchContentArea(
     showDirectSearch: Boolean = false,
     directSearchState: DirectSearchState? = null,
     isOverlayPresentation: Boolean = false,
+    onOpenPermissionsSettings: () -> Unit = {},
 ) {
     val useOneHandedMode =
         state.oneHandedMode && renderingState.expandedSection == ExpandedSection.NONE
@@ -408,6 +409,7 @@ fun SearchContentArea(
                             onDismissSearchHistoryTip = onDismissSearchHistoryTip,
                             onGeminiModelInfoClick = onGeminiModelInfoClick,
                             onSearchHistoryExpandedChange = onSearchHistoryExpandedChange,
+                            onOpenPermissionsSettings = onOpenPermissionsSettings,
                         )
                     }
                 }

@@ -232,8 +232,8 @@ fun FileResultsSection(
             }
             !hasPermission -> {
                 permissionDisabledCard(
-                        stringResource(R.string.files_permission_title),
-                        stringResource(R.string.files_permission_subtitle),
+                        stringResource(R.string.permission_required_title),
+                        stringResource(R.string.files_section_permission_subtitle),
                         stringResource(R.string.permission_action_manage_android),
                         onRequestPermission,
                 )
