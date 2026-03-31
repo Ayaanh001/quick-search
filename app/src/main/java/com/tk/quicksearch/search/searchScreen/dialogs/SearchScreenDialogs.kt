@@ -1,5 +1,6 @@
 package com.tk.quicksearch.search.searchScreen.dialogs
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -11,18 +12,22 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import com.tk.quicksearch.shared.ui.components.AppAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,6 +38,19 @@ import com.tk.quicksearch.search.models.AppInfo
 import com.tk.quicksearch.search.models.CalendarEventInfo
 import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.DeviceFile
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
+import androidx.compose.runtime.snapshotFlow
+
+private const val RELEASE_NOTES_ASSET_FILE_NAME = "RELEASE_NOTES.md"
 
 @Composable
 internal fun ReleaseNotesDialog(
@@ -40,6 +58,7 @@ internal fun ReleaseNotesDialog(
     onAcknowledge: () -> Unit,
     onViewAllFeatures: () -> Unit,
 ) {
+    val context = LocalContext.current
     val scrollState = rememberScrollState()
     val title =
         if (versionName != null) {
@@ -47,9 +66,31 @@ internal fun ReleaseNotesDialog(
         } else {
             stringResource(R.string.release_notes_title_no_version)
         }
-    val bulletPoints =
-        stringArrayResource(R.array.release_notes_points)
-            .filter { it.isNotBlank() }
+    val scrollBarAlpha = remember { Animatable(1f) }
+    LaunchedEffect(scrollState) {
+        val scope = this
+        var hideJob: Job? = null
+        snapshotFlow { scrollState.value }.collect {
+            hideJob?.cancel()
+            scrollBarAlpha.snapTo(1f)
+            hideJob = scope.launch {
+                delay(1500)
+                scrollBarAlpha.animateTo(0f, animationSpec = tween(300))
+            }
+        }
+    }
+
+    val bulletPoints by
+        produceState<List<String>>(initialValue = emptyList(), context) {
+            value =
+                withContext(Dispatchers.IO) {
+                    runCatching {
+                        context.assets.open(RELEASE_NOTES_ASSET_FILE_NAME).bufferedReader().use { reader ->
+                            parseReleaseNotesBulletPoints(reader.readText())
+                        }
+                    }.getOrDefault(emptyList())
+                }
+        }
 
     AppAlertDialog(
         onDismissRequest = onAcknowledge,
@@ -96,7 +137,8 @@ internal fun ReleaseNotesDialog(
                         scrollState = scrollState,
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
-                            .fillMaxHeight(),
+                            .fillMaxHeight()
+                            .graphicsLayer { alpha = scrollBarAlpha.value },
                         thumbColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
                         trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f),
                     )
@@ -114,6 +156,26 @@ internal fun ReleaseNotesDialog(
             }
         },
     )
+}
+
+private fun parseReleaseNotesBulletPoints(markdown: String): List<String> {
+    val bulletPattern = Regex("^\\s*[-*+]\\s+(.+)$")
+    val numberedPattern = Regex("^\\s*\\d+\\.\\s+(.+)$")
+    return markdown
+        .lineSequence()
+        .mapNotNull { rawLine ->
+            val line = rawLine.trim()
+            when {
+                line.isBlank() -> null
+                else -> {
+                    bulletPattern.matchEntire(line)?.groupValues?.get(1)
+                        ?: numberedPattern.matchEntire(line)?.groupValues?.get(1)
+                        ?: line.takeIf { !it.startsWith("#") }
+                }
+            }
+        }.map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .toList()
 }
 
 @Composable
@@ -139,15 +201,16 @@ private fun PersistentScrollIndicator(
 
         if (scrollState.maxValue <= 0) return@Canvas
 
-        val thumbHeight = (size.height * 0.22f).coerceAtLeast(20.dp.toPx())
+        val totalContentHeight = size.height + scrollState.maxValue
+        val thumbHeight = (size.height * (size.height / totalContentHeight) * 0.85f).coerceAtLeast(20.dp.toPx())
         val maxThumbOffset = (size.height - thumbHeight).coerceAtLeast(0f)
         val progress = (scrollState.value.toFloat() / scrollState.maxValue.toFloat()).coerceIn(0f, 1f)
         val thumbTop = maxThumbOffset * progress
 
         drawRoundRect(
             color = thumbColor,
-            topLeft = androidx.compose.ui.geometry.Offset(x = 0f, y = thumbTop),
-            size = androidx.compose.ui.geometry.Size(width = trackWidth, height = thumbHeight),
+            topLeft = Offset(x = 0f, y = thumbTop),
+            size = Size(width = trackWidth, height = thumbHeight),
             cornerRadius = cornerRadius,
         )
     }
