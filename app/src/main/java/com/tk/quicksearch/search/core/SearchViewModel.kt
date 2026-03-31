@@ -2715,6 +2715,33 @@ class SearchViewModel(
         }
     }
 
+    fun activateSearchSectionFilter(section: SearchSection) {
+        setDetectedAliasMode(shortcutTarget = null, section = section, toolMode = null)
+        val currentQuery = _resultsState.value.query
+        updateUiState { state ->
+            state.copy(
+                detectedShortcutTarget = null,
+                detectedAliasSearchSection = section,
+                calculatorState = CalculatorState(),
+                searchResults = emptyList(),
+                contactResults = emptyList(),
+                fileResults = emptyList(),
+                settingResults = emptyList(),
+                appSettingResults = emptyList(),
+                appShortcutResults = emptyList(),
+                calendarEvents = emptyList(),
+            )
+        }
+        if (currentQuery.isNotEmpty() && section != SearchSection.APPS) {
+            secondarySearchOrchestrator.performTargetedSecondarySearch(
+                query = currentQuery,
+                section = section,
+                useFuzzyMatching = true,
+                ignoreSectionToggle = true,
+            )
+        }
+    }
+
     fun clearDetectedShortcut() {
         clearDetectedAliasMode()
         updateUiState {

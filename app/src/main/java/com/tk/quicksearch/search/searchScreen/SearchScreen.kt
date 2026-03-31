@@ -145,6 +145,7 @@ fun SearchScreen(
     onContactActionHintDismissed: () -> Unit = {},
     onPersonalContextHintDismissed: () -> Unit = {},
     onClearDetectedShortcut: () -> Unit = {},
+    onSectionSelected: (com.tk.quicksearch.search.core.SearchSection) -> Unit = {},
     onCustomizeSearchEnginesClick: () -> Unit = {},
     onOpenDirectSearchConfigure: () -> Unit = {},
     onConsumeContactActionRequest: () -> Unit = {},
@@ -413,6 +414,7 @@ fun SearchScreen(
             manuallySwitchedToNumberKeyboard = stateResult.manuallySwitchedToNumberKeyboard,
             scrollState = stateResult.scrollState,
             onClearDetectedShortcut = onClearDetectedShortcut,
+            onSectionSelected = onSectionSelected,
             isOverlayPresentation = isOverlayPresentation,
             showSearchField = true,
         )

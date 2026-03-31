@@ -559,6 +559,7 @@ fun SearchRoute(
                 // This will be handled by the dialog state in SearchScreen
             },
             onClearDetectedShortcut = viewModel::clearDetectedShortcut,
+            onSectionSelected = viewModel::activateSearchSectionFilter,
             onContactNicknameClick = { contact: com.tk.quicksearch.search.models.ContactInfo ->
                 // This will be handled by the dialog state in SearchScreen
             },

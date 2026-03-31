@@ -14,6 +14,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -33,12 +35,18 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Straighten
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.dp
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -107,6 +115,22 @@ private val AliasMorphTextStartPadding = DesignTokens.Spacing48 + DesignTokens.S
 private val AliasMorphHorizontalTravel = DesignTokens.Spacing28
 private val AliasMorphVerticalTravel = DesignTokens.SpacingXXSmall
 
+private data class SectionMenuEntry(
+    val section: SearchSection,
+    val labelRes: Int,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+)
+
+private val sectionMenuEntries = listOf(
+    SectionMenuEntry(SearchSection.APPS, R.string.section_apps, Icons.Rounded.Apps),
+    SectionMenuEntry(SearchSection.APP_SHORTCUTS, R.string.section_app_shortcuts, Icons.AutoMirrored.Rounded.Shortcut),
+    SectionMenuEntry(SearchSection.CONTACTS, R.string.section_contacts, Icons.Rounded.Person),
+    SectionMenuEntry(SearchSection.FILES, R.string.section_files, Icons.AutoMirrored.Rounded.InsertDriveFile),
+    SectionMenuEntry(SearchSection.SETTINGS, R.string.section_settings, Icons.Rounded.Settings),
+    SectionMenuEntry(SearchSection.CALENDAR, R.string.section_calendar, Icons.Rounded.CalendarMonth),
+    SectionMenuEntry(SearchSection.APP_SETTINGS, R.string.section_app_settings, Icons.Rounded.Settings),
+)
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun PersistentSearchBar(
@@ -134,6 +158,7 @@ internal fun PersistentSearchBar(
     forceRestingOutline: Boolean = false,
     autoFocusOnStart: Boolean = false,
     onClearDetectedShortcut: () -> Unit = {},
+    onSectionSelected: (SearchSection) -> Unit = {},
     onWelcomeAnimationCompleted: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -187,6 +212,7 @@ internal fun PersistentSearchBar(
         mutableStateOf(TextFieldValue(query, TextRange(query.length)))
     }
     var hasLaidOutSearchField by remember { mutableStateOf(false) }
+    var showSectionMenu by remember { mutableStateOf(false) }
     val aliasMorphProgress = remember { Animatable(1f) }
     var aliasMorphText by remember { mutableStateOf<String?>(null) }
     var previousLeadingIconState by remember { mutableStateOf(leadingIconState) }
@@ -513,44 +539,78 @@ internal fun PersistentSearchBar(
             singleLine = false,
             maxLines = 3,
             leadingIcon = {
-                AnimatedContent(
-                    targetState = leadingIconState,
-                    transitionSpec = {
-                        (
-                            fadeIn(
-                                animationSpec =
-                                    tween(
-                                        durationMillis = LeadingIconEnterDurationMs,
-                                        delayMillis = LeadingIconEnterDelayMs,
-                                        easing = LinearOutSlowInEasing,
-                                    ),
-                            ) +
-                                scaleIn(
+                Box {
+                    AnimatedContent(
+                        targetState = leadingIconState,
+                        transitionSpec = {
+                            (
+                                fadeIn(
                                     animationSpec =
                                         tween(
                                             durationMillis = LeadingIconEnterDurationMs,
                                             delayMillis = LeadingIconEnterDelayMs,
                                             easing = LinearOutSlowInEasing,
                                         ),
-                                    initialScale = LeadingIconEnterInitialScale,
-                                )
-                            )
-                            .togetherWith(
-                                fadeOut(
-                                    animationSpec = tween(durationMillis = LeadingIconExitDurationMs),
                                 ) +
-                                    scaleOut(
+                                    scaleIn(
+                                        animationSpec =
+                                            tween(
+                                                durationMillis = LeadingIconEnterDurationMs,
+                                                delayMillis = LeadingIconEnterDelayMs,
+                                                easing = LinearOutSlowInEasing,
+                                            ),
+                                        initialScale = LeadingIconEnterInitialScale,
+                                    )
+                                )
+                                .togetherWith(
+                                    fadeOut(
                                         animationSpec = tween(durationMillis = LeadingIconExitDurationMs),
-                                        targetScale = LeadingIconExitTargetScale,
-                                    ),
+                                    ) +
+                                        scaleOut(
+                                            animationSpec = tween(durationMillis = LeadingIconExitDurationMs),
+                                            targetScale = LeadingIconExitTargetScale,
+                                        ),
+                                )
+                        },
+                        label = "search_bar_leading_icon",
+                    ) { currentIconState ->
+                        Box(
+                            modifier = Modifier.clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = { showSectionMenu = true },
+                            ),
+                        ) {
+                            SearchBarLeadingIcon(
+                                iconState = currentIconState,
+                                iconTint = searchBarIconColor,
                             )
-                    },
-                    label = "search_bar_leading_icon",
-                ) { currentIconState ->
-                    SearchBarLeadingIcon(
-                        iconState = currentIconState,
-                        iconTint = searchBarIconColor,
-                    )
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = showSectionMenu,
+                        onDismissRequest = { showSectionMenu = false },
+                        shape = RoundedCornerShape(24.dp),
+                        containerColor = AppColors.DialogBackground,
+                        properties = PopupProperties(focusable = false),
+                    ) {
+                        sectionMenuEntries.forEachIndexed { index, (section, labelRes, icon) ->
+                            if (index > 0) HorizontalDivider()
+                            DropdownMenuItem(
+                                text = { Text(stringResource(labelRes)) },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = null,
+                                    )
+                                },
+                                onClick = {
+                                    showSectionMenu = false
+                                    onSectionSelected(section)
+                                },
+                            )
+                        }
+                    }
                 }
             },
             trailingIcon = {

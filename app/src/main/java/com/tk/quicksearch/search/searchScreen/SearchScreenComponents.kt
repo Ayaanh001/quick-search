@@ -94,6 +94,7 @@ internal fun PersistentSearchBar(
     forceRestingOutline: Boolean = false,
     autoFocusOnStart: Boolean = false,
     onClearDetectedShortcut: () -> Unit = {},
+    onSectionSelected: (com.tk.quicksearch.search.core.SearchSection) -> Unit = {},
     onWelcomeAnimationCompleted: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) = com.tk.quicksearch.search.searchScreen.components.PersistentSearchBar(
@@ -121,6 +122,7 @@ internal fun PersistentSearchBar(
     forceRestingOutline = forceRestingOutline,
     autoFocusOnStart = autoFocusOnStart,
     onClearDetectedShortcut = onClearDetectedShortcut,
+    onSectionSelected = onSectionSelected,
     onWelcomeAnimationCompleted = onWelcomeAnimationCompleted,
     modifier = modifier,
 )
