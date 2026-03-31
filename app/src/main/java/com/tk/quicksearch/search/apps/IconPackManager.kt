@@ -441,7 +441,11 @@ object IconPackManager {
 
         if (maskDrawable != null) {
             val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN) }
-            val maskBitmap = maskDrawable.toBitmap(width = targetSize, height = targetSize)
+            // Render mask into an owned bitmap buffer so recycling cannot affect shared resource bitmaps.
+            val maskBitmap = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888)
+            val maskCanvas = Canvas(maskBitmap)
+            maskDrawable.setBounds(0, 0, targetSize, targetSize)
+            maskDrawable.draw(maskCanvas)
             iconCanvas.drawBitmap(maskBitmap, 0f, 0f, paint)
             paint.xfermode = null
             if (!maskBitmap.isRecycled) {
