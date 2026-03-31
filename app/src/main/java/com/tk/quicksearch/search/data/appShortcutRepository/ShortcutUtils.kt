@@ -587,16 +587,23 @@ fun filterShortcuts(
     context: Context,
 ): List<StaticShortcut> =
     shortcuts.filter { shortcut ->
+        val isCustomDeepLink = shortcut.id.startsWith("custom_deeplink_")
         val shortcutKey = "${shortcut.packageName}:${shortcut.id}"
         val isBlockedBrowserShortcut =
             (shortcut.packageName == "com.android.chrome" ||
                 shortcut.packageName == "com.brave.browser") &&
                 !isUserCreatedShortcut(shortcut) &&
                 shortcutKey !in HARDCODED_SHORTCUT_KEYS
+        val isLaunchable =
+            if (isCustomDeepLink) {
+                shortcut.intents.any { !it.dataString.isNullOrBlank() }
+            } else {
+                canLaunchShortcut(shortcut, packageManager, context)
+            }
         shortcut.enabled &&
             !isBlockedBrowserShortcut &&
             shortcut.intents.isNotEmpty() &&
-            canLaunchShortcut(shortcut, packageManager, context)
+            isLaunchable
     }
 
 private const val ANDROID_NS = "http://schemas.android.com/apk/res/android"
@@ -665,6 +672,28 @@ fun launchStaticShortcut(
     if (lastErrorMessage != null) {
         return lastErrorMessage
     }
+
+    // For custom deep-link shortcuts, fall back to a generic browser VIEW intent
+    // when none of the persisted intents resolve on this device.
+    if (shortcut.id.startsWith("custom_deeplink_")) {
+        val deepLink =
+            shortcut.intents
+                .asSequence()
+                .mapNotNull { it.dataString?.trim() }
+                .firstOrNull { it.isNotBlank() }
+        if (!deepLink.isNullOrBlank()) {
+            val browserFallbackIntent =
+                Intent(Intent.ACTION_VIEW, Uri.parse(deepLink)).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            val fallbackError =
+                kotlin.runCatching { context.startActivity(browserFallbackIntent) }.exceptionOrNull()
+            if (fallbackError == null) {
+                return null
+            }
+        }
+    }
+
     return context.getString(R.string.error_shortcut_no_activity_resolves) + noActivityIntentDetails.toSuffixDetail()
 }
 

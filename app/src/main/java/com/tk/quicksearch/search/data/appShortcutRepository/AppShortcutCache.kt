@@ -79,6 +79,7 @@ internal class AppShortcutCache(
         private const val FIELD_INTENTS = "intents"
 
         private const val FIELD_ACTION = "action"
+        private const val FIELD_INTENT_URI = "intentUri"
         private const val FIELD_TARGET_PACKAGE = "targetPackage"
         private const val FIELD_TARGET_CLASS = "targetClass"
         private const val FIELD_DATA = "data"
@@ -165,9 +166,16 @@ internal class AppShortcutCache(
                     val targetClass = component?.className
                     val data = intent.dataString
                     val action = intent.action
+                    val intentUri =
+                        runCatching { intent.toUri(Intent.URI_INTENT_SCHEME) }
+                            .getOrNull()
+                            ?.takeIf { it.isNotBlank() }
                     val extras = intent.extras?.toExtrasJsonArray()
                     put(
                         JSONObject().apply {
+                            if (!intentUri.isNullOrBlank()) {
+                                put(FIELD_INTENT_URI, intentUri)
+                            }
                             if (!action.isNullOrBlank()) put(FIELD_ACTION, action)
                             if (!targetPackage.isNullOrBlank()) {
                                 put(FIELD_TARGET_PACKAGE, targetPackage)
@@ -188,6 +196,7 @@ internal class AppShortcutCache(
             val intents = mutableListOf<Intent>()
             for (index in 0 until length()) {
                 val jsonObject = getJSONObject(index)
+                val intentUri = jsonObject.getNullableString(FIELD_INTENT_URI)
                 val action = jsonObject.getNullableString(FIELD_ACTION)
                 val targetPackage =
                     jsonObject.getNullableString(FIELD_TARGET_PACKAGE) ?: defaultPackage
@@ -196,12 +205,24 @@ internal class AppShortcutCache(
                 val extrasJson = jsonObject.optJSONArray(FIELD_EXTRAS)
 
                 intents.add(
-                    Intent().apply {
-                        if (!action.isNullOrBlank()) setAction(action)
-                        if (!data.isNullOrBlank()) setData(android.net.Uri.parse(data))
+                    (
+                        runCatching {
+                            if (intentUri.isNullOrBlank()) {
+                                null
+                            } else {
+                                Intent.parseUri(intentUri, Intent.URI_INTENT_SCHEME)
+                            }
+                        }.getOrNull() ?: Intent()
+                    ).apply {
+                        if (action != null) {
+                            setAction(action)
+                        }
+                        if (!data.isNullOrBlank()) {
+                            setData(android.net.Uri.parse(data))
+                        }
                         if (!targetClass.isNullOrBlank()) {
                             component = android.content.ComponentName(targetPackage, targetClass)
-                        } else {
+                        } else if (`package`.isNullOrBlank()) {
                             `package` = targetPackage
                         }
                         extrasJson?.applyExtras(this)
