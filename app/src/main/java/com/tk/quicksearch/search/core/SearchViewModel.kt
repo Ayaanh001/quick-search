@@ -2482,9 +2482,7 @@ class SearchViewModel(
     private fun applyFeatureAliasMode(featureId: String) {
         when (featureId) {
             AliasHandler.CURRENCY_CONVERTER_ALIAS_FEATURE_ID -> {
-                if (!userPreferences.isCurrencyConverterEnabled() ||
-                                userPreferences.getGeminiApiKey().isNullOrBlank()
-                ) {
+                if (userPreferences.getGeminiApiKey().isNullOrBlank()) {
                     clearDetectedAliasMode()
                     return
                 }
@@ -2497,9 +2495,7 @@ class SearchViewModel(
                 return
             }
             AliasHandler.WORD_CLOCK_ALIAS_FEATURE_ID -> {
-                if (!userPreferences.isWordClockEnabled() ||
-                                userPreferences.getGeminiApiKey().isNullOrBlank()
-                ) {
+                if (userPreferences.getGeminiApiKey().isNullOrBlank()) {
                     clearDetectedAliasMode()
                     return
                 }
@@ -2512,9 +2508,7 @@ class SearchViewModel(
                 return
             }
             AliasHandler.DICTIONARY_ALIAS_FEATURE_ID -> {
-                if (!userPreferences.isDictionaryEnabled() ||
-                                userPreferences.getGeminiApiKey().isNullOrBlank()
-                ) {
+                if (userPreferences.getGeminiApiKey().isNullOrBlank()) {
                     clearDetectedAliasMode()
                     return
                 }
@@ -2537,7 +2531,7 @@ class SearchViewModel(
                     AliasHandler.DATE_CALCULATOR_ALIAS_FEATURE_ID -> SearchToolType.DATE_CALCULATOR
                     else -> null
                 }
-        if (toolMode == null || !isToolEnabled(toolMode)) {
+        if (toolMode == null) {
             clearDetectedAliasMode()
             return
         }
@@ -2547,13 +2541,6 @@ class SearchViewModel(
                 toolMode = toolMode,
         )
     }
-
-    private fun isToolEnabled(toolMode: SearchToolType): Boolean =
-            when (toolMode) {
-                SearchToolType.CALCULATOR -> userPreferences.isCalculatorEnabled()
-                SearchToolType.UNIT_CONVERTER -> userPreferences.isUnitConverterEnabled()
-                SearchToolType.DATE_CALCULATOR -> userPreferences.isDateCalculatorEnabled()
-            }
 
     private fun createToolModeState(toolMode: SearchToolType): CalculatorState =
             when (toolMode) {
@@ -3017,7 +3004,7 @@ class SearchViewModel(
             hasGeminiApiKey: Boolean,
     ) {
         currencyConversionJob?.cancel()
-        if (!userPreferences.isCurrencyConverterEnabled() || !hasGeminiApiKey) {
+        if ((!userPreferences.isCurrencyConverterEnabled() && !lockedCurrencyConverterAlias) || !hasGeminiApiKey) {
             updateResultsState { s ->
                 if (s.currencyConverterState.status == CurrencyConverterStatus.Idle) {
                     s
@@ -3059,7 +3046,7 @@ class SearchViewModel(
     fun executeCurrencyConversion() {
         val trimmedQuery = _resultsState.value.query.trim()
         if (trimmedQuery.isBlank()) return
-        if (!userPreferences.isCurrencyConverterEnabled() || !_featureState.value.hasGeminiApiKey) return
+        if ((!userPreferences.isCurrencyConverterEnabled() && !lockedCurrencyConverterAlias) || !_featureState.value.hasGeminiApiKey) return
 
         val confirmed = CurrencyConversionIntentParser.parseConfirmed(trimmedQuery)
         if (confirmed == null) {
@@ -3135,7 +3122,7 @@ class SearchViewModel(
             hasGeminiApiKey: Boolean,
     ) {
         wordClockJob?.cancel()
-        if (!userPreferences.isWordClockEnabled() || !hasGeminiApiKey) {
+        if ((!userPreferences.isWordClockEnabled() && !lockedWordClockAlias) || !hasGeminiApiKey) {
             updateResultsState { s ->
                 if (s.wordClockState.status == WordClockStatus.Idle) {
                     s
@@ -3264,7 +3251,7 @@ class SearchViewModel(
             hasGeminiApiKey: Boolean,
     ) {
         dictionaryJob?.cancel()
-        if (!userPreferences.isDictionaryEnabled() || !hasGeminiApiKey) {
+        if ((!userPreferences.isDictionaryEnabled() && !lockedDictionaryAlias) || !hasGeminiApiKey) {
             updateResultsState { s ->
                 if (s.dictionaryState.status == DictionaryStatus.Idle) {
                     s
@@ -3306,7 +3293,7 @@ class SearchViewModel(
     fun executeDictionaryLookup() {
         val trimmedQuery = _resultsState.value.query.trim()
         if (trimmedQuery.isBlank()) return
-        if (!userPreferences.isDictionaryEnabled() || !_featureState.value.hasGeminiApiKey) return
+        if ((!userPreferences.isDictionaryEnabled() && !lockedDictionaryAlias) || !_featureState.value.hasGeminiApiKey) return
 
         val confirmed =
             if (lockedDictionaryAlias) {

@@ -167,13 +167,13 @@ internal fun SearchScreenContent(
                 else -> stringResource(R.string.search_hint)
             }
     val showCurrencyConverter =
-            state.currencyConverterEnabled &&
+            (state.currencyConverterEnabled || isCurrencyConverterAliasMode) &&
                     state.currencyConverterState.status != CurrencyConverterStatus.Idle
     val showWordClock =
-            state.wordClockEnabled &&
+            (state.wordClockEnabled || isWordClockAliasMode) &&
                     state.wordClockState.status != WordClockStatus.Idle
     val showDictionary =
-            state.dictionaryEnabled &&
+            (state.dictionaryEnabled || isDictionaryAliasMode) &&
                     state.dictionaryState.status != DictionaryStatus.Idle
     val showCalculatorResult =
             state.calculatorState.isToolMode ||
@@ -183,7 +183,7 @@ internal fun SearchScreenContent(
                     state.calculatorState.timeResultLabel != null
     val trimmedQuery = state.query.trim()
     val showCurrencyConverterSearchCard =
-            state.currencyConverterEnabled &&
+            (state.currencyConverterEnabled || isCurrencyConverterAliasMode) &&
                     state.hasGeminiApiKey &&
                     !showCalculatorResult &&
                     !showCurrencyConverter &&
@@ -196,9 +196,8 @@ internal fun SearchScreenContent(
                                 CurrencyConversionIntentParser.parseConfirmed(trimmedQuery) != null
                     }
     val showDictionarySearchCard =
-            state.dictionaryEnabled &&
+            (state.dictionaryEnabled || isDictionaryAliasMode) &&
                     state.hasGeminiApiKey &&
-                    trimmedQuery.isNotBlank() &&
                     !showCalculatorResult &&
                     !showCurrencyConverter &&
                     !showWordClock &&
@@ -206,7 +205,8 @@ internal fun SearchScreenContent(
                     if (isDictionaryAliasMode) {
                         true
                     } else {
-                        DictionaryIntentParser.parseConfirmed(trimmedQuery) != null
+                        trimmedQuery.isNotBlank() &&
+                                DictionaryIntentParser.parseConfirmed(trimmedQuery) != null
                     }
     val hideCompactSearchEnginesInToolMode =
             (isToolMode ||

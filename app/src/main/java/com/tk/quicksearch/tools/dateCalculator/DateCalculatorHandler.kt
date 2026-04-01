@@ -13,7 +13,7 @@ class DateCalculatorHandler(
         query: String,
         forceDateCalculatorMode: Boolean = false,
     ): CalculatorState {
-        if (!userPreferences.isDateCalculatorEnabled()) return CalculatorState()
+        if (!forceDateCalculatorMode && !userPreferences.isDateCalculatorEnabled()) return CalculatorState()
 
         val trimmedQuery = query.trim()
         if (forceDateCalculatorMode) {

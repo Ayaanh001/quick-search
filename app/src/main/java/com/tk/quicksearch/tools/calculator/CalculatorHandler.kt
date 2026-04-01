@@ -11,7 +11,7 @@ class CalculatorHandler(
         query: String,
         forceCalculatorMode: Boolean = false,
     ): CalculatorState {
-        if (!userPreferences.isCalculatorEnabled()) return CalculatorState()
+        if (!forceCalculatorMode && !userPreferences.isCalculatorEnabled()) return CalculatorState()
 
         val trimmedQuery = query.trim()
         if (forceCalculatorMode) {

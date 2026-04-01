@@ -11,7 +11,7 @@ class UnitConverterHandler(
         query: String,
         forceUnitConverterMode: Boolean = false,
     ): CalculatorState {
-        if (!userPreferences.isUnitConverterEnabled()) return CalculatorState()
+        if (!forceUnitConverterMode && !userPreferences.isUnitConverterEnabled()) return CalculatorState()
 
         val trimmedQuery = query.trim()
         if (forceUnitConverterMode) {
