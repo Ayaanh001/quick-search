@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +38,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -55,6 +57,10 @@ import kotlin.math.roundToInt
  *   the close button.
  * @param modifier Modifier applied to the popup surface.
  * @param leadingContent Optional composable rendered before the title (e.g. an avatar or icon).
+ * @param fixedTopContent Optional fixed content rendered at the top of the card, above the
+ *   scrollable content.
+ * @param maxInnerCardHeight Optional max height for the inner content card. If null, defaults to
+ *   72% of screen height.
  * @param content Content rendered inside the scrollable dark card.
  */
 @Composable
@@ -63,9 +69,13 @@ fun AppBottomPopup(
     title: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     leadingContent: (@Composable () -> Unit)? = null,
+    fixedTopContent: (@Composable () -> Unit)? = null,
+    showFixedTopDivider: Boolean = true,
+    maxInnerCardHeight: Dp? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val maxCardHeight = LocalConfiguration.current.screenHeightDp.dp * 0.72f
+    val defaultMaxCardHeight = LocalConfiguration.current.screenHeightDp.dp * 0.72f
+    val resolvedMaxCardHeight = maxInnerCardHeight ?: defaultMaxCardHeight
     val offsetY = remember { Animatable(0f) }
     val coroutineScope = rememberCoroutineScope()
     val dismissThresholdPx = with(LocalDensity.current) { 150.dp.toPx() }
@@ -139,26 +149,65 @@ fun AppBottomPopup(
                     }
 
                     Card(
-                        modifier = Modifier.fillMaxWidth().heightIn(max = maxCardHeight),
+                        modifier = Modifier.fillMaxWidth().heightIn(max = resolvedMaxCardHeight),
                         colors = CardDefaults.cardColors(containerColor = AppColors.getSettingsCardContainerColor()),
                         shape = MaterialTheme.shapes.large,
                     ) {
-                        val scrollState = rememberScrollState()
-                        Column(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .verticalScroll(scrollState)
-                                    .padding(
-                                        start = 16.dp,
-                                        top = 20.dp,
-                                        end = 16.dp,
-                                        bottom = 24.dp,
-                                    ),
-                            verticalArrangement = Arrangement.spacedBy(20.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            content = content,
-                        )
+                        if (fixedTopContent == null) {
+                            val scrollState = rememberScrollState()
+                            Column(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .verticalScroll(scrollState)
+                                        .padding(
+                                            start = 16.dp,
+                                            top = 20.dp,
+                                            end = 16.dp,
+                                            bottom = 24.dp,
+                                        ),
+                                verticalArrangement = Arrangement.spacedBy(20.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                content = content,
+                            )
+                        } else {
+                            Column(modifier = Modifier.fillMaxWidth().heightIn(max = resolvedMaxCardHeight)) {
+                                Column(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(
+                                                start = 16.dp,
+                                                top = 20.dp,
+                                                end = 16.dp,
+                                                bottom = 12.dp,
+                                            ),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    fixedTopContent()
+                                }
+                                if (showFixedTopDivider) {
+                                    HorizontalDivider()
+                                }
+                                val scrollState = rememberScrollState()
+                                Column(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .weight(1f, fill = false)
+                                            .verticalScroll(scrollState)
+                                            .padding(
+                                                start = 16.dp,
+                                                top = 12.dp,
+                                                end = 16.dp,
+                                                bottom = 24.dp,
+                                            ),
+                                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    content = content,
+                                )
+                            }
+                        }
                     }
                 }
             }

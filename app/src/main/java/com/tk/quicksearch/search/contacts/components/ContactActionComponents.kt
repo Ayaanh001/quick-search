@@ -1,6 +1,7 @@
 package com.tk.quicksearch.search.contacts.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,13 +21,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.models.ContactMethod
 import com.tk.quicksearch.shared.ui.components.AppVoiceCallIcon
@@ -102,10 +108,11 @@ internal fun ContactActionButton(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            ContactActionIcon(
+            ContactMethodIcon(
                 method = method,
-                tint = iconColor,
                 usePhoneIconForCallActions = usePhoneIconForCallActions,
+                tintOverride = iconColor,
+                iconSize = DesignTokens.LargeIconSize,
             )
             Text(
                 text = getActionButtonLabel(method),
@@ -120,10 +127,53 @@ internal fun ContactActionButton(
 }
 
 @Composable
+internal fun ContactMethodIcon(
+    method: ContactMethod,
+    usePhoneIconForCallActions: Boolean = false,
+    modifier: Modifier = Modifier,
+    tintOverride: Color? = null,
+    iconSize: Dp = DesignTokens.LargeIconSize,
+) {
+    val callIconTint = AppColors.CallIconTint
+    val tint =
+        tintOverride
+            ?: when (method) {
+                is ContactMethod.Phone -> callIconTint
+                is ContactMethod.Sms -> AppColors.ActionSms
+                is ContactMethod.WhatsAppCall,
+                is ContactMethod.TelegramCall,
+                is ContactMethod.SignalCall,
+                is ContactMethod.VideoCall,
+                -> callIconTint
+                is ContactMethod.WhatsAppMessage,
+                is ContactMethod.WhatsAppVideoCall,
+                is ContactMethod.TelegramMessage,
+                is ContactMethod.TelegramVideoCall,
+                is ContactMethod.SignalMessage,
+                is ContactMethod.SignalVideoCall,
+                is ContactMethod.GoogleMeet,
+                -> Color.Unspecified
+                is ContactMethod.Email -> AppColors.ActionEmail
+                is ContactMethod.CustomApp -> AppColors.ActionCustom
+                is ContactMethod.ViewInContactsApp -> AppColors.ActionView
+            }
+
+    ContactActionIcon(
+        method = method,
+        tint = tint,
+        usePhoneIconForCallActions = usePhoneIconForCallActions,
+        iconSize = iconSize,
+        modifier = modifier,
+    )
+}
+
+@Composable
 private fun ContactActionIcon(
     method: ContactMethod,
     tint: Color,
     usePhoneIconForCallActions: Boolean = false,
+    iconSize: Dp = DesignTokens.LargeIconSize,
+    modifier: Modifier = Modifier,
 ) {
     if (usePhoneIconForCallActions &&
         (method is ContactMethod.Phone ||
@@ -136,7 +186,7 @@ private fun ContactActionIcon(
             imageVector = Icons.Rounded.Call,
             contentDescription = null,
             tint = AppColors.CallIconTint,
-            modifier = Modifier.size(DesignTokens.LargeIconSize),
+            modifier = modifier.size(iconSize),
         )
         return
     }
@@ -146,7 +196,7 @@ private fun ContactActionIcon(
                 imageVector = Icons.Rounded.Call,
                 contentDescription = null,
                 tint = tint,
-                modifier = Modifier.size(DesignTokens.LargeIconSize),
+                modifier = modifier.size(iconSize),
             )
         }
 
@@ -155,14 +205,14 @@ private fun ContactActionIcon(
                 imageVector = Icons.Rounded.Sms,
                 contentDescription = null,
                 tint = tint,
-                modifier = Modifier.size(DesignTokens.LargeIconSize * 0.9f),
+                modifier = modifier.size(iconSize * 0.9f),
             )
         }
 
         is ContactMethod.WhatsAppCall -> {
             AppVoiceCallIcon(
                 logoPainterRes = R.drawable.whatsapp_call,
-                size = DesignTokens.LargeIconSize,
+                size = iconSize,
             )
         }
 
@@ -171,7 +221,7 @@ private fun ContactActionIcon(
                 painter = painterResource(id = R.drawable.whatsapp),
                 contentDescription = null,
                 tint = Color.Unspecified,
-                modifier = Modifier.size(DesignTokens.LargeIconSize),
+                modifier = modifier.size(iconSize),
             )
         }
 
@@ -180,7 +230,7 @@ private fun ContactActionIcon(
                 painter = painterResource(id = R.drawable.whatsapp_video_call),
                 contentDescription = null,
                 tint = Color.Unspecified,
-                modifier = Modifier.size(DesignTokens.LargeIconSize),
+                modifier = modifier.size(iconSize),
             )
         }
 
@@ -189,14 +239,14 @@ private fun ContactActionIcon(
                 painter = painterResource(id = R.drawable.telegram),
                 contentDescription = null,
                 tint = Color.Unspecified,
-                modifier = Modifier.size(DesignTokens.LargeIconSize),
+                modifier = modifier.size(iconSize),
             )
         }
 
         is ContactMethod.TelegramCall -> {
             AppVoiceCallIcon(
                 logoPainterRes = R.drawable.telegram_call,
-                size = DesignTokens.LargeIconSize,
+                size = iconSize,
             )
         }
 
@@ -205,7 +255,7 @@ private fun ContactActionIcon(
                 painter = painterResource(id = R.drawable.telegram_video_call),
                 contentDescription = null,
                 tint = Color.Unspecified,
-                modifier = Modifier.size(DesignTokens.LargeIconSize),
+                modifier = modifier.size(iconSize),
             )
         }
 
@@ -214,14 +264,14 @@ private fun ContactActionIcon(
                 painter = painterResource(id = R.drawable.signal_video_call),
                 contentDescription = null,
                 tint = Color.Unspecified,
-                modifier = Modifier.size(DesignTokens.LargeIconSize),
+                modifier = modifier.size(iconSize),
             )
         }
 
         is ContactMethod.SignalCall -> {
             AppVoiceCallIcon(
                 logoPainterRes = R.drawable.signal_call,
-                size = DesignTokens.LargeIconSize,
+                size = iconSize,
             )
         }
 
@@ -230,7 +280,7 @@ private fun ContactActionIcon(
                 painter = painterResource(id = R.drawable.signal),
                 contentDescription = null,
                 tint = Color.Unspecified,
-                modifier = Modifier.size(DesignTokens.SignalMessageIconSize),
+                modifier = modifier.size(iconSize),
             )
         }
 
@@ -239,7 +289,7 @@ private fun ContactActionIcon(
                 painter = painterResource(id = R.drawable.google_meet),
                 contentDescription = null,
                 tint = Color.Unspecified,
-                modifier = Modifier.size(DesignTokens.LargeIconSize),
+                modifier = modifier.size(iconSize),
             )
         }
 
@@ -248,7 +298,7 @@ private fun ContactActionIcon(
                 imageVector = Icons.Rounded.Email,
                 contentDescription = null,
                 tint = tint,
-                modifier = Modifier.size(DesignTokens.LargeIconSize),
+                modifier = modifier.size(iconSize),
             )
         }
 
@@ -257,17 +307,37 @@ private fun ContactActionIcon(
                 imageVector = Icons.Rounded.Call,
                 contentDescription = null,
                 tint = tint,
-                modifier = Modifier.size(DesignTokens.LargeIconSize),
+                modifier = modifier.size(iconSize),
             )
         }
 
         is ContactMethod.CustomApp -> {
-            Icon(
-                imageVector = Icons.Rounded.Person,
-                contentDescription = null,
-                tint = tint,
-                modifier = Modifier.size(DesignTokens.LargeIconSize),
-            )
+            val context = LocalContext.current
+            val appIconBitmap =
+                remember(method.packageName) {
+                    method.packageName?.let { packageName ->
+                        runCatching {
+                            context.packageManager
+                                .getApplicationIcon(packageName)
+                                .toBitmap()
+                                .asImageBitmap()
+                        }.getOrNull()
+                    }
+                }
+            if (appIconBitmap != null) {
+                Image(
+                    bitmap = appIconBitmap,
+                    contentDescription = null,
+                    modifier = modifier.size(iconSize),
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Rounded.Person,
+                    contentDescription = null,
+                    tint = tint,
+                    modifier = modifier.size(iconSize),
+                )
+            }
         }
 
         is ContactMethod.ViewInContactsApp -> {
@@ -275,14 +345,14 @@ private fun ContactActionIcon(
                 imageVector = Icons.Rounded.Person,
                 contentDescription = null,
                 tint = tint,
-                modifier = Modifier.size(DesignTokens.LargeIconSize),
+                modifier = modifier.size(iconSize),
             )
         }
     }
 }
 
 @Composable
-private fun getActionButtonLabel(method: ContactMethod): String =
+internal fun getActionButtonLabel(method: ContactMethod): String =
     when (method) {
         is ContactMethod.Phone -> {
             stringResource(R.string.contacts_action_button_call)

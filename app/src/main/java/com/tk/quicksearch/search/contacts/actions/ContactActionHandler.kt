@@ -317,13 +317,16 @@ class ContactActionHandler(
                         clearQueryIfEnabled()
                     }
                 } else {
-                    ContactIntentHelpers.openCustomApp(
-                        context,
-                        method.data,
-                        method.mimeType,
-                        method.packageName,
-                    ) { resId -> showToastCallback(resId) }
-                    clearQueryIfEnabled()
+                    val success =
+                        ContactIntentHelpers.openCustomApp(
+                            context,
+                            method.data,
+                            method.mimeType,
+                            method.packageName,
+                        ) { resId -> showToastCallback(resId) }
+                    if (success) {
+                        clearQueryIfEnabled()
+                    }
                 }
             }
 

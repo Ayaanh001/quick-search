@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Sms
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.core.CallingApp
 import com.tk.quicksearch.search.core.MessagingApp
@@ -650,5 +653,76 @@ private fun ContactActionIconForButton(
                                 modifier = modifier,
                         )
                 }
+                is com.tk.quicksearch.search.contacts.models.ContactCardAction.Email -> {
+                        Icon(
+                                imageVector = Icons.Rounded.Email,
+                                contentDescription = null,
+                                tint = if (enabled) AppColors.ActionEmail else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = modifier,
+                        )
+                }
+                is com.tk.quicksearch.search.contacts.models.ContactCardAction.VideoCall -> {
+                        AppPackageIcon(
+                                packageName = action.packageName,
+                                modifier = modifier,
+                                enabled = enabled,
+                        )
+                }
+                is com.tk.quicksearch.search.contacts.models.ContactCardAction.CustomApp -> {
+                        AppPackageIcon(
+                                packageName = action.packageName,
+                                modifier = modifier,
+                                enabled = enabled,
+                        )
+                }
+                is com.tk.quicksearch.search.contacts.models.ContactCardAction.ViewInContactsApp -> {
+                        Icon(
+                                imageVector = Icons.Rounded.Person,
+                                contentDescription = null,
+                                tint = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = modifier,
+                        )
+                }
+        }
+}
+
+@Composable
+private fun AppPackageIcon(
+        packageName: String?,
+        modifier: Modifier,
+        enabled: Boolean,
+) {
+        val context = LocalContext.current
+        val appIcon =
+                remember(packageName) {
+                        packageName?.let { targetPackage ->
+                                runCatching {
+                                                context.packageManager
+                                                        .getApplicationIcon(targetPackage)
+                                                        .toBitmap()
+                                                        .asImageBitmap()
+                                        }
+                                        .getOrNull()
+                        }
+                }
+
+        if (appIcon != null) {
+                        Image(
+                                bitmap = appIcon,
+                                contentDescription = null,
+                                modifier = modifier,
+                        )
+        } else {
+                Icon(
+                        imageVector = Icons.Rounded.Call,
+                        contentDescription = null,
+                        tint =
+                                if (enabled) {
+                                        AppColors.CallIconTint
+                                } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                        modifier = modifier,
+                )
         }
 }

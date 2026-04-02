@@ -128,6 +128,32 @@ class WidgetActionActivity : ComponentActivity() {
                     is ContactCardAction.GoogleMeet -> {
                         method is ContactMethod.GoogleMeet && matchesPhoneNumber(method)
                     }
+                    is ContactCardAction.Email -> {
+                        method is ContactMethod.Email &&
+                            (method.data == action.phoneNumber || matchesPhoneNumber(method))
+                    }
+                    is ContactCardAction.VideoCall -> {
+                        method is ContactMethod.VideoCall &&
+                            method.packageName == action.packageName &&
+                            (method.data == action.phoneNumber || matchesPhoneNumber(method))
+                    }
+                    is ContactCardAction.CustomApp -> {
+                        method is ContactMethod.CustomApp &&
+                            (
+                                (action.dataId != null && method.dataId == action.dataId) ||
+                                    (
+                                        method.mimeType == action.mimeType &&
+                                            method.packageName == action.packageName &&
+                                            (
+                                                method.data == action.phoneNumber ||
+                                                    matchesPhoneNumber(method)
+                                            )
+                                    )
+                            )
+                    }
+                    is ContactCardAction.ViewInContactsApp -> {
+                        method is ContactMethod.ViewInContactsApp
+                    }
                 }
             }
 
@@ -142,6 +168,32 @@ class WidgetActionActivity : ComponentActivity() {
             }
             is ContactCardAction.Sms -> {
                 handleContactMethod(ContactMethod.Sms(getString(R.string.contact_method_message_label), action.phoneNumber))
+            }
+            is ContactCardAction.Email -> {
+                handleContactMethod(ContactMethod.Email(getString(R.string.contacts_action_button_email), action.phoneNumber))
+            }
+            is ContactCardAction.ViewInContactsApp -> {
+                handleContactMethod(ContactMethod.ViewInContactsApp(getString(R.string.contacts_action_button_contacts)))
+            }
+            is ContactCardAction.VideoCall -> {
+                handleContactMethod(
+                    ContactMethod.VideoCall(
+                        displayLabel = getString(R.string.contacts_action_button_video_call),
+                        data = action.phoneNumber,
+                        packageName = action.packageName,
+                    ),
+                )
+            }
+            is ContactCardAction.CustomApp -> {
+                handleContactMethod(
+                    ContactMethod.CustomApp(
+                        displayLabel = action.displayLabel,
+                        data = action.phoneNumber,
+                        mimeType = action.mimeType,
+                        packageName = action.packageName,
+                        dataId = action.dataId,
+                    ),
+                )
             }
             else -> showToast(R.string.error_action_not_available)
         }

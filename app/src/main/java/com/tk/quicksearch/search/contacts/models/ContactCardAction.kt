@@ -1,6 +1,8 @@
 
 package com.tk.quicksearch.search.contacts.models
 
+import android.net.Uri
+
 /**
  * Represents a customizable action on the contact card.
  * Can be assigned to primary (call) or secondary (message) positions.
@@ -56,6 +58,27 @@ sealed class ContactCardAction {
         override val phoneNumber: String,
     ) : ContactCardAction()
 
+    data class Email(
+        override val phoneNumber: String,
+    ) : ContactCardAction()
+
+    data class VideoCall(
+        override val phoneNumber: String,
+        val packageName: String,
+    ) : ContactCardAction()
+
+    data class CustomApp(
+        override val phoneNumber: String,
+        val mimeType: String,
+        val packageName: String?,
+        val dataId: Long?,
+        val displayLabel: String,
+    ) : ContactCardAction()
+
+    data class ViewInContactsApp(
+        override val phoneNumber: String,
+    ) : ContactCardAction()
+
     /**
      * Serializes the action to a string format: "TYPE:PHONE_NUMBER"
      */
@@ -74,11 +97,33 @@ sealed class ContactCardAction {
                 is SignalCall -> TYPE_SIGNAL_CALL
                 is SignalVideoCall -> TYPE_SIGNAL_VIDEO_CALL
                 is GoogleMeet -> TYPE_GOOGLE_MEET
+                is Email -> TYPE_EMAIL
+                is VideoCall -> TYPE_VIDEO_CALL
+                is CustomApp -> TYPE_CUSTOM_APP
+                is ViewInContactsApp -> TYPE_VIEW_CONTACT
             }
-        return "$type:$phoneNumber"
+        val payload =
+            when (this) {
+                is VideoCall ->
+                    listOf(
+                        encodeField(phoneNumber),
+                        encodeField(packageName),
+                    ).joinToString(FIELD_SEPARATOR)
+                is CustomApp ->
+                    listOf(
+                        encodeField(phoneNumber),
+                        dataId?.toString().orEmpty(),
+                        encodeField(mimeType),
+                        encodeField(packageName.orEmpty()),
+                        encodeField(displayLabel),
+                    ).joinToString(FIELD_SEPARATOR)
+                else -> encodeField(phoneNumber)
+            }
+        return "$type:$payload"
     }
 
     companion object {
+        private const val FIELD_SEPARATOR = "|"
         private const val TYPE_PHONE = "PHONE"
         private const val TYPE_SMS = "SMS"
         private const val TYPE_WHATSAPP_CALL = "WHATSAPP_CALL"
@@ -91,6 +136,10 @@ sealed class ContactCardAction {
         private const val TYPE_SIGNAL_CALL = "SIGNAL_CALL"
         private const val TYPE_SIGNAL_VIDEO_CALL = "SIGNAL_VIDEO_CALL"
         private const val TYPE_GOOGLE_MEET = "GOOGLE_MEET"
+        private const val TYPE_EMAIL = "EMAIL"
+        private const val TYPE_VIDEO_CALL = "VIDEO_CALL"
+        private const val TYPE_CUSTOM_APP = "CUSTOM_APP"
+        private const val TYPE_VIEW_CONTACT = "VIEW_CONTACT"
 
         /**
          * Deserializes a string back to a ContactCardAction
@@ -100,23 +149,48 @@ sealed class ContactCardAction {
             if (parts.size != 2) return null
 
             val type = parts[0]
-            val phoneNumber = parts[1]
+            val payload = parts[1]
 
             return when (type) {
-                TYPE_PHONE -> Phone(phoneNumber)
-                TYPE_SMS -> Sms(phoneNumber)
-                TYPE_WHATSAPP_CALL -> WhatsAppCall(phoneNumber)
-                TYPE_WHATSAPP_MESSAGE -> WhatsAppMessage(phoneNumber)
-                TYPE_WHATSAPP_VIDEO_CALL -> WhatsAppVideoCall(phoneNumber)
-                TYPE_TELEGRAM_MESSAGE -> TelegramMessage(phoneNumber)
-                TYPE_TELEGRAM_CALL -> TelegramCall(phoneNumber)
-                TYPE_TELEGRAM_VIDEO_CALL -> TelegramVideoCall(phoneNumber)
-                TYPE_SIGNAL_MESSAGE -> SignalMessage(phoneNumber)
-                TYPE_SIGNAL_CALL -> SignalCall(phoneNumber)
-                TYPE_SIGNAL_VIDEO_CALL -> SignalVideoCall(phoneNumber)
-                TYPE_GOOGLE_MEET -> GoogleMeet(phoneNumber)
+                TYPE_PHONE -> Phone(decodeField(payload))
+                TYPE_SMS -> Sms(decodeField(payload))
+                TYPE_WHATSAPP_CALL -> WhatsAppCall(decodeField(payload))
+                TYPE_WHATSAPP_MESSAGE -> WhatsAppMessage(decodeField(payload))
+                TYPE_WHATSAPP_VIDEO_CALL -> WhatsAppVideoCall(decodeField(payload))
+                TYPE_TELEGRAM_MESSAGE -> TelegramMessage(decodeField(payload))
+                TYPE_TELEGRAM_CALL -> TelegramCall(decodeField(payload))
+                TYPE_TELEGRAM_VIDEO_CALL -> TelegramVideoCall(decodeField(payload))
+                TYPE_SIGNAL_MESSAGE -> SignalMessage(decodeField(payload))
+                TYPE_SIGNAL_CALL -> SignalCall(decodeField(payload))
+                TYPE_SIGNAL_VIDEO_CALL -> SignalVideoCall(decodeField(payload))
+                TYPE_GOOGLE_MEET -> GoogleMeet(decodeField(payload))
+                TYPE_EMAIL -> Email(decodeField(payload))
+                TYPE_VIDEO_CALL -> {
+                    val fields = payload.split(FIELD_SEPARATOR, limit = 2)
+                    if (fields.size != 2) return null
+                    VideoCall(
+                        phoneNumber = decodeField(fields[0]),
+                        packageName = decodeField(fields[1]),
+                    )
+                }
+                TYPE_CUSTOM_APP -> {
+                    val fields = payload.split(FIELD_SEPARATOR, limit = 5)
+                    if (fields.size != 5) return null
+                    CustomApp(
+                        phoneNumber = decodeField(fields[0]),
+                        dataId = fields[1].toLongOrNull(),
+                        mimeType = decodeField(fields[2]),
+                        packageName = decodeField(fields[3]).ifBlank { null },
+                        displayLabel = decodeField(fields[4]),
+                    )
+                }
+                TYPE_VIEW_CONTACT -> ViewInContactsApp(decodeField(payload))
                 else -> null
             }
         }
+
+        private fun encodeField(value: String): String = Uri.encode(value)
+
+        private fun decodeField(value: String): String = Uri.decode(value)
     }
 }

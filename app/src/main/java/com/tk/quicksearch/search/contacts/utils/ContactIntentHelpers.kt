@@ -153,7 +153,7 @@ object ContactIntentHelpers {
     ): Boolean {
         val success = CustomAppActions.openCustomAppWithDataId(context, dataId, mimeType, packageName)
         if (!success) {
-            onShowToast?.invoke(com.tk.quicksearch.R.string.common_error_unable_to_open)
+            onShowToast?.invoke(com.tk.quicksearch.R.string.error_action_not_available)
         }
         return success
     }
@@ -164,5 +164,5 @@ object ContactIntentHelpers {
         mimeType: String,
         packageName: String?,
         onShowToast: ((Int) -> Unit)? = null,
-    ) = CustomAppActions.openCustomApp(context, data, mimeType, packageName, onShowToast)
+    ): Boolean = CustomAppActions.openCustomApp(context, data, mimeType, packageName, onShowToast)
 }

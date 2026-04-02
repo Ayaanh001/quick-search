@@ -2145,6 +2145,32 @@ class SearchViewModel(
                             is com.tk.quicksearch.search.contacts.models.ContactCardAction.GoogleMeet -> {
                                 method is ContactMethod.GoogleMeet && matchesPhoneNumber(method)
                             }
+                            is com.tk.quicksearch.search.contacts.models.ContactCardAction.Email -> {
+                                method is ContactMethod.Email &&
+                                    (method.data == action.phoneNumber || matchesPhoneNumber(method))
+                            }
+                            is com.tk.quicksearch.search.contacts.models.ContactCardAction.VideoCall -> {
+                                method is ContactMethod.VideoCall &&
+                                    method.packageName == action.packageName &&
+                                    (method.data == action.phoneNumber || matchesPhoneNumber(method))
+                            }
+                            is com.tk.quicksearch.search.contacts.models.ContactCardAction.CustomApp -> {
+                                method is ContactMethod.CustomApp &&
+                                    (
+                                        (action.dataId != null && method.dataId == action.dataId) ||
+                                            (
+                                                method.mimeType == action.mimeType &&
+                                                    method.packageName == action.packageName &&
+                                                    (
+                                                        method.data == action.phoneNumber ||
+                                                            matchesPhoneNumber(method)
+                                                    )
+                                            )
+                                    )
+                            }
+                            is com.tk.quicksearch.search.contacts.models.ContactCardAction.ViewInContactsApp -> {
+                                method is ContactMethod.ViewInContactsApp
+                            }
                         }
                     }
 
@@ -2175,6 +2201,58 @@ class SearchViewModel(
                                                     R.string.contact_method_message_label
                                             ),
                                             action.phoneNumber
+                                    ),
+                                    trackHistory = trackHistory,
+                            )
+                        }
+                        is com.tk.quicksearch.search.contacts.models.ContactCardAction.Email -> {
+                            contactActionHandler.handleContactMethod(
+                                    contactInfo,
+                                    ContactMethod.Email(
+                                            displayLabel =
+                                                    appContext.getString(
+                                                            R.string.contacts_action_button_email
+                                                    ),
+                                            data = action.phoneNumber,
+                                    ),
+                                    trackHistory = trackHistory,
+                            )
+                        }
+                        is com.tk.quicksearch.search.contacts.models.ContactCardAction.ViewInContactsApp -> {
+                            contactActionHandler.handleContactMethod(
+                                    contactInfo,
+                                    ContactMethod.ViewInContactsApp(
+                                            displayLabel =
+                                                    appContext.getString(
+                                                            R.string.contacts_action_button_contacts
+                                                    ),
+                                    ),
+                                    trackHistory = trackHistory,
+                            )
+                        }
+                        is com.tk.quicksearch.search.contacts.models.ContactCardAction.VideoCall -> {
+                            contactActionHandler.handleContactMethod(
+                                    contactInfo,
+                                    ContactMethod.VideoCall(
+                                            displayLabel =
+                                                    appContext.getString(
+                                                            R.string.contacts_action_button_video_call
+                                                    ),
+                                            data = action.phoneNumber,
+                                            packageName = action.packageName,
+                                    ),
+                                    trackHistory = trackHistory,
+                            )
+                        }
+                        is com.tk.quicksearch.search.contacts.models.ContactCardAction.CustomApp -> {
+                            contactActionHandler.handleContactMethod(
+                                    contactInfo,
+                                    ContactMethod.CustomApp(
+                                            displayLabel = action.displayLabel,
+                                            data = action.phoneNumber,
+                                            mimeType = action.mimeType,
+                                            packageName = action.packageName,
+                                            dataId = action.dataId,
                                     ),
                                     trackHistory = trackHistory,
                             )

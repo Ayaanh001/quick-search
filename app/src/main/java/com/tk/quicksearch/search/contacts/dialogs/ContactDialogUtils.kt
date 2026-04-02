@@ -63,6 +63,7 @@ internal fun filterMethodsByPhoneNumber(
     contactMethods: List<ContactMethod>,
     selectedPhoneNumber: String?,
     context: android.content.Context,
+    hasMultipleNumbers: Boolean = false,
 ): List<ContactMethod> =
     contactMethods.filter { method ->
         when {
@@ -92,6 +93,23 @@ internal fun filterMethodsByPhoneNumber(
                 }
             }
 
+            // Email and unknown/custom providers may not have a phone-like DATA1 value.
+            method is ContactMethod.Email -> true
+
+            method is ContactMethod.CustomApp ||
+                method is ContactMethod.VideoCall ||
+                method is ContactMethod.ViewInContactsApp -> {
+                if (selectedPhoneNumber == null) {
+                    true
+                } else {
+                    if (method.data.isBlank()) {
+                        !hasMultipleNumbers
+                    } else {
+                        PhoneNumberUtils.isSameNumber(method.data, selectedPhoneNumber)
+                    }
+                }
+            }
+
             // For other methods, require phone number match with the selected number
             else -> {
                 val methodData = method.data?.takeIf { it.isNotBlank() }
@@ -111,9 +129,12 @@ internal inline fun renderMethodRow(
     crossinline onMethodClick: (ContactMethod) -> Unit,
     noinline onMethodLongClick: ((ContactMethod) -> Unit)? = null,
 ) {
+    val methodTypeOrder = methodTypes.withIndex().associate { (index, type) -> type to index }
     val filteredMethods =
         methods.filter { method ->
             methodTypes.any { type -> type.isInstance(method) }
+        }.sortedBy { method ->
+            methodTypeOrder.entries.firstOrNull { (type, _) -> type.isInstance(method) }?.value ?: Int.MAX_VALUE
         }
 
     if (filteredMethods.isNotEmpty()) {
@@ -133,24 +154,61 @@ internal inline fun renderMethodRow(
     }
 }
 
+internal fun ContactMethod.isConfiguredPopupMethod(): Boolean =
+    when (this) {
+        is ContactMethod.Phone,
+        is ContactMethod.Sms,
+        is ContactMethod.GoogleMeet,
+        is ContactMethod.WhatsAppCall,
+        is ContactMethod.WhatsAppMessage,
+        is ContactMethod.WhatsAppVideoCall,
+        is ContactMethod.TelegramMessage,
+        is ContactMethod.TelegramCall,
+        is ContactMethod.TelegramVideoCall,
+        is ContactMethod.SignalMessage,
+        is ContactMethod.SignalCall,
+        is ContactMethod.SignalVideoCall,
+        -> true
+        else -> false
+    }
+
 internal fun contactMethodToCardAction(
     method: ContactMethod,
     selectedPhoneNumber: String?,
 ): ContactCardAction? {
-    val phoneNumber = selectedPhoneNumber ?: method.data.takeIf { it.isNotBlank() } ?: return null
+    val fallbackData =
+        selectedPhoneNumber
+            ?: method.data.takeIf { it.isNotBlank() }
+            ?: method.dataId?.toString()
+            ?: return null
     return when (method) {
-        is ContactMethod.Phone -> ContactCardAction.Phone(phoneNumber)
-        is ContactMethod.Sms -> ContactCardAction.Sms(phoneNumber)
-        is ContactMethod.WhatsAppCall -> ContactCardAction.WhatsAppCall(phoneNumber)
-        is ContactMethod.WhatsAppMessage -> ContactCardAction.WhatsAppMessage(phoneNumber)
-        is ContactMethod.WhatsAppVideoCall -> ContactCardAction.WhatsAppVideoCall(phoneNumber)
-        is ContactMethod.TelegramMessage -> ContactCardAction.TelegramMessage(phoneNumber)
-        is ContactMethod.TelegramCall -> ContactCardAction.TelegramCall(phoneNumber)
-        is ContactMethod.TelegramVideoCall -> ContactCardAction.TelegramVideoCall(phoneNumber)
-        is ContactMethod.SignalMessage -> ContactCardAction.SignalMessage(phoneNumber)
-        is ContactMethod.SignalCall -> ContactCardAction.SignalCall(phoneNumber)
-        is ContactMethod.SignalVideoCall -> ContactCardAction.SignalVideoCall(phoneNumber)
-        is ContactMethod.GoogleMeet -> ContactCardAction.GoogleMeet(phoneNumber)
+        is ContactMethod.Phone -> ContactCardAction.Phone(fallbackData)
+        is ContactMethod.Sms -> ContactCardAction.Sms(fallbackData)
+        is ContactMethod.WhatsAppCall -> ContactCardAction.WhatsAppCall(fallbackData)
+        is ContactMethod.WhatsAppMessage -> ContactCardAction.WhatsAppMessage(fallbackData)
+        is ContactMethod.WhatsAppVideoCall -> ContactCardAction.WhatsAppVideoCall(fallbackData)
+        is ContactMethod.TelegramMessage -> ContactCardAction.TelegramMessage(fallbackData)
+        is ContactMethod.TelegramCall -> ContactCardAction.TelegramCall(fallbackData)
+        is ContactMethod.TelegramVideoCall -> ContactCardAction.TelegramVideoCall(fallbackData)
+        is ContactMethod.SignalMessage -> ContactCardAction.SignalMessage(fallbackData)
+        is ContactMethod.SignalCall -> ContactCardAction.SignalCall(fallbackData)
+        is ContactMethod.SignalVideoCall -> ContactCardAction.SignalVideoCall(fallbackData)
+        is ContactMethod.GoogleMeet -> ContactCardAction.GoogleMeet(fallbackData)
+        is ContactMethod.Email -> ContactCardAction.Email(method.data)
+        is ContactMethod.VideoCall ->
+            ContactCardAction.VideoCall(
+                phoneNumber = method.data.takeIf { it.isNotBlank() } ?: fallbackData,
+                packageName = method.packageName,
+            )
+        is ContactMethod.CustomApp ->
+            ContactCardAction.CustomApp(
+                phoneNumber = method.data.takeIf { it.isNotBlank() } ?: fallbackData,
+                mimeType = method.mimeType,
+                packageName = method.packageName,
+                dataId = method.dataId,
+                displayLabel = method.displayLabel,
+            )
+        is ContactMethod.ViewInContactsApp -> ContactCardAction.ViewInContactsApp(fallbackData)
         else -> null
     }
 }
@@ -175,5 +233,7 @@ internal fun methodShortcutLabel(
         is ContactMethod.SignalVideoCall,
         -> context.getString(R.string.contacts_action_button_video_call)
         is ContactMethod.GoogleMeet -> context.getString(R.string.contacts_action_button_meet)
+        is ContactMethod.CustomApp -> method.displayLabel
+        is ContactMethod.Email -> context.getString(R.string.contacts_action_button_email)
         else -> null
     }

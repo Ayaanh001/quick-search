@@ -43,12 +43,24 @@ object CustomAppActions {
         packageName: String?,
     ): Boolean {
         return try {
-            launchContactDataIntent(
-                context = context,
-                dataId = dataId,
-                packageName = packageName,
-                mimeType = mimeType,
-            )
+            if (
+                packageName != null &&
+                launchContactDataIntent(
+                    context = context,
+                    dataId = dataId,
+                    packageName = packageName,
+                    mimeType = mimeType,
+                )
+            ) {
+                true
+            } else {
+                // Fallback to package-agnostic launch for unknown/non-standard contracts.
+                launchContactDataIntent(
+                    context = context,
+                    dataId = dataId,
+                    mimeType = mimeType,
+                )
+            }
         } catch (e: Exception) {
             Log.e("MessagingService", "Failed to open custom app with dataId", e)
             false
@@ -64,18 +76,35 @@ object CustomAppActions {
         mimeType: String,
         packageName: String?,
         onShowToast: ((Int) -> Unit)? = null,
-    ) {
+    ): Boolean =
         try {
-            val intent =
-                Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(Uri.parse(data), mimeType)
-                    packageName?.let { setPackage(it) }
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            val dataUri = Uri.parse(data)
+
+            fun launchWithPackage(targetPackage: String?): Boolean {
+                val intent =
+                    Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(dataUri, mimeType)
+                        targetPackage?.let { setPackage(it) }
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                if (intent.resolveActivity(context.packageManager) == null) {
+                    return false
                 }
-            context.startActivity(intent)
+                context.startActivity(intent)
+                return true
+            }
+
+            if (packageName != null && launchWithPackage(packageName)) {
+                true
+            } else if (launchWithPackage(null)) {
+                true
+            } else {
+                onShowToast?.invoke(R.string.error_action_not_available)
+                false
+            }
         } catch (e: Exception) {
             Log.e("MessagingService", "Failed to open custom app", e)
-            onShowToast?.invoke(R.string.common_error_unable_to_open)
+            onShowToast?.invoke(R.string.error_action_not_available)
+            false
         }
-    }
 }
