@@ -26,20 +26,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.FormatListBulleted
 import androidx.compose.material.icons.automirrored.rounded.ManageSearch
 import androidx.compose.material.icons.rounded.AdminPanelSettings
-import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Email
-import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.PushPin
 import androidx.compose.material.icons.rounded.RocketLaunch
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Tune
@@ -513,163 +509,18 @@ fun SettingsScreen(
     }
 
     if (showExportSelectionDialog) {
-        AppAlertDialog(
-            onDismissRequest = {
+        SettingsExportDialog(
+            selectionState = exportSelectionState,
+            onSelectionStateChange = { exportSelectionState = it },
+            onDismiss = {
                 showExportSelectionDialog = false
             },
-            title = {
-                Text(text = stringResource(R.string.settings_backup_export_selection_title))
-            },
-            text = {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState()),
-                ) {
-                    SettingsCheckboxRow(
-                        title = stringResource(R.string.settings_backup_export_option_settings_title),
-                        description = "",
-                        checked = exportSelectionState.includeSettings,
-                        onCheckedChange = {
-                            exportSelectionState = exportSelectionState.copy(includeSettings = it)
-                        },
-                        icon = Icons.Rounded.Tune,
-                        isLastItem = false,
-                    )
-                    if (exportSelectionState.showSearchHistoryOption) {
-                        SettingsCheckboxRow(
-                            title =
-                                stringResource(
-                                    R.string.settings_backup_export_option_search_history_title,
-                                ),
-                            description = "",
-                            checked = exportSelectionState.includeSearchHistory,
-                            onCheckedChange = {
-                                exportSelectionState =
-                                    exportSelectionState.copy(includeSearchHistory = it)
-                            },
-                            icon = Icons.Rounded.History,
-                            isLastItem = false,
-                        )
-                    }
-                    if (exportSelectionState.showPinnedItemsOption || true) {
-                        SettingsCheckboxRow(
-                            title =
-                                stringResource(
-                                    R.string.settings_backup_export_option_pinned_items_title,
-                                ),
-                            description = "",
-                            checked = exportSelectionState.includePinnedItems,
-                            onCheckedChange = {
-                                exportSelectionState =
-                                    exportSelectionState.copy(includePinnedItems = it)
-                            },
-                            icon = Icons.Rounded.PushPin,
-                            isLastItem = false,
-                        )
-                    }
-                    SettingsCheckboxRow(
-                        title = stringResource(R.string.settings_backup_export_option_shortcuts_title),
-                        description = "",
-                        checked = exportSelectionState.includeShortcuts,
-                        onCheckedChange = {
-                            exportSelectionState = exportSelectionState.copy(includeShortcuts = it)
-                        },
-                        icon = Icons.Rounded.Apps,
-                        isLastItem = false,
-                    )
-                    SettingsCheckboxRow(
-                        title =
-                            stringResource(
-                                R.string.settings_backup_export_option_search_engines_title,
-                            ),
-                        description = "",
-                        checked = exportSelectionState.includeSearchEngines,
-                        onCheckedChange = {
-                            exportSelectionState =
-                                exportSelectionState.copy(includeSearchEngines = it)
-                        },
-                        icon = Icons.AutoMirrored.Rounded.ManageSearch,
-                        isLastItem = false,
-                    )
-                    SettingsCheckboxRow(
-                        title = stringResource(R.string.settings_backup_export_option_gemini_title),
-                        description = "",
-                        checked = exportSelectionState.includeGeminiApi,
-                        onCheckedChange = {
-                            exportSelectionState = exportSelectionState.copy(includeGeminiApi = it)
-                        },
-                        iconResId = R.drawable.direct_search,
-                        isLastItem = true,
-                    )
-                    if (exportSelectionState.includeGeminiApi) {
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.settings_backup_export_api_key_warning_message,
-                                ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(top = DesignTokens.SpacingMedium),
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    enabled = exportSelectionState.hasAnySelection(),
-                    onClick = {
-                        showExportSelectionDialog = false
-                        val defaultName =
-                            SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
-                        exportLauncher.launch("quick-search-settings-$defaultName.quicksearch")
-                    },
-                ) {
-                    Text(text = stringResource(R.string.settings_backup_export_button))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showExportSelectionDialog = false
-                    },
-                ) {
-                    Text(text = stringResource(R.string.dialog_cancel))
-                }
+            onExport = {
+                showExportSelectionDialog = false
+                val defaultName = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
+                exportLauncher.launch("quick-search-settings-$defaultName.quicksearch")
             },
         )
-    }
-}
-
-private data class ExportSelectionState(
-    val includeSettings: Boolean = true,
-    val includeSearchHistory: Boolean = true,
-    val includePinnedItems: Boolean = true,
-    val includeShortcuts: Boolean = true,
-    val includeSearchEngines: Boolean = true,
-    val includeGeminiApi: Boolean = false,
-    val showSearchHistoryOption: Boolean = true,
-    val showPinnedItemsOption: Boolean = true,
-) {
-    fun hasAnySelection(): Boolean =
-        includeSettings ||
-            includeSearchHistory ||
-            includePinnedItems ||
-            includeShortcuts ||
-            includeSearchEngines ||
-            includeGeminiApi
-
-    fun toExportOptions(): SettingsBackupManager.ExportOptions {
-        val items = buildSet {
-            if (includeSettings) add(SettingsBackupManager.ExportItem.SETTINGS)
-            if (includeSearchHistory) add(SettingsBackupManager.ExportItem.SEARCH_HISTORY)
-            if (includePinnedItems) add(SettingsBackupManager.ExportItem.PINNED_ITEMS)
-            if (includeShortcuts) add(SettingsBackupManager.ExportItem.SHORTCUTS)
-            if (includeSearchEngines) add(SettingsBackupManager.ExportItem.SEARCH_ENGINES)
-            if (includeGeminiApi) add(SettingsBackupManager.ExportItem.GEMINI_API)
-        }
-        return SettingsBackupManager.ExportOptions(selectedItems = items)
     }
 }
 

@@ -920,8 +920,11 @@ class SearchViewModel(
     }
 
     fun handleOnStop() {
+        val shouldRetainDirectOrGeminiQueryOnStop = shouldRetainDirectOrGeminiQueryOnStop()
         val shouldClearQueryOnStop = _configState.value.clearQueryOnLaunch
-        if (shouldClearQueryOnStop) {
+        if (shouldRetainDirectOrGeminiQueryOnStop) {
+            updateConfigState { it.copy(selectRetainedQuery = true) }
+        } else if (shouldClearQueryOnStop) {
             clearQuery()
         } else if (pendingNavigationClear && _resultsState.value.query.isNotEmpty()) {
             updateConfigState { it.copy(selectRetainedQuery = true) }
@@ -929,6 +932,15 @@ class SearchViewModel(
         if (pendingNavigationClear) {
             pendingNavigationClear = false
         }
+    }
+
+    private fun shouldRetainDirectOrGeminiQueryOnStop(): Boolean {
+        val state = _resultsState.value
+        if (state.query.isBlank()) return false
+        return state.DirectSearchState.status != DirectSearchStatus.Idle ||
+            state.currencyConverterState.status != CurrencyConverterStatus.Idle ||
+            state.wordClockState.status != WordClockStatus.Idle ||
+            state.dictionaryState.status != DictionaryStatus.Idle
     }
 
     // ContactActionHandler is initialized in initializeServices()
