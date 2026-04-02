@@ -682,7 +682,8 @@ internal fun SearchScreenContent(
                 AnimatedVisibility(
                         visible = showCurrencyConverterSearchCard,
                         enter = fadeIn(animationSpec = tween(durationMillis = 140, delayMillis = 50)),
-                        exit = fadeOut(animationSpec = tween(durationMillis = 100)),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 160)) +
+                                shrinkVertically(animationSpec = tween(durationMillis = 200), shrinkTowards = Alignment.Top),
                 ) {
                     ToolCard(
                             modifier =
@@ -701,7 +702,8 @@ internal fun SearchScreenContent(
                 AnimatedVisibility(
                         visible = showWordClockSearchCard,
                         enter = fadeIn(animationSpec = tween(durationMillis = 140, delayMillis = 50)),
-                        exit = fadeOut(animationSpec = tween(durationMillis = 100)),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 160)) +
+                                shrinkVertically(animationSpec = tween(durationMillis = 200), shrinkTowards = Alignment.Top),
                 ) {
                     ToolCard(
                             modifier =
@@ -720,7 +722,8 @@ internal fun SearchScreenContent(
                 AnimatedVisibility(
                         visible = showDictionarySearchCard,
                         enter = fadeIn(animationSpec = tween(durationMillis = 140, delayMillis = 50)),
-                        exit = fadeOut(animationSpec = tween(durationMillis = 100)),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 160)) +
+                                shrinkVertically(animationSpec = tween(durationMillis = 200), shrinkTowards = Alignment.Top),
                 ) {
                     ToolCard(
                             modifier =

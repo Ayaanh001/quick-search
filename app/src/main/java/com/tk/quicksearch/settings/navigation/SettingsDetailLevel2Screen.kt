@@ -40,8 +40,6 @@ import com.tk.quicksearch.settings.shared.SettingsManagementSearchBar
 import com.tk.quicksearch.settings.shared.settingsContentWidth
 import com.tk.quicksearch.settings.AppShortcutsSettings.AppShortcutsSettingsSection
 import com.tk.quicksearch.settings.searchEnginesScreen.DirectSearchSetupCard
-import com.tk.quicksearch.shared.featureFlags.FeatureFlag
-import com.tk.quicksearch.shared.featureFlags.FeatureFlags
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 
 @Composable
@@ -182,16 +180,12 @@ internal fun SettingsDetailLevel2Screen(
                                                     .DATE_CALCULATOR_ALIAS_FEATURE_ID
                                     ].orEmpty(),
                             hasGeminiApiKey = state.hasGeminiApiKey,
-                            currencyConverterFeatureFlagEnabled =
-                                    FeatureFlags.isEnabled(FeatureFlag.CURRENCY_CONVERTER),
                             currencyConverterEnabled = state.currencyConverterEnabled,
                             currencyConverterAlias =
                                     state.shortcutCodes[
                                             com.tk.quicksearch.searchEngines.AliasHandler
                                                     .CURRENCY_CONVERTER_ALIAS_FEATURE_ID
                                     ].orEmpty(),
-                            worldClockFeatureFlagEnabled =
-                                    FeatureFlags.isEnabled(FeatureFlag.WORLD_CLOCK),
                             wordClockEnabled = state.wordClockEnabled,
                             wordClockAlias =
                                     state.shortcutCodes[

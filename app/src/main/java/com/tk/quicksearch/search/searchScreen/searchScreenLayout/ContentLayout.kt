@@ -274,7 +274,13 @@ fun ContentLayout(
                 }
 
                 ItemPriorityConfig.ItemType.CURRENCY_CONVERTER_RESULT -> {
-                    if (showCurrencyConverter) {
+                    AnimatedVisibility(
+                        visible = showCurrencyConverter,
+                        enter = fadeIn(animationSpec = tween(durationMillis = 200, delayMillis = 80)) +
+                                expandVertically(animationSpec = tween(durationMillis = 250, delayMillis = 60), expandFrom = Alignment.Top),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 120)) +
+                                shrinkVertically(animationSpec = tween(durationMillis = 160), shrinkTowards = Alignment.Top),
+                    ) {
                         CurrencyConverterResult(
                                 currencyConverterState = state.currencyConverterState,
                                 showWallpaperBackground = effectiveShowWallpaperBackground,
@@ -284,7 +290,13 @@ fun ContentLayout(
                 }
 
                 ItemPriorityConfig.ItemType.WORD_CLOCK_RESULT -> {
-                    if (showWordClock) {
+                    AnimatedVisibility(
+                        visible = showWordClock,
+                        enter = fadeIn(animationSpec = tween(durationMillis = 200, delayMillis = 80)) +
+                                expandVertically(animationSpec = tween(durationMillis = 250, delayMillis = 60), expandFrom = Alignment.Top),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 120)) +
+                                shrinkVertically(animationSpec = tween(durationMillis = 160), shrinkTowards = Alignment.Top),
+                    ) {
                         WordClockResult(
                                 wordClockState = state.wordClockState,
                                 showWallpaperBackground = effectiveShowWallpaperBackground,
@@ -294,7 +306,13 @@ fun ContentLayout(
                 }
 
                 ItemPriorityConfig.ItemType.DICTIONARY_RESULT -> {
-                    if (showDictionary) {
+                    AnimatedVisibility(
+                        visible = showDictionary,
+                        enter = fadeIn(animationSpec = tween(durationMillis = 200, delayMillis = 80)) +
+                                expandVertically(animationSpec = tween(durationMillis = 250, delayMillis = 60), expandFrom = Alignment.Top),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 120)) +
+                                shrinkVertically(animationSpec = tween(durationMillis = 160), shrinkTowards = Alignment.Top),
+                    ) {
                         DictionaryResult(
                                 dictionaryState = state.dictionaryState,
                                 showWallpaperBackground = effectiveShowWallpaperBackground,

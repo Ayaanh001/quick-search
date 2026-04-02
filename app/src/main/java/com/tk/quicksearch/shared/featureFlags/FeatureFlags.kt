@@ -5,10 +5,9 @@ import com.tk.quicksearch.search.core.SearchSection
 import com.tk.quicksearch.search.data.preferences.BasePreferences
 import java.util.EnumMap
 
-enum class FeatureFlag {
-    CURRENCY_CONVERTER,
-    WORLD_CLOCK,
-}
+// This enum is intentionally empty — the feature flag infrastructure below should NOT be removed.
+// Add entries here when new features need to be gated behind a flag.
+enum class FeatureFlag
 
 private data class FeatureFlagDefinition(
     val enabledByDefault: Boolean,
@@ -27,16 +26,8 @@ private data class FeatureFlagDefinition(
 object FeatureFlags {
     const val PREFERENCE_KEY_PREFIX = "feature_flag_"
 
-    private val definitions: Map<FeatureFlag, FeatureFlagDefinition> = mapOf(
-        FeatureFlag.CURRENCY_CONVERTER to FeatureFlagDefinition(
-            enabledByDefault = false,
-            exportExcludedKeys = setOf("currency_converter_enabled"),
-        ),
-        FeatureFlag.WORLD_CLOCK to FeatureFlagDefinition(
-            enabledByDefault = false,
-            exportExcludedKeys = setOf("word_clock_enabled"),
-        ),
-    )
+    // Intentionally empty — add entries here when flags are added to [FeatureFlag].
+    private val definitions: Map<FeatureFlag, FeatureFlagDefinition> = emptyMap()
 
     @Volatile
     private var initialized = false

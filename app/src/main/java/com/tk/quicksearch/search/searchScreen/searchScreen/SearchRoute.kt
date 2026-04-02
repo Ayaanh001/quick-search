@@ -45,6 +45,9 @@ import com.tk.quicksearch.search.models.ContactInfo
 import com.tk.quicksearch.search.models.DeviceFile
 import com.tk.quicksearch.search.searchHistory.RecentSearchEntry
 import com.tk.quicksearch.search.utils.FileUtils
+import com.tk.quicksearch.tools.aiTools.CurrencyConversionIntentParser
+import com.tk.quicksearch.tools.aiTools.WordClockIntentParser
+import com.tk.quicksearch.tools.aiTools.DictionaryIntentParser
 import com.tk.quicksearch.overlay.OverlayModeController
 import com.tk.quicksearch.shared.permissions.PermissionSettingsDialog
 import com.tk.quicksearch.shared.permissions.PermissionHelper
@@ -532,7 +535,25 @@ fun SearchRoute(
             onPhoneNumberSelected = viewModel::onPhoneNumberSelected,
             onDismissPhoneNumberSelection = viewModel::dismissPhoneNumberSelection,
             onSearchTargetClick = { query: String, target: SearchTarget ->
-                viewModel.openSearchTarget(query, target)
+                val trimmedQuery = query.trim()
+                if (target is SearchTarget.Engine &&
+                    target.engine == SearchEngine.DIRECT_SEARCH &&
+                    uiState.hasGeminiApiKey) {
+                    when {
+                        uiState.currencyConverterEnabled &&
+                                CurrencyConversionIntentParser.parseConfirmed(trimmedQuery) != null ->
+                            viewModel.executeCurrencyConversion()
+                        uiState.wordClockEnabled &&
+                                WordClockIntentParser.parseConfirmed(trimmedQuery) != null ->
+                            viewModel.executeWordClockLookup()
+                        uiState.dictionaryEnabled &&
+                                DictionaryIntentParser.parseConfirmed(trimmedQuery) != null ->
+                            viewModel.executeDictionaryLookup()
+                        else -> viewModel.openSearchTarget(query, target)
+                    }
+                } else {
+                    viewModel.openSearchTarget(query, target)
+                }
             },
             onSearchEngineLongPress = onSearchEngineLongPress,
             onDirectSearchEmailClick = { email: String ->
