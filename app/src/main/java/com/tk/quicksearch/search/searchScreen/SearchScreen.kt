@@ -153,6 +153,7 @@ fun SearchScreen(
     onDismissSearchHistoryTip: () -> Unit = {},
     onCurrencyConversionClick: () -> Unit = {},
     onDictionarySearchClick: () -> Unit = {},
+    onWordClockSearchClick: () -> Unit = {},
     onCustomAction: (ContactInfo, ContactCardAction) -> Unit,
     getPrimaryContactCardAction: (Long) -> ContactCardAction?,
     getSecondaryContactCardAction: (Long) -> ContactCardAction?,
@@ -406,6 +407,7 @@ fun SearchScreen(
             onGeminiModelInfoClick = { stateResult.setShowGeminiModelDialog(true) },
             onCurrencyConversionClick = onCurrencyConversionClick,
             onDictionarySearchClick = onDictionarySearchClick,
+            onWordClockSearchClick = onWordClockSearchClick,
             onKeyboardSwitchToggle = {
                 stateResult.setManuallySwitchedToNumberKeyboard(!stateResult.manuallySwitchedToNumberKeyboard)
             },

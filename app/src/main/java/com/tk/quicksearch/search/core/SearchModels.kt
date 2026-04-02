@@ -184,6 +184,8 @@ data class WordClockState(
         val status: WordClockStatus = WordClockStatus.Idle,
         val wordClockText: String? = null,
         val sourceTimeText: String? = null,
+        val placeText: String? = null,
+        val timeZoneText: String? = null,
         val activeQuery: String? = null,
         val usedModelId: String? = null,
         val errorMessage: String? = null,

@@ -21,6 +21,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccessTime
+import androidx.compose.material.icons.rounded.CurrencyExchange
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -59,12 +63,12 @@ import com.tk.quicksearch.search.searchScreen.searchScreenLayout.SearchContentAr
 import com.tk.quicksearch.search.searchScreen.appThemeActionColor
 import com.tk.quicksearch.search.searchScreen.appThemeDividerColor
 import com.tk.quicksearch.search.searchScreen.appThemeResultCardColor
-import com.tk.quicksearch.search.searchScreen.components.CurrencyConverterSearchCard
-import com.tk.quicksearch.search.searchScreen.components.DictionarySearchCard
+import com.tk.quicksearch.search.searchScreen.components.ToolCard
 import com.tk.quicksearch.search.searchScreen.resolveSearchColorTheme
 import com.tk.quicksearch.shared.ui.theme.LocalSearchColorTheme
 import com.tk.quicksearch.tools.aiTools.CurrencyConversionIntentParser
 import com.tk.quicksearch.tools.aiTools.DictionaryIntentParser
+import com.tk.quicksearch.tools.aiTools.WordClockIntentParser
 import kotlinx.coroutines.delay
 
 private const val OPEN_KEYBOARD_ACTION_APPEAR_DELAY_MS = 500L
@@ -99,6 +103,7 @@ internal fun SearchScreenContent(
         onGeminiModelInfoClick: () -> Unit = {},
         onCurrencyConversionClick: () -> Unit = {},
         onDictionarySearchClick: () -> Unit = {},
+        onWordClockSearchClick: () -> Unit = {},
         onKeyboardSwitchToggle: () -> Unit,
         onOverlayNumberKeyboardUiChanged: ((Boolean, Boolean) -> Unit)? = null,
         onOverlayExpandRequest: () -> Unit = {},
@@ -207,6 +212,19 @@ internal fun SearchScreenContent(
                     } else {
                         trimmedQuery.isNotBlank() &&
                                 DictionaryIntentParser.parseConfirmed(trimmedQuery) != null
+                    }
+    val showWordClockSearchCard =
+            (state.wordClockEnabled || isWordClockAliasMode) &&
+                    state.hasGeminiApiKey &&
+                    !showCalculatorResult &&
+                    !showCurrencyConverter &&
+                    !showWordClock &&
+                    !showDictionary &&
+                    if (isWordClockAliasMode) {
+                        true
+                    } else {
+                        trimmedQuery.isNotBlank() &&
+                                WordClockIntentParser.parseConfirmed(trimmedQuery) != null
                     }
     val hideCompactSearchEnginesInToolMode =
             (isToolMode ||
@@ -327,7 +345,8 @@ internal fun SearchScreenContent(
     val predictedTargetForIndicator =
             if (state.topResultIndicatorEnabled &&
                     !showCurrencyConverterSearchCard &&
-                    !showDictionarySearchCard) {
+                    !showDictionarySearchCard &&
+                    !showWordClockSearchCard) {
                 predictedTarget
             } else null
 
@@ -470,6 +489,10 @@ internal fun SearchScreenContent(
                     }
                     if (showDictionarySearchCard) {
                         onDictionarySearchClick()
+                        return@PersistentSearchBar true // keep keyboard open
+                    }
+                    if (showWordClockSearchCard) {
+                        onWordClockSearchClick()
                         return@PersistentSearchBar true // keep keyboard open
                     }
 
@@ -661,12 +684,33 @@ internal fun SearchScreenContent(
                         enter = fadeIn(animationSpec = tween(durationMillis = 140, delayMillis = 50)),
                         exit = fadeOut(animationSpec = tween(durationMillis = 100)),
                 ) {
-                    CurrencyConverterSearchCard(
+                    ToolCard(
                             modifier =
                                     Modifier
                                             .fillMaxWidth()
                                             .padding(bottom = DesignTokens.SpacingXSmall),
+                            label = stringResource(R.string.get_currency_value),
+                            icon = Icons.Rounded.CurrencyExchange,
                             onClick = onCurrencyConversionClick,
+                            showWallpaperBackground = state.showWallpaperBackground,
+                    )
+                }
+            }
+
+            if (!isSearchHistoryExpanded) {
+                AnimatedVisibility(
+                        visible = showWordClockSearchCard,
+                        enter = fadeIn(animationSpec = tween(durationMillis = 140, delayMillis = 50)),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 100)),
+                ) {
+                    ToolCard(
+                            modifier =
+                                    Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = DesignTokens.SpacingXSmall),
+                            label = stringResource(R.string.get_time),
+                            icon = Icons.Rounded.AccessTime,
+                            onClick = onWordClockSearchClick,
                             showWallpaperBackground = state.showWallpaperBackground,
                     )
                 }
@@ -678,11 +722,13 @@ internal fun SearchScreenContent(
                         enter = fadeIn(animationSpec = tween(durationMillis = 140, delayMillis = 50)),
                         exit = fadeOut(animationSpec = tween(durationMillis = 100)),
                 ) {
-                    DictionarySearchCard(
+                    ToolCard(
                             modifier =
                                     Modifier
                                             .fillMaxWidth()
                                             .padding(bottom = DesignTokens.SpacingXSmall),
+                            label = stringResource(R.string.search_in_dictionary),
+                            icon = Icons.Rounded.Search,
                             onClick = onDictionarySearchClick,
                             showWallpaperBackground = state.showWallpaperBackground,
                     )

@@ -854,9 +854,10 @@
     <string name="unit_converter_toggle_desc">Usage examples</string>
     <string name="unit_converter_toggle_title">Unit Converter</string>
     <string name="search_hint_currency_converter">Convert Currencies e.g. 100 USD to INR</string>
-    <string name="search_hint_word_clock">Convert time to words e.g. word clock for 3:45 PM</string>
+    <string name="search_hint_word_clock">Enter any place to get their local time</string>
     <string name="search_hint_dictionary">Enter any word</string>
     <string name="get_currency_value">Get Currency Value</string>
+    <string name="get_time">Get Time</string>
     <string name="currency_converter_invalid_input">Invalid currency conversion input</string>
     <string name="currency_converter_toggle_title">Currency Converter</string>
     <string name="currency_converter_toggle_desc">Example: 100 USD to INR</string>

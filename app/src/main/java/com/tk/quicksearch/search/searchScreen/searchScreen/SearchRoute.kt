@@ -605,6 +605,7 @@ fun SearchRoute(
             onDismissSearchHistoryTip = viewModel::dismissSearchHistoryTip,
             onCurrencyConversionClick = viewModel::executeCurrencyConversion,
             onDictionarySearchClick = viewModel::executeDictionaryLookup,
+            onWordClockSearchClick = viewModel::executeWordClockLookup,
             onWelcomeAnimationCompleted = onWelcomeAnimationCompleted,
             onCustomAction = viewModel::onCustomAction,
             getPrimaryContactCardAction = viewModel::getPrimaryContactCardAction,

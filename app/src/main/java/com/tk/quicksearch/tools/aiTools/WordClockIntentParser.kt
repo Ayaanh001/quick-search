@@ -20,6 +20,15 @@ object WordClockIntentParser {
                 originalQuery = normalized,
         )
     }
+
+    fun parseAliasConfirmed(trimmedQuery: String): ConfirmedWordClockQuery? {
+        val normalized = trimmedQuery.trim()
+        if (normalized.isBlank()) return null
+        return ConfirmedWordClockQuery(
+                timeExpression = normalized,
+                originalQuery = normalized,
+        )
+    }
 }
 
 data class ConfirmedWordClockQuery(

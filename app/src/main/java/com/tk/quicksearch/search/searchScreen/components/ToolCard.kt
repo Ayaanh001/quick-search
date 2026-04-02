@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,17 +14,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import com.tk.quicksearch.R
 import com.tk.quicksearch.search.searchScreen.shared.SearchResultCard
 import com.tk.quicksearch.searchEngines.shared.SearchTargetConstants
 import com.tk.quicksearch.shared.ui.theme.DesignTokens
 import com.tk.quicksearch.shared.util.hapticConfirm
 
 @Composable
-fun DictionarySearchCard(
+internal fun ToolCard(
+    label: String,
+    icon: ImageVector,
     onClick: () -> Unit,
     showWallpaperBackground: Boolean,
     modifier: Modifier = Modifier,
@@ -57,14 +56,14 @@ fun DictionarySearchCard(
             horizontalArrangement = Arrangement.Start,
         ) {
             Icon(
-                imageVector = Icons.Rounded.Search,
+                imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(SearchTargetConstants.DEFAULT_ICON_SIZE),
             )
             Spacer(modifier = Modifier.size(SearchTargetConstants.ICON_TEXT_SPACING))
             Text(
-                text = stringResource(R.string.search_in_dictionary),
+                text = label,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Medium,

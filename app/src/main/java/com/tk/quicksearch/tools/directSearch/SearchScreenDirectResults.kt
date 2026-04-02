@@ -294,6 +294,8 @@ fun WordClockResult(
                     }
                     WordClockStatus.Success -> {
                         val line1 = wordClockState.wordClockText.orEmpty()
+                        val placeLabel = wordClockState.placeText?.trim().orEmpty()
+                        val timeZoneLabel = wordClockState.timeZoneText?.trim().orEmpty()
                         Column(
                                 modifier =
                                         Modifier.fillMaxWidth().pointerInput(line1) {
@@ -315,6 +317,30 @@ fun WordClockResult(
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
+                            }
+                            if (placeLabel.isNotBlank() || timeZoneLabel.isNotBlank()) {
+                                Column(
+                                        modifier =
+                                                Modifier.padding(top = DesignTokens.SpacingSmall)
+                                                        .fillMaxWidth(),
+                                        verticalArrangement =
+                                                Arrangement.spacedBy(DesignTokens.SpacingXXSmall),
+                                ) {
+                                    placeLabel.takeIf { it.isNotBlank() }?.let { place ->
+                                        Text(
+                                                text = place,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                    timeZoneLabel.takeIf { it.isNotBlank() }?.let { timezone ->
+                                        Text(
+                                                text = timezone,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

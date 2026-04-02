@@ -78,7 +78,6 @@ import com.tk.quicksearch.tools.aiTools.CurrencyNotRecognizedException
 import com.tk.quicksearch.tools.aiTools.CurrencyConversionIntentParser
 import com.tk.quicksearch.tools.aiTools.DictionaryHandler
 import com.tk.quicksearch.tools.aiTools.ConfirmedDictionaryQuery
-import com.tk.quicksearch.tools.aiTools.ConfirmedWordClockQuery
 import com.tk.quicksearch.tools.aiTools.DictionaryIntentParser
 import com.tk.quicksearch.tools.aiTools.DictionaryNotRecognizedException
 import com.tk.quicksearch.tools.aiTools.WordClockHandler
@@ -3158,91 +3157,87 @@ class SearchViewModel(
             }
             return
         }
+        // Candidate detected: wait for explicit user action from the UI card.
+    }
+
+    fun executeWordClockLookup() {
+        val trimmedQuery = _resultsState.value.query.trim()
+        if (trimmedQuery.isBlank()) return
+        if ((!userPreferences.isWordClockEnabled() && !lockedWordClockAlias) || !_featureState.value.hasGeminiApiKey) return
+
+        val confirmed =
+            if (lockedWordClockAlias) {
+                WordClockIntentParser.parseAliasConfirmed(trimmedQuery)
+            } else {
+                WordClockIntentParser.parseConfirmed(trimmedQuery)
+            } ?: run {
+                updateResultsState { s -> s.copy(wordClockState = WordClockState()) }
+                return
+            }
+
+        clearInformationCardsExcept(ActiveInformationCard.WORD_CLOCK)
         val version = ++wordClockQueryVersion
-        val capturedTrim = trimmedQuery
+        wordClockJob?.cancel()
         wordClockJob =
-                viewModelScope.launch(Dispatchers.Default) {
-                    delay(WORD_CLOCK_DEBOUNCE_MS)
-                    if (version != wordClockQueryVersion) return@launch
-                    val latestTrim = _resultsState.value.query.trim()
-                    if (latestTrim != capturedTrim) return@launch
-                    val confirmed =
-                            if (lockedWordClockAlias) {
-                                ConfirmedWordClockQuery(
-                                        timeExpression = latestTrim,
-                                        originalQuery = latestTrim,
-                                )
-                            } else {
-                                WordClockIntentParser.parseConfirmed(latestTrim)
-                            }
-                    if (confirmed == null) {
-                        updateResultsState { s ->
-                            s.copy(wordClockState = WordClockState())
-                        }
-                        return@launch
-                    }
-                    clearInformationCardsExcept(ActiveInformationCard.WORD_CLOCK)
-                    updateResultsState { s ->
-                        s.copy(
-                                wordClockState =
-                                        WordClockState(
-                                                status = WordClockStatus.Loading,
-                                                activeQuery = latestTrim,
-                                        ),
-                        )
-                    }
-                    val apiResult = wordClockHandler.convert(confirmed)
-                    if (version != wordClockQueryVersion) return@launch
-                    if (_resultsState.value.query.trim() != latestTrim) return@launch
-                    apiResult.fold(
-                            onSuccess = { (parsed, modelId) ->
-                                updateResultsState { s ->
-                                    s.copy(
-                                            wordClockState =
-                                                    WordClockState(
-                                                            status = WordClockStatus.Success,
-                                                            wordClockText = parsed.wordClockText,
-                                                            sourceTimeText = parsed.sourceTimeText,
-                                                            activeQuery = latestTrim,
-                                                            usedModelId = modelId,
-                                                    ),
-                                    )
-                                }
-                            },
-                            onFailure = { e ->
-                                if (e is WordClockNotRecognizedException) {
-                                    val msg =
-                                            appContext.getString(
-                                                    R.string.word_clock_error_not_recognized,
-                                            )
-                                    updateResultsState { s ->
-                                        s.copy(
-                                                wordClockState =
-                                                        WordClockState(
-                                                                status = WordClockStatus.Error,
-                                                                errorMessage = msg,
-                                                                activeQuery = latestTrim,
-                                                        ),
-                                        )
-                                    }
-                                    return@launch
-                                }
-                                val msg =
-                                        e.message
-                                                ?: appContext.getString(R.string.direct_search_error_generic)
-                                updateResultsState { s ->
-                                    s.copy(
-                                            wordClockState =
-                                                    WordClockState(
-                                                            status = WordClockStatus.Error,
-                                                            errorMessage = msg,
-                                                            activeQuery = latestTrim,
-                                                    ),
-                                    )
-                                }
-                            },
+            viewModelScope.launch(Dispatchers.Default) {
+                updateResultsState { s ->
+                    s.copy(
+                        wordClockState =
+                            WordClockState(
+                                status = WordClockStatus.Loading,
+                                activeQuery = trimmedQuery,
+                            ),
                     )
                 }
+                val apiResult = wordClockHandler.convert(confirmed)
+                if (version != wordClockQueryVersion) return@launch
+                if (_resultsState.value.query.trim() != trimmedQuery) return@launch
+                apiResult.fold(
+                    onSuccess = { (parsed, modelId) ->
+                        updateResultsState { s ->
+                            s.copy(
+                                wordClockState =
+                                    WordClockState(
+                                        status = WordClockStatus.Success,
+                                        wordClockText = parsed.wordClockText,
+                                        sourceTimeText = parsed.sourceTimeText,
+                                        placeText = parsed.placeText,
+                                        timeZoneText = parsed.timeZoneText,
+                                        activeQuery = trimmedQuery,
+                                        usedModelId = modelId,
+                                    ),
+                            )
+                        }
+                    },
+                    onFailure = { e ->
+                        if (e is WordClockNotRecognizedException) {
+                            val msg = appContext.getString(R.string.word_clock_error_not_recognized)
+                            updateResultsState { s ->
+                                s.copy(
+                                    wordClockState =
+                                        WordClockState(
+                                            status = WordClockStatus.Error,
+                                            errorMessage = msg,
+                                            activeQuery = trimmedQuery,
+                                        ),
+                                )
+                            }
+                            return@fold
+                        }
+                        val msg = e.message ?: appContext.getString(R.string.direct_search_error_generic)
+                        updateResultsState { s ->
+                            s.copy(
+                                wordClockState =
+                                    WordClockState(
+                                        status = WordClockStatus.Error,
+                                        errorMessage = msg,
+                                        activeQuery = trimmedQuery,
+                                    ),
+                            )
+                        }
+                    },
+                )
+            }
     }
 
     private fun scheduleDictionaryLookup(
@@ -4860,7 +4855,6 @@ class SearchViewModel(
         // redundant mid-word searches that occur during rapid typing.
         private const val APP_SEARCH_DEBOUNCE_MS = 60L
         private const val CURRENCY_CONVERTER_DEBOUNCE_MS = 450L
-        private const val WORD_CLOCK_DEBOUNCE_MS = 450L
         /** Minimum interval between browser-target refreshes triggered by onResume. */
         private const val BROWSER_REFRESH_INTERVAL_MS = 5 * 60 * 1_000L // 5 minutes
         private const val DEFERRED_APP_REFRESH_DELAY_MS = 2_000L
