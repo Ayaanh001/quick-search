@@ -26,16 +26,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.FormatListBulleted
 import androidx.compose.material.icons.automirrored.rounded.ManageSearch
 import androidx.compose.material.icons.rounded.AdminPanelSettings
+import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.PushPin
 import androidx.compose.material.icons.rounded.RocketLaunch
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Tune
@@ -69,7 +73,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.tk.quicksearch.R
-import com.tk.quicksearch.search.data.preferences.GeminiPreferences
+import com.tk.quicksearch.search.data.preferences.BasePreferences
 import com.tk.quicksearch.settings.settingsDetailScreen.SettingsDetailType
 import com.tk.quicksearch.settings.shared.*
 import com.tk.quicksearch.shared.featureFlags.FeatureFlag
@@ -125,9 +129,29 @@ fun SettingsScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var showImportWarningDialog by remember { mutableStateOf(false) }
-    val geminiPreferences = remember(context) { GeminiPreferences(context) }
-    var includeGeminiApiKeyInNextExport by remember { mutableStateOf(false) }
-    var showApiKeyExportWarningDialog by remember { mutableStateOf(false) }
+    var showExportSelectionDialog by remember { mutableStateOf(false) }
+    var exportSelectionState by remember { mutableStateOf(ExportSelectionState()) }
+    val userPrefs =
+        remember(context) {
+            context.getSharedPreferences(BasePreferences.PREFS_NAME, android.content.Context.MODE_PRIVATE)
+        }
+    val isSearchHistoryEnabledForExport =
+        remember(userPrefs) {
+            userPrefs.getBoolean(BasePreferences.KEY_RECENT_QUERIES_ENABLED, true)
+        }
+    val hasPinnedItemsForExport =
+        remember(userPrefs) {
+            listOf(
+                BasePreferences.KEY_PINNED,
+                BasePreferences.KEY_PINNED_CONTACT_IDS,
+                BasePreferences.KEY_PINNED_FILE_URIS,
+                BasePreferences.KEY_PINNED_SETTINGS,
+                BasePreferences.KEY_PINNED_CALENDAR_EVENT_IDS,
+                BasePreferences.KEY_PINNED_APP_SHORTCUTS,
+            ).any { key ->
+                userPrefs.getStringSet(key, emptySet()).orEmpty().isNotEmpty()
+            }
+        }
     FeatureFlags.initialize(context)
 
     val exportLauncher =
@@ -141,7 +165,7 @@ fun SettingsScreen(
                         SettingsBackupManager.exportToUri(
                             context = context,
                             outputUri = uri,
-                            includeGeminiApiKey = includeGeminiApiKeyInNextExport,
+                            options = exportSelectionState.toExportOptions(),
                         )
                     }.isSuccess
                 withContext(Dispatchers.Main) {
@@ -423,14 +447,18 @@ fun SettingsScreen(
                             showImportWarningDialog = true
                         },
                         onExportClick = {
-                            if (geminiPreferences.getGeminiApiKey().isNullOrBlank()) {
-                                includeGeminiApiKeyInNextExport = false
-                                val defaultName =
-                                    SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
-                                exportLauncher.launch("quick-search-settings-$defaultName.quicksearch")
-                            } else {
-                                showApiKeyExportWarningDialog = true
-                            }
+                            exportSelectionState =
+                                ExportSelectionState(
+                                    includeSettings = true,
+                                    includeSearchHistory = isSearchHistoryEnabledForExport,
+                                    includePinnedItems = hasPinnedItemsForExport,
+                                    includeShortcuts = true,
+                                    includeSearchEngines = true,
+                                    includeGeminiApi = false,
+                                    showSearchHistoryOption = isSearchHistoryEnabledForExport,
+                                    showPinnedItemsOption = hasPinnedItemsForExport,
+                                )
+                            showExportSelectionDialog = true
                         },
                     )
                 }
@@ -484,44 +512,164 @@ fun SettingsScreen(
         )
     }
 
-    if (showApiKeyExportWarningDialog) {
+    if (showExportSelectionDialog) {
         AppAlertDialog(
             onDismissRequest = {
-                showApiKeyExportWarningDialog = false
+                showExportSelectionDialog = false
             },
             title = {
-                Text(text = stringResource(R.string.settings_backup_export_api_key_warning_title))
+                Text(text = stringResource(R.string.settings_backup_export_selection_title))
             },
             text = {
-                Text(text = stringResource(R.string.settings_backup_export_api_key_warning_message))
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState()),
+                ) {
+                    SettingsCheckboxRow(
+                        title = stringResource(R.string.settings_backup_export_option_settings_title),
+                        description = "",
+                        checked = exportSelectionState.includeSettings,
+                        onCheckedChange = {
+                            exportSelectionState = exportSelectionState.copy(includeSettings = it)
+                        },
+                        icon = Icons.Rounded.Tune,
+                        isLastItem = false,
+                    )
+                    if (exportSelectionState.showSearchHistoryOption) {
+                        SettingsCheckboxRow(
+                            title =
+                                stringResource(
+                                    R.string.settings_backup_export_option_search_history_title,
+                                ),
+                            description = "",
+                            checked = exportSelectionState.includeSearchHistory,
+                            onCheckedChange = {
+                                exportSelectionState =
+                                    exportSelectionState.copy(includeSearchHistory = it)
+                            },
+                            icon = Icons.Rounded.History,
+                            isLastItem = false,
+                        )
+                    }
+                    if (exportSelectionState.showPinnedItemsOption || true) {
+                        SettingsCheckboxRow(
+                            title =
+                                stringResource(
+                                    R.string.settings_backup_export_option_pinned_items_title,
+                                ),
+                            description = "",
+                            checked = exportSelectionState.includePinnedItems,
+                            onCheckedChange = {
+                                exportSelectionState =
+                                    exportSelectionState.copy(includePinnedItems = it)
+                            },
+                            icon = Icons.Rounded.PushPin,
+                            isLastItem = false,
+                        )
+                    }
+                    SettingsCheckboxRow(
+                        title = stringResource(R.string.settings_backup_export_option_shortcuts_title),
+                        description = "",
+                        checked = exportSelectionState.includeShortcuts,
+                        onCheckedChange = {
+                            exportSelectionState = exportSelectionState.copy(includeShortcuts = it)
+                        },
+                        icon = Icons.Rounded.Apps,
+                        isLastItem = false,
+                    )
+                    SettingsCheckboxRow(
+                        title =
+                            stringResource(
+                                R.string.settings_backup_export_option_search_engines_title,
+                            ),
+                        description = "",
+                        checked = exportSelectionState.includeSearchEngines,
+                        onCheckedChange = {
+                            exportSelectionState =
+                                exportSelectionState.copy(includeSearchEngines = it)
+                        },
+                        icon = Icons.AutoMirrored.Rounded.ManageSearch,
+                        isLastItem = false,
+                    )
+                    SettingsCheckboxRow(
+                        title = stringResource(R.string.settings_backup_export_option_gemini_title),
+                        description = "",
+                        checked = exportSelectionState.includeGeminiApi,
+                        onCheckedChange = {
+                            exportSelectionState = exportSelectionState.copy(includeGeminiApi = it)
+                        },
+                        iconResId = R.drawable.direct_search,
+                        isLastItem = true,
+                    )
+                    if (exportSelectionState.includeGeminiApi) {
+                        Text(
+                            text =
+                                stringResource(
+                                    R.string.settings_backup_export_api_key_warning_message,
+                                ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(top = DesignTokens.SpacingMedium),
+                        )
+                    }
+                }
             },
             confirmButton = {
                 TextButton(
+                    enabled = exportSelectionState.hasAnySelection(),
                     onClick = {
-                        includeGeminiApiKeyInNextExport = true
-                        showApiKeyExportWarningDialog = false
+                        showExportSelectionDialog = false
                         val defaultName =
                             SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
                         exportLauncher.launch("quick-search-settings-$defaultName.quicksearch")
                     },
                 ) {
-                    Text(text = stringResource(R.string.settings_backup_export_with_api_key))
+                    Text(text = stringResource(R.string.settings_backup_export_button))
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
-                        includeGeminiApiKeyInNextExport = false
-                        showApiKeyExportWarningDialog = false
-                        val defaultName =
-                            SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
-                        exportLauncher.launch("quick-search-settings-$defaultName.quicksearch")
+                        showExportSelectionDialog = false
                     },
                 ) {
-                    Text(text = stringResource(R.string.settings_backup_export_without_api_key))
+                    Text(text = stringResource(R.string.dialog_cancel))
                 }
             },
         )
+    }
+}
+
+private data class ExportSelectionState(
+    val includeSettings: Boolean = true,
+    val includeSearchHistory: Boolean = true,
+    val includePinnedItems: Boolean = true,
+    val includeShortcuts: Boolean = true,
+    val includeSearchEngines: Boolean = true,
+    val includeGeminiApi: Boolean = false,
+    val showSearchHistoryOption: Boolean = true,
+    val showPinnedItemsOption: Boolean = true,
+) {
+    fun hasAnySelection(): Boolean =
+        includeSettings ||
+            includeSearchHistory ||
+            includePinnedItems ||
+            includeShortcuts ||
+            includeSearchEngines ||
+            includeGeminiApi
+
+    fun toExportOptions(): SettingsBackupManager.ExportOptions {
+        val items = buildSet {
+            if (includeSettings) add(SettingsBackupManager.ExportItem.SETTINGS)
+            if (includeSearchHistory) add(SettingsBackupManager.ExportItem.SEARCH_HISTORY)
+            if (includePinnedItems) add(SettingsBackupManager.ExportItem.PINNED_ITEMS)
+            if (includeShortcuts) add(SettingsBackupManager.ExportItem.SHORTCUTS)
+            if (includeSearchEngines) add(SettingsBackupManager.ExportItem.SEARCH_ENGINES)
+            if (includeGeminiApi) add(SettingsBackupManager.ExportItem.GEMINI_API)
+        }
+        return SettingsBackupManager.ExportOptions(selectedItems = items)
     }
 }
 

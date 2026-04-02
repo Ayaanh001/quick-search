@@ -414,6 +414,13 @@
     <string name="settings_backup_export_api_key_warning_message">Proceed at your own risk. Exported API key is not encrypted and can be accessed by anyone who has access to your backup file.</string>
     <string name="settings_backup_export_api_key_warning_title">Export Gemini API key too?</string>
     <string name="settings_backup_export_button">Export</string>
+    <string name="settings_backup_export_selection_title">Export Data</string>
+    <string name="settings_backup_export_option_settings_title">Settings</string>
+    <string name="settings_backup_export_option_search_history_title">Search history</string>
+    <string name="settings_backup_export_option_pinned_items_title">Pinned items</string>
+    <string name="settings_backup_export_option_shortcuts_title">App Shortcuts</string>
+    <string name="settings_backup_export_option_search_engines_title">Search engines</string>
+    <string name="settings_backup_export_option_gemini_title">Gemini API</string>
     <string name="settings_backup_export_failed">Unable to export settings.</string>
     <string name="settings_backup_export_success">Settings exported successfully.</string>
     <string name="settings_backup_export_with_api_key">Yes, backup API key</string>

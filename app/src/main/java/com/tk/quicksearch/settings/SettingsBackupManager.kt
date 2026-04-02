@@ -14,12 +14,35 @@ import org.json.JSONObject
  * Serializes and restores backup-eligible SharedPreferences into a portable JSON file.
  */
 object SettingsBackupManager {
+    enum class ExportItem {
+        SETTINGS,
+        SEARCH_HISTORY,
+        PINNED_ITEMS,
+        SHORTCUTS,
+        SEARCH_ENGINES,
+        GEMINI_API,
+    }
+
+    data class ExportOptions(
+        val selectedItems: Set<ExportItem> =
+            setOf(
+                ExportItem.SETTINGS,
+                ExportItem.SEARCH_HISTORY,
+                ExportItem.PINNED_ITEMS,
+                ExportItem.SHORTCUTS,
+                ExportItem.SEARCH_ENGINES,
+            ),
+    ) {
+        fun includes(item: ExportItem): Boolean = item in selectedItems
+    }
+
     private const val FORMAT_VERSION = 1
 
     private const val FIELD_FORMAT_VERSION = "formatVersion"
     private const val FIELD_EXPORTED_AT_EPOCH_MS = "exportedAtEpochMs"
     private const val FIELD_PREFERENCES = "preferences"
     private const val FIELD_GEMINI_API_KEY = "geminiApiKey"
+    private const val FIELD_SELECTED_EXPORT_ITEMS = "selectedExportItems"
     private const val FIELD_TYPE = "type"
     private const val FIELD_VALUE = "value"
 
@@ -34,7 +57,6 @@ object SettingsBackupManager {
         setOf(
             BasePreferences.FIRST_LAUNCH_PREFS_NAME,
             BasePreferences.TIMING_PREFS_NAME,
-            BasePreferences.SESSION_PREFS_NAME,
             "app_cache",
             BasePreferences.ENCRYPTED_PREFS_NAME,
             "app_launch_counts",
@@ -68,10 +90,10 @@ object SettingsBackupManager {
     fun exportToUri(
         context: Context,
         outputUri: Uri,
-        includeGeminiApiKey: Boolean = false,
+        options: ExportOptions = ExportOptions(),
     ) {
         val geminiApiKey =
-            if (includeGeminiApiKey) {
+            if (options.includes(ExportItem.GEMINI_API)) {
                 GeminiPreferences(context).getGeminiApiKey()?.takeIf { it.isNotBlank() }
             } else {
                 null
@@ -80,7 +102,11 @@ object SettingsBackupManager {
             JSONObject()
                 .put(FIELD_FORMAT_VERSION, FORMAT_VERSION)
                 .put(FIELD_EXPORTED_AT_EPOCH_MS, System.currentTimeMillis())
-                .put(FIELD_PREFERENCES, buildPreferencesJson(context))
+                .put(FIELD_PREFERENCES, buildPreferencesJson(context, options))
+                .put(
+                    FIELD_SELECTED_EXPORT_ITEMS,
+                    JSONArray(options.selectedItems.map { it.name }.sorted()),
+                )
                 .apply {
                     geminiApiKey?.let { put(FIELD_GEMINI_API_KEY, it) }
                 }
@@ -109,19 +135,34 @@ object SettingsBackupManager {
         val root = JSONObject(text)
         val preferencesJson = root.optJSONObject(FIELD_PREFERENCES)
             ?: throw IllegalArgumentException("Invalid backup file format")
+        val selectedExportItems = parseSelectedExportItems(root)
         val geminiApiKey =
             root
                 .optString(FIELD_GEMINI_API_KEY, "")
                 .takeIf { it.isNotBlank() }
 
         val importedNames = preferencesJson.keys().asSequence().toSet()
-        val preferenceNames = collectEligiblePreferenceNames(context, importedNames)
+        val preferenceNames =
+            if (selectedExportItems != null) {
+                importedNames
+            } else {
+                collectEligiblePreferenceNames(context, importedNames)
+            }
 
         preferenceNames.forEach { prefName ->
             val sharedPreferences = context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
-            val editor = sharedPreferences.edit().clear()
-
             val prefEntries = preferencesJson.optJSONObject(prefName)
+            if (prefEntries == null && selectedExportItems != null) return@forEach
+
+            val editor =
+                sharedPreferences
+                    .edit()
+                    .apply {
+                        if (selectedExportItems == null) {
+                            clear()
+                        }
+                    }
+
             if (prefEntries != null) {
                 prefEntries.keys().forEach { key ->
                     if (shouldExcludeKey(prefName, key)) return@forEach
@@ -159,7 +200,23 @@ object SettingsBackupManager {
         }
     }
 
-    private fun buildPreferencesJson(context: Context): JSONObject {
+    private fun parseSelectedExportItems(root: JSONObject): Set<ExportItem>? {
+        val itemsArray = root.optJSONArray(FIELD_SELECTED_EXPORT_ITEMS) ?: return null
+        if (itemsArray.length() == 0) return emptySet()
+        return buildSet {
+            for (index in 0 until itemsArray.length()) {
+                val itemName = itemsArray.optString(index)
+                runCatching { ExportItem.valueOf(itemName) }
+                    .getOrNull()
+                    ?.let { add(it) }
+            }
+        }
+    }
+
+    private fun buildPreferencesJson(
+        context: Context,
+        options: ExportOptions,
+    ): JSONObject {
         val preferencesJson = JSONObject()
         collectEligiblePreferenceNames(context)
             .sorted()
@@ -169,13 +226,16 @@ object SettingsBackupManager {
                 pref.all
                     .asSequence()
                     .filterNot { shouldExcludeKey(prefName, it.key) }
+                    .filter { shouldIncludeKeyForExport(prefName, it.key, options) }
                     .sortedBy { it.key }
                     .forEach { (key, value) ->
                         serializePreferenceValue(value)?.let { serialized ->
                             prefEntriesJson.put(key, serialized)
                         }
                     }
-                preferencesJson.put(prefName, prefEntriesJson)
+                if (prefEntriesJson.length() > 0) {
+                    preferencesJson.put(prefName, prefEntriesJson)
+                }
             }
         return preferencesJson
     }
@@ -211,6 +271,93 @@ object SettingsBackupManager {
         return key in excludedUserPreferenceKeys ||
             key.startsWith(FeatureFlags.PREFERENCE_KEY_PREFIX) ||
             FeatureFlags.shouldExcludePreferenceFromExport(key)
+    }
+
+    private fun shouldIncludeKeyForExport(
+        prefName: String,
+        key: String,
+        options: ExportOptions,
+    ): Boolean {
+        if (isSearchHistoryKey(prefName, key)) {
+            return options.includes(ExportItem.SEARCH_HISTORY)
+        }
+        if (isPinnedItemKey(prefName, key)) {
+            return options.includes(ExportItem.PINNED_ITEMS)
+        }
+        if (isShortcutKey(prefName, key)) {
+            return options.includes(ExportItem.SHORTCUTS)
+        }
+        if (isSearchEngineKey(prefName, key)) {
+            return options.includes(ExportItem.SEARCH_ENGINES)
+        }
+        if (isGeminiKey(prefName, key)) {
+            return options.includes(ExportItem.GEMINI_API)
+        }
+        if (prefName == "app_shortcut_cache") {
+            return options.includes(ExportItem.SHORTCUTS)
+        }
+        return options.includes(ExportItem.SETTINGS)
+    }
+
+    private fun isSearchHistoryKey(
+        prefName: String,
+        key: String,
+    ): Boolean =
+        (prefName == BasePreferences.SESSION_PREFS_NAME && key == BasePreferences.KEY_RECENT_QUERIES) ||
+            (prefName == BasePreferences.PREFS_NAME && key == BasePreferences.KEY_RECENT_RESULT_OPENS)
+
+    private fun isPinnedItemKey(
+        prefName: String,
+        key: String,
+    ): Boolean {
+        if (prefName != BasePreferences.PREFS_NAME) return false
+        return key == BasePreferences.KEY_PINNED ||
+            key == BasePreferences.KEY_PINNED_CONTACT_IDS ||
+            key == BasePreferences.KEY_PINNED_FILE_URIS ||
+            key == BasePreferences.KEY_PINNED_SETTINGS ||
+            key == BasePreferences.KEY_PINNED_CALENDAR_EVENT_IDS ||
+            key == BasePreferences.KEY_PINNED_APP_SHORTCUTS
+    }
+
+    private fun isShortcutKey(
+        prefName: String,
+        key: String,
+    ): Boolean {
+        if (prefName != BasePreferences.PREFS_NAME) return false
+        return key == BasePreferences.KEY_DISABLED_APP_SHORTCUTS ||
+            key.startsWith(BasePreferences.KEY_APP_SHORTCUT_ICON_OVERRIDE_PREFIX) ||
+            key.startsWith(BasePreferences.KEY_NICKNAME_APP_SHORTCUT_PREFIX)
+    }
+
+    private fun isSearchEngineKey(
+        prefName: String,
+        key: String,
+    ): Boolean {
+        if (prefName != BasePreferences.PREFS_NAME) return false
+        return key == BasePreferences.KEY_DISABLED_SEARCH_ENGINES ||
+            key == BasePreferences.KEY_SEARCH_ENGINE_ORDER ||
+            key == BasePreferences.KEY_CUSTOM_SEARCH_ENGINES ||
+            key == BasePreferences.KEY_SEARCH_ENGINE_COMPACT_MODE ||
+            key == BasePreferences.KEY_SEARCH_ENGINE_COMPACT_ROW_COUNT ||
+            key == BasePreferences.KEY_SEARCH_ENGINE_ALIAS_SUFFIX_ENABLED ||
+            key == BasePreferences.KEY_ALIAS_TRIGGER_AFTER_SPACE ||
+            key == BasePreferences.KEY_ALIASES_ENABLED ||
+            key == BasePreferences.KEY_SHORTCUTS_ENABLED ||
+            key == BasePreferences.KEY_AMAZON_DOMAIN ||
+            key.startsWith(BasePreferences.KEY_ALIAS_CODE_PREFIX) ||
+            key.startsWith(BasePreferences.KEY_ALIAS_ENABLED_PREFIX) ||
+            key.startsWith(BasePreferences.KEY_SHORTCUT_CODE_PREFIX) ||
+            key.startsWith(BasePreferences.KEY_SHORTCUT_ENABLED_PREFIX)
+    }
+
+    private fun isGeminiKey(
+        prefName: String,
+        key: String,
+    ): Boolean {
+        if (prefName != BasePreferences.PREFS_NAME) return false
+        return key == BasePreferences.KEY_GEMINI_PERSONAL_CONTEXT ||
+            key == BasePreferences.KEY_GEMINI_MODEL ||
+            key == BasePreferences.KEY_GEMINI_GROUNDING_ENABLED
     }
 
     private fun serializePreferenceValue(value: Any?): JSONObject? =
