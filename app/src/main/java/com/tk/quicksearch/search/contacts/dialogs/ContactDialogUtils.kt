@@ -56,8 +56,8 @@ internal fun reorderPhoneNumbersForDisplay(
 
 /**
  * Filters contact methods to only include those that match the selected phone number.
- * Telegram methods use special utility functions for matching, while other methods
- * use phone number normalization for comparison.
+ * Telegram and Cherrygram methods use special utility functions for matching, while
+ * other methods use phone number normalization for comparison.
  */
 internal fun filterMethodsByPhoneNumber(
     contactMethods: List<ContactMethod>,
@@ -67,10 +67,13 @@ internal fun filterMethodsByPhoneNumber(
 ): List<ContactMethod> =
     contactMethods.filter { method ->
         when {
-            // Telegram methods require special handling with utility functions
+            // Telegram and Cherrygram methods require special handling with utility functions
             method is ContactMethod.TelegramMessage ||
-                method is ContactMethod.TelegramCall ||
-                method is ContactMethod.TelegramVideoCall -> {
+                    method is ContactMethod.TelegramCall ||
+                    method is ContactMethod.TelegramVideoCall ||
+                    method is ContactMethod.CherrygramMessage ||
+                    method is ContactMethod.CherrygramCall ||
+                    method is ContactMethod.CherrygramVideoCall -> {
                 if (selectedPhoneNumber != null) {
                     TelegramContactUtils.isTelegramMethodForPhoneNumber(
                         context = context,
@@ -78,14 +81,14 @@ internal fun filterMethodsByPhoneNumber(
                         telegramMethod = method,
                     )
                 } else {
-                    // If no phone number is selected, show all Telegram methods
+                    // If no phone number is selected, show all Telegram/Cherrygram methods
                     true
                 }
             }
 
             method is ContactMethod.SignalMessage ||
-                method is ContactMethod.SignalCall ||
-                method is ContactMethod.SignalVideoCall -> {
+                    method is ContactMethod.SignalCall ||
+                    method is ContactMethod.SignalVideoCall -> {
                 if (selectedPhoneNumber == null) {
                     true
                 } else {
@@ -97,8 +100,8 @@ internal fun filterMethodsByPhoneNumber(
             method is ContactMethod.Email -> true
 
             method is ContactMethod.CustomApp ||
-                method is ContactMethod.VideoCall ||
-                method is ContactMethod.ViewInContactsApp -> {
+                    method is ContactMethod.VideoCall ||
+                    method is ContactMethod.ViewInContactsApp -> {
                 if (selectedPhoneNumber == null) {
                     true
                 } else {
@@ -114,7 +117,7 @@ internal fun filterMethodsByPhoneNumber(
             else -> {
                 val methodData = method.data?.takeIf { it.isNotBlank() }
                 methodData != null && selectedPhoneNumber != null &&
-                    PhoneNumberUtils.isSameNumber(methodData, selectedPhoneNumber)
+                        PhoneNumberUtils.isSameNumber(methodData, selectedPhoneNumber)
             }
         }
     }
@@ -165,10 +168,13 @@ internal fun ContactMethod.isConfiguredPopupMethod(): Boolean =
         is ContactMethod.TelegramMessage,
         is ContactMethod.TelegramCall,
         is ContactMethod.TelegramVideoCall,
+        is ContactMethod.CherrygramMessage,
+        is ContactMethod.CherrygramCall,
+        is ContactMethod.CherrygramVideoCall,
         is ContactMethod.SignalMessage,
         is ContactMethod.SignalCall,
         is ContactMethod.SignalVideoCall,
-        -> true
+            -> true
         else -> false
     }
 
@@ -190,6 +196,9 @@ internal fun contactMethodToCardAction(
         is ContactMethod.TelegramMessage -> ContactCardAction.TelegramMessage(fallbackData)
         is ContactMethod.TelegramCall -> ContactCardAction.TelegramCall(fallbackData)
         is ContactMethod.TelegramVideoCall -> ContactCardAction.TelegramVideoCall(fallbackData)
+        is ContactMethod.CherrygramMessage -> ContactCardAction.CherrygramMessage(fallbackData)
+        is ContactMethod.CherrygramCall -> ContactCardAction.CherrygramCall(fallbackData)
+        is ContactMethod.CherrygramVideoCall -> ContactCardAction.CherrygramVideoCall(fallbackData)
         is ContactMethod.SignalMessage -> ContactCardAction.SignalMessage(fallbackData)
         is ContactMethod.SignalCall -> ContactCardAction.SignalCall(fallbackData)
         is ContactMethod.SignalVideoCall -> ContactCardAction.SignalVideoCall(fallbackData)
@@ -222,16 +231,19 @@ internal fun methodShortcutLabel(
         is ContactMethod.Sms -> context.getString(R.string.contacts_action_button_message)
         is ContactMethod.WhatsAppCall,
         is ContactMethod.TelegramCall,
+        is ContactMethod.CherrygramCall,
         is ContactMethod.SignalCall,
-        -> context.getString(R.string.contacts_action_button_voice_call)
+            -> context.getString(R.string.contacts_action_button_voice_call)
         is ContactMethod.WhatsAppMessage,
         is ContactMethod.TelegramMessage,
+        is ContactMethod.CherrygramMessage,
         is ContactMethod.SignalMessage,
-        -> context.getString(R.string.contacts_action_button_chat)
+            -> context.getString(R.string.contacts_action_button_chat)
         is ContactMethod.WhatsAppVideoCall,
         is ContactMethod.TelegramVideoCall,
+        is ContactMethod.CherrygramVideoCall,
         is ContactMethod.SignalVideoCall,
-        -> context.getString(R.string.contacts_action_button_video_call)
+            -> context.getString(R.string.contacts_action_button_video_call)
         is ContactMethod.GoogleMeet -> context.getString(R.string.contacts_action_button_meet)
         is ContactMethod.CustomApp -> method.displayLabel
         is ContactMethod.Email -> context.getString(R.string.contacts_action_button_email)

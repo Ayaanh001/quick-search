@@ -7,13 +7,17 @@ import android.util.Log
 import com.tk.quicksearch.R
 import com.tk.quicksearch.search.models.ContactMethodMimeTypes
 import com.tk.quicksearch.search.utils.PhoneNumberUtils
+import com.tk.quicksearch.shared.util.PackageConstants
 
 /**
  * Telegram-specific contact actions.
  * All Telegram functionality consolidated in one place.
+ * Supports both official Telegram (org.telegram.messenger) and
+ * Cherrygram (uz.unnarsx.cherrygram), a popular Telegram fork.
  */
 object TelegramActions {
-    private const val TELEGRAM_PACKAGE = "org.telegram.messenger"
+    private const val TELEGRAM_PACKAGE = PackageConstants.TELEGRAM_PACKAGE
+    private const val CHERRYGRAM_PACKAGE = PackageConstants.CHERRYGRAM_PACKAGE
 
     /**
      * Opens Telegram chat using the contact data URI approach.
@@ -201,6 +205,101 @@ object TelegramActions {
             }
         } catch (e: Exception) {
             Log.w("TelegramActions", "Telegram video call intent failed", e)
+            false
+        }
+    }
+
+    // =========================================================================
+    // Cherrygram-specific entry points
+    // These always target Cherrygram explicitly, regardless of whether official
+    // Telegram is also installed.
+    // =========================================================================
+
+    fun openCherrygramChat(
+        context: Application,
+        dataId: Long?,
+        onShowToast: ((Int) -> Unit)? = null,
+    ): Boolean {
+        if (dataId == null) {
+            Log.w("TelegramActions", "No dataId provided for Cherrygram chat")
+            return false
+        }
+        return try {
+            if (
+                !launchContactDataIntent(
+                    context = context,
+                    dataId = dataId,
+                    packageName = CHERRYGRAM_PACKAGE,
+                    mimeType = ContactMethodMimeTypes.CHERRYGRAM_MESSAGE,
+                )
+            ) {
+                Log.w("TelegramActions", "Cherrygram chat intent cannot be resolved")
+                onShowToast?.invoke(R.string.error_cherrygram_not_installed)
+                false
+            } else {
+                true
+            }
+        } catch (e: Exception) {
+            Log.e("TelegramActions", "Failed to open Cherrygram chat", e)
+            onShowToast?.invoke(R.string.error_cherrygram_chat_failed)
+            false
+        }
+    }
+
+    fun openCherrygramCall(
+        context: Application,
+        dataId: Long?,
+        onShowToast: ((Int) -> Unit)? = null,
+    ): Boolean {
+        if (dataId == null) {
+            Log.w("TelegramActions", "No dataId provided for Cherrygram call")
+            return false
+        }
+        return try {
+            if (
+                launchContactDataIntent(
+                    context = context,
+                    dataId = dataId,
+                    packageName = CHERRYGRAM_PACKAGE,
+                    mimeType = ContactMethodMimeTypes.CHERRYGRAM_CALL,
+                )
+            ) {
+                true
+            } else {
+                Log.w("TelegramActions", "Cherrygram call intent cannot be resolved")
+                onShowToast?.invoke(R.string.error_cherrygram_not_installed)
+                false
+            }
+        } catch (e: Exception) {
+            Log.e("TelegramActions", "Failed to initiate Cherrygram call", e)
+            onShowToast?.invoke(R.string.error_cherrygram_call_failed)
+            false
+        }
+    }
+
+    fun openCherrygramVideoCall(
+        context: Application,
+        dataId: Long?,
+    ): Boolean {
+        if (dataId == null) {
+            Log.w("TelegramActions", "No dataId provided for Cherrygram video call")
+            return false
+        }
+        return try {
+            if (
+                launchContactDataIntent(
+                    context = context,
+                    dataId = dataId,
+                    packageName = CHERRYGRAM_PACKAGE,
+                )
+            ) {
+                true
+            } else {
+                Log.w("TelegramActions", "No activity found to handle Cherrygram video call intent")
+                false
+            }
+        } catch (e: Exception) {
+            Log.w("TelegramActions", "Cherrygram video call intent failed", e)
             false
         }
     }

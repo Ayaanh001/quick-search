@@ -1,4 +1,3 @@
-
 package com.tk.quicksearch.search.contacts.models
 
 import android.net.Uri
@@ -39,6 +38,18 @@ sealed class ContactCardAction {
     ) : ContactCardAction()
 
     data class TelegramVideoCall(
+        override val phoneNumber: String,
+    ) : ContactCardAction()
+
+    data class CherrygramMessage(
+        override val phoneNumber: String,
+    ) : ContactCardAction()
+
+    data class CherrygramCall(
+        override val phoneNumber: String,
+    ) : ContactCardAction()
+
+    data class CherrygramVideoCall(
         override val phoneNumber: String,
     ) : ContactCardAction()
 
@@ -93,6 +104,9 @@ sealed class ContactCardAction {
                 is TelegramMessage -> TYPE_TELEGRAM_MESSAGE
                 is TelegramCall -> TYPE_TELEGRAM_CALL
                 is TelegramVideoCall -> TYPE_TELEGRAM_VIDEO_CALL
+                is CherrygramMessage -> TYPE_CHERRYGRAM_MESSAGE
+                is CherrygramCall -> TYPE_CHERRYGRAM_CALL
+                is CherrygramVideoCall -> TYPE_CHERRYGRAM_VIDEO_CALL
                 is SignalMessage -> TYPE_SIGNAL_MESSAGE
                 is SignalCall -> TYPE_SIGNAL_CALL
                 is SignalVideoCall -> TYPE_SIGNAL_VIDEO_CALL
@@ -132,6 +146,9 @@ sealed class ContactCardAction {
         private const val TYPE_TELEGRAM_MESSAGE = "TELEGRAM_MESSAGE"
         private const val TYPE_TELEGRAM_CALL = "TELEGRAM_CALL"
         private const val TYPE_TELEGRAM_VIDEO_CALL = "TELEGRAM_VIDEO_CALL"
+        private const val TYPE_CHERRYGRAM_MESSAGE = "CHERRYGRAM_MESSAGE"
+        private const val TYPE_CHERRYGRAM_CALL = "CHERRYGRAM_CALL"
+        private const val TYPE_CHERRYGRAM_VIDEO_CALL = "CHERRYGRAM_VIDEO_CALL"
         private const val TYPE_SIGNAL_MESSAGE = "SIGNAL_MESSAGE"
         private const val TYPE_SIGNAL_CALL = "SIGNAL_CALL"
         private const val TYPE_SIGNAL_VIDEO_CALL = "SIGNAL_VIDEO_CALL"
@@ -160,6 +177,9 @@ sealed class ContactCardAction {
                 TYPE_TELEGRAM_MESSAGE -> TelegramMessage(decodeField(payload))
                 TYPE_TELEGRAM_CALL -> TelegramCall(decodeField(payload))
                 TYPE_TELEGRAM_VIDEO_CALL -> TelegramVideoCall(decodeField(payload))
+                TYPE_CHERRYGRAM_MESSAGE -> CherrygramMessage(decodeField(payload))
+                TYPE_CHERRYGRAM_CALL -> CherrygramCall(decodeField(payload))
+                TYPE_CHERRYGRAM_VIDEO_CALL -> CherrygramVideoCall(decodeField(payload))
                 TYPE_SIGNAL_MESSAGE -> SignalMessage(decodeField(payload))
                 TYPE_SIGNAL_CALL -> SignalCall(decodeField(payload))
                 TYPE_SIGNAL_VIDEO_CALL -> SignalVideoCall(decodeField(payload))

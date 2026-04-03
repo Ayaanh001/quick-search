@@ -61,16 +61,19 @@ internal fun ContactActionButton(
 
             is ContactMethod.WhatsAppCall,
             is ContactMethod.TelegramCall,
+            is ContactMethod.CherrygramCall,
             is ContactMethod.SignalCall,
-            -> callIconTint
+                -> callIconTint
 
             is ContactMethod.WhatsAppMessage,
             is ContactMethod.WhatsAppVideoCall,
             is ContactMethod.TelegramMessage,
             is ContactMethod.TelegramVideoCall,
+            is ContactMethod.CherrygramMessage,
+            is ContactMethod.CherrygramVideoCall,
             is ContactMethod.SignalMessage,
             is ContactMethod.SignalVideoCall,
-            -> Color.Unspecified
+                -> Color.Unspecified
 
             is ContactMethod.GoogleMeet -> Color.Unspecified
 
@@ -142,17 +145,20 @@ internal fun ContactMethodIcon(
                 is ContactMethod.Sms -> AppColors.ActionSms
                 is ContactMethod.WhatsAppCall,
                 is ContactMethod.TelegramCall,
+                is ContactMethod.CherrygramCall,
                 is ContactMethod.SignalCall,
                 is ContactMethod.VideoCall,
-                -> callIconTint
+                    -> callIconTint
                 is ContactMethod.WhatsAppMessage,
                 is ContactMethod.WhatsAppVideoCall,
                 is ContactMethod.TelegramMessage,
                 is ContactMethod.TelegramVideoCall,
+                is ContactMethod.CherrygramMessage,
+                is ContactMethod.CherrygramVideoCall,
                 is ContactMethod.SignalMessage,
                 is ContactMethod.SignalVideoCall,
                 is ContactMethod.GoogleMeet,
-                -> Color.Unspecified
+                    -> Color.Unspecified
                 is ContactMethod.Email -> AppColors.ActionEmail
                 is ContactMethod.CustomApp -> AppColors.ActionCustom
                 is ContactMethod.ViewInContactsApp -> AppColors.ActionView
@@ -177,10 +183,11 @@ private fun ContactActionIcon(
 ) {
     if (usePhoneIconForCallActions &&
         (method is ContactMethod.Phone ||
-            method is ContactMethod.VideoCall ||
-            method is ContactMethod.WhatsAppCall ||
-            method is ContactMethod.TelegramCall ||
-            method is ContactMethod.SignalCall)
+                method is ContactMethod.VideoCall ||
+                method is ContactMethod.WhatsAppCall ||
+                method is ContactMethod.TelegramCall ||
+                method is ContactMethod.CherrygramCall ||
+                method is ContactMethod.SignalCall)
     ) {
         Icon(
             imageVector = Icons.Rounded.Call,
@@ -253,6 +260,31 @@ private fun ContactActionIcon(
         is ContactMethod.TelegramVideoCall -> {
             Icon(
                 painter = painterResource(id = R.drawable.telegram_video_call),
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier = modifier.size(iconSize),
+            )
+        }
+
+        is ContactMethod.CherrygramMessage -> {
+            Icon(
+                painter = painterResource(id = R.drawable.cherrygram),
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier = modifier.size(iconSize),
+            )
+        }
+
+        is ContactMethod.CherrygramCall -> {
+            AppVoiceCallIcon(
+                logoPainterRes = R.drawable.cherrygram_call,
+                size = iconSize,
+            )
+        }
+
+        is ContactMethod.CherrygramVideoCall -> {
+            Icon(
+                painter = painterResource(id = R.drawable.cherrygram_video_call),
                 contentDescription = null,
                 tint = Color.Unspecified,
                 modifier = modifier.size(iconSize),
@@ -383,6 +415,18 @@ internal fun getActionButtonLabel(method: ContactMethod): String =
         }
 
         is ContactMethod.TelegramVideoCall -> {
+            stringResource(R.string.contacts_action_button_video_call)
+        }
+
+        is ContactMethod.CherrygramMessage -> {
+            stringResource(R.string.contacts_action_button_chat)
+        }
+
+        is ContactMethod.CherrygramCall -> {
+            stringResource(R.string.contacts_action_button_voice_call)
+        }
+
+        is ContactMethod.CherrygramVideoCall -> {
             stringResource(R.string.contacts_action_button_video_call)
         }
 

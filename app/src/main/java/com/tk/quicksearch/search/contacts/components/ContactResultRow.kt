@@ -125,14 +125,14 @@ internal fun ContactResultRow(
                                                                 }
                                                         },
                                                         onLongClick = onLongPressOverride
-                                                                        ?: if (enableLongPress) {
-                                                                                {
-                                                                                        showOptions =
-                                                                                                true
-                                                                                }
-                                                                        } else {
-                                                                                null
-                                                                        },
+                                                                ?: if (enableLongPress) {
+                                                                        {
+                                                                                showOptions =
+                                                                                        true
+                                                                        }
+                                                                } else {
+                                                                        null
+                                                                },
                                                 )
                                                 .topPredictedRowContentPadding(
                                                         isTopPredicted = isPredicted,
@@ -230,26 +230,26 @@ internal fun ContactAvatar(
 ) {
         val context = LocalContext.current
         val contactPhoto by
-                produceState<ImageBitmap?>(initialValue = null, key1 = photoUri) {
-                        value =
-                                photoUri?.let { uri ->
-                                        withContext(Dispatchers.IO) {
-                                                runCatching {
-                                                                val parsedUri = Uri.parse(uri)
-                                                                context.contentResolver
-                                                                        .openInputStream(parsedUri)
-                                                                        ?.use { stream ->
-                                                                                BitmapFactory
-                                                                                        .decodeStream(
-                                                                                                stream,
-                                                                                        )
-                                                                                        ?.asImageBitmap()
-                                                                        }
+        produceState<ImageBitmap?>(initialValue = null, key1 = photoUri) {
+                value =
+                        photoUri?.let { uri ->
+                                withContext(Dispatchers.IO) {
+                                        runCatching {
+                                                val parsedUri = Uri.parse(uri)
+                                                context.contentResolver
+                                                        .openInputStream(parsedUri)
+                                                        ?.use { stream ->
+                                                                BitmapFactory
+                                                                        .decodeStream(
+                                                                                stream,
+                                                                        )
+                                                                        ?.asImageBitmap()
                                                         }
-                                                        .getOrNull()
                                         }
+                                                .getOrNull()
                                 }
-                }
+                        }
+        }
 
         val placeholderInitials =
                 remember(displayName) {
@@ -447,8 +447,8 @@ private fun ContactActionButtons(
                                                         modifier =
                                                                 Modifier.size(
                                                                         (ContactUiConstants
-                                                                                        .ACTION_ICON_SIZE *
-                                                                                        0.9f)
+                                                                                .ACTION_ICON_SIZE *
+                                                                                0.9f)
                                                                                 .dp,
                                                                 ),
                                                 )
@@ -596,6 +596,21 @@ private fun ContactActionIconForButton(
                                 modifier = modifier,
                         )
                 }
+                is com.tk.quicksearch.search.contacts.models.ContactCardAction.CherrygramCall -> {
+                        AppVoiceCallIcon(
+                                logoPainterRes = R.drawable.cherrygram_call,
+                                size = ContactUiConstants.ACTION_ICON_SIZE.dp,
+                                enabled = enabled,
+                        )
+                }
+                is com.tk.quicksearch.search.contacts.models.ContactCardAction.CherrygramVideoCall -> {
+                        Icon(
+                                painter = painterResource(id = R.drawable.cherrygram_video_call),
+                                contentDescription = null,
+                                tint = tint,
+                                modifier = modifier,
+                        )
+                }
 
                 // Messaging / Meet -> App Icon
                 is com.tk.quicksearch.search.contacts.models.ContactCardAction.Sms -> {
@@ -617,6 +632,14 @@ private fun ContactActionIconForButton(
                 is com.tk.quicksearch.search.contacts.models.ContactCardAction.TelegramMessage -> {
                         Icon(
                                 painter = painterResource(id = R.drawable.telegram),
+                                contentDescription = null,
+                                tint = tint,
+                                modifier = modifier,
+                        )
+                }
+                is com.tk.quicksearch.search.contacts.models.ContactCardAction.CherrygramMessage -> {
+                        Icon(
+                                painter = painterResource(id = R.drawable.cherrygram),
                                 contentDescription = null,
                                 tint = tint,
                                 modifier = modifier,
@@ -697,21 +720,21 @@ private fun AppPackageIcon(
                 remember(packageName) {
                         packageName?.let { targetPackage ->
                                 runCatching {
-                                                context.packageManager
-                                                        .getApplicationIcon(targetPackage)
-                                                        .toBitmap()
-                                                        .asImageBitmap()
-                                        }
+                                        context.packageManager
+                                                .getApplicationIcon(targetPackage)
+                                                .toBitmap()
+                                                .asImageBitmap()
+                                }
                                         .getOrNull()
                         }
                 }
 
         if (appIcon != null) {
-                        Image(
-                                bitmap = appIcon,
-                                contentDescription = null,
-                                modifier = modifier,
-                        )
+                Image(
+                        bitmap = appIcon,
+                        contentDescription = null,
+                        modifier = modifier,
+                )
         } else {
                 Icon(
                         imageVector = Icons.Rounded.Call,

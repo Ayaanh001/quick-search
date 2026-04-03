@@ -138,7 +138,7 @@ internal fun ContactActionsPopup(
     // Precompute ReplaceAction title so stringResource can be called in composable scope
     val replaceActionTitle =
         if (state is ContactActionsPopupState.ReplaceAction) {
-                val actionDisplayName =
+            val actionDisplayName =
                 when (val action = state.currentAction) {
                     is ContactCardAction.Phone -> stringResource(R.string.contacts_action_button_call)
                     is ContactCardAction.Sms -> stringResource(R.string.contacts_action_button_message)
@@ -148,6 +148,9 @@ internal fun ContactActionsPopup(
                     is ContactCardAction.TelegramMessage -> stringResource(R.string.contact_method_telegram_message_label)
                     is ContactCardAction.TelegramCall -> stringResource(R.string.contact_method_telegram_voice_call_label)
                     is ContactCardAction.TelegramVideoCall -> stringResource(R.string.contact_method_telegram_video_call_label)
+                    is ContactCardAction.CherrygramMessage -> stringResource(R.string.contact_method_cherrygram_message_label)
+                    is ContactCardAction.CherrygramCall -> stringResource(R.string.contact_method_cherrygram_voice_call_label)
+                    is ContactCardAction.CherrygramVideoCall -> stringResource(R.string.contact_method_cherrygram_video_call_label)
                     is ContactCardAction.SignalMessage -> stringResource(R.string.contact_method_signal_message_label)
                     is ContactCardAction.SignalCall -> stringResource(R.string.contact_method_signal_voice_call_label)
                     is ContactCardAction.SignalVideoCall -> stringResource(R.string.contact_method_signal_video_call_label)
@@ -360,6 +363,31 @@ internal fun ContactActionsPopup(
                     methods = normalizedMethodsForSelectedNumber,
                     methodTypes =
                         listOf(
+                            ContactMethod.CherrygramMessage::class,
+                            ContactMethod.CherrygramCall::class,
+                            ContactMethod.CherrygramVideoCall::class,
+                        ),
+                    onMethodClick = { method ->
+                        state.onContactMethodClick(contactInfo, method)
+                        onDismiss()
+                    },
+                    onMethodLongClick = { method ->
+                        val action = contactMethodToCardAction(method, selectedPhoneNumber)
+                        val actionDisplayName = methodShortcutLabel(context, method)
+                        if (action != null && actionDisplayName != null) {
+                            addToHomeHandler.addContactActionToHome(
+                                contact = contactInfo,
+                                contactAction = action,
+                                actionDisplayName = actionDisplayName,
+                            )
+                        }
+                    },
+                )
+
+                renderMethodRow(
+                    methods = normalizedMethodsForSelectedNumber,
+                    methodTypes =
+                        listOf(
                             ContactMethod.SignalMessage::class,
                             ContactMethod.SignalCall::class,
                             ContactMethod.SignalVideoCall::class,
@@ -460,10 +488,20 @@ internal fun ContactActionsPopup(
                     methods = normalizedMethodsForSelectedNumber,
                     methodTypes =
                         listOf(
+                            ContactMethod.CherrygramMessage::class,
+                            ContactMethod.CherrygramCall::class,
+                            ContactMethod.CherrygramVideoCall::class,
+                        ),
+                    onMethodClick = onMethodClick,
+                )
+                renderMethodRow(
+                    methods = normalizedMethodsForSelectedNumber,
+                    methodTypes =
+                        listOf(
                             ContactMethod.SignalMessage::class,
                             ContactMethod.SignalCall::class,
                             ContactMethod.SignalVideoCall::class,
-                    ),
+                        ),
                     onMethodClick = onMethodClick,
                 )
 
@@ -545,8 +583,8 @@ private fun remapSignalMessageToMollyCustomMethod(methods: List<ContactMethod>):
     val alreadyHasMollyMessage =
         methods.any { method ->
             method is ContactMethod.CustomApp &&
-                method.isMollyProvider() &&
-                method.mimeType == ContactMethodMimeTypes.SIGNAL_MESSAGE
+                    method.isMollyProvider() &&
+                    method.mimeType == ContactMethodMimeTypes.SIGNAL_MESSAGE
         }
     if (alreadyHasMollyMessage) return methods
 
@@ -578,7 +616,7 @@ private fun remapSignalMessageToMollyCustomMethod(methods: List<ContactMethod>):
 
 private fun ContactMethod.CustomApp.isMollyProvider(): Boolean =
     packageName?.contains("molly", ignoreCase = true) == true ||
-        displayLabel.contains("molly", ignoreCase = true)
+            displayLabel.contains("molly", ignoreCase = true)
 
 private fun ContactMethod.CustomApp.providerName(): String {
     val appNameFromLabel =
@@ -615,7 +653,7 @@ private fun ContactMethod.hasDisplayNameAfterSanitization(): Boolean =
                 ContactMethodMimeTypes.SIGNAL_MESSAGE,
                 ContactMethodMimeTypes.SIGNAL_CALL,
                 ContactMethodMimeTypes.SIGNAL_VIDEO_CALL,
-                -> sanitizedProviderNameOrNull() != null
+                    -> sanitizedProviderNameOrNull() != null
                 else -> sanitizedDisplayLabel().isNotBlank()
             }
         else -> true

@@ -116,6 +116,15 @@ class WidgetActionActivity : ComponentActivity() {
                     is ContactCardAction.TelegramVideoCall -> {
                         method is ContactMethod.TelegramVideoCall && matchesTelegramNumber(method)
                     }
+                    is ContactCardAction.CherrygramMessage -> {
+                        method is ContactMethod.CherrygramMessage && matchesTelegramNumber(method)
+                    }
+                    is ContactCardAction.CherrygramCall -> {
+                        method is ContactMethod.CherrygramCall && matchesTelegramNumber(method)
+                    }
+                    is ContactCardAction.CherrygramVideoCall -> {
+                        method is ContactMethod.CherrygramVideoCall && matchesTelegramNumber(method)
+                    }
                     is ContactCardAction.SignalMessage -> {
                         method is ContactMethod.SignalMessage && matchesSignalNumber(method)
                     }
@@ -279,6 +288,22 @@ class WidgetActionActivity : ComponentActivity() {
 
             is ContactMethod.TelegramVideoCall -> {
                 ContactIntentHelpers.openTelegramVideoCall(application, method.dataId, method.data)
+            }
+
+            is ContactMethod.CherrygramMessage -> {
+                ContactIntentHelpers.openCherrygramChat(application, method.dataId) { resId ->
+                    showToast(resId)
+                }
+            }
+
+            is ContactMethod.CherrygramCall -> {
+                ContactIntentHelpers.openCherrygramCall(application, method.dataId) { resId ->
+                    showToast(resId)
+                }
+            }
+
+            is ContactMethod.CherrygramVideoCall -> {
+                ContactIntentHelpers.openCherrygramVideoCall(application, method.dataId)
             }
 
             is ContactMethod.SignalMessage -> {

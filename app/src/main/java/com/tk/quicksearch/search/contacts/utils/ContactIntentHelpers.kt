@@ -102,6 +102,24 @@ object ContactIntentHelpers {
         phoneNumber: String?,
     ): Boolean = TelegramActions.openTelegramVideoCall(context, dataId, phoneNumber)
 
+    // ===== CHERRYGRAM ACTIONS =====
+    fun openCherrygramChat(
+        context: android.app.Application,
+        dataId: Long?,
+        onShowToast: ((Int) -> Unit)? = null,
+    ): Boolean = TelegramActions.openCherrygramChat(context, dataId, onShowToast)
+
+    fun openCherrygramCall(
+        context: android.app.Application,
+        dataId: Long?,
+        onShowToast: ((Int) -> Unit)? = null,
+    ): Boolean = TelegramActions.openCherrygramCall(context, dataId, onShowToast)
+
+    fun openCherrygramVideoCall(
+        context: android.app.Application,
+        dataId: Long?,
+    ): Boolean = TelegramActions.openCherrygramVideoCall(context, dataId)
+
     // ===== SIGNAL ACTIONS =====
     fun openSignalChat(
         context: android.app.Application,

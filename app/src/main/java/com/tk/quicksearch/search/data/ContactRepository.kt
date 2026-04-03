@@ -50,6 +50,9 @@ class ContactRepository(
     private val telegramMessageLabel = context.getString(R.string.contact_method_telegram_message_label)
     private val telegramVoiceCallLabel = context.getString(R.string.contact_method_telegram_voice_call_label)
     private val telegramVideoCallLabel = context.getString(R.string.contact_method_telegram_video_call_label)
+    private val cherrygramMessageLabel = context.getString(R.string.contact_method_cherrygram_message_label)
+    private val cherrygramVoiceCallLabel = context.getString(R.string.contact_method_cherrygram_voice_call_label)
+    private val cherrygramVideoCallLabel = context.getString(R.string.contact_method_cherrygram_video_call_label)
     private val signalMessageLabel = context.getString(R.string.contact_method_signal_message_label)
     private val signalVoiceCallLabel = context.getString(R.string.contact_method_signal_voice_call_label)
     private val signalVideoCallLabel = context.getString(R.string.contact_method_signal_video_call_label)
@@ -314,7 +317,7 @@ class ContactRepository(
         val tokenClauses =
             queryTokens.joinToString(" AND ") {
                 "(LOWER(${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY}) LIKE ? " +
-                    "OR LOWER(${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_ALTERNATIVE}) LIKE ?)"
+                        "OR LOWER(${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_ALTERNATIVE}) LIKE ?)"
             }
         val exclusionsClause =
             if (existingContactIds.isNotEmpty()) {
@@ -579,6 +582,17 @@ class ContactRepository(
 
                 ContactMethodMimeTypes.TELEGRAM_VIDEO_CALL -> {
                     ContactMethod.TelegramVideoCall(telegramVideoCallLabel, data1, dataId, isPrimary)
+                }
+
+                // Cherrygram (Telegram fork)
+                ContactMethodMimeTypes.CHERRYGRAM_MESSAGE -> {
+                    ContactMethod.CherrygramMessage(cherrygramMessageLabel, data1, dataId, isPrimary)
+                }
+                ContactMethodMimeTypes.CHERRYGRAM_CALL -> {
+                    ContactMethod.CherrygramCall(cherrygramVoiceCallLabel, data1, dataId, isPrimary)
+                }
+                ContactMethodMimeTypes.CHERRYGRAM_VIDEO_CALL -> {
+                    ContactMethod.CherrygramVideoCall(cherrygramVideoCallLabel, data1, dataId, isPrimary) 
                 }
 
                 ContactMethodMimeTypes.SIGNAL_MESSAGE -> {

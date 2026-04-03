@@ -7,6 +7,7 @@ object PackageConstants {
     // Messaging apps
     const val WHATSAPP_PACKAGE = "com.whatsapp"
     const val TELEGRAM_PACKAGE = "org.telegram.messenger"
+    const val CHERRYGRAM_PACKAGE = "uz.unnarsx.cherrygram"
     const val SIGNAL_PACKAGE = "org.thoughtcrime.securesms"
     const val GOOGLE_MEET_PACKAGE = "com.google.android.apps.tachyon"
 

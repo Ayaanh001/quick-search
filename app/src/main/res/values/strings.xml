@@ -80,6 +80,9 @@
     <string name="contact_method_telegram_message_label">Telegram</string>
     <string name="contact_method_telegram_video_call_label">Telegram video call</string>
     <string name="contact_method_telegram_voice_call_label">Telegram voice call</string>
+    <string name="contact_method_cherrygram_message_label">Cherrygram</string>
+    <string name="contact_method_cherrygram_voice_call_label">Cherrygram voice call</string>
+    <string name="contact_method_cherrygram_video_call_label">Cherrygram video call</string>
     <string name="contact_method_view_in_contacts_label">View in contacts app</string>
     <string name="contact_method_whatsapp_message_label">WhatsApp</string>
     <string name="contact_method_whatsapp_video_call_label">WhatsApp video call</string>
@@ -118,6 +121,9 @@
     <string name="error_telegram_call_failed">Telegram call failed. Please ensure Telegram is installed.</string>
     <string name="error_telegram_chat_failed">Failed to open Telegram chat</string>
     <string name="error_telegram_not_installed">Telegram is not installed</string>
+    <string name="error_cherrygram_not_installed">Cherrygram is not installed</string>
+    <string name="error_cherrygram_chat_failed">Failed to open Cherrygram chat</string>
+    <string name="error_cherrygram_call_failed">Cherrygram call failed</string>
     <string name="error_whatsapp_call_failed">WhatsApp call failed. Please ensure WhatsApp is installed.</string>
     <string name="error_whatsapp_chat_failed">Failed to open WhatsApp chat</string>
     <string name="error_whatsapp_not_installed">WhatsApp is not installed</string>

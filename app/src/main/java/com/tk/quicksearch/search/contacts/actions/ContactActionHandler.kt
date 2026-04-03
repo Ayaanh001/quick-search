@@ -276,6 +276,21 @@ class ContactActionHandler(
                 handleTelegramVideoCallWithPermission(method.dataId, method.data)
             }
 
+            is ContactMethod.CherrygramMessage -> {
+                val success = ContactIntentHelpers.openCherrygramChat(context, method.dataId) { resId -> showToastCallback(resId) }
+                if (success) {
+                    clearQueryIfEnabled()
+                }
+            }
+
+            is ContactMethod.CherrygramCall -> {
+                handleCherrygramCallWithPermission(method.dataId)
+            }
+
+            is ContactMethod.CherrygramVideoCall -> {
+                handleCherrygramVideoCallWithPermission(method.dataId)
+            }
+
             is ContactMethod.SignalMessage -> {
                 val success = ContactIntentHelpers.openSignalChat(context, method.dataId) { resId -> showToastCallback(resId) }
                 if (success) {
@@ -515,6 +530,41 @@ class ContactActionHandler(
                 app = CallingApp.TELEGRAM,
                 dataId = dataId,
                 phoneNumber = phoneNumber,
+                isVideoCall = true,
+            ),
+        )
+    }
+
+    private fun handleCherrygramCallWithPermission(dataId: Long?) {
+        if (PermissionHelper.checkCallPermission(context)) {
+            val success = ContactIntentHelpers.openCherrygramCall(context, dataId) { resId -> showToastCallback(resId) }
+            if (success) {
+                clearQueryIfEnabled()
+            }
+            return
+        }
+
+        queuePendingThirdPartyCall(
+            PendingThirdPartyCall(
+                app = CallingApp.TELEGRAM,
+                dataId = dataId,
+            ),
+        )
+    }
+
+    private fun handleCherrygramVideoCallWithPermission(dataId: Long?) {
+        if (PermissionHelper.checkCallPermission(context)) {
+            val success = ContactIntentHelpers.openCherrygramVideoCall(context, dataId)
+            if (success) {
+                clearQueryIfEnabled()
+            }
+            return
+        }
+
+        queuePendingThirdPartyCall(
+            PendingThirdPartyCall(
+                app = CallingApp.TELEGRAM,
+                dataId = dataId,
                 isVideoCall = true,
             ),
         )
