@@ -498,7 +498,16 @@ class ContactRepository(
                             }
                         }
                     } else {
-                        contact.contactMethods.add(method)
+                        // Deduplicate by method type + data to prevent duplicate actions
+                        // from apps like Cherrygram that register multiple rows for the
+                        // same action type (e.g. once via their own MIME type and once via
+                        // the upstream Telegram MIME type).
+                        val isDuplicate = contact.contactMethods.any { existing ->
+                            existing::class == method::class && existing.data == method.data
+                        }
+                        if (!isDuplicate) {
+                            contact.contactMethods.add(method)
+                        }
                     }
                 }
             }
@@ -592,7 +601,7 @@ class ContactRepository(
                     ContactMethod.CherrygramCall(cherrygramVoiceCallLabel, data1, dataId, isPrimary)
                 }
                 ContactMethodMimeTypes.CHERRYGRAM_VIDEO_CALL -> {
-                    ContactMethod.CherrygramVideoCall(cherrygramVideoCallLabel, data1, dataId, isPrimary) 
+                    ContactMethod.CherrygramVideoCall(cherrygramVideoCallLabel, data1, dataId, isPrimary)
                 }
 
                 ContactMethodMimeTypes.SIGNAL_MESSAGE -> {
